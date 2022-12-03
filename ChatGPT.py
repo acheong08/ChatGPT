@@ -70,5 +70,5 @@ if __name__ == "__main__":
             print(e)
             continue
         print("\n")
-        print("GPT-3:", response['message'])
+        print("Chatbot:", response['message'])
         print("\n")
