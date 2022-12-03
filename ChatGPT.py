@@ -1,7 +1,6 @@
 # Makes a HTTP request to the GPT-3 API and returns the response
 import requests
 import json
-from sys import argv
 import uuid
 
 class Chatbot:
