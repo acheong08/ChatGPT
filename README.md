@@ -12,7 +12,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 Go to https://chat.openai.com/chat and log in or sign up
 1. Open console with `F12`
 2. Go to Network tab in console
-3. Find session request
+3. Find session request (Might need refresh)
 4. Copy accessToken value to config.json.example as Authorization
 5. Save as config.json
 ![image](https://user-images.githubusercontent.com/36258159/205446680-b3f40499-9757-428b-9e2f-23e89ca99461.png)
