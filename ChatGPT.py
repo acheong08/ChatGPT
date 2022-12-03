@@ -7,10 +7,10 @@ class Chatbot:
     config: json
     conversation_id: str
     parent_id: str
-    def __init__(self):
+    def __init__(self, conversation_id=None):
         with open("config.json", "r") as f:
             self.config = json.load(f)
-        self.conversation_id = None
+        self.conversation_id = conversation_id
         self.parent_id = self.generate_uuid()
 
     def generate_uuid(self):
