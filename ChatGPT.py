@@ -7,9 +7,8 @@ class Chatbot:
     config: json
     conversation_id: str
     parent_id: str
-    def __init__(self, conversation_id=None):
-        with open("config.json", "r") as f:
-            self.config = json.load(f)
+    def __init__(self, config, conversation_id=None):
+        self.config = config
         self.conversation_id = conversation_id
         self.parent_id = self.generate_uuid()
 
@@ -58,7 +57,9 @@ if __name__ == "__main__":
     By: github.com/acheong08
     """)
     print("Type '!exit' to exit")
-    chatbot = Chatbot()
+    with open("config.json", "r") as f:
+            config = json.load(f)
+    chatbot = Chatbot(config)
     while True:
         prompt = input("You: ")
         if prompt == "!exit":
