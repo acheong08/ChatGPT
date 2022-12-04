@@ -4,7 +4,7 @@ import json
 with open("config.json", "r") as f:
     config = json.load(f)
 
-chatbot = ChatGPT.Chatbot(config)
+chatbot = ChatGPT.Chatbot(config, conversation_id=None)
 
 prompts = open("prompts.txt", "r").readlines()
 for prompt in prompts:

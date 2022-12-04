@@ -48,7 +48,7 @@ class Chatbot:
         self.parent_id = response["message"]["id"]
         self.conversation_id = response["conversation_id"]
         message = response["message"]["content"]["parts"][0]
-        return {'message':message}
+        return {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
 
 if __name__ == "__main__":
     print("""
