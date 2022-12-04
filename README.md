@@ -55,3 +55,7 @@ This can be imported to projects for bots and much more. You can have multiple i
 
 # Known issues
 - Access token expires in one hour
+
+# Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=acheong08/ChatGPT&type=Date)](https://star-history.com/#acheong08/ChatGPT&Date)
