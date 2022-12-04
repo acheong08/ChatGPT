@@ -65,8 +65,8 @@ config = {
 
 chatbot = Chatbot(config, conversation_id=None)
 chatbot.reset_chat() # Forgets conversation
-refresh_session() # Uses the session_token to get a new bearer token
-resp = get_chat_response(prompt) # Sends a request to the API and returns the response by OpenAI
+chatbot.refresh_session() # Uses the session_token to get a new bearer token
+resp = chatbot.get_chat_response(prompt) # Sends a request to the API and returns the response by OpenAI
 resp['message'] # The message sent by the response
 resp['conversation_id'] # The current conversation id
 resp['parent_id'] # The ID of the response
