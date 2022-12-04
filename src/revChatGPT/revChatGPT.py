@@ -67,7 +67,7 @@ class Chatbot:
         response = s.get("https://chat.openai.com/api/auth/session")
         try:
             self.config['session_token'] = response.cookies.get("__Secure-next-auth.session-token")
-            self.headers['Authorization'] = response.json()["accessToken"]
+            self.config['Authorization'] = response.json()["accessToken"]
             self.refresh_headers()
         except Exception as e:
             print("Error refreshing session")  
