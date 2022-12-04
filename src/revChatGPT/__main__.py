@@ -26,7 +26,9 @@ if __name__ == "__main__":
     with open("config.json", "r") as f:
             config = json.load(f)
     chatbot = Chatbot(config)
-    import subprocess
+    if 'session_token' in config:
+        chatbot.refresh_session()
+    
     from subprocess import Popen
     import sys
 
