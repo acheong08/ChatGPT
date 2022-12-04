@@ -42,6 +42,8 @@ You: !help
 ```
 **Make sure you run `!refresh` if you are only using the `session_token`.**
 
+Refresh every so often in case the token expires.
+
 ## Arguments
 You can pass the output through a processor using command line arguments.
 
