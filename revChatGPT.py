@@ -107,11 +107,9 @@ if __name__ == "__main__":
                 process.terminate()
             except NameError:
                 print("")
-            if len(arguments)>2:
 
-                # Use `python3 ./revChatGPT.py say -v Samantha -r 600`` to make a Mac speak the output
-                # using the Samantha voice at 600 words per minute (about 3x)
-                arguments.append('"' + response['message'] + '"')
-                process = Popen(arguments)
-            else:
-                process = Popen([arguments[1],"-r 400",response['message']])
+            # Use `python3 ./revChatGPT.py say -v Samantha -r 600` to make a Mac speak the output
+            # using the Samantha voice at 600 words per minute (about 3x)
+            # or `python3 ./revChatGPT.py espeak -v en -s 600` to do something similar using espeak (untested)
+            arguments.append('"' + response['message'] + '"')
+            process = Popen(arguments)
