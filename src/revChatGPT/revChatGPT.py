@@ -45,7 +45,7 @@ class Chatbot:
             "parent_message_id": self.parent_id,
             "model": "text-davinci-002-render",
         }
-        async with httpx.AsyncClient(proxies="http://localhost:7890") as client:
+        async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://chat.openai.com/backend-api/conversation",
                 headers=self.headers,
@@ -76,7 +76,7 @@ class Chatbot:
         if "session_token" not in self.config:
             return ValueError("No session token provided")
         cookies = {"__Secure-next-auth.session-token": self.config["session_token"]}
-        async with httpx.AsyncClient(cookies=cookies, proxies="http://localhost:7890") as client:
+        async with httpx.AsyncClient(cookies=cookies) as client:
             response = await client.get("https://chat.openai.com/api/auth/session")
         try:
             self.config["session_token"] = response.cookies.get(
