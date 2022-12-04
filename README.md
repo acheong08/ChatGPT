@@ -1,6 +1,8 @@
 # ChatGPT
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
+Note: This is a proof of concept. The goal here is to be able to write bots using the API.
+
 # Features
 - Scientific knowledge
 - Has memory. It remembers the chat history and context
