@@ -12,19 +12,35 @@ Note: This is a proof of concept. The goal here is to be able to write bots usin
 # Setup
 ## Install
 `pip3 install revChatGPT`
-## Get your Bearer token
+## Get your session token
 Go to https://chat.openai.com/chat and log in or sign up
 1. Open console with `F12`
-2. Go to Network tab in console
-3. Find session request (Might need refresh)
-4. Copy accessToken value to config.json.example as Authorization
-5. Save as config.json (In current active directory)
-![image](https://user-images.githubusercontent.com/36258159/205446680-b3f40499-9757-428b-9e2f-23e89ca99461.png)
-![image](https://user-images.githubusercontent.com/36258159/205446730-793f8187-316c-4ae8-962c-0f4c1ee00bd1.png)
+2. Open `Application` tab > Cookies
+![image](https://user-images.githubusercontent.com/36258159/205494773-32ef651a-994d-435a-9f76-a26699935dac.png)
+3. Copy the value for `__Secure-next-auth.session-token` and paste it into `config.json.example` under `session_token`. You do not need to fill out `Authorization`
+![image](https://user-images.githubusercontent.com/36258159/205495076-664a8113-eda5-4d1e-84d3-6fad3614cfd8.png)
+4. Save the modified file to `config.json` (In the current working directory)
+
 
 # Running
-`python3 -m revChatGPT`
-Remember to press enter twice to send the message. This allows for multi-line input.
+```
+ $ python3 -m revChatGPT            
+
+    ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+    Repo: github.com/acheong08/ChatGPT
+    
+Type '!help' to show commands
+Press enter twice to submit your question.
+
+You: !help
+
+
+                !help - Show this message
+                !reset - Forget the current conversation
+                !refresh - Refresh the session authentication
+                !exit - Exit the program
+```
+**Make sure you run `!refresh` if you are only using the `session_token`.**
 
 ## Arguments
 You can pass the output through a processor using command line arguments.
@@ -41,20 +57,19 @@ import json
 
 # Get your config in JSON
 config = {
-        "Authorization": "<Your Bearer Token Here>"
-    }
+        "Authorization": "<Your Bearer Token Here>", # This is optional
+        "session_token": "<Your Session Token here>" # This is used to refresh the authentication
+}
 
 chatbot = Chatbot(config, conversation_id=None)
-prompt = "<Some prompt>"
-response = chatbot.get_chat_response(prompt)
-print(response["message"])
-print(response["conversation_id"])
-print(response["parent_id"])
+chatbot.reset_chat() # Forgets conversation
+refresh_session() # Uses the session_token to get a new bearer token
+resp = get_chat_response(prompt) # Sends a request to the API and returns the response by OpenAI
+resp['message'] # The message sent by the response
+resp['conversation_id'] # The current conversation id
+resp['parent_id'] # The ID of the response
 ```
 This can be imported to projects for bots and much more. You can have multiple independent conversations by keeping track of the conversation_id.
-
-# Known issues
-- Access token expires in one hour
 
 # Star History
 
