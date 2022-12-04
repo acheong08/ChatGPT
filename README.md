@@ -6,8 +6,8 @@ Note: This is a proof of concept. The goal here is to be able to write bots usin
 # Features
 - Scientific knowledge
 - Has memory. It remembers the chat history and context
-- Uncensored
 - No moderation
+- Programmable
 
 # Setup
 ## Get your Bearer token
@@ -22,6 +22,25 @@ Go to https://chat.openai.com/chat and log in or sign up
 
 # Running
 `python3 ChatGPT.py`
+
+# Development:
+```python
+import ChatGPT
+import json
+
+# Get your config in JSON
+config = {
+        "Authorization": "<Your Bearer Token Here>"
+    }
+
+chatbot = ChatGPT.Chatbot(config, conversation_id=None)
+prompt = "<Some prompt>"
+response = chatbot.get_chat_response(prompt)
+print(response["message"])
+print(response["conversation_id"])
+print(response["parent_id"])
+```
+This can be imported to projects for bots and much more. You can have multiple independent conversations by keeping track of the conversation_id.
 
 # Known issues
 - Access token expires in one hour
