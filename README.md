@@ -26,6 +26,13 @@ Go to https://chat.openai.com/chat and log in or sign up
 `python3 -m revChatGPT`
 Remember to press enter twice to send the message. This allows for multi-line input.
 
+## Arguments
+You can pass the output through a processor using command line arguments.
+
+Example:
+
+Use `python3 -m revChatGPT say` to make a Mac speak the output
+
 # Development:
 `pip3 install revChatGPT`
 ```python
