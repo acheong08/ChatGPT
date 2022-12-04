@@ -21,7 +21,7 @@ if __name__ == "__main__":
     ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
     Repo: github.com/acheong08/ChatGPT
     """)
-    print("Type '!exit' to exit")
+    print("Type '!help' to show commands")
     print("Press enter twice to submit your question.\n")
     with open("config.json", "r") as f:
             config = json.load(f)
@@ -32,8 +32,28 @@ if __name__ == "__main__":
 
     while True:
         prompt = get_input("You: ")
-        if prompt == "!exit":
-            break
+        if prompt.startswith("!"):
+            if prompt == "!help":
+                print("""
+                !help - Show this message
+                !reset - Forget the current conversation
+                !refresh - Refresh the session authentication
+                !exit - Exit the program
+                """)
+                continue
+            elif prompt == "!reset":
+                chatbot.reset_chat()
+                print("Chat session reset.")
+                continue
+            elif prompt == "!refresh":
+                chatbot.refresh_session()
+                print("Session refreshed.\n")
+                # Save the new config
+                with open("config.json", "w") as f:
+                    json.dump(chatbot.config, f)
+                continue
+            elif prompt == "!exit":
+                break
         try:
             print("Please wait for ChatGPT to formulate its full response...")
             response = chatbot.get_chat_response(prompt)
@@ -51,7 +71,7 @@ if __name__ == "__main__":
         arguments=list(sys.argv)
         del arguments[0]
 
-        if len(arguments)>1:
+        if len(arguments)>2:
             try:
                 process.terminate()
             except NameError:
