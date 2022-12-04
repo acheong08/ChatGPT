@@ -11,7 +11,7 @@ Note: This is a proof of concept. The goal here is to be able to write bots usin
 
 # Setup
 ## Install
-`pip3 install revChatGPT`
+`pip3 install revChatGPT --upgrade`
 ## Get your session token
 Go to https://chat.openai.com/chat and log in or sign up
 1. Open console with `F12`
@@ -52,7 +52,7 @@ Example:
 Use `python3 -m revChatGPT say` to make a Mac speak the output
 
 # Development:
-`pip3 install revChatGPT`
+`pip3 install revChatGPT --upgrade`
 ```python
 from revChatGPT.revChatGPT import Chatbot
 import json
