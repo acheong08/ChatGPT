@@ -1,3 +1,4 @@
 {
-    "Authorization": "<Your Bearer Token Here>"
+    "Authorization": "<API_KEY>",
+    "session_token": "<SESSION_TOKEN>"
 }
