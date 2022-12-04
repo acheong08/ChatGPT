@@ -73,6 +73,16 @@ resp['parent_id'] # The ID of the response
 ```
 This can be imported to projects for bots and much more. You can have multiple independent conversations by keeping track of the conversation_id.
 
+# Awesome ChatGPT
+<details>
+<summary> 
+Click here for more details
+</summary>
+
+- [chatGPT-discord-bot](https://github.com/Zero6992/chatGPT-discord-bot)
+
+</details>
+
 # Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=acheong08/ChatGPT&type=Date)](https://star-history.com/#acheong08/ChatGPT&Date)
