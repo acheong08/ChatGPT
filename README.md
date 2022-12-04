@@ -24,6 +24,7 @@ Go to https://chat.openai.com/chat and log in or sign up
 
 # Running
 `python3 -m revChatGPT`
+Remember to press enter twice to send the message. This allows for multi-line input.
 
 # Development:
 `pip3 install revChatGPT`
