@@ -65,6 +65,7 @@ Refresh every so often in case the token expires.
 `pip3 install revChatGPT --upgrade`
 ```python
 from revChatGPT.revChatGPT import Chatbot
+import requests
 import json
 
 # Get your config in JSON
