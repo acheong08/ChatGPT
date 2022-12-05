@@ -53,7 +53,7 @@ class Chatbot:
             self.conversation_id = response["conversation_id"]
             message = response["message"]["content"]["parts"][0]
             return {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
-        elif output == "response":
+        elif output == "stream":
             response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data), stream=True)
             for line in response.iter_lines():
                 try:
