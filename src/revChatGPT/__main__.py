@@ -33,7 +33,7 @@ if __name__ == "__main__":
     import sys
 
     while True:
-        prompt = get_input("You: ")
+        prompt = get_input("\nYou:\n")
         if prompt.startswith("!"):
             if prompt == "!help":
                 print("""
@@ -56,19 +56,24 @@ if __name__ == "__main__":
                 continue
             elif prompt == "!exit":
                 break
+        import textwrap
+
+        messages = []
+        lines_printed=0
+
         try:
-            print("Please wait for ChatGPT to formulate its full response...")
-            response = chatbot.get_chat_response(prompt)
+            print("Chatbot: ")
+            for message in chatbot.get_chat_response(prompt, output="stream"):
+                formatted_messages = textwrap.wrap(message, width=80)
+                if (len(formatted_messages) > lines_printed+1):
+                    print(formatted_messages[lines_printed])
+                    lines_printed+=1
+            print(formatted_messages[lines_printed])
         except Exception as e:
             print("Something went wrong!")
             print(e)
             continue
-        # Erase the "Please wait" line when done waiting
-        sys.stdout.write("\033[F\033[K")
 
-        print("\n")
-        print("Chatbot:", response['message'])
-        print("\n")
 
         arguments=list(sys.argv)
         del arguments[0]
