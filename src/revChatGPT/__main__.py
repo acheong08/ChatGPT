@@ -1,31 +1,29 @@
 import asyncio
 import json
 
-from revChatGPT import Chatbot
+from revChatGPT.revChatGPT import AsyncChatbot
 
 
 def get_input(prompt):
-    # prompt for input
-    lines = []
-    print(prompt, end="")
-    while True:
-        line = input()
-        if line == "":
-            break
-        lines.append(line)
+  # prompt for input
+  lines = []
+  print(prompt,end="")
+  while True:
+      line = input()
+      if line == "":
+          break
+      lines.append(line)
 
-    # Join the lines, separated by newlines, and print the result
-    user_input = "\n".join(lines)
-    # print(user_input)
-    return user_input
-
+  # Join the lines, separated by newlines, and print the result
+  user_input = "\n".join(lines)
+  #print(user_input)
+  return user_input
 
 if __name__ == "__main__":
-
     async def main():
         print(
             """
-        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        ChatGPT -   command-line interface 到 OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
         """
         )
@@ -33,7 +31,7 @@ if __name__ == "__main__":
         print("Press enter twice to submit your question.\n")
         with open("config.json", "r") as f:
             config = json.load(f)
-        chatbot = Chatbot(config)
+        chatbot = AsyncChatbot(config)
         if "session_token" in config:
             await chatbot.refresh_session()
 
@@ -47,9 +45,9 @@ if __name__ == "__main__":
                     print(
                         """
                     !help - Show this message
-                    !reset - Forget the current conversation
-                    !refresh - Refresh the session authentication
-                    !exit - Exit the program
+                    !reset - Forget   current conversation
+                    !refresh - 刷新   session authentication
+                    !exit - Exit   program
                     """
                     )
                     continue
@@ -60,7 +58,7 @@ if __name__ == "__main__":
                 elif prompt == "!refresh":
                     await chatbot.refresh_session()
                     print("Session refreshed.\n")
-                    # Save the new config
+                    # 保存   new config
                     with open("config.json", "w") as f:
                         json.dump(chatbot.config, f)
                     continue
@@ -73,7 +71,7 @@ if __name__ == "__main__":
                 print("Something went wrong!")
                 print(e)
                 continue
-            # Erase the "Please wait" line when done waiting
+            # Erase   "Please wait" line when done 等待中
             sys.stdout.write("\033[F\033[K")
 
             print("\n")
@@ -89,9 +87,9 @@ if __name__ == "__main__":
                 except NameError:
                     print("")
 
-                # Use `python3 ./revChatGPT.py say -v Samantha -r 600` to make a Mac speak the output
-                # using the Samantha voice at 600 words per minute (about 3x)
-                # or `python3 ./revChatGPT.py espeak -v en -s 600` to do something similar using espeak (untested)
+                # 使用 `python3 ./revChatGPT.py say -v Samantha -r 600` 到 make a Mac speak   output
+                # using   Samantha voice 在 600 words per minute (about 3x)
+                # 或 `python3 ./revChatGPT.py espeak -v en -s 600` 到 do something similar using espeak (untested)
                 arguments.append('"' + response["message"] + '"')
                 process = Popen(arguments)
 
