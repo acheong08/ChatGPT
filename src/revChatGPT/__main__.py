@@ -28,9 +28,6 @@ if __name__ == "__main__":
     chatbot = Chatbot(config)
     if 'session_token' in config:
         chatbot.refresh_session()
-    
-    from subprocess import Popen
-    import sys
 
     while True:
         prompt = get_input("\nYou:\n")
@@ -63,9 +60,10 @@ if __name__ == "__main__":
 
         try:
             print("Chatbot: ")
+            formatted_parts = []
             for message in chatbot.get_chat_response(prompt, output="stream"):
                 # Split the message by newlines
-                message_parts = message.split('\n')
+                message_parts = message['message'].split('\n')
 
                 # Wrap each part separately
                 formatted_parts = []
@@ -80,19 +78,3 @@ if __name__ == "__main__":
             print("Something went wrong!")
             print(e)
             continue
-
-
-        arguments=list(sys.argv)
-        del arguments[0]
-
-        if len(arguments)>2:
-            try:
-                process.terminate()
-            except NameError:
-                print("")
-
-            # Use `python3 ./revChatGPT.py say -v Samantha -r 600` to make a Mac speak the output
-            # using the Samantha voice at 600 words per minute (about 3x)
-            # or `python3 ./revChatGPT.py espeak -v en -s 600` to do something similar using espeak (untested)
-            arguments.append('"' + response['message'] + '"')
-            process = Popen(arguments)
