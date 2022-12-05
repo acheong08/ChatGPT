@@ -40,6 +40,7 @@ class Chatbot:
             "parent_message_id":self.parent_id,
             "model":"text-davinci-002-render"
         }
+        #print("bar")
         if output == "text":
             response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data))
             try:
@@ -62,6 +63,7 @@ class Chatbot:
                         continue
                     line = line[6:]
                     line = json.loads(line)
+                    #print(line)
                     try:
                         message = line["message"]["content"]["parts"][0]
                     except:
@@ -70,6 +72,7 @@ class Chatbot:
                 except:
                     continue
         else:
+            print("foo")
             return ValueError("Output must be either 'text' or 'response'")
 
     def refresh_session(self):
