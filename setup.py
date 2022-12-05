@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name = "revChatGPT",
-    version = "0.0.22",
+    version = "0.0.23",
     license = "GNU General Public License v2.0",
     author = "Antonio Cheong",
     author_email = "acheong@student.dalat.org",
@@ -10,7 +10,9 @@ setup(
     package_dir={'': 'src'},
     url = "https://github.com/acheong08/ChatGPT",
     install_requires = [
-        "requests"
+        "requests",
+        "tls-client",
+        "bs4"
     ],
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
