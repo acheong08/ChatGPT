@@ -61,17 +61,25 @@ You: !help
 
 Refresh every so often in case the token expires.
 
+## Installation
+- Doesn't work on mac
+- Tested on Linux alpine
+- If you don't have Linux installed, you can try installing it with docker
+
 # Development:
 `pip3 install revChatGPT --upgrade`
 ```python
 from revChatGPT.revChatGPT import Chatbot
 import json
+import requests
 
 # Get your config in JSON
 config = {
-    "email": "<YOUR_EMAIL>",
-    "password": "<YOUR_PASSWORD>"
+    "email": "<your_email>",
+    "password": "<your_pass>"
 }
+
+prompt="Hi"
 
 chatbot = Chatbot(config, conversation_id=None)
 chatbot.reset_chat() # Forgets conversation
@@ -81,11 +89,14 @@ resp['message'] # The message sent by the response
 resp['conversation_id'] # The current conversation id
 resp['parent_id'] # The ID of the response
 
-response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data), stream=True) # This returns a stream of text (live update)
+while(True):
 
-for message in response: # You have to loop through the response stream
-        print(line['message']) # Same format as text return type
-        ...
+  prompt = input("Human :")
+  resp=chatbot.get_chat_response(prompt, output="text")
+
+  print("AI : ",resp['message'])
+
+
 ```
 This can be imported to projects for bots and much more. You can have multiple independent conversations by keeping track of the conversation_id.
 
