@@ -1,7 +1,8 @@
 # ChatGPT
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
-Note: This is a proof of concept. The goal here is to be able to write bots using the API.
+# Disclaimer
+This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
 
 # Features
 - Scientific knowledge
