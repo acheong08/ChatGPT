@@ -30,9 +30,9 @@ class Chatbot:
     def generate_uuid(self):
         uid = str(uuid.uuid4())
         return uid
-        
-    def get_chat_response(self, prompt):
-        data = {
+
+    def generate_data(self, prompt):
+        return {
             "action":"next",
             "messages":[
                 {"id":str(self.generate_uuid()),
@@ -43,7 +43,9 @@ class Chatbot:
             "parent_message_id":self.parent_id,
             "model":"text-davinci-002-render"
         }
-        response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data))
+
+    def get_chat_response(self, prompt):
+        response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(self.generate_data(prompt)))
         try:
             response = response.text.splitlines()[-4]
         except:
@@ -79,24 +81,11 @@ class Chatbot:
             
 class AsyncChatbot(Chatbot):
     async def get_chat_response(self, prompt):
-        data = {
-            "action": "next",
-            "messages": [
-                {
-                    "id": str(self.generate_uuid()),
-                    "role": "user",
-                    "content": {"content_type": "text", "parts": [prompt]},
-                }
-            ],
-            "conversation_id": self.conversation_id,
-            "parent_message_id": self.parent_id,
-            "model": "text-davinci-002-render",
-        }
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://chat.openai.com/backend-api/conversation",
                 headers=self.headers,
-                data=json.dumps(data),
+                data=json.dumps(self.generate_data(prompt)),
             )
         try:
             response = response.text.splitlines()[-4]
