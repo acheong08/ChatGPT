@@ -7,8 +7,9 @@ This is not an official OpenAI product. This is a personal project and is not af
 ## Urgent help needed
 - Writing tests
 - More verbose error handling
-- Update documentation for email/password authentication (Working but needs documentation)
 - Decrecate bs4 in favor of pure requests
+- Update documentation for email/password authentication (Working but needs documentation)
+### Wiki is now open to all contributors
 
 # Features
 ![image](https://user-images.githubusercontent.com/36258159/205534498-acc59484-c4b4-487d-89a7-d7b884af709b.png)
