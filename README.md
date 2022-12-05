@@ -5,7 +5,6 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
 
 # Features
-- Scientific knowledge
 - Has memory. It remembers the chat history and context
 - No moderation
 - Programmable
