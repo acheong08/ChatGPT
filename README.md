@@ -81,9 +81,9 @@ resp['message'] # The message sent by the response
 resp['conversation_id'] # The current conversation id
 resp['parent_id'] # The ID of the response
 
-response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data), stream=True) # This returns a stream of text (live update)
-
-for message in response: # You have to loop through the response stream
+ # This returns a stream of text (live update)
+resp = chatbot.get_chat_response(prompt, output="stream") 
+for message in resp: # You have to loop through the response stream
         print(line['message']) # Same format as text return type
         ...
 ```
