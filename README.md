@@ -74,6 +74,8 @@ This can be imported to projects for bots and much more. You can have multiple i
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
 
+If you have a cool project you want added to the list, open an issue.
+
 # Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=acheong08/ChatGPT&type=Date)](https://star-history.com/#acheong08/ChatGPT&Date)
