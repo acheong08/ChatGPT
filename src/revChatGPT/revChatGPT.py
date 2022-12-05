@@ -107,14 +107,20 @@ class Chatbot:
                 self.login(self.config['email'], self.config['password'])
             except Exception as e:
                 print("Error refreshing session")
-                print(e)
+                return e
         else:
             return ValueError("No tokens provided")
     
     def login(self, email, password):
         print("Logging in...")
         auth = OpenAIAuth(email, password)
-        auth.begin()
+        try:
+            auth.begin()
+        except Exception as e:
+            # if ValueError with e as "Captcha detected" fail
+            if e == "Captcha detected":
+                print("Captcha not supported. Use session tokens instead.")
+                return ValueError("Captcha detected")
         self.config['Authorization'] = auth.access_token
         self.refresh_headers()
 
@@ -265,7 +271,7 @@ class OpenAIAuth:
             soup = BeautifulSoup(response.text, 'lxml')
             if soup.find('img', alt='captcha'):
                 print("Captcha detected")
-                return
+                return ValueError("Captcha detected")
             else:
                 self.part_six(state=state, captcha=None)
         else:
