@@ -64,11 +64,18 @@ if __name__ == "__main__":
         try:
             print("Chatbot: ")
             for message in chatbot.get_chat_response(prompt, output="stream"):
-                formatted_messages = textwrap.wrap(message, width=80)
-                if (len(formatted_messages) > lines_printed+1):
-                    print(formatted_messages[lines_printed])
-                    lines_printed+=1
-            print(formatted_messages[lines_printed])
+                # Split the message by newlines
+                message_parts = message.split('\n')
+
+                # Wrap each part separately
+                formatted_parts = []
+                for part in message_parts:
+                    formatted_parts.extend(textwrap.wrap(part, width=80))
+                    for formatted_line in formatted_parts:
+                        if (len(formatted_parts) > lines_printed+1):
+                            print(formatted_parts[lines_printed])
+                            lines_printed+=1
+            print(formatted_parts[lines_printed])
         except Exception as e:
             print("Something went wrong!")
             print(e)
