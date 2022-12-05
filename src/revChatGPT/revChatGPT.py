@@ -5,7 +5,7 @@ import httpx
 import requests
 
 
-class AsyncChatbot:
+class Chatbot:
     config: json
     conversation_id: str
     parent_id: str
@@ -77,7 +77,7 @@ class AsyncChatbot:
             print(response.text)
             
             
-class AsyncChatbot(AsyncChatbot):
+class AsyncChatbot(Chatbot):
     async def get_chat_response(self, prompt):
         data = {
             "action": "next",
