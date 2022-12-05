@@ -27,6 +27,39 @@ class Chatbot:
     def generate_uuid(self):
         uid = str(uuid.uuid4())
         return uid
+
+    def get_chat_stream(self, data):
+        response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data), stream=True)
+        for line in response.iter_lines():
+            try:
+                line = line.decode('utf-8')
+                if line == "":
+                    continue
+                line = line[6:]
+                line = json.loads(line)
+                try:
+                    message = line["message"]["content"]["parts"][0]
+                    self.conversation_id = line["conversation_id"]
+                    self.parent_id = line["message"]["id"]
+                except:
+                    continue
+                yield {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
+            except:
+                continue
+
+    def get_chat_text(self, data):
+        response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data))
+        try:
+            response = response.text.splitlines()[-4]
+            response = response[6:]
+        except:
+            print(response.text)
+            return ValueError("Response is not in the correct format")
+        response = json.loads(response)
+        self.parent_id = response["message"]["id"]
+        self.conversation_id = response["conversation_id"]
+        message = response["message"]["content"]["parts"][0]
+        return {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
         
     def get_chat_response(self, prompt, output="text"):
         data = {
@@ -41,36 +74,9 @@ class Chatbot:
             "model":"text-davinci-002-render"
         }
         if output == "text":
-            response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data))
-            try:
-                response = response.text.splitlines()[-4]
-                response = response[6:]
-            except:
-                print(response.text)
-                return ValueError("Response is not in the correct format")
-            response = json.loads(response)
-            self.parent_id = response["message"]["id"]
-            self.conversation_id = response["conversation_id"]
-            message = response["message"]["content"]["parts"][0]
-            return {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
+            return self.get_chat_text(data)
         elif output == "stream":
-            response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data), stream=True)
-            for line in response.iter_lines():
-                try:
-                    line = line.decode('utf-8')
-                    if line == "":
-                        continue
-                    line = line[6:]
-                    line = json.loads(line)
-                    try:
-                        message = line["message"]["content"]["parts"][0]
-                        self.conversation_id = line["conversation_id"]
-                        self.parent_id = line["message"]["id"]
-                    except:
-                        continue
-                    yield {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
-                except:
-                    continue
+            return self.get_chat_stream(data)
         else:
             return ValueError("Output must be either 'text' or 'response'")
 
