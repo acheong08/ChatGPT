@@ -60,7 +60,7 @@ class Chatbot:
             response = response[6:]
         except:
             print(response.text)
-            return ValueError("Response is not in the correct format")
+            raise ValueError("Response is not in the correct format")
         response = json.loads(response)
         self.parent_id = response["message"]["id"]
         self.conversation_id = response["conversation_id"]
@@ -84,11 +84,11 @@ class Chatbot:
         elif output == "stream":
             return self.get_chat_stream(data)
         else:
-            return ValueError("Output must be either 'text' or 'response'")
+            raise ValueError("Output must be either 'text' or 'response'")
 
     def refresh_session(self):
         if 'session_token' not in self.config and ('email' not in self.config or 'password' not in self.config):
-            return ValueError("No tokens provided")
+            raise ValueError("No tokens provided")
         elif 'session_token' in self.config:
             s = requests.Session()
             # Set cookies
@@ -109,7 +109,7 @@ class Chatbot:
                 print("Error refreshing session: " + e)
                 return e
         else:
-            return ValueError("No tokens provided")
+            raise ValueError("No tokens provided")
     
     def login(self, email, password):
         print("Logging in...")
@@ -120,7 +120,7 @@ class Chatbot:
             # if ValueError with e as "Captcha detected" fail
             if e == "Captcha detected":
                 print("Captcha not supported. Use session tokens instead.")
-                return ValueError("Captcha detected")
+                raise ValueError("Captcha detected")
         self.config['Authorization'] = auth.access_token
         self.refresh_headers()
 
@@ -271,7 +271,7 @@ class OpenAIAuth:
             soup = BeautifulSoup(response.text, 'lxml')
             if soup.find('img', alt='captcha'):
                 print("Captcha detected")
-                return ValueError("Captcha detected")
+                raise ValueError("Captcha detected")
             else:
                 self.part_six(state=state, captcha=None)
         else:
