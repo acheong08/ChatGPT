@@ -40,16 +40,8 @@ You: !help
                 !refresh - Refresh the session authentication
                 !exit - Exit the program
 ```
-**Make sure you run `!refresh` if you are only using the `session_token`.**
 
 Refresh every so often in case the token expires.
-
-## Arguments
-You can pass the output through a processor using command line arguments.
-
-Example:
-
-Use `python3 -m revChatGPT say` to make a Mac speak the output
 
 # Development:
 `pip3 install revChatGPT --upgrade`
