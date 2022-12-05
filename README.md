@@ -91,7 +91,7 @@ resp['parent_id'] # The ID of the response
 
  # This returns a stream of text (live update)
 resp = chatbot.get_chat_response(prompt, output="stream") 
-for message in resp: # You have to loop through the response stream
+for line in resp: # You have to loop through the response stream
         print(line['message']) # Same format as text return type
         ...
 ```
