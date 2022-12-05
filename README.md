@@ -38,6 +38,7 @@ Save this in `config.json` in current working directory
 <details>
  <summary>Legacy authentication or if using Google Auth</summary>
 Go to https://chat.openai.com/chat and log in or sign up
+
 1. Open console with `F12`
 2. Open `Application` tab > Cookies
 ![image](https://user-images.githubusercontent.com/36258159/205494773-32ef651a-994d-435a-9f76-a26699935dac.png)
