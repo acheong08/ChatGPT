@@ -116,6 +116,7 @@ class Chatbot:
         auth = OpenAIAuth(email, password)
         auth.begin()
         self.config['Authorization'] = auth.access_token
+        self.refresh_headers()
 
 ### Credits to github.com/rawandahmad698/PyChatGPT
 class OpenAIAuth:
