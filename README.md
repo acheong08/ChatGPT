@@ -46,6 +46,7 @@ Go to https://chat.openai.com/chat and log in or sign up
 
     ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
     Repo: github.com/acheong08/ChatGPT
+    Arguments: Use --stream to enable data streaming. (Doesn't work on MacOS)
     
 Type '!help' to show commands
 Press enter twice to submit your question.
