@@ -4,6 +4,10 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 # Disclaimer
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
 
+## Urgent help needed
+- Writing tests
+- More verbose error handling
+
 # Features
 ![image](https://user-images.githubusercontent.com/36258159/205534498-acc59484-c4b4-487d-89a7-d7b884af709b.png)
 - No moderation
