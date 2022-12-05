@@ -1,6 +1,8 @@
 import asyncio
 import json
 
+from reprint import output
+
 from revChatGPT.revChatGPT import AsyncChatbot
 
 
@@ -62,18 +64,26 @@ if __name__ == "__main__":
                     continue
                 elif prompt == "!exit":
                     break
+            print("Please wait for ChatGPT to formulate its full response...")
             try:
-                print("Please wait for ChatGPT to formulate its full response...")
-                response = await chatbot.get_chat_response(prompt)
+                message = ""
+                i = 0
+                with output() as output_list:
+                    async for line in chatbot.get_chat_stream_response(prompt):
+                        if not message:
+                            # Erase the "Please wait" line when done waiting
+                            sys.stdout.write("\033[F\033[K")
+                            message += "Chatbot: "
+                        message += line["message"]
+                        output_list[i] = message
+                        if line["message"] == "\n":
+                            i += 1
+                            output_list.append(message := "\n")
             except Exception as e:
                 print("Something went wrong!")
                 print(e)
                 continue
-            # Erase the "Please wait" line when done waiting
-            sys.stdout.write("\033[F\033[K")
 
-            print("\n")
-            print("Chatbot:", response["message"])
             print("\n")
 
             arguments = list(sys.argv)
@@ -88,7 +98,7 @@ if __name__ == "__main__":
                 # Use `python3 ./revChatGPT.py say -v Samantha -r 600` to make a Mac speak the output
                 # using the Samantha voice at 600 words per minute (about 3x)
                 # or `python3 ./revChatGPT.py espeak -v en -s 600` to do something similar using espeak (untested)
-                arguments.append('"' + response["message"] + '"')
+                arguments.append('"' + "".join(output_list) + '"')
                 process = Popen(arguments)
 
     asyncio.run(main())

@@ -11,7 +11,7 @@ setup(
     package_dir={'': 'src'},
     url = "https://github.com/acheong08/ChatGPT",
     install_requires = [
-        "requests", "httpx"
+        "requests", "httpx", "reprint"
     ],
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
