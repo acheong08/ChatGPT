@@ -22,8 +22,8 @@ class Chatbot:
         self.parent_id = self.generate_uuid()
         
     def refresh_headers(self):
-        if 'Authorization' not in self.config:
-            self.config['Authorization'] = ""
+        if self.config['Authorization'] == None:
+            self.config['Authorization'] = ''
         self.headers = {
             "Accept": "application/json",
             "Authorization": "Bearer " + self.config['Authorization'],
@@ -106,7 +106,7 @@ class Chatbot:
             try:
                 self.login(self.config['email'], self.config['password'])
             except Exception as e:
-                print("Error refreshing session")
+                print("Error refreshing session: " + e)
                 return e
         else:
             return ValueError("No tokens provided")
