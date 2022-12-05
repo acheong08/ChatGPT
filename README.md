@@ -4,11 +4,17 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 # Disclaimer
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
 
+### This is a library and not intended for direct CLI use
+The CLI functionality is for demo and testing only.
+
+[@rawandahmad698](https://github.com/rawandahmad698) has a much better CLI tool at
+
+**[PyChatGPT](https://github.com/rawandahmad698/PyChatGPT)**
+
 ## Urgent help needed
 - Writing tests
 - More verbose error handling
 - Decrecate bs4 in favor of pure requests
-- Update documentation for email/password authentication (Working but needs documentation)
 ### Wiki is now open to all contributors
 
 # Features
