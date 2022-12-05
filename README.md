@@ -19,7 +19,18 @@ This is not an official OpenAI product. This is a personal project and is not af
 # Setup
 ## Install
 `pip3 install revChatGPT --upgrade`
-## Get your session token
+
+## Email and password authentication
+```json
+{
+    "email": "<YOUR_EMAIL>",
+    "password": "<YOUR_PASSWORD>"
+}
+```
+Save this in `config.json` in current working directory
+
+<details>
+ <summary>Legacy authentication or if using Google Auth</summary>
 Go to https://chat.openai.com/chat and log in or sign up
 1. Open console with `F12`
 2. Open `Application` tab > Cookies
@@ -27,7 +38,7 @@ Go to https://chat.openai.com/chat and log in or sign up
 3. Copy the value for `__Secure-next-auth.session-token` and paste it into `config.json.example` under `session_token`. You do not need to fill out `Authorization`
 ![image](https://user-images.githubusercontent.com/36258159/205495076-664a8113-eda5-4d1e-84d3-6fad3614cfd8.png)
 4. Save the modified file to `config.json` (In the current working directory)
-
+</details>
 
 # Running
 ```
@@ -58,8 +69,8 @@ import json
 
 # Get your config in JSON
 config = {
-        "Authorization": "<Your Bearer Token Here>", # This is optional
-        "session_token": "<Your Session Token here>" # This is used to refresh the authentication
+    "email": "<YOUR_EMAIL>",
+    "password": "<YOUR_PASSWORD>"
 }
 
 chatbot = Chatbot(config, conversation_id=None)
