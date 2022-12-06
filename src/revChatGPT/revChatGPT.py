@@ -307,7 +307,6 @@ class OpenAIAuth:
             url = response.json()["url"]
             self.part_four(url=url)
         elif response.status_code == 400:
-            print("Invalid credentials")
             raise Exception("Invalid credentials")
         else:
             raise Exception("Unknown error")
@@ -442,7 +441,7 @@ class OpenAIAuth:
             # Save access_token and an hour from now on ./Classes/auth.json
             self.save_access_token(access_token=access_token)
         else:
-            print("Error logging in")
+            print("Invalid credentials")
             raise Exception("Failed to find accessToken")
 
     def save_access_token(self, access_token: str):
