@@ -7,7 +7,6 @@ import re
 import urllib
 import tls_client
 import requests
-from bs4 import BeautifulSoup
 
 
 def generate_uuid() -> str:
@@ -91,9 +90,24 @@ class Chatbot:
             response = response[6:]
         except Exception as exc:
             try:
-                soup = BeautifulSoup(response.text, 'lxml')
-                error_desp = soup.title.text + ": " + \
-                    soup.find("div", {"id": "message"}).get_text()
+                # Get the title text
+                title_text = re.search('<title>(.*)</title>', response.text).group(1)
+
+                # Find all div elements and capture the id attribute and the contents of the element
+                div_pattern = '<div[^>]*id="([^"]*)">(.*)</div>'
+                div_elements = re.findall(div_pattern, response.text)
+
+                # Loop through the div elements and find the one with the "message" id
+                message_text = ""
+                for div in div_elements:
+                    div_id = div[0]
+                    div_content = div[1]
+                    if div_id == "message":
+                        message_text = div_content
+                        break
+                # Concatenate the title and message text
+                error_desp = title_text + ": " + message_text
+               
             except:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
@@ -359,8 +373,7 @@ class OpenAIAuth:
         }
         response = self.session.get(url, headers=headers)
         if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'lxml')
-            if soup.find('img', alt='captcha'):
+            if re.search(r'<img[^>]+alt="captcha"[^>]+>', response.text):
                 print("Captcha detected")
                 raise ValueError("Captcha detected")
             self.part_six(state=state, captcha=None)
@@ -445,12 +458,9 @@ class OpenAIAuth:
         response = self.session.get(url, headers=headers, allow_redirects=True)
         is_200 = response.status_code == 200
         if is_200:
-            soup = BeautifulSoup(response.text, 'lxml')
-            # Find __NEXT_DATA__, which contains the data we need, the get accessToken
-            next_data = soup.find("script", {"id": "__NEXT_DATA__"})
             # Access Token
             access_token = re.findall(
-                r"accessToken\":\"(.*)\"", next_data.text)
+                r"accessToken\":\"(.*)\"", response.text)
             if access_token:
                 access_token = access_token[0]
                 access_token = access_token.split('"')[0]
