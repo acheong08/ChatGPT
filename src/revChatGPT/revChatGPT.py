@@ -22,7 +22,9 @@ class Chatbot:
         self.parent_id = self.generate_uuid()
         
     def refresh_headers(self):
-        if self.config['Authorization'] == None:
+        if 'Authorization' not in self.config:
+            self.config['Authorization'] = ''
+        elif self.config['Authorization'] == None:
             self.config['Authorization'] = ''
         self.headers = {
             "Accept": "application/json",
