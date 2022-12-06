@@ -33,8 +33,6 @@ if __name__ == "__main__":
 
     while True:
         prompt = get_input("\nYou:\n")
-        print(prompt)
-        print(prompt.startswith("!"))
         if prompt.startswith("!"):
             if prompt == "!help":
                 print("""
