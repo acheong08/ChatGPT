@@ -11,6 +11,8 @@ class Chatbot:
     conversation_id: str
     parent_id: str
     headers: dict
+    conversation_id_prev: str
+    parent_id_prev: str
     def __init__(self, config, conversation_id=None):
         self.config = config
         self.conversation_id = conversation_id
@@ -91,12 +93,18 @@ class Chatbot:
             "parent_message_id":self.parent_id,
             "model":"text-davinci-002-render"
         }
+        self.conversation_id_prev = self.conversation_id
+        self.parent_id_prev = self.parent_id
         if output == "text":
             return self.get_chat_text(data)
         elif output == "stream":
             return self.get_chat_stream(data)
         else:
             raise ValueError("Output must be either 'text' or 'response'")
+    
+    def rollback_conversation(self):
+        self.conversation_id = self.conversation_id_prev
+        self.parent_id = self.parent_id_prev
 
     def refresh_session(self):
         if 'session_token' not in self.config and ('email' not in self.config or 'password' not in self.config):

@@ -39,6 +39,7 @@ if __name__ == "__main__":
                 !help - Show this message
                 !reset - Forget the current conversation
                 !refresh - Refresh the session authentication
+                !rollback - Rollback the conversation by 1 message
                 !exit - Exit the program
                 """)
                 continue
@@ -53,10 +54,14 @@ if __name__ == "__main__":
                 with open("config.json", "w") as f:
                     json.dump(chatbot.config, f)
                 continue
+            elif prompt == "!rollback":
+                chatbot.rollback_conversation()
+                print("Chat session rolled back.")
+                continue
             elif prompt == "!exit":
                 break
         
-        if '--stream' in argv:
+        if '--text' not in argv:
             messages = []
             lines_printed=0
 
