@@ -65,10 +65,10 @@ class Chatbot:
             # Check if the response is html or json
             # print(response.text)
             try:
-                soup = BeautifulSoup(response.text, 'html')
+                soup = BeautifulSoup(response.text, 'lxml')
                 error_desp = soup.title.text + soup.find("div", {"id": "message"}).text
             except:
-                error_desp = json.loads(response)["detail"]
+                error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
                     error_desp = error_desp["message"]
             finally:
