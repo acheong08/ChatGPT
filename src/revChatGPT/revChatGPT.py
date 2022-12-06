@@ -1,10 +1,13 @@
-import requests
+# Author: @acheong08@fosstodon.org
+# License: MIT
+# Description: A Python wrapper for OpenAI's chatbot API
 import json
 import uuid
-import tls_client
 import re
-from bs4 import BeautifulSoup
 import urllib
+import tls_client
+import requests
+from bs4 import BeautifulSoup
 
 
 class Chatbot:
@@ -21,10 +24,12 @@ class Chatbot:
         self.parent_id = self.generate_uuid()
         self.refresh_headers()
 
+    # Resets the conversation ID and parent ID
     def reset_chat(self):
         self.conversation_id = None
         self.parent_id = self.generate_uuid()
 
+    # Refreshes the headers -- Internal use only
     def refresh_headers(self):
         if 'Authorization' not in self.config:
             self.config['Authorization'] = ''
@@ -37,13 +42,15 @@ class Chatbot:
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
         }
 
+    # Generates a UUID -- Internal use only
     def generate_uuid(self):
         uid = str(uuid.uuid4())
         return uid
 
+    # Generator for chat stream -- Internal use only
     def get_chat_stream(self, data):
         response = requests.post("https://chat.openai.com/backend-api/conversation",
-                                 headers=self.headers, data=json.dumps(data), stream=True)
+                                 headers=self.headers, data=json.dumps(data), stream=True, timeout=20)
         for line in response.iter_lines():
             try:
                 line = line.decode('utf-8')
@@ -61,6 +68,7 @@ class Chatbot:
             except:
                 continue
 
+    # Gets the chat response as text -- Internal use only
     def get_chat_text(self, data):
         # Create request session
         s = requests.Session()
@@ -77,9 +85,7 @@ class Chatbot:
         try:
             response = response.text.splitlines()[-4]
             response = response[6:]
-        except:
-            # Check if the response is html or json
-            # print(response.text)
+        except Exception as exc:
             try:
                 soup = BeautifulSoup(response.text, 'lxml')
                 error_desp = soup.title.text + \
@@ -88,15 +94,15 @@ class Chatbot:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
                     error_desp = error_desp["message"]
-            finally:
                 raise ValueError(
-                    "Response is not in the correct format", error_desp)
+                    "Response is not in the correct format", error_desp) from exc
         response = json.loads(response)
         self.parent_id = response["message"]["id"]
         self.conversation_id = response["conversation_id"]
         message = response["message"]["content"]["parts"][0]
         return {'message': message, 'conversation_id': self.conversation_id, 'parent_id': self.parent_id}
 
+    # Gets the chat response
     def get_chat_response(self, prompt, output="text"):
         data = {
             "action": "next",
@@ -146,16 +152,17 @@ class Chatbot:
                     "__Secure-next-auth.session-token")
                 self.config['Authorization'] = response.json()["accessToken"]
                 self.refresh_headers()
-            except Exception as e:
+            except Exception as exc:
                 print("Error refreshing session")
                 print(response.text)
+                raise Exception("Error refreshing session") from exc
         elif 'email' in self.config and 'password' in self.config:
             try:
                 self.login(self.config['email'], self.config['password'])
-            except Exception as e:
+            except Exception as exc:
                 print("Error refreshing session: ")
-                print(e)
-                return e
+                print(exc)
+                return exc
         else:
             raise ValueError("No tokens provided")
 
@@ -170,11 +177,13 @@ class Chatbot:
         auth = OpenAIAuth(email, password, use_proxy, proxy)
         try:
             auth.begin()
-        except Exception as e:
+        except Exception as exc:
             # if ValueError with e as "Captcha detected" fail
-            if e == "Captcha detected":
+            if exc == "Captcha detected":
                 print("Captcha not supported. Use session tokens instead.")
-                raise ValueError("Captcha detected")
+                raise ValueError("Captcha detected") from exc
+            else:
+                raise Exception("Error logging in") from exc
         self.config['Authorization'] = auth.access_token
         self.config['session_token'] = auth.session_token
         self.refresh_headers()
@@ -218,7 +227,7 @@ class OpenAIAuth:
                     "http": self.proxy,
                     "https": self.proxy
                 }
-                self.session.proxies(proxies)
+                self.session.proxies = proxies
 
         # First, make a request to https://chat.openai.com/auth/login
         url = "https://chat.openai.com/auth/login"
