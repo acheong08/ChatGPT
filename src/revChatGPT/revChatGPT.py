@@ -120,6 +120,8 @@ class Chatbot:
         if 'session_token' not in self.config and ('email' not in self.config or 'password' not in self.config):
             raise ValueError("No tokens provided")
         elif 'session_token' in self.config:
+            if self.config['session_token'] == None or self.config['session_token'] == "":
+                raise ValueError("No tokens provided")
             s = requests.Session()
             if self.config.get("proxy", "") != "":
                 s.proxies = {
