@@ -10,6 +10,9 @@ This is not an official OpenAI product. This is a personal project and is not af
 ### This is a library and not intended for direct CLI use
 The CLI functionality is for demo and testing only. Captcha is not supported (For unclean IP addresses)
 
+## Server
+https://github.com/chitalian/revChatGPTServer
+
 ## CLI use
 [@rawandahmad698](https://github.com/rawandahmad698) has a much better CLI tool at
 
