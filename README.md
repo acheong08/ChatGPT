@@ -42,7 +42,8 @@ Save this in `config.json` in current working directory
 <details>
 <summary>
 
-## Token Authentication
+### Token Authentication 
+Functional but deprecated. Use only if email/password not available
 </summary>
 Go to https://chat.openai.com/chat and log in or sign up
 
@@ -56,21 +57,26 @@ Go to https://chat.openai.com/chat and log in or sign up
 
 # Running
 ```
- $ python3 -m revChatGPT            
+ $ python3 -m revChatGPT
 
     ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
     Repo: github.com/acheong08/ChatGPT
-    Arguments: Use --stream to enable data streaming. (Doesn't work on MacOS)
+    Use --text if error with streaming
     
 Type '!help' to show commands
 Press enter twice to submit your question.
 
-You: !help
+Logging in...
+
+You:
+!help
 
 
                 !help - Show this message
                 !reset - Forget the current conversation
                 !refresh - Refresh the session authentication
+                !rollback - Rollback the conversation by 1 message
+                !config - Show the current configuration
                 !exit - Exit the program
 ```
 
@@ -100,7 +106,7 @@ resp['parent_id'] # The ID of the response
 resp = chatbot.get_chat_response(prompt, output="stream") 
 for line in resp: # You have to loop through the response stream
         print(line['message']) # Same format as text return type
-        ...
+        ........
 ```
 This can be imported to projects for bots and much more. You can have multiple independent conversations by keeping track of the conversation_id.
 
