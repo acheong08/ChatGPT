@@ -8,12 +8,12 @@ If you were using this prior to version 0.0.24, please update immediately. `pip3
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
 
 ### This is a library and not intended for direct CLI use
-The CLI functionality is for demo and testing only.
+The CLI functionality is for demo and testing only. Captcha is not supported (For unclean IP addresses)
 
 ## CLI use
 [@rawandahmad698](https://github.com/rawandahmad698) has a much better CLI tool at
 
-**[PyChatGPT](https://github.com/rawandahmad698/PyChatGPT)**
+**[PyChatGPT](https://github.com/rawandahmad698/PyChatGPT)** supports captcha!
 
 ## Urgent help needed
 - Writing tests
