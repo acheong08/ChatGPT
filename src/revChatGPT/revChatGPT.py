@@ -462,4 +462,5 @@ class OpenAIAuth:
                 "__Secure-next-auth.session-token")
             return True
         else:
-            return False
+            self.session_token = None
+            raise Exception("Failed to get session token")
