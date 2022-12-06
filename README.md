@@ -15,6 +15,7 @@ If you were using this prior to version 0.0.24, please update immediately. `pip3
 - Writing tests
 - More verbose error handling
 - Decrecate bs4 in favor of pure requests
+- My account has been blocked (https://github.com/acheong08/ChatGPT/issues/78)
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
