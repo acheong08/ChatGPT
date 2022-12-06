@@ -270,9 +270,9 @@ class OpenAIAuth:
             url = response.json()["url"]
             self.part_four(url=url)
         elif response.status_code == 400:
-            return
+            raise Exception("Invalid credentials")
         else:
-            return
+            raise Exception("Unknown error")
 
     def part_four(self, url: str):
         """
@@ -294,7 +294,7 @@ class OpenAIAuth:
             state = state.split('"')[0]
             self.part_five(state=state)
         else:
-            return
+            raise Exception("Unknown error")
 
     def part_five(self, state: str):
         """
@@ -349,7 +349,7 @@ class OpenAIAuth:
         if response.status_code == 302:
             self.part_seven(state=state)
         else:
-            return
+            raise Exception("Unknown error")
 
     def part_seven(self, state: str):
         """
@@ -379,7 +379,7 @@ class OpenAIAuth:
             new_state = new_state.split('"')[0]
             self.part_eight(old_state=state, new_state=new_state)
         else:
-            return
+            raise Exception("Unknown error")
 
     def part_eight(self, old_state: str, new_state):
         url = f"https://auth0.openai.com/authorize/resume?state={new_state}"
@@ -412,7 +412,11 @@ class OpenAIAuth:
         :param access_token:
         :return:
         """
-        self.access_token = access_token
+        if self.part_nine():
+            self.access_token = access_token
+        else:
+            print("Failed to login")
+            raise Exception("Failed to login")
 
     def part_nine(self):
         url = "https://chat.openai.com/api/auth/session"
@@ -429,8 +433,6 @@ class OpenAIAuth:
         response = self.session.get(url, headers=headers)
         is_200 = response.status_code == 200
         if is_200:
-            # Get the session token
-            # return response.json()
-            pass
+            return True
         else:
-            raise Exception("Failed to get session token")
+            return False
