@@ -35,7 +35,7 @@ The CLI functionality is for demo and testing only.
 ```
 Save this in `config.json` in current working directory
 
-# Token Authentication
+## Token Authentication
 Go to https://chat.openai.com/chat and log in or sign up
 
 1. Open console with `F12`
