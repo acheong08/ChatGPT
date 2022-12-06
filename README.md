@@ -41,6 +41,7 @@ Save this in `config.json` in current working directory
 
 <details>
 <summary>
+
 ## Token Authentication
 </summary>
 Go to https://chat.openai.com/chat and log in or sign up
