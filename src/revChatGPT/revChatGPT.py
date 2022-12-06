@@ -185,9 +185,24 @@ class Chatbot:
                 raise ValueError("Captcha detected") from exc
             else:
                 raise Exception("Error logging in") from exc
-        self.config['Authorization'] = auth.access_token
-        self.config['session_token'] = auth.session_token
-        self.refresh_headers()
+        if auth.access_token != None:
+            self.config['Authorization'] = auth.access_token
+            if auth.session_token != None:
+                self.config['session_token'] = auth.session_token
+            else:
+                possible_tokens = auth.session.cookies.get(
+                    "__Secure-next-auth.session-token")
+                if possible_tokens != None:
+                    if len(possible_tokens) > 1:
+                        self.config['session_token'] = possible_tokens[0]
+                    else:
+                        try:
+                            self.config['session_token'] = possible_tokens
+                        except Exception as exc:
+                            raise Exception("Error logging in") from exc
+            self.refresh_headers()
+        else:
+            raise Exception("Error logging in")
 
 # Credits to github.com/rawandahmad698/PyChatGPT
 
