@@ -30,8 +30,6 @@ if __name__ == "__main__":
     with open("config.json", "r") as f:
         config = json.load(f)
     chatbot = Chatbot(config)
-    if 'session_token' in config or ('email' in config and 'password' in config):
-        chatbot.refresh_session()
 
     while True:
         prompt = get_input("\nYou:\n")

@@ -22,7 +22,8 @@ class Chatbot:
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = self.generate_uuid()
-        self.refresh_headers()
+        if 'session_token' in config or ('email' in config and 'password' in config):
+            self.refresh_session()
 
     # Resets the conversation ID and parent ID
     def reset_chat(self):
