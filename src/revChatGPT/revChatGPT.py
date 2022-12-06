@@ -186,8 +186,7 @@ class Chatbot:
             if exc == "Captcha detected":
                 print("Captcha not supported. Use session tokens instead.")
                 raise ValueError("Captcha detected") from exc
-            else:
-                raise Exception("Error logging in") from exc
+            raise Exception("Error logging in") from exc
         if auth.access_token is not None:
             self.config['Authorization'] = auth.access_token
             if auth.session_token is not None:
@@ -238,17 +237,16 @@ class OpenAIAuth:
         """
         if not self.email_address or not self.password:
             return
-        else:
 
-            if self.use_proxy:
-                if not self.proxy:
-                    return
+        if self.use_proxy:
+            if not self.proxy:
+                return
 
-                proxies = {
-                    "http": self.proxy,
-                    "https": self.proxy
-                }
-                self.session.proxies = proxies
+            proxies = {
+                "http": self.proxy,
+                "https": self.proxy
+            }
+            self.session.proxies = proxies
 
         # First, make a request to https://chat.openai.com/auth/login
         url = "https://chat.openai.com/auth/login"
@@ -363,8 +361,7 @@ class OpenAIAuth:
             if soup.find('img', alt='captcha'):
                 print("Captcha detected")
                 raise ValueError("Captcha detected")
-            else:
-                self.part_six(state=state, captcha=None)
+            self.part_six(state=state, captcha=None)
         else:
             raise ValueError("Invalid response code")
 
@@ -491,6 +488,5 @@ class OpenAIAuth:
             self.session_token = response.cookies.get(
                 "__Secure-next-auth.session-token")
             return True
-        else:
-            self.session_token = None
-            raise Exception("Failed to get session token")
+        self.session_token = None
+        raise Exception("Failed to get session token")
