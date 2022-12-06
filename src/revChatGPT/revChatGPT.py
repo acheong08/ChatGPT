@@ -145,7 +145,8 @@ class Chatbot:
             try:
                 self.login(self.config['email'], self.config['password'])
             except Exception as e:
-                print("Error refreshing session: " + e)
+                print("Error refreshing session: ")
+                print(e)
                 return e
         else:
             raise ValueError("No tokens provided")
@@ -167,7 +168,7 @@ class Chatbot:
                 print("Captcha not supported. Use session tokens instead.")
                 raise ValueError("Captcha detected")
         self.config['Authorization'] = auth.access_token
-        self.config['session_token'] = auth.session.cookies.get("__Secure-next-auth.session-token")
+        self.config['session_token'] = auth.session_token
         self.refresh_headers()
 
 ### Credits to github.com/rawandahmad698/PyChatGPT
@@ -435,6 +436,8 @@ class OpenAIAuth:
         response = self.session.get(url, headers=headers)
         is_200 = response.status_code == 200
         if is_200:
+            # Get session token
+            self.session_token = response.cookies.get("__Secure-next-auth.session-token")
             return True
         else:
             return False
