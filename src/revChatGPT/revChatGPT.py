@@ -277,7 +277,7 @@ class OpenAIAuth:
             else:
                 self.part_six(state=state, captcha=None)
         else:
-            return
+            raise ValueError("Invalid response code")
 
     def part_six(self, state: str, captcha: str or None):
         """
@@ -360,6 +360,9 @@ class OpenAIAuth:
             access_token = access_token.split('"')[0]
             # Save access_token and an hour from now on ./Classes/auth.json
             self.save_access_token(access_token=access_token)
+        else:
+            print("Error logging in")
+            raise Exception("Failed to find accessToken")
 
     def save_access_token(self, access_token: str):
         """
