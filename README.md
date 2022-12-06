@@ -1,6 +1,9 @@
 # ChatGPT
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
+# Announcement:
+If you were using this prior to version 0.0.24, please update immediately. `pip3 install revChatGPT --upgrade`. Fixes has been done to avoid bot blocking.
+
 # Disclaimer
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
 
