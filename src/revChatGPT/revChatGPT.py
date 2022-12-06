@@ -245,8 +245,7 @@ class OpenAIAuth:
         if response.status_code == 200:
             self.part_two()
         else:
-            return
-            # TODO: Add error handling
+            raise Exception("Error logging in")
 
     def part_two(self):
         """
@@ -268,7 +267,7 @@ class OpenAIAuth:
             csrf_token = response.json()["csrfToken"]
             self.part_three(token=csrf_token)
         else:
-            return
+            raise Exception("Error logging in")
 
     def part_three(self, token: str):
         """

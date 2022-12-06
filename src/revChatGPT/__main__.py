@@ -12,7 +12,7 @@ def get_input(prompt):
         line = input()
         if line == "":
             break
-    lines.append(line)
+        lines.append(line)
 
     # Join the lines, separated by newlines, and print the result
     user_input = "\n".join(lines)
@@ -33,6 +33,8 @@ if __name__ == "__main__":
 
     while True:
         prompt = get_input("\nYou:\n")
+        print(prompt)
+        print(prompt.startswith("!"))
         if prompt.startswith("!"):
             if prompt == "!help":
                 print("""
