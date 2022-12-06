@@ -10,6 +10,7 @@ The CLI functionality is for demo and testing only.
 ## Announcement:
 ChatGPT is down. 
 
+## CLI use
 [@rawandahmad698](https://github.com/rawandahmad698) has a much better CLI tool at
 
 **[PyChatGPT](https://github.com/rawandahmad698/PyChatGPT)**
