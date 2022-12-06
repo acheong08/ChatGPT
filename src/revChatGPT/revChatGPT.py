@@ -6,6 +6,7 @@ import re
 from bs4 import BeautifulSoup
 import urllib
 
+
 class Chatbot:
     config: json
     conversation_id: str
@@ -13,6 +14,7 @@ class Chatbot:
     headers: dict
     conversation_id_prev: str
     parent_id_prev: str
+
     def __init__(self, config, conversation_id=None):
         self.config = config
         self.conversation_id = conversation_id
@@ -22,7 +24,7 @@ class Chatbot:
     def reset_chat(self):
         self.conversation_id = None
         self.parent_id = self.generate_uuid()
-        
+
     def refresh_headers(self):
         if 'Authorization' not in self.config:
             self.config['Authorization'] = ''
@@ -40,7 +42,8 @@ class Chatbot:
         return uid
 
     def get_chat_stream(self, data):
-        response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data), stream=True)
+        response = requests.post("https://chat.openai.com/backend-api/conversation",
+                                 headers=self.headers, data=json.dumps(data), stream=True)
         for line in response.iter_lines():
             try:
                 line = line.decode('utf-8')
@@ -54,7 +57,7 @@ class Chatbot:
                     self.parent_id = line["message"]["id"]
                 except:
                     continue
-                yield {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
+                yield {'message': message, 'conversation_id': self.conversation_id, 'parent_id': self.parent_id}
             except:
                 continue
 
@@ -69,7 +72,8 @@ class Chatbot:
                 "http": self.config["proxy"],
                 "https": self.config["proxy"]
             }
-        response = s.post("https://chat.openai.com/backend-api/conversation", data=json.dumps(data))
+        response = s.post(
+            "https://chat.openai.com/backend-api/conversation", data=json.dumps(data))
         try:
             response = response.text.splitlines()[-4]
             response = response[6:]
@@ -78,30 +82,32 @@ class Chatbot:
             # print(response.text)
             try:
                 soup = BeautifulSoup(response.text, 'lxml')
-                error_desp = soup.title.text + soup.find("div", {"id": "message"}).text
+                error_desp = soup.title.text + \
+                    soup.find("div", {"id": "message"}).text
             except:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
                     error_desp = error_desp["message"]
             finally:
-                raise ValueError("Response is not in the correct format", error_desp)
+                raise ValueError(
+                    "Response is not in the correct format", error_desp)
         response = json.loads(response)
         self.parent_id = response["message"]["id"]
         self.conversation_id = response["conversation_id"]
         message = response["message"]["content"]["parts"][0]
-        return {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
-        
+        return {'message': message, 'conversation_id': self.conversation_id, 'parent_id': self.parent_id}
+
     def get_chat_response(self, prompt, output="text"):
         data = {
-            "action":"next",
-            "messages":[
-                {"id":str(self.generate_uuid()),
-                "role":"user",
-                "content":{"content_type":"text","parts":[prompt]}
-            }],
-            "conversation_id":self.conversation_id,
-            "parent_message_id":self.parent_id,
-            "model":"text-davinci-002-render"
+            "action": "next",
+            "messages": [
+                {"id": str(self.generate_uuid()),
+                 "role": "user",
+                 "content": {"content_type": "text", "parts": [prompt]}
+                 }],
+            "conversation_id": self.conversation_id,
+            "parent_message_id": self.parent_id,
+            "model": "text-davinci-002-render"
         }
         self.conversation_id_prev = self.conversation_id
         self.parent_id_prev = self.parent_id
@@ -111,7 +117,7 @@ class Chatbot:
             return self.get_chat_stream(data)
         else:
             raise ValueError("Output must be either 'text' or 'response'")
-    
+
     def rollback_conversation(self):
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
@@ -129,17 +135,19 @@ class Chatbot:
                     "https": self.config["proxy"]
                 }
             # Set cookies
-            s.cookies.set("__Secure-next-auth.session-token", self.config['session_token'])
+            s.cookies.set("__Secure-next-auth.session-token",
+                          self.config['session_token'])
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get("https://chat.openai.com/api/auth/session", headers={
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15'
             })
             try:
-                self.config['session_token'] = response.cookies.get("__Secure-next-auth.session-token")
+                self.config['session_token'] = response.cookies.get(
+                    "__Secure-next-auth.session-token")
                 self.config['Authorization'] = response.json()["accessToken"]
                 self.refresh_headers()
             except Exception as e:
-                print("Error refreshing session")  
+                print("Error refreshing session")
                 print(response.text)
         elif 'email' in self.config and 'password' in self.config:
             try:
@@ -150,7 +158,7 @@ class Chatbot:
                 return e
         else:
             raise ValueError("No tokens provided")
-    
+
     def login(self, email, password):
         print("Logging in...")
         use_proxy = False
@@ -171,7 +179,9 @@ class Chatbot:
         self.config['session_token'] = auth.session_token
         self.refresh_headers()
 
-### Credits to github.com/rawandahmad698/PyChatGPT
+# Credits to github.com/rawandahmad698/PyChatGPT
+
+
 class OpenAIAuth:
     def __init__(self, email_address: str, password: str, use_proxy: bool = False, proxy: str = None):
         self.email_address = email_address
@@ -401,7 +411,8 @@ class OpenAIAuth:
             # Find __NEXT_DATA__, which contains the data we need, the get accessToken
             next_data = soup.find("script", {"id": "__NEXT_DATA__"})
             # Access Token
-            access_token = re.findall(r"accessToken\":\"(.*)\"", next_data.text)[0]
+            access_token = re.findall(
+                r"accessToken\":\"(.*)\"", next_data.text)[0]
             access_token = access_token.split('"')[0]
             # Save access_token and an hour from now on ./Classes/auth.json
             self.save_access_token(access_token=access_token)
@@ -437,7 +448,8 @@ class OpenAIAuth:
         is_200 = response.status_code == 200
         if is_200:
             # Get session token
-            self.session_token = response.cookies.get("__Secure-next-auth.session-token")
+            self.session_token = response.cookies.get(
+                "__Secure-next-auth.session-token")
             return True
         else:
             return False

@@ -3,20 +3,22 @@ import json
 from sys import argv
 import textwrap
 
-def get_input(prompt):
-  # prompt for input
-  lines = []
-  print(prompt,end="")
-  while True:
-      line = input()
-      if line == "":
-          break
-      lines.append(line)
 
-  # Join the lines, separated by newlines, and print the result
-  user_input = "\n".join(lines)
-  #print(user_input)
-  return user_input
+def get_input(prompt):
+    # prompt for input
+    lines = []
+    print(prompt, end="")
+    while True:
+        line = input()
+        if line == "":
+            break
+    lines.append(line)
+
+    # Join the lines, separated by newlines, and print the result
+    user_input = "\n".join(lines)
+    # print(user_input)
+    return user_input
+
 
 if __name__ == "__main__":
     print("""
@@ -26,7 +28,7 @@ if __name__ == "__main__":
     print("Type '!help' to show commands")
     print("Press enter twice to submit your question.\n")
     with open("config.json", "r") as f:
-            config = json.load(f)
+        config = json.load(f)
     chatbot = Chatbot(config)
     if 'session_token' in config or ('email' in config and 'password' in config):
         chatbot.refresh_session()
@@ -61,10 +63,10 @@ if __name__ == "__main__":
                 continue
             elif prompt == "!exit":
                 break
-        
+
         if '--text' not in argv:
             messages = []
-            lines_printed=0
+            lines_printed = 0
 
             try:
                 print("Chatbot: ")
@@ -80,7 +82,7 @@ if __name__ == "__main__":
                         for formatted_line in formatted_parts:
                             if (len(formatted_parts) > lines_printed+1):
                                 print(formatted_parts[lines_printed])
-                                lines_printed+=1
+                                lines_printed += 1
                 print(formatted_parts[lines_printed])
             except Exception as e:
                 print("Something went wrong!")
