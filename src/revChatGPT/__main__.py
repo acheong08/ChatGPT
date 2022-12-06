@@ -2,6 +2,7 @@ from revChatGPT.revChatGPT import Chatbot
 import json
 from sys import argv
 import textwrap
+from os.path import exists
 
 
 def get_input(prompt):
@@ -27,9 +28,13 @@ if __name__ == "__main__":
     """)
     print("Type '!help' to show commands")
     print("Press enter twice to submit your question.\n")
-    with open("config.json", "r", encoding='utf-8') as f:
-        config = json.load(f)
-    chatbot = Chatbot(config)
+
+    if exists("config.json"):
+        with open("config.json", "r", encoding='utf-8') as f:
+            config = json.load(f)
+        chatbot = Chatbot(config)
+    else:
+        print("Please create and populate config.json to continue")
 
     while True:
         prompt = get_input("\nYou:\n")
