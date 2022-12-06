@@ -8,7 +8,7 @@ This is not an official OpenAI product. This is a personal project and is not af
 The CLI functionality is for demo and testing only.
 
 ## Announcement:
-ChatGPT is down. 
+ChatGPT API is down. 
 
 ## CLI use
 [@rawandahmad698](https://github.com/rawandahmad698) has a much better CLI tool at
