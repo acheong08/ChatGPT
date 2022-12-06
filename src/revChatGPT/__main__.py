@@ -40,6 +40,7 @@ if __name__ == "__main__":
                 !reset - Forget the current conversation
                 !refresh - Refresh the session authentication
                 !rollback - Rollback the conversation by 1 message
+                !config - Show the current configuration
                 !exit - Exit the program
                 """)
                 continue
@@ -50,13 +51,13 @@ if __name__ == "__main__":
             elif prompt == "!refresh":
                 chatbot.refresh_session()
                 print("Session refreshed.\n")
-                # Save the new config
-                with open("config.json", "w") as f:
-                    json.dump(chatbot.config, f)
                 continue
             elif prompt == "!rollback":
                 chatbot.rollback_conversation()
                 print("Chat session rolled back.")
+                continue
+            elif prompt == "!config":
+                print(json.dumps(config, indent=4))
                 continue
             elif prompt == "!exit":
                 break
