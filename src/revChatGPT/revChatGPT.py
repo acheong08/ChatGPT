@@ -62,8 +62,17 @@ class Chatbot:
             response = response.text.splitlines()[-4]
             response = response[6:]
         except:
-            print(response.text)
-            raise ValueError("Response is not in the correct format")
+            # Check if the response is html or json
+            # print(response.text)
+            try:
+                soup = BeautifulSoup(response.text, 'lxml')
+                error_desp = soup.title.text + soup.find("div", {"id": "message"}).text
+            except:
+                error_desp = json.loads(response.text)["detail"]
+                if "message" in error_desp:
+                    error_desp = error_desp["message"]
+            finally:
+                raise ValueError("Response is not in the correct format", error_desp)
         response = json.loads(response)
         self.parent_id = response["message"]["id"]
         self.conversation_id = response["conversation_id"]
