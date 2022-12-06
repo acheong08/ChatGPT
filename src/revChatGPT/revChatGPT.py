@@ -29,7 +29,8 @@ class Chatbot:
         self.headers = {
             "Accept": "application/json",
             "Authorization": "Bearer " + self.config['Authorization'],
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
         }
 
     def generate_uuid(self):
@@ -96,7 +97,9 @@ class Chatbot:
             # Set cookies
             s.cookies.set("__Secure-next-auth.session-token", self.config['session_token'])
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
-            response = s.get("https://chat.openai.com/api/auth/session")
+            response = s.get("https://chat.openai.com/api/auth/session", headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15'
+            })
             try:
                 self.config['session_token'] = response.cookies.get("__Secure-next-auth.session-token")
                 self.config['Authorization'] = response.json()["accessToken"]
