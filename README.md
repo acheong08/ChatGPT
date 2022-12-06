@@ -1,6 +1,5 @@
 # ChatGPT
-`Latest PyPi version: 0.0.28`
-
+[![PyPi](https://img.shields.io/pypi/v/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
 [![PyPi](https://img.shields.io/pypi/dm/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
 
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
