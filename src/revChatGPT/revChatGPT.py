@@ -127,7 +127,13 @@ class Chatbot:
     
     def login(self, email, password):
         print("Logging in...")
-        auth = OpenAIAuth(email, password)
+        use_proxy = False
+        proxy = None
+        if 'proxy' in self.config:
+            if self.config['proxy'] != "":
+                use_proxy = True
+                proxy = self.config['proxy']
+        auth = OpenAIAuth(email, password, use_proxy, proxy)
         try:
             auth.begin()
         except Exception as e:
