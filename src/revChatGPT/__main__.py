@@ -35,6 +35,7 @@ if __name__ == "__main__":
         chatbot = Chatbot(config)
     else:
         print("Please create and populate config.json to continue")
+        exit()
 
     while True:
         prompt = get_input("\nYou:\n")
