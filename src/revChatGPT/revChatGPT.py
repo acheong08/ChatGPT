@@ -10,6 +10,11 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def generate_uuid() -> str:
+    uid = str(uuid.uuid4())
+    return uid
+
+
 class Chatbot:
     config: json
     conversation_id: str
@@ -21,34 +26,33 @@ class Chatbot:
     def __init__(self, config, conversation_id=None):
         self.config = config
         self.conversation_id = conversation_id
-        self.parent_id = self.generate_uuid()
-        self.refresh_headers()
+        self.parent_id = generate_uuid()
+        if 'session_token' in config or ('email' in config and 'password' in config):
+            self.refresh_session()
 
     # Resets the conversation ID and parent ID
-    def reset_chat(self):
+    def reset_chat(self) -> None:
         self.conversation_id = None
-        self.parent_id = self.generate_uuid()
+        self.parent_id = generate_uuid()
 
     # Refreshes the headers -- Internal use only
-    def refresh_headers(self):
+    def refresh_headers(self) -> None:
         if 'Authorization' not in self.config:
             self.config['Authorization'] = ''
-        elif self.config['Authorization'] == None:
+        elif self.config['Authorization'] is None:
             self.config['Authorization'] = ''
         self.headers = {
             "Accept": "application/json",
             "Authorization": "Bearer " + self.config['Authorization'],
             "Content-Type": "application/json",
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
         }
 
     # Generates a UUID -- Internal use only
-    def generate_uuid(self):
-        uid = str(uuid.uuid4())
-        return uid
 
     # Generator for chat stream -- Internal use only
-    def get_chat_stream(self, data):
+    def get_chat_stream(self, data) -> None:
         response = requests.post("https://chat.openai.com/backend-api/conversation",
                                  headers=self.headers, data=json.dumps(data), stream=True, timeout=20)
         for line in response.iter_lines():
@@ -69,7 +73,7 @@ class Chatbot:
                 continue
 
     # Gets the chat response as text -- Internal use only
-    def get_chat_text(self, data):
+    def get_chat_text(self, data) -> dict:
         # Create request session
         s = requests.Session()
         # set headers
@@ -88,8 +92,7 @@ class Chatbot:
         except Exception as exc:
             try:
                 soup = BeautifulSoup(response.text, 'lxml')
-                error_desp = soup.title.text + \
-                    soup.find("div", {"id": "message"}).text
+                error_desp = soup.title.text + soup.find("div", {"id": "message"}).text
             except:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
@@ -103,11 +106,11 @@ class Chatbot:
         return {'message': message, 'conversation_id': self.conversation_id, 'parent_id': self.parent_id}
 
     # Gets the chat response
-    def get_chat_response(self, prompt, output="text"):
+    def get_chat_response(self, prompt, output="text") -> dict or None:
         data = {
             "action": "next",
             "messages": [
-                {"id": str(self.generate_uuid()),
+                {"id": str(generate_uuid()),
                  "role": "user",
                  "content": {"content_type": "text", "parts": [prompt]}
                  }],
@@ -124,15 +127,15 @@ class Chatbot:
         else:
             raise ValueError("Output must be either 'text' or 'response'")
 
-    def rollback_conversation(self):
+    def rollback_conversation(self) -> None:
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
 
-    def refresh_session(self):
+    def refresh_session(self) -> Exception:
         if 'session_token' not in self.config and ('email' not in self.config or 'password' not in self.config):
             raise ValueError("No tokens provided")
         elif 'session_token' in self.config:
-            if self.config['session_token'] == None or self.config['session_token'] == "":
+            if self.config['session_token'] is None or self.config['session_token'] == "":
                 raise ValueError("No tokens provided")
             s = requests.Session()
             if self.config.get("proxy", "") != "":
@@ -145,7 +148,8 @@ class Chatbot:
                           self.config['session_token'])
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get("https://chat.openai.com/api/auth/session", headers={
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15'
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, '
+                              'like Gecko) Version/16.1 Safari/605.1.15 '
             })
             try:
                 self.config['session_token'] = response.cookies.get(
@@ -166,7 +170,7 @@ class Chatbot:
         else:
             raise ValueError("No tokens provided")
 
-    def login(self, email, password):
+    def login(self, email, password) -> None:
         print("Logging in...")
         use_proxy = False
         proxy = None
@@ -184,15 +188,32 @@ class Chatbot:
                 raise ValueError("Captcha detected") from exc
             else:
                 raise Exception("Error logging in") from exc
-        self.config['Authorization'] = auth.access_token
-        self.config['session_token'] = auth.session_token
-        self.refresh_headers()
+        if auth.access_token is not None:
+            self.config['Authorization'] = auth.access_token
+            if auth.session_token is not None:
+                self.config['session_token'] = auth.session_token
+            else:
+                possible_tokens = auth.session.cookies.get(
+                    "__Secure-next-auth.session-token")
+                if possible_tokens is not None:
+                    if len(possible_tokens) > 1:
+                        self.config['session_token'] = possible_tokens[0]
+                    else:
+                        try:
+                            self.config['session_token'] = possible_tokens
+                        except Exception as exc:
+                            raise Exception("Error logging in") from exc
+            self.refresh_headers()
+        else:
+            raise Exception("Error logging in")
+
 
 # Credits to github.com/rawandahmad698/PyChatGPT
 
 
 class OpenAIAuth:
     def __init__(self, email_address: str, password: str, use_proxy: bool = False, proxy: str = None):
+        self.session_token = None
         self.email_address = email_address
         self.password = password
         self.use_proxy = use_proxy
@@ -211,7 +232,7 @@ class OpenAIAuth:
         """
         return urllib.parse.quote(string)
 
-    def begin(self):
+    def begin(self) -> None:
         """
             Begin the auth process
         """
@@ -234,7 +255,8 @@ class OpenAIAuth:
         headers = {
             "Host": "ask.openai.com",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
             "Accept-Encoding": "gzip, deflate, br",
             "Connection": "keep-alive",
@@ -244,10 +266,9 @@ class OpenAIAuth:
         if response.status_code == 200:
             self.part_two()
         else:
-            return
-            # TODO: Add error handling
+            raise Exception("Error logging in")
 
-    def part_two(self):
+    def part_two(self) -> None:
         """
         In part two, We make a request to https://chat.openai.com/api/auth/csrf and grab a fresh csrf token
         """
@@ -257,7 +278,8 @@ class OpenAIAuth:
             "Host": "ask.openai.com",
             "Accept": "*/*",
             "Connection": "keep-alive",
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
             "Referer": "https://chat.openai.com/auth/login",
             "Accept-Encoding": "gzip, deflate, br",
@@ -267,9 +289,9 @@ class OpenAIAuth:
             csrf_token = response.json()["csrfToken"]
             self.part_three(token=csrf_token)
         else:
-            return
+            raise Exception("Error logging in")
 
-    def part_three(self, token: str):
+    def part_three(self, token: str) -> None:
         """
         We reuse the token from part to make a request to /api/auth/signin/auth0?prompt=login
         """
@@ -281,7 +303,8 @@ class OpenAIAuth:
             'Origin': 'https://chat.openai.com',
             'Connection': 'keep-alive',
             'Accept': '*/*',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             'Referer': 'https://chat.openai.com/auth/login',
             'Content-Length': '100',
             'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
@@ -296,7 +319,7 @@ class OpenAIAuth:
         else:
             raise Exception("Unknown error")
 
-    def part_four(self, url: str):
+    def part_four(self, url: str) -> None:
         """
         We make a GET request to url
         :param url:
@@ -306,7 +329,8 @@ class OpenAIAuth:
             'Host': 'auth0.openai.com',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             'Accept-Language': 'en-US,en;q=0.9',
             'Referer': 'https://chat.openai.com/',
         }
@@ -318,7 +342,7 @@ class OpenAIAuth:
         else:
             raise Exception("Unknown error")
 
-    def part_five(self, state: str):
+    def part_five(self, state: str) -> None:
         """
         We use the state to get the login page & check for a captcha
         """
@@ -328,7 +352,8 @@ class OpenAIAuth:
             'Host': 'auth0.openai.com',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             'Accept-Language': 'en-US,en;q=0.9',
             'Referer': 'https://chat.openai.com/',
         }
@@ -343,7 +368,7 @@ class OpenAIAuth:
         else:
             raise ValueError("Invalid response code")
 
-    def part_six(self, state: str, captcha: str or None):
+    def part_six(self, state: str, captcha: str or None) -> None:
         """
         We make a POST request to the login page with the captcha, email
         :param state:
@@ -352,17 +377,20 @@ class OpenAIAuth:
         """
         url = f"https://auth0.openai.com/u/login/identifier?state={state}"
         email_url_encoded = self.url_encode(self.email_address)
-        payload = f'state={state}&username={email_url_encoded}&captcha={captcha}&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=true&action=default'
+        payload = f'state={state}&username={email_url_encoded}&captcha={captcha}&js-available=true&webauthn-available' \
+                  f'=true&is-brave=false&webauthn-platform-available=true&action=default '
 
         if captcha is None:
-            payload = f'state={state}&username={email_url_encoded}&js-available=false&webauthn-available=true&is-brave=false&webauthn-platform-available=true&action=default'
+            payload = f'state={state}&username={email_url_encoded}&js-available=false&webauthn-available=true&is' \
+                      f'-brave=false&webauthn-platform-available=true&action=default '
 
         headers = {
             'Host': 'auth0.openai.com',
             'Origin': 'https://auth0.openai.com',
             'Connection': 'keep-alive',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             'Referer': f'https://auth0.openai.com/u/login/identifier?state={state}',
             'Accept-Language': 'en-US,en;q=0.9',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -373,7 +401,7 @@ class OpenAIAuth:
         else:
             raise Exception("Unknown error")
 
-    def part_seven(self, state: str):
+    def part_seven(self, state: str) -> None:
         """
         We enter the password
         :param state:
@@ -389,7 +417,8 @@ class OpenAIAuth:
             'Origin': 'https://auth0.openai.com',
             'Connection': 'keep-alive',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             'Referer': f'https://auth0.openai.com/u/login/password?state={state}',
             'Accept-Language': 'en-US,en;q=0.9',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -403,13 +432,14 @@ class OpenAIAuth:
         else:
             raise Exception("Unknown error")
 
-    def part_eight(self, old_state: str, new_state):
+    def part_eight(self, old_state: str, new_state) -> None:
         url = f"https://auth0.openai.com/authorize/resume?state={new_state}"
         headers = {
             'Host': 'auth0.openai.com',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                          'Version/16.1 Safari/605.1.15',
             'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
             'Referer': f'https://auth0.openai.com/u/login/password?state={old_state}',
         }
@@ -426,10 +456,10 @@ class OpenAIAuth:
             # Save access_token and an hour from now on ./Classes/auth.json
             self.save_access_token(access_token=access_token)
         else:
-            print("Error logging in")
+            print("Invalid credentials")
             raise Exception("Failed to find accessToken")
 
-    def save_access_token(self, access_token: str):
+    def save_access_token(self, access_token: str) -> None:
         """
         Save access_token and an hour from now on ./Classes/auth.json
         :param access_token:
@@ -441,14 +471,15 @@ class OpenAIAuth:
             print("Failed to login")
             raise Exception("Failed to login")
 
-    def part_nine(self):
+    def part_nine(self) -> bool:
         url = "https://chat.openai.com/api/auth/session"
         headers = {
             "Host": "ask.openai.com",
             "Connection": "keep-alive",
             "If-None-Match": "\"bwc9mymkdm2\"",
             "Accept": "*/*",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+                          "Version/16.1 Safari/605.1.15",
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
             "Referer": "https://chat.openai.com/chat",
             "Accept-Encoding": "gzip, deflate, br",
@@ -461,4 +492,5 @@ class OpenAIAuth:
                 "__Secure-next-auth.session-token")
             return True
         else:
-            return False
+            self.session_token = None
+            raise Exception("Failed to get session token")

@@ -12,7 +12,7 @@ def get_input(prompt):
         line = input()
         if line == "":
             break
-    lines.append(line)
+        lines.append(line)
 
     # Join the lines, separated by newlines, and print the result
     user_input = "\n".join(lines)
@@ -30,8 +30,6 @@ if __name__ == "__main__":
     with open("config.json", "r") as f:
         config = json.load(f)
     chatbot = Chatbot(config)
-    if 'session_token' in config or ('email' in config and 'password' in config):
-        chatbot.refresh_session()
 
     while True:
         prompt = get_input("\nYou:\n")
@@ -80,7 +78,7 @@ if __name__ == "__main__":
                     for part in message_parts:
                         formatted_parts.extend(textwrap.wrap(part, width=80))
                         for formatted_line in formatted_parts:
-                            if (len(formatted_parts) > lines_printed+1):
+                            if len(formatted_parts) > lines_printed+1:
                                 print(formatted_parts[lines_printed])
                                 lines_printed += 1
                 print(formatted_parts[lines_printed])
