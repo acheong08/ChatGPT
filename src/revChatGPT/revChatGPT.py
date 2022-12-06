@@ -15,7 +15,7 @@ def generate_uuid() -> str:
     return uid
 
 
-class Chatbot:
+class ChatBot:
     config: json
     conversation_id: str
     parent_id: str
