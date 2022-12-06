@@ -7,6 +7,9 @@ This is not an official OpenAI product. This is a personal project and is not af
 ### This is a library and not intended for direct CLI use
 The CLI functionality is for demo and testing only.
 
+## Announcement:
+ChatGPT is down. 
+
 [@rawandahmad698](https://github.com/rawandahmad698) has a much better CLI tool at
 
 **[PyChatGPT](https://github.com/rawandahmad698/PyChatGPT)**
@@ -26,7 +29,7 @@ The CLI functionality is for demo and testing only.
 ## Install
 `pip3 install revChatGPT --upgrade`
 
-## Email and password authentication (ERROR. BROKEN!)
+## Email and password authentication
 ```json
 {
     "email": "<YOUR_EMAIL>",
