@@ -78,7 +78,7 @@ if __name__ == "__main__":
                     for part in message_parts:
                         formatted_parts.extend(textwrap.wrap(part, width=80))
                         for formatted_line in formatted_parts:
-                            if (len(formatted_parts) > lines_printed+1):
+                            if len(formatted_parts) > lines_printed+1:
                                 print(formatted_parts[lines_printed])
                                 lines_printed += 1
                 print(formatted_parts[lines_printed])
