@@ -26,6 +26,13 @@ The CLI functionality is for demo and testing only.
 ## Install
 `pip3 install revChatGPT --upgrade`
 
+If you encounter an error about installing lxml, download the required lxml library from "https://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml" and then run the following command:
+
+For Python3.10: `pip install lxml‑4.9.0‑cp310‑cp310‑win_amd64.whl`
+For Python3.11: `pip install lxml-4.9.0-cp311-cp311-win_amd64.whl`
+
+This will install the library and allow the program to run properly.
+
 ## Email and password authentication
 ```json
 {
