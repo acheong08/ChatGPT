@@ -59,7 +59,17 @@ class Chatbot:
                 continue
 
     def get_chat_text(self, data):
-        response = requests.post("https://chat.openai.com/backend-api/conversation", headers=self.headers, data=json.dumps(data))
+        # Create request session
+        s = requests.Session()
+        # set headers
+        s.headers = self.headers
+        # Set proxies
+        if self.config.get("proxy", "") != "":
+            s.proxies = {
+                "http": self.config["proxy"],
+                "https": self.config["proxy"]
+            }
+        response = s.post("https://chat.openai.com/backend-api/conversation", data=json.dumps(data))
         try:
             response = response.text.splitlines()[-4]
             response = response[6:]
