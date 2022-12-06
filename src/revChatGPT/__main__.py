@@ -27,7 +27,7 @@ if __name__ == "__main__":
     """)
     print("Type '!help' to show commands")
     print("Press enter twice to submit your question.\n")
-    with open("config.json", "r") as f:
+    with open("config.json", "r", encoding='utf-8') as f:
         config = json.load(f)
     chatbot = Chatbot(config)
 

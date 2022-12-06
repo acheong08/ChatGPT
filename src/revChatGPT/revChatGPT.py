@@ -92,7 +92,8 @@ class Chatbot:
         except Exception as exc:
             try:
                 soup = BeautifulSoup(response.text, 'lxml')
-                error_desp = soup.title.text + soup.find("div", {"id": "message"}).text
+                error_desp = soup.title.text + \
+                    soup.find("div", {"id": "message"}).text
             except:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
@@ -448,10 +449,15 @@ class OpenAIAuth:
             next_data = soup.find("script", {"id": "__NEXT_DATA__"})
             # Access Token
             access_token = re.findall(
-                r"accessToken\":\"(.*)\"", next_data.text)[0]
-            access_token = access_token.split('"')[0]
-            # Save access_token and an hour from now on ./Classes/auth.json
-            self.save_access_token(access_token=access_token)
+                r"accessToken\":\"(.*)\"", next_data.text)
+            if access_token:
+                access_token = access_token[0]
+                access_token = access_token.split('"')[0]
+                # Save access_token and an hour from now on ./classes/auth.json
+                self.save_access_token(access_token=access_token)
+            else:
+                print("Invalid credentials")
+                raise Exception("Invalid credentials")
         else:
             print("Invalid credentials")
             raise Exception("Failed to find accessToken")
