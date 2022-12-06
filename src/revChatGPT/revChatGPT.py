@@ -307,6 +307,7 @@ class OpenAIAuth:
             url = response.json()["url"]
             self.part_four(url=url)
         elif response.status_code == 400:
+            print("Invalid credentials")
             raise Exception("Invalid credentials")
         else:
             raise Exception("Unknown error")
