@@ -92,12 +92,13 @@ class Chatbot:
         except Exception as exc:
             try:
                 soup = BeautifulSoup(response.text, 'lxml')
-                error_desp = soup.title.text + \
-                    soup.find("div", {"id": "message"}).text
+                error_desp = soup.title.text + ": " + \
+                    soup.find("div", {"id": "message"}).get_text()
             except:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
                     error_desp = error_desp["message"]
+            finally:
                 raise ValueError(
                     "Response is not in the correct format", error_desp) from exc
         response = json.loads(response)
