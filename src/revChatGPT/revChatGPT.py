@@ -111,6 +111,11 @@ class Chatbot:
             raise ValueError("No tokens provided")
         elif 'session_token' in self.config:
             s = requests.Session()
+            if self.config.get("proxy", "") != "":
+                s.proxies = {
+                    "http": self.config["proxy"],
+                    "https": self.config["proxy"]
+                }
             # Set cookies
             s.cookies.set("__Secure-next-auth.session-token", self.config['session_token'])
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
