@@ -3,7 +3,6 @@ import json
 import uuid
 import tls_client
 import re
-from bs4 import BeautifulSoup
 import urllib
 
 class Chatbot:
