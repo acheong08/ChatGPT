@@ -14,11 +14,6 @@ def generate_uuid() -> str:
     return uid
 
 
-def generate_uuid() -> str:
-    uid = str(uuid.uuid4())
-    return uid
-
-
 class Chatbot:
     config: json
     conversation_id: str
@@ -108,7 +103,8 @@ class Chatbot:
         except Exception as exc:
             try:
                 # Get the title text
-                title_text = re.search('<title>(.*)</title>', response.text).group(1)
+                title_text = re.search(
+                    '<title>(.*)</title>', response.text).group(1)
 
                 # Find all div elements and capture the id attribute and the contents of the element
                 div_pattern = '<div[^>]*id="([^"]*)">(.*)</div>'
@@ -124,7 +120,7 @@ class Chatbot:
                         break
                 # Concatenate the title and message text
                 error_desp = title_text + ": " + message_text
-               
+
             except:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
