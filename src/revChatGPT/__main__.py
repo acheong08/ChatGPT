@@ -35,7 +35,12 @@ if __name__ == "__main__":
     if exists("config.json"):
         with open("config.json", encoding="utf-8") as f:
             config = json.load(f)
-        chatbot = Chatbot(config)
+        if "--debug" in argv:
+            print("Debugging enabled.")
+            debug = True
+        else:
+            debug = False
+        chatbot = Chatbot(config, debug=debug)
     else:
         print("Please create and populate config.json to continue")
         exit()

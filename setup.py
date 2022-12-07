@@ -13,7 +13,7 @@ setup(
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "requests",
-        "tls-client",
+        "OpenAIAuth",
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
