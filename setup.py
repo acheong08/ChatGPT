@@ -12,7 +12,7 @@ setup(
     package_dir={"": "src"},
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
-        "requests",
+        "httpx[http2]",
         "OpenAIAuth",
     ],
     long_description=open("README.md", encoding="utf-8").read(),
