@@ -42,6 +42,7 @@ if __name__ == "__main__":
                 debug = True
             else:
                 debug = False
+            print("Logging in...")
             chatbot = Chatbot(config, debug=debug)
         else:
             print("Please create and populate config.json to continue")
