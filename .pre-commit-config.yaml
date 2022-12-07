@@ -6,7 +6,6 @@ repos:
         -   id: end-of-file-fixer
         -   id: check-yaml
         -   id: debug-statements
-        -   id: double-quote-string-fixer
         -   id: name-tests-test
         -   id: requirements-txt-fixer
 
@@ -19,27 +18,14 @@ repos:
     rev: 4.0.1
     hooks:
       - id: flake8
+        args: [--max-line-length=120]
         additional_dependencies:
           - flake8-bugbear
           - flake8-comprehensions
           - flake8-simplify
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.971
-    hooks:
-      - id: mypy
-        exclude: ^docs/conf.py
-        additional_dependencies:
-          - types-dataclasses >= 0.1.3
-          - types-PyYAML
-          - tomli >= 0.2.6, < 2.0.0
-          - types-typed-ast >= 1.4.1
-          - click >= 8.1.0
-          - platformdirs >= 2.1.0
-          - pytest
-          - hypothesis
-
   - repo: https://github.com/psf/black
     rev: 22.10.0
     hooks:
       - id: black
+        args: [--line-length=100]
