@@ -21,6 +21,7 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
+- [Telegram bot](https://github.com/n3d1117/chatgpt-telegram-bot)
 
 If you have a cool project you want added to the list, open an issue.
 
