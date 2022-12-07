@@ -4,7 +4,7 @@
 import json
 import uuid
 
-import requests
+import httpx
 
 from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
@@ -58,7 +58,7 @@ class Chatbot:
 
     # Generator for chat stream -- Internal use only
     def get_chat_stream(self, data) -> None:
-        response = requests.post(
+        response = httpx.post(
             "https://chat.openai.com/backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
@@ -89,7 +89,7 @@ class Chatbot:
     # Gets the chat response as text -- Internal use only
     def get_chat_text(self, data) -> dict:
         # Create request session
-        s = requests.Session()
+        s = httpx.Client(http2=True)
         # set headers
         s.headers = self.headers
         # Set multiple cookies
@@ -172,7 +172,7 @@ class Chatbot:
                 or self.config["session_token"] == ""
             ):
                 raise ValueError("No tokens provided")
-            s = requests.Session()
+            s = httpx.Client(http2=True)
             if self.config.get("proxy", "") != "":
                 s.proxies = {
                     "http": self.config["proxy"],
