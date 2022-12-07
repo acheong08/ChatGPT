@@ -1,8 +1,6 @@
 # Author: @acheong08@fosstodon.org
 # License: MIT
 # Description: A Python wrapper for OpenAI's chatbot API
-from __future__ import annotations
-
 import json
 import re
 import urllib
