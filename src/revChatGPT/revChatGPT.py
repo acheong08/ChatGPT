@@ -83,8 +83,9 @@ class Chatbot:
         # set headers
         s.headers = self.headers
         # Set multiple cookies
-        s.cookies.set("__Secure-next-auth.session-token",
-                      self.config['session_token'])
+        if 'session_token' in self.config:
+            s.cookies.set("__Secure-next-auth.session-token",
+                          self.config['session_token'])
         s.cookies.set("__Secure-next-auth.callback-url",
                       "https://chat.openai.com/")
         # Set proxies
@@ -162,7 +163,7 @@ class Chatbot:
         self.parent_id = self.parent_id_prev
 
     def refresh_session(self) -> Exception:
-        if 'session_token' not in self.config and ('email' not in self.config or 'password' not in self.config):
+        if 'session_token' not in self.config and ('email' not in self.config or 'password' not in self.config) and 'Authorization' not in self.config:
             raise ValueError("No tokens provided")
         elif 'session_token' in self.config:
             if self.config['session_token'] is None or self.config['session_token'] == "":
@@ -197,6 +198,9 @@ class Chatbot:
                 print("Error refreshing session: ")
                 print(exc)
                 return exc
+        elif 'Authorization' in self.config:
+            self.refresh_headers()
+            return
         else:
             raise ValueError("No tokens provided")
 
