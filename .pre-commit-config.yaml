@@ -14,7 +14,6 @@ repos:
     rev: 22.10.0
     hooks:
     -   id: black
-        args: [--safe, --quiet]
 -   repo: https://github.com/asottile/reorder_python_imports
     rev: v3.9.0
     hooks:
@@ -43,15 +42,11 @@ repos:
     hooks:
     -   id: mypy
         additional_dependencies: [types-all]
-        exclude: ^testing/resources/
--   repo: https://github.com/PyCQA/autoflake
-    rev: v2.0.0
+-   repo: https://github.com/pycqa/pylint
+    rev: v2.15.8
     hooks:
-    -   id: autoflake
-        exclude: &fixtures tests(/\w*)*/functional/|tests/input|doc/data/messages|tests(/\w*)*data/
+    -   id: pylint
         args:
-        - --in-place
-        - --remove-all-unused-imports
-        - --expand-star-imports
-        - --remove-duplicate-keys
-        - --remove-unused-variables
+        - --max-line-length=80
+        - --ignore-imports=yes
+        - -d duplicate-code
