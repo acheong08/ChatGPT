@@ -7,7 +7,11 @@ import re
 import urllib
 import tls_client
 import requests
-from bs4 import BeautifulSoup
+
+
+def generate_uuid() -> str:
+    uid = str(uuid.uuid4())
+    return uid
 
 
 def generate_uuid() -> str:
@@ -91,12 +95,29 @@ class Chatbot:
             response = response[6:]
         except Exception as exc:
             try:
-                soup = BeautifulSoup(response.text, 'lxml')
-                error_desp = soup.title.text + soup.find("div", {"id": "message"}).text
+                # Get the title text
+                title_text = re.search('<title>(.*)</title>', response.text).group(1)
+
+                # Find all div elements and capture the id attribute and the contents of the element
+                div_pattern = '<div[^>]*id="([^"]*)">(.*)</div>'
+                div_elements = re.findall(div_pattern, response.text)
+
+                # Loop through the div elements and find the one with the "message" id
+                message_text = ""
+                for div in div_elements:
+                    div_id = div[0]
+                    div_content = div[1]
+                    if div_id == "message":
+                        message_text = div_content
+                        break
+                # Concatenate the title and message text
+                error_desp = title_text + ": " + message_text
+               
             except:
                 error_desp = json.loads(response.text)["detail"]
                 if "message" in error_desp:
                     error_desp = error_desp["message"]
+            finally:
                 raise ValueError(
                     "Response is not in the correct format", error_desp) from exc
         response = json.loads(response)
@@ -186,8 +207,7 @@ class Chatbot:
             if exc == "Captcha detected":
                 print("Captcha not supported. Use session tokens instead.")
                 raise ValueError("Captcha detected") from exc
-            else:
-                raise Exception("Error logging in") from exc
+            raise Exception("Error logging in") from exc
         if auth.access_token is not None:
             self.config['Authorization'] = auth.access_token
             if auth.session_token is not None:
@@ -238,17 +258,16 @@ class OpenAIAuth:
         """
         if not self.email_address or not self.password:
             return
-        else:
 
-            if self.use_proxy:
-                if not self.proxy:
-                    return
+        if self.use_proxy:
+            if not self.proxy:
+                return
 
-                proxies = {
-                    "http": self.proxy,
-                    "https": self.proxy
-                }
-                self.session.proxies = proxies
+            proxies = {
+                "http": self.proxy,
+                "https": self.proxy
+            }
+            self.session.proxies = proxies
 
         # First, make a request to https://chat.openai.com/auth/login
         url = "https://chat.openai.com/auth/login"
@@ -359,12 +378,10 @@ class OpenAIAuth:
         }
         response = self.session.get(url, headers=headers)
         if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'lxml')
-            if soup.find('img', alt='captcha'):
+            if re.search(r'<img[^>]+alt="captcha"[^>]+>', response.text):
                 print("Captcha detected")
                 raise ValueError("Captcha detected")
-            else:
-                self.part_six(state=state, captcha=None)
+            self.part_six(state=state, captcha=None)
         else:
             raise ValueError("Invalid response code")
 
@@ -446,15 +463,17 @@ class OpenAIAuth:
         response = self.session.get(url, headers=headers, allow_redirects=True)
         is_200 = response.status_code == 200
         if is_200:
-            soup = BeautifulSoup(response.text, 'lxml')
-            # Find __NEXT_DATA__, which contains the data we need, the get accessToken
-            next_data = soup.find("script", {"id": "__NEXT_DATA__"})
             # Access Token
             access_token = re.findall(
-                r"accessToken\":\"(.*)\"", next_data.text)[0]
-            access_token = access_token.split('"')[0]
-            # Save access_token and an hour from now on ./Classes/auth.json
-            self.save_access_token(access_token=access_token)
+                r"accessToken\":\"(.*)\"", response.text)
+            if access_token:
+                access_token = access_token[0]
+                access_token = access_token.split('"')[0]
+                # Save access_token and an hour from now on ./classes/auth.json
+                self.save_access_token(access_token=access_token)
+            else:
+                print("Invalid credentials")
+                raise Exception("Invalid credentials")
         else:
             print("Invalid credentials")
             raise Exception("Failed to find accessToken")
@@ -491,6 +510,5 @@ class OpenAIAuth:
             self.session_token = response.cookies.get(
                 "__Secure-next-auth.session-token")
             return True
-        else:
-            self.session_token = None
-            raise Exception("Failed to get session token")
+        self.session_token = None
+        raise Exception("Failed to get session token")
