@@ -46,11 +46,16 @@ class Chatbot:
         elif self.config['Authorization'] is None:
             self.config['Authorization'] = ''
         self.headers = {
-            "Accept": "application/json",
+            "Host": "chat.openai.com",
+            "Accept": "text/event-stream",
             "Authorization": "Bearer " + self.config['Authorization'],
             "Content-Type": "application/json",
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
                           'Version/16.1 Safari/605.1.15',
+            "X-Openai-Assistant-App-Id": "",
+            "Connection": "close",
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://chat.openai.com/chat',
         }
 
     # Generates a UUID -- Internal use only
@@ -82,6 +87,11 @@ class Chatbot:
         s = requests.Session()
         # set headers
         s.headers = self.headers
+        # Set multiple cookies
+        s.cookies.set("__Secure-next-auth.session-token",
+                      self.config['session_token'])
+        s.cookies.set("__Secure-next-auth.callback-url",
+                      "https://chat.openai.com/")
         # Set proxies
         if self.config.get("proxy", "") != "":
             s.proxies = {
@@ -90,6 +100,8 @@ class Chatbot:
             }
         response = s.post(
             "https://chat.openai.com/backend-api/conversation", data=json.dumps(data))
+
+        error_desp = ""
         try:
             response = response.text.splitlines()[-4]
             response = response[6:]
@@ -118,6 +130,7 @@ class Chatbot:
                 if "message" in error_desp:
                     error_desp = error_desp["message"]
             finally:
+                print(response.text)
                 raise ValueError(
                     "Response is not in the correct format", error_desp) from exc
         response = json.loads(response)

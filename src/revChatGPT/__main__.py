@@ -95,7 +95,8 @@ if __name__ == "__main__":
         else:
             try:
                 print("Chatbot: ")
-                print(chatbot.get_chat_response(prompt)['message'])
+                message = chatbot.get_chat_response(prompt)
+                print(message['message'])
             except Exception as e:
                 print("Something went wrong!")
                 print(e)
