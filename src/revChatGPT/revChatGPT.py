@@ -58,33 +58,30 @@ class Chatbot:
 
     # Generator for chat stream -- Internal use only
     def get_chat_stream(self, data) -> None:
-        response = httpx.post(
+        with httpx.stream(
+            "POST", 
             "https://chat.openai.com/backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
-            stream=True,
             timeout=50,
-        )
-        for line in response.iter_lines():
-            try:
-                line = line.decode("utf-8")
-                if line == "":
-                    continue
-                line = line[6:]
-                line = json.loads(line)
+        ) as response:
+            for line in response.iter_lines():
                 try:
-                    message = line["message"]["content"]["parts"][0]
-                    self.conversation_id = line["conversation_id"]
-                    self.parent_id = line["message"]["id"]
+                    line = line[6:-1]
+                    line = json.loads(line)
+                    try:
+                        message = line["message"]["content"]["parts"][0]
+                        self.conversation_id = line["conversation_id"]
+                        self.parent_id = line["message"]["id"]
+                    except:
+                        continue
+                    yield {
+                        "message": message,
+                        "conversation_id": self.conversation_id,
+                        "parent_id": self.parent_id,
+                    }
                 except:
                     continue
-                yield {
-                    "message": message,
-                    "conversation_id": self.conversation_id,
-                    "parent_id": self.parent_id,
-                }
-            except:
-                continue
 
     # Gets the chat response as text -- Internal use only
     def get_chat_text(self, data) -> dict:
