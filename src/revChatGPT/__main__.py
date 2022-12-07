@@ -28,6 +28,7 @@ if __name__ == "__main__":
             """
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
+        Run with --debug to enable debugging
         """,
         )
         print("Type '!help' to show commands")
