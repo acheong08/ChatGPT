@@ -22,13 +22,13 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
 
-    def __init__(self, config, conversation_id=None, debug=False) -> Exception:
+    def __init__(self, config, conversation_id=None, debug=False, refresh=True) -> Exception:
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = generate_uuid()
-        if "session_token" in config or ("email" in config and "password" in config):
+        if "session_token" in config or ("email" in config and "password" in config) and refresh:
             self.refresh_session()
         if "Authorization" in config:
             self.refresh_headers()
@@ -121,6 +121,17 @@ class Chatbot:
         except Exception as exc:
             self.debugger.log("Incorrect response from OpenAI API")
             self.debugger.log(response.text)
+            try:
+                resp = response.json()
+                if resp['detail']['code'] == "invalid_api_key":
+                    if "email" in self.config and "password" in self.config:
+                        self.refresh_session()
+                        return self.get_chat_text(data)
+                    else:
+                        raise Exception(
+                            "Missing necessary credentials") from exc
+            except Exception as exc2:
+                raise Exception("Not a JSON response") from exc2
             raise Exception("Incorrect response from OpenAI API") from exc
         response = json.loads(response)
         self.parent_id = response["message"]["id"]

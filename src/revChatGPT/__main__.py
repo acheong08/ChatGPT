@@ -43,7 +43,7 @@ if __name__ == "__main__":
             else:
                 debug = False
             print("Logging in...")
-            chatbot = Chatbot(config, debug=debug)
+            chatbot = Chatbot(config, debug=debug,)
         else:
             print("Please create and populate config.json to continue")
             exit()
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                                     lines_printed += 1
                     print(formatted_parts[lines_printed])
                 except Exception as e:
-                    print("Something went wrong!")
+                    print("Response not in correct format!")
                     print(e)
                     continue
             else:
