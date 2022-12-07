@@ -58,7 +58,7 @@ class Chatbot:
     # Generator for chat stream -- Internal use only
     def get_chat_stream(self, data) -> None:
         response = requests.post("https://chat.openai.com/backend-api/conversation",
-                                 headers=self.headers, data=json.dumps(data), stream=True, timeout=20)
+                                 headers=self.headers, data=json.dumps(data), stream=True, timeout=50)
         for line in response.iter_lines():
             try:
                 line = line.decode('utf-8')
