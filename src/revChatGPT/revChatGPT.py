@@ -146,7 +146,7 @@ class Chatbot:
         elif output == "stream":
             return self.get_chat_stream(data)
         else:
-            raise ValueError("Output must be either 'text' or 'response'")
+            raise ValueError("Output must be either 'text' or 'stream'")
 
     def rollback_conversation(self) -> None:
         self.conversation_id = self.conversation_id_prev
