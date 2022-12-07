@@ -22,8 +22,9 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
 
-    def __init__(self, config, conversation_id=None, debug=False):
+    def __init__(self, config, conversation_id=None, debug=False) -> Exception:
         self.debugger = Debugger(debug)
+        self.debug = debug
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = generate_uuid()
@@ -198,16 +199,15 @@ class Chatbot:
                 self.config["Authorization"] = response.json()["accessToken"]
                 self.refresh_headers()
             except Exception as exc:
-                self.debugger.log("Error refreshing session")
+                print("Error refreshing session")
                 self.debugger.log(response.text)
                 raise Exception("Error refreshing session") from exc
         elif "email" in self.config and "password" in self.config:
             try:
                 self.login(self.config["email"], self.config["password"])
             except Exception as exc:
-                self.debugger.log("Error refreshing session: ")
-                self.debugger.log(exc)
-                return exc
+                self.debugger.log("Login failed")
+                raise exc
         elif "Authorization" in self.config:
             self.refresh_headers()
             return
@@ -222,7 +222,7 @@ class Chatbot:
             if self.config["proxy"] != "":
                 use_proxy = True
                 proxy = self.config["proxy"]
-        auth = OpenAIAuth(email, password, use_proxy, proxy)
+        auth = OpenAIAuth(email, password, use_proxy, proxy, debug=self.debug)
         try:
             auth.begin()
         except Exception as exc:
@@ -231,8 +231,7 @@ class Chatbot:
                 self.debugger.log(
                     "Captcha not supported. Use session tokens instead.")
                 raise ValueError("Captcha detected") from exc
-            self.debugger.log("Error logging in (Probably wrong credentials)")
-            raise Exception("Error logging in") from exc
+            raise exc
         if auth.access_token is not None:
             self.config["Authorization"] = auth.access_token
             if auth.session_token is not None:
