@@ -1,12 +1,15 @@
 # Author: @acheong08@fosstodon.org
 # License: MIT
 # Description: A Python wrapper for OpenAI's chatbot API
+from __future__ import annotations
+
 import json
-import uuid
 import re
 import urllib
-import tls_client
+import uuid
+
 import requests
+import tls_client
 
 
 def generate_uuid() -> str:
@@ -26,7 +29,7 @@ class Chatbot:
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = generate_uuid()
-        if 'session_token' in config or ('email' in config and 'password' in config):
+        if "session_token" in config or ("email" in config and "password" in config):
             self.refresh_session()
 
     # Resets the conversation ID and parent ID
@@ -36,32 +39,37 @@ class Chatbot:
 
     # Refreshes the headers -- Internal use only
     def refresh_headers(self) -> None:
-        if 'Authorization' not in self.config:
-            self.config['Authorization'] = ''
-        elif self.config['Authorization'] is None:
-            self.config['Authorization'] = ''
+        if "Authorization" not in self.config:
+            self.config["Authorization"] = ""
+        elif self.config["Authorization"] is None:
+            self.config["Authorization"] = ""
         self.headers = {
             "Host": "chat.openai.com",
             "Accept": "text/event-stream",
-            "Authorization": "Bearer " + self.config['Authorization'],
+            "Authorization": "Bearer " + self.config["Authorization"],
             "Content-Type": "application/json",
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
             "X-Openai-Assistant-App-Id": "",
             "Connection": "close",
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://chat.openai.com/chat',
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://chat.openai.com/chat",
         }
 
     # Generates a UUID -- Internal use only
 
     # Generator for chat stream -- Internal use only
     def get_chat_stream(self, data) -> None:
-        response = requests.post("https://chat.openai.com/backend-api/conversation",
-                                 headers=self.headers, data=json.dumps(data), stream=True, timeout=50)
+        response = requests.post(
+            "https://chat.openai.com/backend-api/conversation",
+            headers=self.headers,
+            data=json.dumps(data),
+            stream=True,
+            timeout=50,
+        )
         for line in response.iter_lines():
             try:
-                line = line.decode('utf-8')
+                line = line.decode("utf-8")
                 if line == "":
                     continue
                 line = line[6:]
@@ -72,7 +80,11 @@ class Chatbot:
                     self.parent_id = line["message"]["id"]
                 except:
                     continue
-                yield {'message': message, 'conversation_id': self.conversation_id, 'parent_id': self.parent_id}
+                yield {
+                    "message": message,
+                    "conversation_id": self.conversation_id,
+                    "parent_id": self.parent_id,
+                }
             except:
                 continue
 
@@ -83,19 +95,25 @@ class Chatbot:
         # set headers
         s.headers = self.headers
         # Set multiple cookies
-        if 'session_token' in self.config:
-            s.cookies.set("__Secure-next-auth.session-token",
-                          self.config['session_token'])
-        s.cookies.set("__Secure-next-auth.callback-url",
-                      "https://chat.openai.com/")
+        if "session_token" in self.config:
+            s.cookies.set(
+                "__Secure-next-auth.session-token",
+                self.config["session_token"],
+            )
+        s.cookies.set(
+            "__Secure-next-auth.callback-url",
+            "https://chat.openai.com/",
+        )
         # Set proxies
         if self.config.get("proxy", "") != "":
             s.proxies = {
                 "http": self.config["proxy"],
-                "https": self.config["proxy"]
+                "https": self.config["proxy"],
             }
         response = s.post(
-            "https://chat.openai.com/backend-api/conversation", data=json.dumps(data))
+            "https://chat.openai.com/backend-api/conversation",
+            data=json.dumps(data),
+        )
 
         error_desp = ""
         try:
@@ -105,7 +123,9 @@ class Chatbot:
             try:
                 # Get the title text
                 title_text = re.search(
-                    '<title>(.*)</title>', response.text).group(1)
+                    "<title>(.*)</title>",
+                    response.text,
+                ).group(1)
 
                 # Find all div elements and capture the id attribute and the contents of the element
                 div_pattern = '<div[^>]*id="([^"]*)">(.*)</div>'
@@ -129,25 +149,33 @@ class Chatbot:
             finally:
                 print(response.text)
                 raise ValueError(
-                    "Response is not in the correct format", error_desp) from exc
+                    "Response is not in the correct format",
+                    error_desp,
+                ) from exc
         response = json.loads(response)
         self.parent_id = response["message"]["id"]
         self.conversation_id = response["conversation_id"]
         message = response["message"]["content"]["parts"][0]
-        return {'message': message, 'conversation_id': self.conversation_id, 'parent_id': self.parent_id}
+        return {
+            "message": message,
+            "conversation_id": self.conversation_id,
+            "parent_id": self.parent_id,
+        }
 
     # Gets the chat response
     def get_chat_response(self, prompt, output="text") -> dict or None:
         data = {
             "action": "next",
             "messages": [
-                {"id": str(generate_uuid()),
-                 "role": "user",
-                 "content": {"content_type": "text", "parts": [prompt]}
-                 }],
+                {
+                    "id": str(generate_uuid()),
+                    "role": "user",
+                    "content": {"content_type": "text", "parts": [prompt]},
+                },
+            ],
             "conversation_id": self.conversation_id,
             "parent_message_id": self.parent_id,
-            "model": "text-davinci-002-render"
+            "model": "text-davinci-002-render",
         }
         self.conversation_id_prev = self.conversation_id
         self.parent_id_prev = self.parent_id
@@ -163,42 +191,55 @@ class Chatbot:
         self.parent_id = self.parent_id_prev
 
     def refresh_session(self) -> Exception:
-        if 'session_token' not in self.config and ('email' not in self.config or 'password' not in self.config) and 'Authorization' not in self.config:
+        if (
+            "session_token" not in self.config
+            and ("email" not in self.config or "password" not in self.config)
+            and "Authorization" not in self.config
+        ):
             raise ValueError("No tokens provided")
-        elif 'session_token' in self.config:
-            if self.config['session_token'] is None or self.config['session_token'] == "":
+        elif "session_token" in self.config:
+            if (
+                self.config["session_token"] is None
+                or self.config["session_token"] == ""
+            ):
                 raise ValueError("No tokens provided")
             s = requests.Session()
             if self.config.get("proxy", "") != "":
                 s.proxies = {
                     "http": self.config["proxy"],
-                    "https": self.config["proxy"]
+                    "https": self.config["proxy"],
                 }
             # Set cookies
-            s.cookies.set("__Secure-next-auth.session-token",
-                          self.config['session_token'])
+            s.cookies.set(
+                "__Secure-next-auth.session-token",
+                self.config["session_token"],
+            )
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
-            response = s.get("https://chat.openai.com/api/auth/session", headers={
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, '
-                              'like Gecko) Version/16.1 Safari/605.1.15 '
-            })
+            response = s.get(
+                "https://chat.openai.com/api/auth/session",
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, "
+                    "like Gecko) Version/16.1 Safari/605.1.15 ",
+                },
+            )
             try:
-                self.config['session_token'] = response.cookies.get(
-                    "__Secure-next-auth.session-token")
-                self.config['Authorization'] = response.json()["accessToken"]
+                self.config["session_token"] = response.cookies.get(
+                    "__Secure-next-auth.session-token",
+                )
+                self.config["Authorization"] = response.json()["accessToken"]
                 self.refresh_headers()
             except Exception as exc:
                 print("Error refreshing session")
                 print(response.text)
                 raise Exception("Error refreshing session") from exc
-        elif 'email' in self.config and 'password' in self.config:
+        elif "email" in self.config and "password" in self.config:
             try:
-                self.login(self.config['email'], self.config['password'])
+                self.login(self.config["email"], self.config["password"])
             except Exception as exc:
                 print("Error refreshing session: ")
                 print(exc)
                 return exc
-        elif 'Authorization' in self.config:
+        elif "Authorization" in self.config:
             self.refresh_headers()
             return
         else:
@@ -208,10 +249,10 @@ class Chatbot:
         print("Logging in...")
         use_proxy = False
         proxy = None
-        if 'proxy' in self.config:
-            if self.config['proxy'] != "":
+        if "proxy" in self.config:
+            if self.config["proxy"] != "":
                 use_proxy = True
-                proxy = self.config['proxy']
+                proxy = self.config["proxy"]
         auth = OpenAIAuth(email, password, use_proxy, proxy)
         try:
             auth.begin()
@@ -222,18 +263,19 @@ class Chatbot:
                 raise ValueError("Captcha detected") from exc
             raise Exception("Error logging in") from exc
         if auth.access_token is not None:
-            self.config['Authorization'] = auth.access_token
+            self.config["Authorization"] = auth.access_token
             if auth.session_token is not None:
-                self.config['session_token'] = auth.session_token
+                self.config["session_token"] = auth.session_token
             else:
                 possible_tokens = auth.session.cookies.get(
-                    "__Secure-next-auth.session-token")
+                    "__Secure-next-auth.session-token",
+                )
                 if possible_tokens is not None:
                     if len(possible_tokens) > 1:
-                        self.config['session_token'] = possible_tokens[0]
+                        self.config["session_token"] = possible_tokens[0]
                     else:
                         try:
-                            self.config['session_token'] = possible_tokens
+                            self.config["session_token"] = possible_tokens
                         except Exception as exc:
                             raise Exception("Error logging in") from exc
             self.refresh_headers()
@@ -245,14 +287,20 @@ class Chatbot:
 
 
 class OpenAIAuth:
-    def __init__(self, email_address: str, password: str, use_proxy: bool = False, proxy: str = None):
+    def __init__(
+        self,
+        email_address: str,
+        password: str,
+        use_proxy: bool = False,
+        proxy: str = None,
+    ):
         self.session_token = None
         self.email_address = email_address
         self.password = password
         self.use_proxy = use_proxy
         self.proxy = proxy
         self.session = tls_client.Session(
-            client_identifier="chrome_105"
+            client_identifier="chrome_105",
         )
         self.access_token: str = None
 
@@ -267,7 +315,7 @@ class OpenAIAuth:
 
     def begin(self) -> None:
         """
-            Begin the auth process
+        Begin the auth process
         """
         if not self.email_address or not self.password:
             return
@@ -278,7 +326,7 @@ class OpenAIAuth:
 
             proxies = {
                 "http": self.proxy,
-                "https": self.proxy
+                "https": self.proxy,
             }
             self.session.proxies = proxies
 
@@ -287,8 +335,8 @@ class OpenAIAuth:
         headers = {
             "Host": "ask.openai.com",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
             "Accept-Encoding": "gzip, deflate, br",
             "Connection": "keep-alive",
@@ -310,14 +358,14 @@ class OpenAIAuth:
             "Host": "ask.openai.com",
             "Accept": "*/*",
             "Connection": "keep-alive",
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
             "Referer": "https://chat.openai.com/auth/login",
             "Accept-Encoding": "gzip, deflate, br",
         }
         response = self.session.get(url=url, headers=headers)
-        if response.status_code == 200 and 'json' in response.headers['Content-Type']:
+        if response.status_code == 200 and "json" in response.headers["Content-Type"]:
             csrf_token = response.json()["csrfToken"]
             self.part_three(token=csrf_token)
         else:
@@ -329,21 +377,21 @@ class OpenAIAuth:
         """
         url = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
 
-        payload = f'callbackUrl=%2F&csrfToken={token}&json=true'
+        payload = f"callbackUrl=%2F&csrfToken={token}&json=true"
         headers = {
-            'Host': 'ask.openai.com',
-            'Origin': 'https://chat.openai.com',
-            'Connection': 'keep-alive',
-            'Accept': '*/*',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
-            'Referer': 'https://chat.openai.com/auth/login',
-            'Content-Length': '100',
-            'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "Host": "ask.openai.com",
+            "Origin": "https://chat.openai.com",
+            "Connection": "keep-alive",
+            "Accept": "*/*",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "Referer": "https://chat.openai.com/auth/login",
+            "Content-Length": "100",
+            "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
         response = self.session.post(url=url, headers=headers, data=payload)
-        if response.status_code == 200 and 'json' in response.headers['Content-Type']:
+        if response.status_code == 200 and "json" in response.headers["Content-Type"]:
             url = response.json()["url"]
             self.part_four(url=url)
         elif response.status_code == 400:
@@ -358,13 +406,13 @@ class OpenAIAuth:
         :return:
         """
         headers = {
-            'Host': 'auth0.openai.com',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://chat.openai.com/',
+            "Host": "auth0.openai.com",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Connection": "keep-alive",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://chat.openai.com/",
         }
         response = self.session.get(url=url, headers=headers)
         if response.status_code == 302:
@@ -381,13 +429,13 @@ class OpenAIAuth:
         url = f"https://auth0.openai.com/u/login/identifier?state={state}"
 
         headers = {
-            'Host': 'auth0.openai.com',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://chat.openai.com/',
+            "Host": "auth0.openai.com",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Connection": "keep-alive",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://chat.openai.com/",
         }
         response = self.session.get(url, headers=headers)
         if response.status_code == 200:
@@ -407,23 +455,27 @@ class OpenAIAuth:
         """
         url = f"https://auth0.openai.com/u/login/identifier?state={state}"
         email_url_encoded = self.url_encode(self.email_address)
-        payload = f'state={state}&username={email_url_encoded}&captcha={captcha}&js-available=true&webauthn-available' \
-                  f'=true&is-brave=false&webauthn-platform-available=true&action=default '
+        payload = (
+            f"state={state}&username={email_url_encoded}&captcha={captcha}&js-available=true&webauthn-available"
+            f"=true&is-brave=false&webauthn-platform-available=true&action=default "
+        )
 
         if captcha is None:
-            payload = f'state={state}&username={email_url_encoded}&js-available=false&webauthn-available=true&is' \
-                      f'-brave=false&webauthn-platform-available=true&action=default '
+            payload = (
+                f"state={state}&username={email_url_encoded}&js-available=false&webauthn-available=true&is"
+                f"-brave=false&webauthn-platform-available=true&action=default "
+            )
 
         headers = {
-            'Host': 'auth0.openai.com',
-            'Origin': 'https://auth0.openai.com',
-            'Connection': 'keep-alive',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
-            'Referer': f'https://auth0.openai.com/u/login/identifier?state={state}',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "Host": "auth0.openai.com",
+            "Origin": "https://auth0.openai.com",
+            "Connection": "keep-alive",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "Referer": f"https://auth0.openai.com/u/login/identifier?state={state}",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
         response = self.session.post(url, headers=headers, data=payload)
         if response.status_code == 302:
@@ -441,17 +493,17 @@ class OpenAIAuth:
 
         email_url_encoded = self.url_encode(self.email_address)
         password_url_encoded = self.url_encode(self.password)
-        payload = f'state={state}&username={email_url_encoded}&password={password_url_encoded}&action=default'
+        payload = f"state={state}&username={email_url_encoded}&password={password_url_encoded}&action=default"
         headers = {
-            'Host': 'auth0.openai.com',
-            'Origin': 'https://auth0.openai.com',
-            'Connection': 'keep-alive',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
-            'Referer': f'https://auth0.openai.com/u/login/password?state={state}',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "Host": "auth0.openai.com",
+            "Origin": "https://auth0.openai.com",
+            "Connection": "keep-alive",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "Referer": f"https://auth0.openai.com/u/login/password?state={state}",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
         response = self.session.post(url, headers=headers, data=payload)
         is_302 = response.status_code == 302
@@ -465,20 +517,22 @@ class OpenAIAuth:
     def part_eight(self, old_state: str, new_state) -> None:
         url = f"https://auth0.openai.com/authorize/resume?state={new_state}"
         headers = {
-            'Host': 'auth0.openai.com',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                          'Version/16.1 Safari/605.1.15',
-            'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-            'Referer': f'https://auth0.openai.com/u/login/password?state={old_state}',
+            "Host": "auth0.openai.com",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Connection": "keep-alive",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+            "Referer": f"https://auth0.openai.com/u/login/password?state={old_state}",
         }
         response = self.session.get(url, headers=headers, allow_redirects=True)
         is_200 = response.status_code == 200
         if is_200:
             # Access Token
             access_token = re.findall(
-                r"accessToken\":\"(.*)\"", response.text)
+                r"accessToken\":\"(.*)\"",
+                response.text,
+            )
             if access_token:
                 access_token = access_token[0]
                 access_token = access_token.split('"')[0]
@@ -508,10 +562,10 @@ class OpenAIAuth:
         headers = {
             "Host": "ask.openai.com",
             "Connection": "keep-alive",
-            "If-None-Match": "\"bwc9mymkdm2\"",
+            "If-None-Match": '"bwc9mymkdm2"',
             "Accept": "*/*",
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
-                          "Version/16.1 Safari/605.1.15",
+            "Version/16.1 Safari/605.1.15",
             "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
             "Referer": "https://chat.openai.com/chat",
             "Accept-Encoding": "gzip, deflate, br",
@@ -521,7 +575,8 @@ class OpenAIAuth:
         if is_200:
             # Get session token
             self.session_token = response.cookies.get(
-                "__Secure-next-auth.session-token")
+                "__Secure-next-auth.session-token",
+            )
             return True
         self.session_token = None
         raise Exception("Failed to get session token")

@@ -1,4 +1,8 @@
-from setuptools import setup, find_packages
+from __future__ import annotations
+
+from setuptools import find_packages
+from setuptools import setup
+
 setup(
     name="revChatGPT",
     version="0.0.31.1",
@@ -7,12 +11,12 @@ setup(
     author_email="acheong@student.dalat.org",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     packages=find_packages("src"),
-    package_dir={'': 'src'},
+    package_dir={"": "src"},
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "requests",
         "tls-client",
     ],
-    long_description=open('README.md', encoding='utf-8').read(),
-    long_description_content_type='text/markdown',
+    long_description=open("README.md", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
 )
