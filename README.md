@@ -16,8 +16,7 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 
 # Urgent help needed
 - Writing tests
-- Decrecate bs4 in favor of pure requests
-- **Error handling**
+- Better documentation
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
