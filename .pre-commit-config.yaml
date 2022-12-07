@@ -18,7 +18,7 @@ repos:
     rev: v3.9.0
     hooks:
     -   id: reorder-python-imports
-        args: [--py37-plus, --add-import, 'from __future__ import annotations']
+        args: [--py37-plus]
 -   repo: https://github.com/asottile/add-trailing-comma
     rev: v2.3.0
     hooks:
@@ -33,6 +33,10 @@ repos:
     rev: v2.0.0
     hooks:
     -   id: autopep8
+        args:
+        - --aggressive
+        - --verbose
+        - -d
 -   repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:
