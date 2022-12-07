@@ -14,6 +14,11 @@ def generate_uuid() -> str:
     return uid
 
 
+def generate_uuid() -> str:
+    uid = str(uuid.uuid4())
+    return uid
+
+
 class Chatbot:
     config: json
     conversation_id: str
