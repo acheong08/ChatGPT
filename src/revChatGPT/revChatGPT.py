@@ -66,7 +66,7 @@ class Chatbot:
             headers=self.headers,
             data=json.dumps(data),
             stream=True,
-            timeout=50,
+            timeout=100,
         )
         for line in response.iter_lines():
             try:
