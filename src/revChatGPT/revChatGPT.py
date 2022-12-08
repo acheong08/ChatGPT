@@ -37,7 +37,10 @@ class Chatbot:
     :param debug: Whether to enable debug mode
     :type debug: :obj:`bool`, optional
 
-    :param refresh: Whether to refresh the session or Exception
+    :param refresh: Whether to refresh the session
+    :type refresh: :obj:`bool`, optional
+
+    :return: None or Exception
     """
     config: json
     conversation_id: str
@@ -190,14 +193,14 @@ class Chatbot:
         """
         Gets the chat response
 
-        :param prompt: The message sent
+        :param prompt: The message sent to the chatbot
         :type prompt: :obj:`str`
 
-        :param output: The output type (`text` or `stream`)
+        :param output: The output type `text` or `stream`
         :type output: :obj:`str`, optional
 
-        :return: The chat response
-            `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None or Exception
+        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}`
+        :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
         """
         data = {
             "action": "next",
