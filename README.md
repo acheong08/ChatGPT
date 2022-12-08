@@ -1,6 +1,7 @@
 # ChatGPT
 [![PyPi](https://img.shields.io/pypi/v/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
 [![PyPi](https://img.shields.io/pypi/dm/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
+[![Python package](https://github.com/acheong08/ChatGPT/actions/workflows/python-package.yml/badge.svg)](https://github.com/acheong08/ChatGPT/actions/workflows/python-package.yml)
 
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
