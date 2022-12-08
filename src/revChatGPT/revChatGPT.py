@@ -206,6 +206,10 @@ class Chatbot:
                     "like Gecko) Version/16.1 Safari/605.1.15 ",
                 },
             )
+            if response.status_code != 200:
+                self.debugger.log("Invalid status code")
+                self.debugger.log(response.status_code)
+                raise Exception("Wrong response code")
             try:
                 self.config["session_token"] = response.cookies.get(
                     "__Secure-next-auth.session-token",
@@ -214,7 +218,20 @@ class Chatbot:
                 self.refresh_headers()
             except Exception as exc:
                 print("Error refreshing session")
-                self.debugger.log(response.text)
+                self.debugger.log("Response: '" + str(response.text) + "'")
+                self.debugger.log(response.status_code)
+                # Check if response JSON is empty
+                if response.json() == {}:
+                    self.debugger.log("Empty response")
+                    self.debugger.log("Probably invalid session token")
+                    if 'email' in self.config and 'password' in self.config:
+                        del self.config['session_token']
+                        self.login(self.config['email'],
+                                   self.config['password'])
+                        return
+                    else:
+                        raise ValueError(
+                            "No email and password provided") from exc
                 raise Exception("Error refreshing session") from exc
         elif "email" in self.config and "password" in self.config:
             try:
