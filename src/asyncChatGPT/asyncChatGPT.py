@@ -51,7 +51,7 @@ class Chatbot:
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = generate_uuid()
-        if "session_token" in config or ("email" in config and "password" in config) and refresh:
+        if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
         if "Authorization" in config:
             self.refresh_headers()
