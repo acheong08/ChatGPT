@@ -1,8 +1,11 @@
 # Development
 
 ## Standard use
+
 ### Initial setup
+
 `pip3 install revChatGPT --upgrade`
+
 ```python
 from revChatGPT.revChatGPT import Chatbot
 
@@ -15,7 +18,9 @@ config = {
 
 chatbot = Chatbot(config, conversation_id=None)
 ```
+
 ### Chatbot functions
+
 ```python
     def __init__(self, config, conversation_id=None):
     def reset_chat(self): -> None
@@ -28,8 +33,11 @@ chatbot = Chatbot(config, conversation_id=None)
     def refresh_session(self):
     def login(self, email, password):
 ```
-##  Getting responses
+
+## Getting responses
+
 Output options: `text`, `stream`
+
 ```python
 ... # After the initial setup
 response = chatbot.get_chat_response("Hello world")
@@ -37,10 +45,13 @@ print(response) #returns {'message':message, 'conversation_id':self.conversation
 ```
 
 ## Async use
+
 ### Initial setup
+
 `pip3 install revChatGPT --upgrade`
+
 ```python
-from revChatGPT.asyncChatGPT import Chatbot
+from asyncChatGPT.asyncChatGPT import Chatbot
 
 config = {
     "email": "<YOUR_EMAIL>",
@@ -56,9 +67,11 @@ chatbot = Chatbot(config, conversation_id=None)
 <summary>
 
 ### Get text response
+
 </summary>
 
 example use:
+
 ```python
 ... # After the initial setup
 import asyncio
@@ -71,10 +84,12 @@ print(message)
 <details>
 <summary>
 
-###  Get streaming response
+### Get streaming response
+
 </summary>
 
 example use:
+
 ```python
 ... # After the initial setup
 import asyncio
@@ -83,4 +98,5 @@ async def printMessage():
         print(i['message'])
 asyncio.run(get_res())
 ```
+
 </details>

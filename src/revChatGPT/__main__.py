@@ -5,16 +5,6 @@ from sys import argv
 
 from revChatGPT.revChatGPT import Chatbot
 
-if "--help" in argv:
-    print(
-        """
-    ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
-    Repo: github.com/acheong08/ChatGPT
-    Run with --debug to enable debugging
-    """,
-    )
-    exit()
-
 
 def get_input(prompt):
     # prompt for input
@@ -32,7 +22,16 @@ def get_input(prompt):
     return user_input
 
 
-if __name__ == "__main__":
+def main():
+    if "--help" in argv:
+        print(
+            """
+        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        Repo: github.com/acheong08/ChatGPT
+        Run with --debug to enable debugging
+        """,
+        )
+        exit()
     try:
         print(
             """
@@ -92,7 +91,6 @@ if __name__ == "__main__":
                     break
 
             if "--text" not in argv:
-                messages = []
                 lines_printed = 0
 
                 try:
@@ -107,25 +105,29 @@ if __name__ == "__main__":
                         for part in message_parts:
                             formatted_parts.extend(
                                 textwrap.wrap(part, width=80))
-                            for formatted_line in formatted_parts:
+                            for _ in formatted_parts:
                                 if len(formatted_parts) > lines_printed + 1:
                                     print(formatted_parts[lines_printed])
                                     lines_printed += 1
                     print(formatted_parts[lines_printed])
-                except Exception as e:
+                except Exception as exc:
                     print("Response not in correct format!")
-                    print(e)
+                    print(exc)
                     continue
             else:
                 try:
                     print("Chatbot: ")
                     message = chatbot.get_chat_response(prompt)
                     print(message["message"])
-                except Exception as e:
+                except Exception as exc:
                     print("Something went wrong!")
-                    print(e)
+                    print(exc)
                     continue
-    except Exception as e:
+    except Exception as exc:
         print("Something went wrong! Please run with --debug to see the error.")
-        print(e)
+        print(exc)
         exit()
+
+
+if __name__ == "__main__":
+    main()
