@@ -14,6 +14,8 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 - No moderation
 - Programmable.
 
+Async at [async branch](https://github.com/acheong08/ChatGPT/tree/async)
+
 # Urgent help needed
 - Writing tests
 - Better documentation
