@@ -11,11 +11,33 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
 
 def generate_uuid() -> str:
+    """
+    Generates a UUID for the session -- Internal use only
+
+    :return: str
+    """
     uid = str(uuid.uuid4())
     return uid
 
 
 class Chatbot:
+    """
+    Initializes the chatbot
+
+    See wiki for the configuration json:
+    https://github.com/acheong08/ChatGPT/wiki/Setup
+
+    :param config: The configuration json
+    :type config: :obj:`json`
+
+    :param conversation_id: The conversation ID
+    :type conversation_id: :obj:`str`, optional
+
+    :param debug: Whether to enable debug mode
+    :type debug: :obj:`bool`, optional
+
+    :param refresh: Whether to refresh the session or Exception
+    """
     config: json
     conversation_id: str
     parent_id: str
@@ -34,13 +56,21 @@ class Chatbot:
         if "Authorization" in config:
             self.refresh_headers()
 
-    # Resets the conversation ID and parent ID
     def reset_chat(self) -> None:
+        """
+        Resets the conversation ID and parent ID
+
+        :return: None
+        """
         self.conversation_id = None
         self.parent_id = generate_uuid()
 
-    # Refreshes the headers -- Internal use only
     def refresh_headers(self) -> None:
+        """
+        Refreshes the headers -- Internal use only
+
+        :return: None
+        """
         if "Authorization" not in self.config:
             self.config["Authorization"] = ""
         elif self.config["Authorization"] is None:
@@ -58,10 +88,14 @@ class Chatbot:
             "Referer": "https://chat.openai.com/chat",
         }
 
-    # Generates a UUID -- Internal use only
-
-    # Generator for chat stream -- Internal use only
     async def get_chat_stream(self, data) -> None:
+        """
+        Generator for chat stream -- Internal use only
+
+        :param data: The data to send
+
+        :return: None
+        """
         s = httpx.AsyncClient()
         async with s.stream(
             'POST', 
@@ -90,8 +124,14 @@ class Chatbot:
                 except:
                     continue
 
-    # Gets the chat response as text -- Internal use only
     async def get_chat_text(self, data) -> dict:
+        """
+        Gets the chat response as text -- Internal use only
+
+        :param data: The data to send
+
+        :return: The chat response
+        """
         # Create request session
         s = httpx.Client(http2=True)
         async with httpx.AsyncClient() as s:
@@ -148,6 +188,18 @@ class Chatbot:
 
     # Gets the chat response
     async def get_chat_response(self, prompt, output="text") -> dict or None:
+        """
+        Gets the chat response
+
+        :param prompt: The message sent
+        :type prompt: :obj:`str`
+
+        :param output: The output type (`text` or `stream`)
+        :type output: :obj:`str`, optional
+
+        :return: The chat response
+            `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None or Exception
+        """
         data = {
             "action": "next",
             "messages": [
@@ -171,10 +223,20 @@ class Chatbot:
             raise ValueError("Output must be either 'text' or 'stream'")
 
     def rollback_conversation(self) -> None:
+        """
+        Rollbacks the conversation
+
+        :return: None
+        """
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
 
     def refresh_session(self) -> Exception:
+        """
+        Refreshes the session
+
+        :return: None or Exception
+        """
         if (
             "session_token" not in self.config
             and ("email" not in self.config or "password" not in self.config)
@@ -248,6 +310,17 @@ class Chatbot:
             raise ValueError("No tokens provided")
 
     def login(self, email, password) -> None:
+        """
+        Logs in to OpenAI
+
+        :param email: The email
+        :type email: :obj:`str`
+
+        :param password: The password
+        :type password: :obj:`str`
+
+        :return: None
+        """
         self.debugger.log("Logging in...")
         use_proxy = False
         proxy = None
