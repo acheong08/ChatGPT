@@ -4,7 +4,7 @@
 ### Initial setup
 `pip3 install revChatGPT --upgrade`
 ```python
-import from revChatGPT.revChatGPT import Chatbot
+from revChatGPT.revChatGPT import Chatbot
 
 config = {
     "email": "<YOUR_EMAIL>",
@@ -40,7 +40,7 @@ print(response) #returns {'message':message, 'conversation_id':self.conversation
 ### Initial setup
 `pip3 install revChatGPT --upgrade`
 ```python
-import from revChatGPT.asyncChatGPT import Chatbot
+from revChatGPT.asyncChatGPT import Chatbot
 
 config = {
     "email": "<YOUR_EMAIL>",
