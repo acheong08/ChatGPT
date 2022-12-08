@@ -13,7 +13,7 @@ config = {
 
 chatbot = Chatbot(config, conversation_id=None)
 ```
-
+# revChatGPT.revChatGPT.py
 ## Chatbot functions
 ```python
     def __init__(self, config, conversation_id=None):
@@ -30,7 +30,43 @@ chatbot = Chatbot(config, conversation_id=None)
 ##  get_chat_response(self, prompt, output="text")
 Output options: `text`, `stream`
 returns {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
-```py
+```python
 ... # After the initial setup
 message = chatbot.get_chat_response("Hello world")['message']
 print(message)
+```
+
+# AsyncrevChatGPT.AsyncrevChatGPT.py
+<details>
+<summary>
+
+## get_chat_response(self, prompt, output="text")
+</summary>
+
+example use:
+```python
+... # After the initial setup
+import asyncio
+message = asyncio.run(chatbot.get_chat_response("Hello world"))['message']
+print(message)
+```
+
+</details>
+
+
+<details>
+<summary>
+
+##  get_chat_response(self, prompt, output="stream")
+</summary>
+
+example use:
+```python
+... # After the initial setup
+import asyncio
+async def printMessage():
+    async for i in await chatbot.get_chat_response("hello", output="stream"):
+        print(i['message'])
+asyncio.run(get_res())
+```
+</details>
