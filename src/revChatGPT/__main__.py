@@ -5,6 +5,16 @@ from sys import argv
 
 from revChatGPT.revChatGPT import Chatbot
 
+if "--help" in argv:
+    print(
+        """
+    ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+    Repo: github.com/acheong08/ChatGPT
+    Run with --debug to enable debugging
+    """,
+    )
+    exit()
+
 
 def get_input(prompt):
     # prompt for input
