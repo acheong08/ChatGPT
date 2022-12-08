@@ -44,6 +44,7 @@ class Chatbot:
     config: json
     conversation_id: str
     parent_id: str
+    base_url: str
     headers: dict
     conversation_id_prev: str
     parent_id_prev: str
@@ -160,7 +161,7 @@ class Chatbot:
             response = await s.post(
                 self.base_url + "backend-api/conversation",
                 data=json.dumps(data),
-                timeout=60,
+                timeout=100,
             )
             try:
                 response = response.text.splitlines()[-4]
