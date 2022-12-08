@@ -115,14 +115,14 @@ class Chatbot:
                     message = line["message"]["content"]["parts"][0]
                     self.conversation_id = line["conversation_id"]
                     self.parent_id = line["message"]["id"]
-                except:
+                except:  # This needs fixing. Automatic detect blank lines and done lines
                     continue
                 yield {
                     "message": message,
                     "conversation_id": self.conversation_id,
                     "parent_id": self.parent_id,
                 }
-            except:
+            except:  # Not sure what error occurs here. Needs looking into
                 continue
 
     def get_chat_text(self, data) -> dict:
