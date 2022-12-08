@@ -54,6 +54,7 @@ class Chatbot:
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = generate_uuid()
+        self.base_url = "https://chat.openai.com/"
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
         if "Authorization" in config:
@@ -102,7 +103,7 @@ class Chatbot:
         s = httpx.AsyncClient()
         async with s.stream(
             'POST', 
-            "https://chat.openai.com/backend-api/conversation",
+            self.base_url + "backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
             timeout=100,
@@ -148,7 +149,7 @@ class Chatbot:
                 )
             s.cookies.set(
                 "__Secure-next-auth.callback-url",
-                "https://chat.openai.com/",
+                self.base_url,
             )
             # Set proxies
             if self.config.get("proxy", "") != "":
@@ -157,7 +158,7 @@ class Chatbot:
                     "https": self.config["proxy"],
                 }
             response = await s.post(
-                "https://chat.openai.com/backend-api/conversation",
+                self.base_url + "backend-api/conversation",
                 data=json.dumps(data),
                 timeout=60,
             )
@@ -267,7 +268,7 @@ class Chatbot:
             )
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get(
-                "https://chat.openai.com/api/auth/session",
+                self.base_url + "api/auth/session",
                 headers={
                     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, "
                     "like Gecko) Version/16.1 Safari/605.1.15 ",
