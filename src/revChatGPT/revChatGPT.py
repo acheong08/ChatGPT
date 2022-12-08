@@ -120,14 +120,15 @@ class Chatbot:
             response = response[6:]
         except Exception as exc:
             self.debugger.log("Incorrect response from OpenAI API")
-            self.debugger.log(response.text)
             try:
                 resp = response.json()
-                if resp['detail']['code'] == "invalid_api_key":
+                self.debugger.log(resp)
+                if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
                     if "email" in self.config and "password" in self.config:
                         self.refresh_session()
                         return self.get_chat_text(data)
                     else:
+                        self.debugger.log("Missing necessary credentials")
                         raise Exception(
                             "Missing necessary credentials") from exc
             except Exception as exc2:
