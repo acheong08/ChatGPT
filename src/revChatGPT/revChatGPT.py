@@ -177,6 +177,7 @@ class Chatbot:
                         raise Exception(
                             "Missing necessary credentials") from exc
             except Exception as exc2:
+                self.debugger.log(response.text)
                 raise Exception("Not a JSON response") from exc2
             raise Exception("Incorrect response from OpenAI API") from exc
         response = json.loads(response)
