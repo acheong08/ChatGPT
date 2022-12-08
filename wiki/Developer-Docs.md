@@ -1,8 +1,10 @@
 # Development
-## Initial setup
+
+## Standard use
+### Initial setup
 `pip3 install revChatGPT --upgrade`
 ```python
-from revChatGPT.revChatGPT import Chatbot
+import from revChatGPT.revChatGPT import Chatbot
 
 config = {
     "email": "<YOUR_EMAIL>",
@@ -13,8 +15,7 @@ config = {
 
 chatbot = Chatbot(config, conversation_id=None)
 ```
-# revChatGPT.revChatGPT.py
-## Chatbot functions
+### Chatbot functions
 ```python
     def __init__(self, config, conversation_id=None):
     def reset_chat(self): -> None
@@ -27,20 +28,34 @@ chatbot = Chatbot(config, conversation_id=None)
     def refresh_session(self):
     def login(self, email, password):
 ```
-##  get_chat_response(self, prompt, output="text")
+##  Getting responses
 Output options: `text`, `stream`
-returns {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
 ```python
 ... # After the initial setup
-message = chatbot.get_chat_response("Hello world")['message']
-print(message)
+response = chatbot.get_chat_response("Hello world")
+print(response) #returns {'message':message, 'conversation_id':self.conversation_id, 'parent_id':self.parent_id}
 ```
 
-# AsyncrevChatGPT.AsyncrevChatGPT.py
+## Async use
+### Initial setup
+`pip3 install revChatGPT --upgrade`
+```python
+import from revChatGPT.asyncChatGPT import Chatbot
+
+config = {
+    "email": "<YOUR_EMAIL>",
+    "password": "<YOUR_PASSWORD>"#,
+    #"session_token": "<SESSION_TOKEN>", # Deprecated. Use only if you encounter captcha with email/password
+    #"proxy": "<HTTP/HTTPS_PROXY>"
+}
+
+chatbot = Chatbot(config, conversation_id=None)
+```
+
 <details>
 <summary>
 
-## get_chat_response(self, prompt, output="text")
+### Get text response
 </summary>
 
 example use:
@@ -53,11 +68,10 @@ print(message)
 
 </details>
 
-
 <details>
 <summary>
 
-##  get_chat_response(self, prompt, output="stream")
+###  Get streaming response
 </summary>
 
 example use:
