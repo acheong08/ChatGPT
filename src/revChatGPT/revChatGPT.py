@@ -8,6 +8,8 @@ import requests
 
 from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
+BASE_URL = "https://chat.openai.com/"
+
 
 def generate_uuid() -> str:
     uid = str(uuid.uuid4())
@@ -62,7 +64,7 @@ class Chatbot:
     # Generator for chat stream -- Internal use only
     def get_chat_stream(self, data) -> None:
         response = requests.post(
-            "https://chat.openai.com/backend-api/conversation",
+            BASE_URL+"backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
             stream=True,
@@ -112,7 +114,7 @@ class Chatbot:
                 "https": self.config["proxy"],
             }
         response = s.post(
-            "https://chat.openai.com/backend-api/conversation",
+            BASE_URL+"backend-api/conversation",
             data=json.dumps(data),
         )
         try:
@@ -200,12 +202,16 @@ class Chatbot:
             )
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get(
-                "https://chat.openai.com/api/auth/session",
+                BASE_URL+"api/auth/session",
                 headers={
                     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, "
                     "like Gecko) Version/16.1 Safari/605.1.15 ",
                 },
             )
+            if response.status_code != 200:
+                self.debugger.log("Invalid status code")
+                self.debugger.log(response.status_code)
+                raise Exception("Wrong response code")
             try:
                 self.config["session_token"] = response.cookies.get(
                     "__Secure-next-auth.session-token",
@@ -214,7 +220,20 @@ class Chatbot:
                 self.refresh_headers()
             except Exception as exc:
                 print("Error refreshing session")
-                self.debugger.log(response.text)
+                self.debugger.log("Response: '" + str(response.text) + "'")
+                self.debugger.log(response.status_code)
+                # Check if response JSON is empty
+                if response.json() == {}:
+                    self.debugger.log("Empty response")
+                    self.debugger.log("Probably invalid session token")
+                    if 'email' in self.config and 'password' in self.config:
+                        del self.config['session_token']
+                        self.login(self.config['email'],
+                                   self.config['password'])
+                        return
+                    else:
+                        raise ValueError(
+                            "No email and password provided") from exc
                 raise Exception("Error refreshing session") from exc
         elif "email" in self.config and "password" in self.config:
             try:
