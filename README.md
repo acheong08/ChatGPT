@@ -15,28 +15,22 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 - No moderation
 - Programmable.
 
-# Urgent help needed
-- Writing tests
-- Better documentation
-- Documentation for Async
+# Flaws
+- No captcha support 
+  - Use [PyChatGPT](https://github.com/rawandahmad698/PyChatGPT/) for captcha support
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
-- [Telegram bot](https://github.com/n3d1117/chatgpt-telegram-bot)
 
 If you have a cool project you want added to the list, open an issue.
 
 # Disclaimers
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
 
-### This is a library and not intended for direct CLI use
-The CLI functionality is for demo and testing only. Captcha is not supported (For unclean IP addresses)
-
-### CLI use
-[@rawandahmad698](https://github.com/rawandahmad698) has a much better CLI tool at
-
-**[PyChatGPT](https://github.com/rawandahmad698/PyChatGPT)** supports captcha!
-
-# Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=acheong08/ChatGPT&type=Date)](https://star-history.com/#acheong08/ChatGPT&Date)
+# Credits
+- [rawandahmad698](https://github.com/rawandahmad698) - Reverse engineering Auth0
+- [FlorianREGAZ](https://github.com/FlorianREGAZ) - TLS client
+- [PyRo1121](https://github.com/PyRo1121) - Linting
+- [Harry-Jing](https://github.com/Harry-Jing) - Async support
+- [Ukenn2112](https://github.com/Ukenn2112) - Documentation
+- [All other contributors](https://github.com/acheong08/ChatGPT/graphs/contributors)
