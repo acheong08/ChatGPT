@@ -76,9 +76,7 @@ class Chatbot:
 
         :return: None
         """
-        if "Authorization" not in self.config:
-            self.config["Authorization"] = ""
-        elif self.config["Authorization"] is None:
+        if not self.config.get("Authorization"):
             self.config["Authorization"] = ""
         self.headers = {
             "Host": "chat.openai.com",
@@ -179,6 +177,7 @@ class Chatbot:
                             raise Exception(
                                 "Missing necessary credentials") from exc
                 except Exception as exc2:
+                    self.debugger.log(response.text)
                     raise Exception("Not a JSON response") from exc2
                 raise Exception("Incorrect response from OpenAI API") from exc
             response = json.loads(response)
@@ -242,22 +241,10 @@ class Chatbot:
 
         :return: None or Exception
         """
-        if (
-            "session_token" not in self.config
-            and ("email" not in self.config or "password" not in self.config)
-            and "Authorization" not in self.config
-        ):
-            error = ValueError("No tokens provided")
-            self.debugger.log(error)
-            raise error
-        elif "session_token" in self.config:
-            if (
-                self.config["session_token"] is None
-                or self.config["session_token"] == ""
-            ):
-                raise ValueError("No tokens provided")
+        # Either session_token, email and password or Authroization is required
+        if self.config.get("session_token"):
             s = httpx.Client(http2=True)
-            if self.config.get("proxy", "") != "":
+            if self.config.get("proxy"):
                 s.proxies = {
                     "http": self.config["proxy"],
                     "https": self.config["proxy"],
@@ -276,8 +263,7 @@ class Chatbot:
                 },
             )
             if response.status_code != 200:
-                self.debugger.log("Invalid status code")
-                self.debugger.log(response.status_code)
+                self.debugger.log(f"Invalid status code: {response.status_code}")
                 raise Exception("Wrong response code")
             try:
                 self.config["session_token"] = response.cookies.get(
@@ -297,11 +283,11 @@ class Chatbot:
                         del self.config['session_token']
                         self.login(self.config['email'],
                                    self.config['password'])
-                        return
                     else:
                         raise ValueError(
                             "No email and password provided") from exc
-                raise Exception("Error refreshing session") from exc
+                else:
+                    raise Exception("Error refreshing session") from exc
         elif "email" in self.config and "password" in self.config:
             try:
                 self.login(self.config["email"], self.config["password"])
@@ -310,9 +296,9 @@ class Chatbot:
                 raise exc
         elif "Authorization" in self.config:
             self.refresh_headers()
-            return
         else:
-            raise ValueError("No tokens provided")
+            self.debugger.log("No session_token, email and password or Authroization provided")
+            raise ValueError("No session_token, email and password or Authroization provided")
 
     def login(self, email, password) -> None:
         """
@@ -327,13 +313,8 @@ class Chatbot:
         :return: None
         """
         self.debugger.log("Logging in...")
-        use_proxy = False
-        proxy = None
-        if "proxy" in self.config:
-            if self.config["proxy"] != "":
-                use_proxy = True
-                proxy = self.config["proxy"]
-        auth = OpenAIAuth(email, password, use_proxy, proxy, debug=self.debug)
+        proxy = self.config.get("proxy")
+        auth = OpenAIAuth(email, password, bool(proxy), proxy, debug=self.debug)
         try:
             auth.begin()
         except Exception as exc:
@@ -355,10 +336,7 @@ class Chatbot:
                     if len(possible_tokens) > 1:
                         self.config["session_token"] = possible_tokens[0]
                     else:
-                        try:
-                            self.config["session_token"] = possible_tokens
-                        except Exception as exc:
-                            raise Exception("Error logging in") from exc
+                        self.config["session_token"] = possible_tokens
             self.refresh_headers()
         else:
             raise Exception("Error logging in")
