@@ -20,7 +20,7 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 # Flaws
 - No captcha support 
   - Use [PyChatGPT](https://github.com/rawandahmad698/PyChatGPT/) for captcha support
-- No arm support for email/password. Use session token authentication.
+- No ARM support for email/password. Use session token authentication if on Raspberry Pi
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
