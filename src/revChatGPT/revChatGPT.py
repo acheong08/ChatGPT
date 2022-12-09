@@ -41,6 +41,9 @@ class Chatbot:
     :param refresh: Whether to refresh the session
     :type refresh: :obj:`bool`, optional
 
+    :param request_timeout: The network request timeout seconds
+    :type request_timeout: :obj:`int`, optional
+
     :return: None or Exception
     """
     config: json
@@ -50,14 +53,16 @@ class Chatbot:
     headers: dict
     conversation_id_prev: str
     parent_id_prev: str
+    request_timeout: int
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True):
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = parent_id if parent_id else generate_uuid()
         self.base_url = "https://chat.openai.com/"
+        self.request_timeout = request_timeout
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
         if "Authorization" in config:
@@ -106,7 +111,7 @@ class Chatbot:
             headers=self.headers,
             data=json.dumps(data),
             stream=True,
-            timeout=100,
+            timeout=self.request_timeout,
         )
         for line in response.iter_lines():
             line = line.decode("utf-8")
@@ -156,6 +161,7 @@ class Chatbot:
         response = s.post(
             self.base_url+"backend-api/conversation",
             data=json.dumps(data),
+            timeout=self.request_timeout
         )
         try:
             response = response.text.splitlines()[-4]
