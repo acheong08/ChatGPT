@@ -111,24 +111,21 @@ class Chatbot:
             timeout=100,
         )as response:
             async for line in response.aiter_lines():
-                try:
-                    if line == "":
-                        continue
-                    line = line[6:]
-                    line = json.loads(line)
-                    try:
-                        message = line["message"]["content"]["parts"][0]
-                        self.conversation_id = line["conversation_id"]
-                        self.parent_id = line["message"]["id"]
-                    except:
-                        continue
-                    yield {
-                        "message": message,
-                        "conversation_id": self.conversation_id,
-                        "parent_id": self.parent_id,
-                    }
-                except:
+                line = line[:-1]
+                if line == "" or line == "data: [DONE]":
                     continue
+                line = line[6:]
+                line = json.loads(line)
+                if len(line["message"]["content"]["parts"]) == 0:
+                    continue
+                message = line["message"]["content"]["parts"][0]
+                self.conversation_id = line["conversation_id"]
+                self.parent_id = line["message"]["id"]
+                yield {
+                    "message": message,
+                    "conversation_id": self.conversation_id,
+                    "parent_id": self.parent_id,
+                }
 
     async def __get_chat_text(self, data) -> dict:
         """
@@ -169,16 +166,11 @@ class Chatbot:
                 response = response[6:]
             except Exception as exc:
                 self.debugger.log("Incorrect response from OpenAI API")
-                self.debugger.log(response.text)
                 try:
                     resp = response.json()
-                    if resp['detail']['code'] == "invalid_api_key":
-                        if "email" in self.config and "password" in self.config:
-                            self.refresh_session()
-                            return self.__get_chat_text(data)
-                        else:
-                            raise Exception(
-                                "Missing necessary credentials") from exc
+                    self.debugger.log(resp)
+                    if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
+                        self.refresh_session()
                 except Exception as exc2:
                     self.debugger.log(response.text)
                     raise Exception("Not a JSON response") from exc2
@@ -244,7 +236,7 @@ class Chatbot:
 
         :return: None or Exception
         """
-        # Either session_token, email and password or Authroization is required
+        # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
             s = httpx.Client(http2=True)
             if self.config.get("proxy"):
@@ -265,8 +257,39 @@ class Chatbot:
                     "like Gecko) Version/16.1 Safari/605.1.15 ",
                 },
             )
+            # Check if response JSON is empty
+            if response.json() == {}:
+                self.debugger.log("Empty response")
+                self.debugger.log("Probably invalid session token")
+                if 'email' in self.config and 'password' in self.config:
+                    del self.config['session_token']
+                    self.login(self.config['email'],
+                               self.config['password'])
+                else:
+                    self.debugger.log(
+                        "Invalid token and no email and password provided")
+                    raise ValueError(
+                        "No email and password provided")
+            # Check if ['detail']['code'] == 'token_expired' in response JSON
+            # First check if detail is in response JSON
+            if 'detail' in response.json():
+                # Check if code is in response JSON
+                if 'code' in response.json()['detail']:
+                    # Check if code is token_expired
+                    if response.json()['detail']['code'] == 'token_expired':
+                        self.debugger.log("Token expired")
+                        if 'email' in self.config and 'password' in self.config:
+                            del self.config['session_token']
+                            self.login(self.config['email'],
+                                       self.config['password'])
+                        else:
+                            self.debugger.log(
+                                "Invalid token and no email and password provided")
+                            raise ValueError(
+                                "No email and password provided")
             if response.status_code != 200:
-                self.debugger.log(f"Invalid status code: {response.status_code}")
+                self.debugger.log(
+                    f"Invalid status code: {response.status_code}")
                 raise Exception("Wrong response code")
             try:
                 self.config["session_token"] = response.cookies.get(
@@ -278,19 +301,7 @@ class Chatbot:
                 print("Error refreshing session")
                 self.debugger.log("Response: '" + str(response.text) + "'")
                 self.debugger.log(str(response.status_code))
-                # Check if response JSON is empty
-                if response.json() == {}:
-                    self.debugger.log("Empty response")
-                    self.debugger.log("Probably invalid session token")
-                    if 'email' in self.config and 'password' in self.config:
-                        del self.config['session_token']
-                        self.login(self.config['email'],
-                                   self.config['password'])
-                    else:
-                        raise ValueError(
-                            "No email and password provided") from exc
-                else:
-                    raise Exception("Error refreshing session") from exc
+                raise Exception("Error refreshing session") from exc
         elif "email" in self.config and "password" in self.config:
             try:
                 self.login(self.config["email"], self.config["password"])
@@ -300,10 +311,12 @@ class Chatbot:
         elif "Authorization" in self.config:
             self.refresh_headers()
         else:
-            self.debugger.log("No session_token, email and password or Authorization provided")
-            raise ValueError("No session_token, email and password or Authorization provided")
+            self.debugger.log(
+                "No session_token, email and password or Authorization provided")
+            raise ValueError(
+                "No session_token, email and password or Authorization provided")
 
-    def login(self, email, password) -> None:
+    def login(self, email: str, password: str) -> None:
         """
         Logs in to OpenAI
 
@@ -317,7 +330,8 @@ class Chatbot:
         """
         self.debugger.log("Logging in...")
         proxy = self.config.get("proxy")
-        auth = OpenAIAuth(email, password, bool(proxy), proxy, debug=self.debug)
+        auth = OpenAIAuth(email, password, bool(
+            proxy), proxy, debug=self.debug)
         try:
             auth.begin()
         except Exception as exc:
