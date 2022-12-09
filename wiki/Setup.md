@@ -23,7 +23,7 @@ Save this in `config.json` in current working directory
 <details>
 <summary>
 
-## Token Authentication 
+## Session Token Authentication 
 Use if using third-party providers (Google / Microsoft Auth) or if email/password rate limited
 </summary>
 
