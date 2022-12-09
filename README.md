@@ -16,6 +16,8 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 - Programmable.
 - Async version
 - Email/password authentication
+- Cookie based authentication
+- Access Token authentication
 
 # Flaws
 - No captcha support 
