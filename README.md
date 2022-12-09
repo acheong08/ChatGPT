@@ -14,10 +14,13 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 ![image](https://user-images.githubusercontent.com/36258159/205534498-acc59484-c4b4-487d-89a7-d7b884af709b.png)
 - No moderation
 - Programmable.
+- Async version
+- Email/password authentication
 
 # Flaws
 - No captcha support 
   - Use [PyChatGPT](https://github.com/rawandahmad698/PyChatGPT/) for captcha support
+- No arm support for email/password. Use session token authentication.
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
