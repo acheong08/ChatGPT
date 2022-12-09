@@ -3,9 +3,7 @@
 # Description: A Python wrapper for OpenAI's chatbot API
 import json
 import uuid
-
 import requests
-
 from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
 
@@ -51,7 +49,7 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True) -> Exception:
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True) -> Exception or None:
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
@@ -69,7 +67,7 @@ class Chatbot:
 
         :return: None
         """
-        self.conversation_id = None
+        self.conversation_id = ""
         self.parent_id = generate_uuid()
 
     def refresh_headers(self) -> None:
@@ -93,11 +91,11 @@ class Chatbot:
             "Referer": "https://chat.openai.com/chat",
         }
 
-    def get_chat_stream(self, data) -> None:
+    def __get_chat_stream(self, data) -> None:
         """
         Generator for chat stream -- Internal use only
 
-        :param data: The data to send
+        param data: The data to send
 
         :return: None
         """
@@ -129,11 +127,11 @@ class Chatbot:
             except:  # Not sure what error occurs here. Needs looking into
                 continue
 
-    def get_chat_text(self, data) -> dict:
+    def __get_chat_text(self, data) -> dict:
         """
         Gets the chat response as text -- Internal use only
 
-        :param data: The data to send
+        param data: The data to send
 
         :return: The chat response
         """
@@ -172,7 +170,7 @@ class Chatbot:
                 if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
                     if "email" in self.config and "password" in self.config:
                         self.refresh_session()
-                        return self.get_chat_text(data)
+                        return self.__get_chat_text(data)
                     else:
                         self.debugger.log("Missing necessary credentials")
                         raise Exception(
@@ -186,23 +184,23 @@ class Chatbot:
         self.conversation_id = response["conversation_id"]
         message = response["message"]["content"]["parts"][0]
         return {
-            "message": message,
             "conversation_id": self.conversation_id,
             "parent_id": self.parent_id,
+            "message": message,
         }
 
     def get_chat_response(self, prompt: str, output="text") -> dict or None:
         """
         Gets the chat response
 
-        :param prompt: The message sent to the chatbot
+        param prompt: The message sent to the chatbot
         :type prompt: :obj:`str`
 
         :param output: The output type `text` or `stream`
         :type output: :obj:`str`, optional
 
-        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}`
-        :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
+        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID",
+        "parent_id": "parent ID"}` :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
         """
         data = {
             "action": "next",
@@ -220,9 +218,9 @@ class Chatbot:
         self.conversation_id_prev = self.conversation_id
         self.parent_id_prev = self.parent_id
         if output == "text":
-            return self.get_chat_text(data)
+            return self.__get_chat_text(data)
         elif output == "stream":
-            return self.get_chat_stream(data)
+            return self.__get_chat_stream(data)
         else:
             raise ValueError("Output must be either 'text' or 'stream'")
 
@@ -235,13 +233,13 @@ class Chatbot:
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
 
-    def refresh_session(self) -> Exception:
+    def refresh_session(self) -> Exception or None:
         """
         Refreshes the session
 
         :return: None or Exception
         """
-        # Either session_token, email and password or Authroization is required
+        # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
             s = requests.Session()
             if self.config.get("proxy"):
@@ -274,7 +272,7 @@ class Chatbot:
             except Exception as exc:
                 print("Error refreshing session")
                 self.debugger.log("Response: '" + str(response.text) + "'")
-                self.debugger.log(response.status_code)
+                self.debugger.log(str(response.status_code))
                 # Check if response JSON is empty
                 if response.json() == {}:
                     self.debugger.log("Empty response")
@@ -297,14 +295,14 @@ class Chatbot:
         elif "Authorization" in self.config:
             self.refresh_headers()
         else:
-            self.debugger.log("No session_token, email and password or Authroization provided")
-            raise ValueError("No session_token, email and password or Authroization provided")
+            self.debugger.log("No session_token, email and password or Authorization provided")
+            raise ValueError("No session_token, email and password or Authorization provided")
 
     def login(self, email: str, password: str) -> None:
         """
         Logs in to OpenAI
 
-        :param email: The email
+        param email: The email
         :type email: :obj:`str`
 
         :param password: The password

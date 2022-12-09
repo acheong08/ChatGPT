@@ -4,9 +4,7 @@
 import json
 import uuid
 import asyncio
-
 import httpx
-
 from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
 
@@ -52,7 +50,7 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True) -> Exception:
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True) -> Exception or None:
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
@@ -70,7 +68,7 @@ class Chatbot:
 
         :return: None
         """
-        self.conversation_id = None
+        self.conversation_id = ""
         self.parent_id = generate_uuid()
 
     def refresh_headers(self) -> None:
@@ -94,11 +92,11 @@ class Chatbot:
             "Referer": "https://chat.openai.com/chat",
         }
 
-    async def get_chat_stream(self, data) -> None:
+    async def __get_chat_stream(self, data: dict) -> None:
         """
         Generator for chat stream -- Internal use only
 
-        :param data: The data to send
+        param data: The data to send
 
         :return: None
         """
@@ -107,7 +105,7 @@ class Chatbot:
             'POST', 
             self.base_url + "backend-api/conversation",
             headers=self.headers,
-            data=json.dumps(data),
+            data=data,
             timeout=100,
         )as response:
             async for line in response.aiter_lines():
@@ -130,11 +128,11 @@ class Chatbot:
                 except:
                     continue
 
-    async def get_chat_text(self, data) -> dict:
+    async def __get_chat_text(self, data: dict) -> dict:
         """
         Gets the chat response as text -- Internal use only
 
-        :param data: The data to send
+        param data: The data to send
 
         :return: The chat response
         """
@@ -161,7 +159,7 @@ class Chatbot:
                 }
             response = await s.post(
                 self.base_url + "backend-api/conversation",
-                data=json.dumps(data),
+                data=data,
                 timeout=100,
             )
             try:
@@ -175,7 +173,7 @@ class Chatbot:
                     if resp['detail']['code'] == "invalid_api_key":
                         if "email" in self.config and "password" in self.config:
                             self.refresh_session()
-                            return self.get_chat_text(data)
+                            return self.__get_chat_text(data)
                         else:
                             raise Exception(
                                 "Missing necessary credentials") from exc
@@ -198,7 +196,7 @@ class Chatbot:
         """
         Gets the chat response
 
-        :param prompt: The message sent to the chatbot
+        param prompt: The message sent to the chatbot
         :type prompt: :obj:`str`
 
         :param output: The output type `text` or `stream`
@@ -223,9 +221,9 @@ class Chatbot:
         self.conversation_id_prev = self.conversation_id
         self.parent_id_prev = self.parent_id
         if output == "text":
-            return await self.get_chat_text(data)
+            return await self.__get_chat_text(data)
         elif output == "stream":
-            return self.get_chat_stream(data)
+            return self.__get_chat_stream(data)
         else:
             raise ValueError("Output must be either 'text' or 'stream'")
 
@@ -238,13 +236,13 @@ class Chatbot:
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
 
-    def refresh_session(self) -> Exception:
+    def refresh_session(self) -> Exception or None:
         """
         Refreshes the session
 
         :return: None or Exception
         """
-        # Either session_token, email and password or Authroization is required
+        # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
             s = httpx.Client(http2=True)
             if self.config.get("proxy"):
@@ -277,7 +275,7 @@ class Chatbot:
             except Exception as exc:
                 print("Error refreshing session")
                 self.debugger.log("Response: '" + str(response.text) + "'")
-                self.debugger.log(response.status_code)
+                self.debugger.log(str(response.status_code))
                 # Check if response JSON is empty
                 if response.json() == {}:
                     self.debugger.log("Empty response")
@@ -300,14 +298,14 @@ class Chatbot:
         elif "Authorization" in self.config:
             self.refresh_headers()
         else:
-            self.debugger.log("No session_token, email and password or Authroization provided")
-            raise ValueError("No session_token, email and password or Authroization provided")
+            self.debugger.log("No session_token, email and password or Authorization provided")
+            raise ValueError("No session_token, email and password or Authorization provided")
 
     def login(self, email, password) -> None:
         """
         Logs in to OpenAI
 
-        :param email: The email
+        param email: The email
         :type email: :obj:`str`
 
         :param password: The password
