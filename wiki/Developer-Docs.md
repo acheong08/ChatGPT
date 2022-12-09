@@ -136,7 +136,7 @@ import asyncio
 async def printMessage():
     async for i in await chatbot.get_chat_response("hello", output="stream"):
         print(i['message'])
-asyncio.run(get_res())
+asyncio.run(printMessage())
 ```
 
 </details>
