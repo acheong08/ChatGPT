@@ -51,7 +51,7 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True) -> Exception:
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
@@ -93,7 +93,7 @@ class Chatbot:
             "Referer": "https://chat.openai.com/chat",
         }
 
-    def get_chat_stream(self, data) -> None:
+    def __get_chat_stream(self, data) -> None:
         """
         Generator for chat stream -- Internal use only
 
@@ -125,7 +125,7 @@ class Chatbot:
                 "parent_id": self.parent_id,
             }
 
-    def get_chat_text(self, data) -> dict:
+    def __get_chat_text(self, data) -> dict:
         """
         Gets the chat response as text -- Internal use only
 
@@ -210,9 +210,9 @@ class Chatbot:
         self.conversation_id_prev = self.conversation_id
         self.parent_id_prev = self.parent_id
         if output == "text":
-            return self.get_chat_text(data)
+            return self.__get_chat_text(data)
         elif output == "stream":
-            return self.get_chat_stream(data)
+            return self.__get_chat_stream(data)
         else:
             raise ValueError("Output must be either 'text' or 'stream'")
 
@@ -225,13 +225,13 @@ class Chatbot:
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
 
-    def refresh_session(self) -> Exception:
+    def refresh_session(self) -> Exception or None:
         """
         Refreshes the session
 
         :return: None or Exception
         """
-        # Either session_token, email and password or Authroization is required
+        # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
             s = requests.Session()
             if self.config.get("proxy"):
@@ -295,7 +295,7 @@ class Chatbot:
             except Exception as exc:
                 print("Error refreshing session")
                 self.debugger.log("Response: '" + str(response.text) + "'")
-                self.debugger.log(response.status_code)
+                self.debugger.log(str(response.status_code))
                 raise Exception("Error refreshing session") from exc
         elif "email" in self.config and "password" in self.config:
             try:
