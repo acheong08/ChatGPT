@@ -265,6 +265,23 @@ class Chatbot:
                         "Invalid token and no email and password provided")
                     raise ValueError(
                         "No email and password provided")
+            # Check if ['detail']['code'] == 'token_expired' in response JSON
+            # First check if detail is in response JSON
+            if 'detail' in response.json():
+                # Check if code is in response JSON
+                if 'code' in response.json()['detail']:
+                    # Check if code is token_expired
+                    if response.json()['detail']['code'] == 'token_expired':
+                        self.debugger.log("Token expired")
+                        if 'email' in self.config and 'password' in self.config:
+                            del self.config['session_token']
+                            self.login(self.config['email'],
+                                       self.config['password'])
+                        else:
+                            self.debugger.log(
+                                "Invalid token and no email and password provided")
+                            raise ValueError(
+                                "No email and password provided")
             if response.status_code != 200:
                 self.debugger.log(
                     f"Invalid status code: {response.status_code}")
