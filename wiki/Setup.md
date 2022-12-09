@@ -2,7 +2,7 @@
 ## Install
 `pip3 install revChatGPT --upgrade`
 
-`duplicate config.json.example into config.json`
+Make the necessary changes in `config.json.example` and save as `config.json`
 
 <details>
 <summary>
