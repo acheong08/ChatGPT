@@ -33,6 +33,9 @@ class Chatbot:
     :param conversation_id: The conversation ID
     :type conversation_id: :obj:`str`, optional
 
+    :param parent_id: The parent ID
+    :type parent_id: :obj:`str`, optional
+
     :param debug: Whether to enable debug mode
     :type debug: :obj:`bool`, optional
 
@@ -49,12 +52,12 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
 
-    def __init__(self, config, conversation_id=None, debug=False, refresh=True) -> Exception:
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True) -> Exception:
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
         self.conversation_id = conversation_id
-        self.parent_id = generate_uuid()
+        self.parent_id = parent_id if parent_id else generate_uuid()
         self.base_url = "https://chat.openai.com/"
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
