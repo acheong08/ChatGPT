@@ -1,5 +1,7 @@
 # Custom
 config.json
+inputseq/
+outcome/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
