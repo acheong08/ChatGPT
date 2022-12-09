@@ -45,8 +45,8 @@ class Chatbot:
     :return: None or Exception
     """
     config: json
-    conversation_id: uuid
-    parent_id: uuid
+    conversation_id: str
+    parent_id: str
     base_url: str
     headers: dict
     conversation_id_prev: str
