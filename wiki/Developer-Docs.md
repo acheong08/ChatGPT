@@ -13,7 +13,7 @@ from revChatGPT.revChatGPT import Chatbot
 # https://github.com/acheong08/ChatGPT/wiki/Setup
 config = {
     "email": "<YOUR_EMAIL>",
-    "password": "<YOUR_PASSWORD>"#,
+    "password": "<YOUR_PASSWORD>",
     #"session_token": "<SESSION_TOKEN>", # Deprecated. Use only if you encounter captcha with email/password
     #"proxy": "<HTTP/HTTPS_PROXY>"
 }
