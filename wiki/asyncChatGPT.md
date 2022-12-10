@@ -40,6 +40,7 @@ https://github.com/acheong08/ChatGPT/wiki/Setup
 - `parent_id` (`:obj:`str`, optional`): The parent ID
 - `debug` (`:obj:`bool`, optional`): Whether to enable debug mode
 - `refresh` (`:obj:`bool`, optional`): Whether to refresh the session
+- `request_timeout` (`:obj:`int`, optional`): The network request timeout seconds
 
 **Returns**:
 
@@ -73,42 +74,6 @@ Refreshes the headers -- Internal use only
 
 None
 
-<a id="asyncChatGPT.asyncChatGPT.Chatbot.get_chat_stream"></a>
-
-#### get\_chat\_stream
-
-```python
-async def get_chat_stream(data) -> None
-```
-
-Generator for chat stream -- Internal use only
-
-**Arguments**:
-
-- `data`: The data to send
-
-**Returns**:
-
-None
-
-<a id="asyncChatGPT.asyncChatGPT.Chatbot.get_chat_text"></a>
-
-#### get\_chat\_text
-
-```python
-async def get_chat_text(data) -> dict
-```
-
-Gets the chat response as text -- Internal use only
-
-**Arguments**:
-
-- `data`: The data to send
-
-**Returns**:
-
-The chat response
-
 <a id="asyncChatGPT.asyncChatGPT.Chatbot.get_chat_response"></a>
 
 #### get\_chat\_response
@@ -126,7 +91,8 @@ Gets the chat response
 
 **Returns**:
 
-`:obj:`dict` or :obj:`None` or :obj:`Exception``: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}`
+The chat response `{"message": "Returned messages", "conversation_id": "conversation ID",
+"parent_id": "parent ID"}` :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
 
 <a id="asyncChatGPT.asyncChatGPT.Chatbot.rollback_conversation"></a>
 
@@ -147,7 +113,7 @@ None
 #### refresh\_session
 
 ```python
-def refresh_session() -> Exception
+def refresh_session() -> Exception or None
 ```
 
 Refreshes the session
@@ -161,7 +127,7 @@ None or Exception
 #### login
 
 ```python
-def login(email, password) -> None
+def login(email: str, password: str) -> None
 ```
 
 Logs in to OpenAI

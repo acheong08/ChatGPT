@@ -22,44 +22,6 @@ config = {
 chatbot = Chatbot(config, conversation_id=None)
 ```
 
-### Chatbot functions
-
-```python
-    def __init__(self, config, conversation_id=None, debug=False, refresh=True):
-        """
-        :param config: Config dict
-        :param conversation_id: Conversation ID. If None, a new conversation will be created
-        :param debug: Debug mode, Default is False
-        :param refresh: Refresh the session token, Default is True
-        """
-    def reset_chat(self): -> None
-    def refresh_headers(self): -> None
-    def generate_uuid(self): # Internal use
-    def get_chat_stream(self, data): # Internal
-    def get_chat_text(self, data): # Internal
-    def get_chat_response(self, prompt, output="text"):
-        """
-        :param prompt: The message sent to the chatbot
-        :param output: Output type. Can be "text" or "stream"
-        :return: Response from the chatbot
-        """
-    def rollback_conversation(self):
-        """
-        Rollback the conversation to the previous state
-        :return: None
-        """
-    def refresh_session(self):
-        """
-        Refresh the session token
-        :return: None
-        """
-    def login(self, email, password):
-        """
-        :param email: Email
-        :param password: Password
-        """
-```
-
 ## Getting responses
 
 Output options: `text`, `stream`

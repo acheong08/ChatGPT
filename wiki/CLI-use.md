@@ -23,3 +23,6 @@ You:
 ```
 
 Refresh every so often in case the token expires.
+
+# Captcha
+If you encounter captcha, it saves the image to `captcha.svg` which you can open with your browser. You can then enter the code into the terminal where it asks.
