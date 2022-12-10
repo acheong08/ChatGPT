@@ -16,6 +16,7 @@ setup(
         "requests",
         "httpx[http2]",
         "OpenAIAuth>=0.0.6",
+        "svglib"
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
