@@ -95,7 +95,7 @@ class Chatbot:
             "Version/16.1 Safari/605.1.15",
             "X-Openai-Assistant-App-Id": "",
             "Connection": "close",
-            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Language": "zh-CN,zh;q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
 
