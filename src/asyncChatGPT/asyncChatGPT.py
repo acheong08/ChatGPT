@@ -67,10 +67,22 @@ class Chatbot:
         self.base_url = "https://chat.openai.com/"
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
+        self.headers = {
+            "Host": "chat.openai.com",
+            "Accept": "text/event-stream",
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "X-Openai-Assistant-App-Id": "",
+            "Connection": "close",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://chat.openai.com/chat",
+        }
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
         if "Authorization" in config:
-            self.refresh_headers()
+            self.__refresh_headers()
 
     def reset_chat(self) -> None:
         """
@@ -81,7 +93,7 @@ class Chatbot:
         self.conversation_id = None
         self.parent_id = generate_uuid()
 
-    def refresh_headers(self) -> None:
+    def __refresh_headers(self) -> None:
         """
         Refresh the headers -- Internal use only
 
@@ -89,18 +101,7 @@ class Chatbot:
         """
         if not self.config.get("Authorization"):
             self.config["Authorization"] = ""
-        self.headers = {
-            "Host": "chat.openai.com",
-            "Accept": "text/event-stream",
-            "Authorization": "Bearer " + self.config["Authorization"],
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
-            "Version/16.1 Safari/605.1.15",
-            "X-Openai-Assistant-App-Id": "",
-            "Connection": "close",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Referer": "https://chat.openai.com/chat",
-        }
+        self.headers["Authorization"] = "Bearer " + self.config["Authorization"]
 
     async def __get_chat_stream(self, data) -> None:
         """
@@ -273,10 +274,40 @@ class Chatbot:
                     "like Gecko) Version/16.1 Safari/605.1.15 ",
                 },
             )
+            # Check the response code
+            if response.status_code != 200:
+                self.debugger.log(
+                    f"Invalid status code: {response.status_code}")
+                raise Exception("Wrong response code")
+            # Try to get new session token and Authorization
+            try:
+                if 'error' in response.json():
+                    self.debugger.log("Error in response JSON")
+                    self.debugger.log(response.json()['error'])
+                    raise Exception
+                self.config["session_token"] = response.cookies.get(
+                    "__Secure-next-auth.session-token",
+                )
+                self.config["Authorization"] = response.json()["accessToken"]
+                self.__refresh_headers()
+            # If it fails, try to login with email and password to get tokens
+            except Exception:
             # Check if response JSON is empty
-            if response.json() == {}:
-                self.debugger.log("Empty response")
-                self.debugger.log("Probably invalid session token")
+                if response.json() == {}:
+                    self.debugger.log("Empty response")
+                    self.debugger.log("Probably invalid session token")
+                # Check if ['detail']['code'] == 'token_expired' in response JSON
+                # First check if detail is in response JSON
+                elif 'detail' in response.json():
+                    # Check if code is in response JSON
+                    if 'code' in response.json()['detail']:
+                        # Check if code is token_expired
+                        if response.json()['detail']['code'] == 'token_expired':
+                            self.debugger.log("Token expired")
+                else:
+                    self.debugger.log(f"Response: '{response.text}'")
+                self.debugger.log("Cannot refresh the session, try to login")
+                # Try to login
                 if 'email' in self.config and 'password' in self.config:
                     del self.config['session_token']
                     self.login(self.config['email'],
@@ -285,39 +316,7 @@ class Chatbot:
                     self.debugger.log(
                         "Invalid token and no email and password provided")
                     raise ValueError(
-                        "No email and password provided")
-            # Check if ['detail']['code'] == 'token_expired' in response JSON
-            # First check if detail is in response JSON
-            if 'detail' in response.json():
-                # Check if code is in response JSON
-                if 'code' in response.json()['detail']:
-                    # Check if code is token_expired
-                    if response.json()['detail']['code'] == 'token_expired':
-                        self.debugger.log("Token expired")
-                        if 'email' in self.config and 'password' in self.config:
-                            del self.config['session_token']
-                            self.login(self.config['email'],
-                                       self.config['password'])
-                        else:
-                            self.debugger.log(
-                                "Invalid token and no email and password provided")
-                            raise ValueError(
-                                "No email and password provided")
-            if response.status_code != 200:
-                self.debugger.log(
-                    f"Invalid status code: {response.status_code}")
-                raise Exception("Wrong response code")
-            try:
-                self.config["session_token"] = response.cookies.get(
-                    "__Secure-next-auth.session-token",
-                )
-                self.config["Authorization"] = response.json()["accessToken"]
-                self.refresh_headers()
-            except Exception as exc:
-                print("Error refreshing session")
-                self.debugger.log("Response: '" + str(response.text) + "'")
-                self.debugger.log(str(response.status_code))
-                raise Exception("Error refreshing session") from exc
+                        "Error refreshing session: No email and password provided")
         elif "email" in self.config and "password" in self.config:
             try:
                 self.login(self.config["email"], self.config["password"])
@@ -325,7 +324,7 @@ class Chatbot:
                 self.debugger.log("Login failed")
                 raise exc
         elif "Authorization" in self.config:
-            self.refresh_headers()
+            self.__refresh_headers()
         else:
             self.debugger.log(
                 "No session_token, email and password or Authorization provided")
@@ -370,6 +369,6 @@ class Chatbot:
                         self.config["session_token"] = possible_tokens[0]
                     else:
                         self.config["session_token"] = possible_tokens
-            self.refresh_headers()
+            self.__refresh_headers()
         else:
             raise Exception("Error logging in")
