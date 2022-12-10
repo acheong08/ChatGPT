@@ -1,4 +1,5 @@
 # Development
+Full API docs: [standard](https://github.com/acheong08/ChatGPT/wiki/revChatGPT), [async](https://github.com/acheong08/ChatGPT/wiki/asyncChatGPT)
 
 ## Standard use
 
