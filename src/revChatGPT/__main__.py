@@ -163,6 +163,9 @@ def main():
                     print("Something went wrong!")
                     print(exc)
                     continue
+    except KeyboardInterrupt:
+        print("\nGoodbye!")
+        exit()
     except Exception as exc:
         print("Something went wrong! Please run with --debug to see the error.")
         print(exc)
