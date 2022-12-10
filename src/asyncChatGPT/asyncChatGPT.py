@@ -116,21 +116,25 @@ class Chatbot:
             timeout=self.request_timeout,
         )as response:
             async for line in response.aiter_lines():
-                line = line[:-1]
-                if line == "" or line == "data: [DONE]":
-                    continue
-                line = line[6:]
-                line = json.loads(line)
-                if len(line["message"]["content"]["parts"]) == 0:
-                    continue
-                message = line["message"]["content"]["parts"][0]
-                self.conversation_id = line["conversation_id"]
-                self.parent_id = line["message"]["id"]
-                yield {
-                    "message": message,
-                    "conversation_id": self.conversation_id,
-                    "parent_id": self.parent_id,
-                }
+                try:
+                    line = line[:-1]
+                    if line == "" or line == "data: [DONE]":
+                        continue
+                    line = line[6:]
+                    line = json.loads(line)
+                    if len(line["message"]["content"]["parts"]) == 0:
+                        continue
+                    message = line["message"]["content"]["parts"][0]
+                    self.conversation_id = line["conversation_id"]
+                    self.parent_id = line["message"]["id"]
+                    yield {
+                        "message": message,
+                        "conversation_id": self.conversation_id,
+                        "parent_id": self.parent_id,
+                    }
+                except Exception as exc:
+                    self.debugger.log(f"Error when handling resbonse, got values{line}")
+                    raise Exception(f"Error when handling resbonse, got values{line}")
 
     async def __get_chat_text(self, data) -> dict:
         """
