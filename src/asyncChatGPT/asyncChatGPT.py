@@ -3,7 +3,6 @@
 # Description: A Python wrapper for OpenAI's chatbot API
 import json
 import uuid
-import asyncio
 
 import httpx
 
@@ -55,8 +54,9 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
     request_timeout: int
+    captcha_solver: any
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100):
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
@@ -64,6 +64,7 @@ class Chatbot:
         self.parent_id = parent_id if parent_id else generate_uuid()
         self.base_url = "https://chat.openai.com/"
         self.request_timeout = request_timeout
+        self.captcha_solver = captcha_solver
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
         if "Authorization" in config:
@@ -133,8 +134,10 @@ class Chatbot:
                         "parent_id": self.parent_id,
                     }
                 except Exception as exc:
-                    self.debugger.log(f"Error when handling resbonse, got values{line}")
-                    raise Exception(f"Error when handling resbonse, got values{line}")
+                    self.debugger.log(
+                        f"Error when handling response, got values{line}")
+                    raise Exception(
+                        f"Error when handling response, got values{line}") from exc
 
     async def __get_chat_text(self, data) -> dict:
         """
@@ -194,7 +197,6 @@ class Chatbot:
                 "parent_id": self.parent_id,
             }
 
-    # Gets the chat response
     async def get_chat_response(self, prompt, output="text") -> dict or None:
         """
         Gets the chat response
@@ -205,8 +207,8 @@ class Chatbot:
         :param output: The output type `text` or `stream`
         :type output: :obj:`str`, optional
 
-        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID",
-        "parent_id": "parent ID"}` :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
+        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}`
+        :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
         """
         data = {
             "action": "next",
@@ -340,7 +342,7 @@ class Chatbot:
         self.debugger.log("Logging in...")
         proxy = self.config.get("proxy")
         auth = OpenAIAuth(email, password, bool(
-            proxy), proxy, debug=self.debug)
+            proxy), proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver)
         try:
             auth.begin()
         except Exception as exc:
