@@ -11,9 +11,10 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
 def generate_uuid() -> str:
     """
-    Generates a UUID for the session -- Internal use only
+    Generate a UUID for the session -- Internal use only
 
-    :return: str
+    :return: a random UUID
+    :rtype: :obj:`str`
     """
     uid = str(uuid.uuid4())
     return uid
@@ -21,7 +22,7 @@ def generate_uuid() -> str:
 
 class Chatbot:
     """
-    Initializes the chatbot
+    Initialize the chatbot.
 
     See wiki for the configuration json:
     https://github.com/acheong08/ChatGPT/wiki/Setup
@@ -44,7 +45,8 @@ class Chatbot:
     :param request_timeout: The network request timeout seconds
     :type request_timeout: :obj:`int`, optional
 
-    :return: None or Exception
+    :return: The Chatbot object
+    :rtype: :obj:`Chatbot`
     """
     config: json
     conversation_id: str
@@ -72,7 +74,7 @@ class Chatbot:
 
     def reset_chat(self) -> None:
         """
-        Resets the conversation ID and parent ID
+        Reset the conversation ID and parent ID.
 
         :return: None
         """
@@ -81,7 +83,7 @@ class Chatbot:
 
     def refresh_headers(self) -> None:
         """
-        Refreshes the headers -- Internal use only
+        Refresh the headers -- Internal use only
 
         :return: None
         """
@@ -102,9 +104,10 @@ class Chatbot:
 
     async def __get_chat_stream(self, data) -> None:
         """
-        Generator for chat stream -- Internal use only
+        Generator for the chat stream -- Internal use only
 
         :param data: The data to send
+        :type data: :obj:`dict`
 
         :return: None
         """
@@ -115,7 +118,7 @@ class Chatbot:
             headers=self.headers,
             data=json.dumps(data),
             timeout=self.request_timeout,
-        )as response:
+        ) as response:
             async for line in response.aiter_lines():
                 try:
                     line = line[:-1]
@@ -141,11 +144,13 @@ class Chatbot:
 
     async def __get_chat_text(self, data) -> dict:
         """
-        Gets the chat response as text -- Internal use only
+        Get the chat response as text -- Internal use only
 
         :param data: The data to send
+        :type data: :obj:`dict`
 
         :return: The chat response
+        :rtype: :obj:`dict`
         """
         # Create request session
         s = httpx.Client(http2=True)
@@ -197,9 +202,9 @@ class Chatbot:
                 "parent_id": self.parent_id,
             }
 
-    async def get_chat_response(self, prompt, output="text") -> dict or None:
+    async def get_chat_response(self, prompt: str, output="text") -> dict or None:
         """
-        Gets the chat response
+        Get the chat response.
 
         :param prompt: The message sent to the chatbot
         :type prompt: :obj:`str`
@@ -207,8 +212,8 @@ class Chatbot:
         :param output: The output type `text` or `stream`
         :type output: :obj:`str`, optional
 
-        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}`
-        :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
+        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
+        :rtype: :obj:`dict` or :obj:`None`
         """
         data = {
             "action": "next",
@@ -234,18 +239,18 @@ class Chatbot:
 
     def rollback_conversation(self) -> None:
         """
-        Rollbacks the conversation
+        Rollback the conversation.
 
         :return: None
         """
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
 
-    def refresh_session(self) -> Exception or None:
+    def refresh_session(self) -> None:
         """
-        Refreshes the session
+        Refresh the session.
 
-        :return: None or Exception
+        :return: None
         """
         # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
@@ -329,7 +334,7 @@ class Chatbot:
 
     def login(self, email: str, password: str) -> None:
         """
-        Logs in to OpenAI
+        Log in to OpenAI.
 
         :param email: The email
         :type email: :obj:`str`
