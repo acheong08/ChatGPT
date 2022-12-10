@@ -54,8 +54,9 @@ class Chatbot:
     conversation_id_prev: str
     parent_id_prev: str
     request_timeout: int
+    captcha_solver: any
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100):
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
@@ -63,6 +64,7 @@ class Chatbot:
         self.parent_id = parent_id if parent_id else generate_uuid()
         self.base_url = "https://chat.openai.com/"
         self.request_timeout = request_timeout
+        self.captcha_solver = captcha_solver
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
         if "Authorization" in config:
@@ -332,7 +334,7 @@ class Chatbot:
         self.debugger.log("Logging in...")
         proxy = self.config.get("proxy")
         auth = OpenAIAuth(email, password, bool(
-            proxy), proxy, debug=self.debug)
+            proxy), proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver)
         try:
             auth.begin()
         except Exception as exc:
