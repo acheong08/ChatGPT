@@ -133,8 +133,10 @@ class Chatbot:
                     "parent_id": self.parent_id,
                 }
             except Exception as exc:
-                    self.debugger.log(f"Error when handling resbonse, got values{line}")
-                    raise Exception(f"Error when handling resbonse, got values{line}")
+                self.debugger.log(
+                    f"Error when handling response, got values{line}")
+                raise Exception(
+                    f"Error when handling response, got values{line}") from exc
 
     def __get_chat_text(self, data) -> dict:
         """
