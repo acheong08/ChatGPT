@@ -6,6 +6,33 @@ from sys import argv
 from revChatGPT.revChatGPT import Chatbot
 
 
+class CaptchaSolver:
+    """
+    Captcha solver
+    """
+    @staticmethod
+    def solve_captcha(raw_svg):
+        """
+        Solves the captcha
+
+        :param raw_svg: The raw SVG
+        :type raw_svg: :obj:`str`
+
+        :return: The solution
+        :rtype: :obj:`str`
+        """
+        # Get the SVG
+        svg = raw_svg
+        # Save the SVG
+        with open("captcha.svg", "w") as f:
+            print("Captcha saved to captcha.svg")
+            f.write(svg)
+        # Get input
+        solution = input("Please solve the captcha: ")
+        # Return the solution
+        return solution
+
+
 def get_input(prompt):
     # prompt for input
     lines = []
@@ -53,7 +80,7 @@ def main():
                 debug = False
             print("Logging in...")
             chatbot = Chatbot(config, debug=debug,
-                              captcha_solver=CaptchaSolver)
+                              captcha_solver=CaptchaSolver())
         else:
             print("Please create and populate config.json to continue")
             exit()
@@ -132,30 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-class CaptchaSolver:
-    """
-    Captcha solver
-    """
-    @staticmethod
-    def solve_captcha(raw_svg):
-        """
-        Solves the captcha
-
-        :param raw_svg: The raw SVG
-        :type raw_svg: :obj:`str`
-
-        :return: The solution
-        :rtype: :obj:`str`
-        """
-        # Get the SVG
-        svg = raw_svg
-        # Save the SVG
-        with open("captcha.svg", "w") as f:
-            print("Captcha saved to captcha.svg")
-            f.write(svg)
-        # Get input
-        solution = input("Please solve the captcha: ")
-        # Return the solution
-        return solution
