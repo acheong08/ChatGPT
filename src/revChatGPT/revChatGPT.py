@@ -58,17 +58,16 @@ class Chatbot:
     request_timeout: int
     captcha_solver: any
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None):
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None, base_url="https://chat.openai.com/"):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = parent_id if parent_id else generate_uuid()
-        self.base_url = "https://chat.openai.com/"
+        self.base_url = base_url
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
         self.headers = {
-            "Host": "chat.openai.com",
             "Accept": "text/event-stream",
             "Authorization": "Bearer ",
             "Content-Type": "application/json",
