@@ -18,10 +18,9 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 - Email/password authentication
 - Cookie based authentication
 - Access Token authentication
+- Captcha support 
 
 # Flaws
-- No captcha support 
-  - Use [PyChatGPT](https://github.com/rawandahmad698/PyChatGPT/) for captcha support
 - No ARM support for email/password. Use session token authentication if on Raspberry Pi
 
 # Awesome ChatGPT
