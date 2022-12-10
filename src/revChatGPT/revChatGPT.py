@@ -112,7 +112,7 @@ class Chatbot:
         :return: None
         """
         response = requests.post(
-            self.base_url+"backend-api/conversation",
+            self.base_url + "backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
             stream=True,
@@ -172,7 +172,7 @@ class Chatbot:
                 "https": self.config["proxy"],
             }
         response = s.post(
-            self.base_url+"backend-api/conversation",
+            self.base_url + "backend-api/conversation",
             data=json.dumps(data),
             timeout=self.request_timeout
         )
