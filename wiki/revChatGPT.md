@@ -6,6 +6,35 @@
 
 # revChatGPT.\_\_main\_\_
 
+<a id="revChatGPT.__main__.CaptchaSolver"></a>
+
+## CaptchaSolver Objects
+
+```python
+class CaptchaSolver()
+```
+
+Captcha solver
+
+<a id="revChatGPT.__main__.CaptchaSolver.solve_captcha"></a>
+
+#### solve\_captcha
+
+```python
+@staticmethod
+def solve_captcha(raw_svg)
+```
+
+Solves the captcha
+
+**Arguments**:
+
+- `raw_svg` (`:obj:`str``): The raw SVG
+
+**Returns**:
+
+`:obj:`str``: The solution
+
 <a id="revChatGPT.revChatGPT"></a>
 
 # revChatGPT.revChatGPT
