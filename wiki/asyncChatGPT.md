@@ -61,12 +61,12 @@ Reset the conversation ID and parent ID.
 
 None
 
-<a id="asyncChatGPT.asyncChatGPT.Chatbot.refresh_headers"></a>
+<a id="asyncChatGPT.asyncChatGPT.Chatbot.__refresh_headers"></a>
 
 #### refresh\_headers
 
 ```python
-def refresh_headers() -> None
+def __refresh_headers() -> None
 ```
 
 Refresh the headers -- Internal use only
