@@ -41,4 +41,5 @@ This is not an official OpenAI product. This is a personal project and is not af
 - [PyRo1121](https://github.com/PyRo1121) - Linting
 - [Harry-Jing](https://github.com/Harry-Jing) - Async support
 - [Ukenn2112](https://github.com/Ukenn2112) - Documentation
+- [aliferouss19](https://github.com/aliferouss19) - Logo
 - [All other contributors](https://github.com/acheong08/ChatGPT/graphs/contributors)
