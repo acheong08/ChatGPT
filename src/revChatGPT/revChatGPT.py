@@ -376,7 +376,6 @@ class AsyncChatBot:
         else:
             raise Exception("Error logging in")
 
-
     def send_feedback(
         self,
         is_good: bool,

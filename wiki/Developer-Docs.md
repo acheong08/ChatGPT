@@ -52,7 +52,7 @@ for res in response:
 `pip3 install revChatGPT --upgrade`
 
 ```python
-from revChatGPT.revChatGPT import asyncChatbot as Chatbot
+from revChatGPT.revChatGPT import AsyncChatbot as Chatbot
 
 # For the config please go here:
 # https://github.com/acheong08/ChatGPT/wiki/Setup

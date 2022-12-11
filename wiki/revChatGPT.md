@@ -163,15 +163,15 @@ Log in to OpenAI.
 
 None
 
-<a id="revChatGPT.revChatGPT.asyncChatBot"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatBot"></a>
 
-## asyncChatBot Objects
+## AsyncChatBot Objects
 
 ```python
-class asyncChatBot(Chatbot)
+class AsyncChatBot(Chatbot)
 ```
 
-<a id="revChatGPT.revChatGPT.asyncChatBot.get_chat_response"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatBot.get_chat_response"></a>
 
 #### get\_chat\_response
 
@@ -190,7 +190,7 @@ Get the chat response.
 
 `:obj:`dict` or :obj:`None``: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
 
-<a id="revChatGPT.revChatGPT.asyncChatBot.rollback_conversation"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatBot.rollback_conversation"></a>
 
 #### rollback\_conversation
 
