@@ -102,7 +102,9 @@ class Chatbot:
         access_token = self.config.get("Authorization") or self.config.get("authorization")
 
         if not access_token:
-            self.headers["Authorization"] = f'Bearer {access_token}'
+            self.headers["Authorization"] = ""
+
+        self.headers["Authorization"] = f'Bearer {access_token}'
 
     async def __get_chat_stream(self, data) -> None:
         """
