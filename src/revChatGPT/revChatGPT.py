@@ -5,6 +5,7 @@ import json
 import uuid
 
 import requests
+import httpx
 
 from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
@@ -217,6 +218,7 @@ class Chatbot:
         :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
         :rtype: :obj:`dict` or :obj:`None`
         """
+        self.refresh_session()  # Refreshing session token is fast
         data = {
             "action": "next",
             "messages": [
@@ -373,3 +375,149 @@ class Chatbot:
             self.__refresh_headers()
         else:
             raise Exception("Error logging in")
+
+
+class asyncChatBot(Chatbot):
+    async def __get_chat_stream(self, data) -> None:
+        """
+        Generator for the chat stream -- Internal use only
+
+        :param data: The data to send
+        :type data: :obj:`dict`
+
+        :return: None
+        """
+        s = httpx.AsyncClient()
+        async with s.stream(
+            'POST',
+            self.base_url + "backend-api/conversation",
+            headers=self.headers,
+            data=json.dumps(data),
+            timeout=self.request_timeout,
+        ) as response:
+            async for line in response.aiter_lines():
+                try:
+                    line = line[:-1]
+                    if line == "" or line == "data: [DONE]":
+                        continue
+                    line = line[6:]
+                    line = json.loads(line)
+                    if len(line["message"]["content"]["parts"]) == 0:
+                        continue
+                    message = line["message"]["content"]["parts"][0]
+                    self.conversation_id = line["conversation_id"]
+                    self.parent_id = line["message"]["id"]
+                    yield {
+                        "message": message,
+                        "conversation_id": self.conversation_id,
+                        "parent_id": self.parent_id,
+                    }
+                except Exception as exc:
+                    self.debugger.log(
+                        f"Error when handling response, got values{line}")
+                    raise Exception(
+                        f"Error when handling response, got values{line}") from exc
+
+    async def __get_chat_text(self, data) -> dict:
+        """
+        Get the chat response as text -- Internal use only
+
+        :param data: The data to send
+        :type data: :obj:`dict`
+
+        :return: The chat response
+        :rtype: :obj:`dict`
+        """
+        # Create request session
+        s = httpx.Client(http2=True)
+        async with httpx.AsyncClient() as s:
+            # set headers
+            s.headers = self.headers
+            # Set multiple cookies
+            if "session_token" in self.config:
+                s.cookies.set(
+                    "__Secure-next-auth.session-token",
+                    self.config["session_token"],
+                )
+            s.cookies.set(
+                "__Secure-next-auth.callback-url",
+                self.base_url,
+            )
+            # Set proxies
+            if self.config.get("proxy", "") != "":
+                s.proxies = {
+                    "http": self.config["proxy"],
+                    "https": self.config["proxy"],
+                }
+            response = await s.post(
+                self.base_url + "backend-api/conversation",
+                data=json.dumps(data),
+                timeout=self.request_timeout,
+            )
+            try:
+                response = response.text.splitlines()[-4]
+                response = response[6:]
+            except Exception as exc:
+                self.debugger.log("Incorrect response from OpenAI API")
+                try:
+                    resp = response.json()
+                    self.debugger.log(resp)
+                    if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
+                        self.refresh_session()
+                except Exception as exc2:
+                    self.debugger.log(response.text)
+                    raise Exception("Not a JSON response") from exc2
+                raise Exception("Incorrect response from OpenAI API") from exc
+            response = json.loads(response)
+            self.parent_id = response["message"]["id"]
+            self.conversation_id = response["conversation_id"]
+            message = response["message"]["content"]["parts"][0]
+            return {
+                "message": message,
+                "conversation_id": self.conversation_id,
+                "parent_id": self.parent_id,
+            }
+
+    async def get_chat_response(self, prompt: str, output="text") -> dict or None:
+        """
+        Get the chat response.
+
+        :param prompt: The message sent to the chatbot
+        :type prompt: :obj:`str`
+
+        :param output: The output type `text` or `stream`
+        :type output: :obj:`str`, optional
+
+        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
+        :rtype: :obj:`dict` or :obj:`None`
+        """
+        data = {
+            "action": "next",
+            "messages": [
+                {
+                    "id": str(generate_uuid()),
+                    "role": "user",
+                    "content": {"content_type": "text", "parts": [prompt]},
+                },
+            ],
+            "conversation_id": self.conversation_id,
+            "parent_message_id": self.parent_id,
+            "model": "text-davinci-002-render",
+        }
+        self.conversation_id_prev = self.conversation_id
+        self.parent_id_prev = self.parent_id
+        if output == "text":
+            return await self.__get_chat_text(data)
+        elif output == "stream":
+            return self.__get_chat_stream(data)
+        else:
+            raise ValueError("Output must be either 'text' or 'stream'")
+
+    def rollback_conversation(self) -> None:
+        """
+        Rollback the conversation.
+
+        :return: None
+        """
+        self.conversation_id = self.conversation_id_prev
+        self.parent_id = self.parent_id_prev
