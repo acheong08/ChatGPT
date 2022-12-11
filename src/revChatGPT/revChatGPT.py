@@ -349,8 +349,8 @@ class AsyncChatbot:
         """
         self.debugger.log("Logging in...")
         proxy = self.config.get("proxy")
-        auth = OpenAIAuth(email, password, bool(
-            proxy), proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver)
+        auth = OpenAIAuth(email, password, use_proxy=bool(
+            proxy), proxy=proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver)
         try:
             auth.begin()
         except Exception as exc:
