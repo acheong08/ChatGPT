@@ -14,6 +14,7 @@ setup(
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "httpx",
+        "nest-asyncio",
         "OpenAIAuth>=0.0.6",
     ],
     long_description=open("README.md", encoding="utf-8").read(),
