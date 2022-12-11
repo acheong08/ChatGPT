@@ -34,4 +34,5 @@ except Exception as e:
     print("Error:", e)
     assert False
 
+print("Success!")
 assert True
