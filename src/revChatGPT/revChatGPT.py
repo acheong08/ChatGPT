@@ -3,8 +3,8 @@
 # Description: A Python wrapper for OpenAI's chatbot API
 import json
 import uuid
+import asyncio
 
-import requests
 import httpx
 
 from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
@@ -20,10 +20,9 @@ def generate_uuid() -> str:
     uid = str(uuid.uuid4())
     return uid
 
-
-class Chatbot:
+class AsyncChatBot:
     """
-    Initialize the chatbot.
+    Initialize the AsyncChatBot.
 
     See wiki for the configuration json:
     https://github.com/acheong08/ChatGPT/wiki/Setup
@@ -110,7 +109,7 @@ class Chatbot:
         self.headers["Authorization"] = "Bearer " + \
             self.config["Authorization"]
 
-    def __get_chat_stream(self, data) -> None:
+    async def __get_chat_stream(self, data) -> None:
         """
         Generator for the chat stream -- Internal use only
 
@@ -119,74 +118,84 @@ class Chatbot:
 
         :return: None
         """
-        response = requests.post(
+        s = httpx.AsyncClient()
+        async with s.stream(
+            'POST',
             self.base_url + "backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
-            stream=True,
             timeout=self.request_timeout,
-        )
-        for line in response.iter_lines():
-            try:
-                line = line.decode("utf-8")
-                if line == "" or line == "data: [DONE]":
-                    continue
-                line = line[6:]
-                line = json.loads(line)
-                if len(line["message"]["content"]["parts"]) == 0:
-                    continue
-                message = line["message"]["content"]["parts"][0]
-                self.conversation_id = line["conversation_id"]
-                self.parent_id = line["message"]["id"]
-                yield {
-                    "message": message,
-                    "conversation_id": self.conversation_id,
-                    "parent_id": self.parent_id,
-                }
-            except Exception as exc:
-                self.debugger.log(
-                    f"Error when handling response, got values{line}")
-                raise Exception(
-                    f"Error when handling response, got values{line}") from exc
+        ) as response:
+            async for line in response.aiter_lines():
+                try:
+                    line = line[:-1]
+                    if line == "" or line == "data: [DONE]":
+                        continue
+                    line = line[6:]
+                    line = json.loads(line)
+                    if len(line["message"]["content"]["parts"]) == 0:
+                        continue
+                    message = line["message"]["content"]["parts"][0]
+                    self.conversation_id = line["conversation_id"]
+                    self.parent_id = line["message"]["id"]
+                    yield {
+                        "message": message,
+                        "conversation_id": self.conversation_id,
+                        "parent_id": self.parent_id,
+                    }
+                except Exception as exc:
+                    self.debugger.log(
+                        f"Error when handling response, got values{line}")
+                    raise Exception(
+                        f"Error when handling response, got values{line}") from exc
 
-    def __get_chat_text(self, data) -> dict:
+    async def __get_chat_text(self, data) -> dict:
         """
         Get the chat response as text -- Internal use only
-
         :param data: The data to send
         :type data: :obj:`dict`
-
         :return: The chat response
         :rtype: :obj:`dict`
         """
         # Create request session
-        s = requests.Session()
-        # set headers
-        s.headers = self.headers
-        # Set multiple cookies
-        if "session_token" in self.config:
+        async with httpx.AsyncClient() as s:
+            # set headers
+            s.headers = self.headers
+            # Set multiple cookies
+            if "session_token" in self.config:
+                s.cookies.set(
+                    "__Secure-next-auth.session-token",
+                    self.config["session_token"],
+                )
             s.cookies.set(
-                "__Secure-next-auth.session-token",
-                self.config["session_token"],
+                "__Secure-next-auth.callback-url",
+                self.base_url,
             )
-        s.cookies.set(
-            "__Secure-next-auth.callback-url",
-            "https://chat.openai.com/",
-        )
-        # Set proxies
-        if self.config.get("proxy", "") != "":
-            s.proxies = {
-                "http": self.config["proxy"],
-                "https": self.config["proxy"],
-            }
-        response = s.post(
-            self.base_url + "backend-api/conversation",
-            data=json.dumps(data),
-            timeout=self.request_timeout
-        )
-        try:
-            response = response.text.splitlines()[-4]
-            response = response[6:]
+            # Set proxies
+            if self.config.get("proxy", "") != "":
+                s.proxies = {
+                    "http": self.config["proxy"],
+                    "https": self.config["proxy"],
+                }
+            response = await s.post(
+                self.base_url + "backend-api/conversation",
+                data=json.dumps(data),
+                timeout=self.request_timeout,
+            )
+            try:
+                response = response.text.splitlines()[-4]
+                response = response[6:]
+            except Exception as exc:
+                self.debugger.log("Incorrect response from OpenAI API")
+                try:
+                    resp = response.json()
+                    self.debugger.log(resp)
+                    if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
+                        self.refresh_session()
+                except Exception as exc2:
+                    self.debugger.log(response.text)
+                    raise Exception("Not a JSON response") from exc2
+                raise Exception("Incorrect response from OpenAI API") from exc
             response = json.loads(response)
             self.parent_id = response["message"]["id"]
             self.conversation_id = response["conversation_id"]
@@ -196,17 +205,8 @@ class Chatbot:
                 "conversation_id": self.conversation_id,
                 "parent_id": self.parent_id,
             }
-        except Exception as exc:
-            # Check for expired token
-            if 'detail' in response.json():
-                if 'code' in response['detail']:
-                    if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
-                        self.refresh_session()
-                        return self.__get_chat_text(data)
-            self.debugger.log("Failed to retrieve chat response")
-            raise exc
 
-    def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
+    async def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
         """
         Get the chat response.
 
@@ -219,7 +219,6 @@ class Chatbot:
         :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
         :rtype: :obj:`dict` or :obj:`None`
         """
-        self.refresh_session()  # Refreshing session token is fast
         data = {
             "action": "next",
             "messages": [
@@ -236,7 +235,7 @@ class Chatbot:
         self.conversation_id_prev = self.conversation_id
         self.parent_id_prev = self.parent_id
         if output == "text":
-            return self.__get_chat_text(data)
+            return await self.__get_chat_text(data)
         elif output == "stream":
             return self.__get_chat_stream(data)
         else:
@@ -250,7 +249,7 @@ class Chatbot:
         """
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
-
+    
     def refresh_session(self) -> None:
         """
         Refresh the session.
@@ -259,7 +258,7 @@ class Chatbot:
         """
         # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
-            s = requests.Session()
+            s = httpx.Client(http2=True)
             if self.config.get("proxy"):
                 s.proxies = {
                     "http": self.config["proxy"],
@@ -414,7 +413,7 @@ class Chatbot:
         if description is not None:
             data["text"] = description
 
-        response = requests.post(
+        response = httpx.post(
             url,
             headers=self.headers,
             data=json.dumps(data),
@@ -424,145 +423,14 @@ class Chatbot:
         return response
 
 
-class AsyncChatBot(Chatbot):
-    async def __get_chat_stream(self, data) -> None:
-        """
-        Generator for the chat stream -- Internal use only
+class ChatBot(AsyncChatBot):
+    async def async_generator_to_list(self, async_generator):
+        return [item async for item in await async_generator]
 
-        :param data: The data to send
-        :type data: :obj:`dict`
-
-        :return: None
-        """
-        s = httpx.AsyncClient()
-        async with s.stream(
-            'POST',
-            self.base_url + "backend-api/conversation",
-            headers=self.headers,
-            data=json.dumps(data),
-            timeout=self.request_timeout,
-        ) as response:
-            async for line in response.aiter_lines():
-                try:
-                    line = line[:-1]
-                    if line == "" or line == "data: [DONE]":
-                        continue
-                    line = line[6:]
-                    line = json.loads(line)
-                    if len(line["message"]["content"]["parts"]) == 0:
-                        continue
-                    message = line["message"]["content"]["parts"][0]
-                    self.conversation_id = line["conversation_id"]
-                    self.parent_id = line["message"]["id"]
-                    yield {
-                        "message": message,
-                        "conversation_id": self.conversation_id,
-                        "parent_id": self.parent_id,
-                    }
-                except Exception as exc:
-                    self.debugger.log(
-                        f"Error when handling response, got values{line}")
-                    raise Exception(
-                        f"Error when handling response, got values{line}") from exc
-
-    async def __get_chat_text(self, data) -> dict:
-        """
-        Get the chat response as text -- Internal use only
-
-        :param data: The data to send
-        :type data: :obj:`dict`
-
-        :return: The chat response
-        :rtype: :obj:`dict`
-        """
-        # Create request session
-        s = httpx.Client(http2=True)
-        async with httpx.AsyncClient() as s:
-            # set headers
-            s.headers = self.headers
-            # Set multiple cookies
-            if "session_token" in self.config:
-                s.cookies.set(
-                    "__Secure-next-auth.session-token",
-                    self.config["session_token"],
-                )
-            s.cookies.set(
-                "__Secure-next-auth.callback-url",
-                self.base_url,
-            )
-            # Set proxies
-            if self.config.get("proxy", "") != "":
-                s.proxies = {
-                    "http": self.config["proxy"],
-                    "https": self.config["proxy"],
-                }
-            response = await s.post(
-                self.base_url + "backend-api/conversation",
-                data=json.dumps(data),
-                timeout=self.request_timeout,
-            )
-        try:
-            response_formatted = response.text.splitlines()[-4]
-            response_formatted = response[6:]
-            response_formatted = json.loads(response)
-            self.parent_id = response_formatted["message"]["id"]
-            self.conversation_id = response_formatted["conversation_id"]
-            message = response_formatted["message"]["content"]["parts"][0]
-            return {
-                "message": message,
-                "conversation_id": self.conversation_id,
-                "parent_id": self.parent_id,
-            }
-        except Exception as exc:
-            # Check for expired token
-            if 'detail' in response.json():
-                if 'code' in response['detail']:
-                    if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
-                        self.refresh_session()
-                        return self.__get_chat_text(data)
-            self.debugger.log("Unable to refresh session")
-            raise exc
-
-    async def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
-        """
-        Get the chat response.
-
-        :param prompt: The message sent to the chatbot
-        :type prompt: :obj:`str`
-
-        :param output: The output type `text` or `stream`
-        :type output: :obj:`str`, optional
-
-        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
-        :rtype: :obj:`dict` or :obj:`None`
-        """
-        data = {
-            "action": "next",
-            "messages": [
-                {
-                    "id": str(generate_uuid()),
-                    "role": "user",
-                    "content": {"content_type": "text", "parts": [prompt]},
-                },
-            ],
-            "conversation_id": conversation_id or self.conversation_id,
-            "parent_message_id": parent_id or self.parent_id,
-            "model": "text-davinci-002-render",
-        }
-        self.conversation_id_prev = self.conversation_id
-        self.parent_id_prev = self.parent_id
+    def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
+        coroutine_object = super().get_chat_response(prompt, output, conversation_id, parent_id)
         if output == "text":
-            return await self.__get_chat_text(data)
-        elif output == "stream":
-            return self.__get_chat_stream(data)
-        else:
-            raise ValueError("Output must be either 'text' or 'stream'")
-
-    def rollback_conversation(self) -> None:
-        """
-        Rollback the conversation.
-
-        :return: None
-        """
-        self.conversation_id = self.conversation_id_prev
-        self.parent_id = self.parent_id_prev
+            return asyncio.run(coroutine_object)
+        if output == "stream":
+            return asyncio.run(self.async_generator_to_list(coroutine_object))
+            
