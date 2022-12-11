@@ -168,3 +168,53 @@ Log in to OpenAI.
 
 None
 
+<a id="revChatGPT.revChatGPT.Chatbot"></a>
+
+## Chatbot Objects
+
+```python
+class Chatbot(AsyncChatbot)
+```
+
+Initialize the AsyncChatbot.
+
+See wiki for the configuration json:
+https://github.com/acheong08/ChatGPT/wiki/Setup
+
+**Arguments**:
+
+- `config` (`:obj:`json``): The configuration json
+- `conversation_id` (`:obj:`str`, optional`): The conversation ID
+- `parent_id` (`:obj:`str`, optional`): The parent ID
+- `debug` (`:obj:`bool`, optional`): Whether to enable debug mode
+- `refresh` (`:obj:`bool`, optional`): Whether to refresh the session
+- `request_timeout` (`:obj:`int`, optional`): The network request timeout seconds
+- `base_url` (`:obj:`str`, optional`): The base url to chat.openai.com backend server,
+useful when set up a reverse proxy to avoid network issue.
+
+**Returns**:
+
+`:obj:`Chatbot``: The Chatbot object
+
+<a id="revChatGPT.revChatGPT.Chatbot.get_chat_response"></a>
+
+#### get\_chat\_response
+
+```python
+def get_chat_response(prompt: str,
+                      output="text",
+                      conversation_id=None,
+                      parent_id=None) -> dict or None
+```
+
+Get the chat response.
+
+**Arguments**:
+
+- `prompt` (`:obj:`str``): The message sent to the chatbot
+- `output` (`:obj:`str`, optional`): The output type `text` or `stream`
+
+**Returns**:
+
+`:obj:`dict` or :obj:`None``: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
+
