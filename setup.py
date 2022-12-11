@@ -13,8 +13,7 @@ setup(
     py_modules=["revChatGPT"],
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
-        "requests",
-        "httpx[http2]",
+        "httpx",
         "OpenAIAuth>=0.0.6",
         "svglib"
     ],
