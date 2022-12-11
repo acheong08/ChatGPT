@@ -59,7 +59,7 @@ def main():
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
         Run with --debug to enable debugging
-        """,
+        """
         )
         exit()
     try:
@@ -68,7 +68,7 @@ def main():
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
         Run with --debug to enable debugging
-        """,
+        """
         )
         print("Type '!help' to show commands")
         print("Press enter twice to submit your question.\n")
@@ -94,8 +94,7 @@ def main():
         else:
             debug = False
         print("Logging in...")
-        chatbot = Chatbot(config, debug=debug,
-                          captcha_solver=CaptchaSolver())
+        chatbot = Chatbot(config, debug=debug, captcha_solver=CaptchaSolver())
 
         while True:
             prompt = get_input("\nYou:\n")
@@ -109,7 +108,7 @@ def main():
                     !rollback - Rollback the conversation by 1 message
                     !config - Show the current configuration
                     !exit - Exit the program
-                    """,
+                    """
                     )
                     continue
                 elif prompt == "!reset":
@@ -118,58 +117,26 @@ def main():
                     continue
                 elif prompt == "!refresh":
                     chatbot.refresh_session()
-                    print("Session refreshed.\n")
+                    print("Session refreshed.")
                     continue
                 elif prompt == "!rollback":
-                    chatbot.rollback_conversation()
-                    print("Chat session rolled back.")
+                    chatbot.rollback()
+                    print("Conversation rolled back.")
                     continue
                 elif prompt == "!config":
-                    print(json.dumps(config, indent=4))
+                    print("Current Configuration:")
+                    print(json.dumps(config, indent=2))
                     continue
                 elif prompt == "!exit":
-                    break
-
-            if "--text" not in argv:
-                lines_printed = 0
-
-                try:
-                    print("Chatbot: ")
-                    formatted_parts = []
-                    for message in chatbot.get_chat_response(prompt, output="stream"):
-                        # Split the message by newlines
-                        message_parts = message["message"].split("\n")
-
-                        # Wrap each part separately
-                        formatted_parts = []
-                        for part in message_parts:
-                            formatted_parts.extend(
-                                textwrap.wrap(part, width=80))
-                            for _ in formatted_parts:
-                                if len(formatted_parts) > lines_printed + 1:
-                                    print(formatted_parts[lines_printed])
-                                    lines_printed += 1
-                    print(formatted_parts[lines_printed])
-                except Exception as exc:
-                    print("Response not in correct format!")
-                    print(exc)
+                    exit()
+                else:
+                    print("Unknown command")
                     continue
-            else:
-                try:
-                    print("Chatbot: ")
-                    message = chatbot.get_chat_response(prompt)
-                    print(message["message"])
-                except Exception as exc:
-                    print("Something went wrong!")
-                    print(exc)
-                    continue
+            response = chatbot.get_response(prompt)
+            print("\nBot:\n", response)
+
     except KeyboardInterrupt:
-        print("\nGoodbye!")
-        exit()
-    except Exception as exc:
-        print("Something went wrong! Please run with --debug to see the error.")
-        print(exc)
-        exit()
+        print("\nExiting...")
 
 
 if __name__ == "__main__":
