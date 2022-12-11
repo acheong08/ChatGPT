@@ -515,4 +515,17 @@ class Chatbot(AsyncChatbot):
         if output == "text":
             return asyncio.run(coroutine_object)
         if output == "stream":
-            return self.__get_chat_stream()
+            data = {
+                "action": "next",
+                "messages": [
+                    {
+                        "id": str(generate_uuid()),
+                        "role": "user",
+                        "content": {"content_type": "text", "parts": [prompt]},
+                    },
+                ],
+                "conversation_id": conversation_id or self.conversation_id,
+                "parent_message_id": parent_id or self.parent_id,
+                "model": "text-davinci-002-render",
+            }
+            return self.__get_chat_stream(data)
