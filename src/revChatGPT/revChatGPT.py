@@ -510,9 +510,9 @@ class Chatbot(AsyncChatbot):
         :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
         :rtype: :obj:`dict` or :obj:`None`
         """
-        coroutine_object = super().get_chat_response(
-            prompt, output, conversation_id, parent_id)
         if output == "text":
+            coroutine_object = super().get_chat_response(
+                prompt, output, conversation_id, parent_id)
             return asyncio.run(coroutine_object)
         if output == "stream":
             data = {
