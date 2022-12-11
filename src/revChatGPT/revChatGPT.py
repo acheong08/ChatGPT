@@ -7,6 +7,8 @@ import asyncio
 
 import httpx
 
+from typing import List
+
 from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
 
@@ -58,12 +60,13 @@ class AsyncChatbot:
     parent_id: str
     base_url: str
     headers: dict
-    conversation_id_prev: str
-    parent_id_prev: str
+    conversation_id_prev_queue: List
+    parent_id_prev_queue: List
     request_timeout: int
     captcha_solver: any
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None, base_url="https://chat.openai.com/"):
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100,
+                 captcha_solver=None, base_url="https://chat.openai.com/", max_rollbacks=20):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
@@ -72,6 +75,9 @@ class AsyncChatbot:
         self.base_url = base_url
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
+        self.max_rollbacks = max_rollbacks
+        self.conversation_id_prev_queue = []
+        self.parent_id_prev_queue = []
         self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys(
         ) else self.config["accept_language"]
         self.headers = {
@@ -233,8 +239,12 @@ class AsyncChatbot:
             "parent_message_id": parent_id or self.parent_id,
             "model": "text-davinci-002-render",
         }
-        self.conversation_id_prev = self.conversation_id
-        self.parent_id_prev = self.parent_id
+        self.conversation_id_prev_queue.append(data["conversation_id"])  # for rollback
+        self.parent_id_prev_queue.append(data["parent_message_id"])
+        while len(self.conversation_id_prev_queue) > self.max_rollbacks:  # LRU, remove oldest
+            self.conversation_id_prev_queue.pop(0)
+        while len(self.parent_id_prev_queue) > self.max_rollbacks:
+            self.parent_id_prev_queue.pop(0)
         if output == "text":
             return await self.__get_chat_text(data)
         elif output == "stream":
@@ -242,14 +252,15 @@ class AsyncChatbot:
         else:
             raise ValueError("Output must be either 'text' or 'stream'")
 
-    def rollback_conversation(self) -> None:
+    def rollback_conversation(self, num=1) -> None:
         """
         Rollback the conversation.
-
+        :param num: The number of messages to rollback
         :return: None
         """
-        self.conversation_id = self.conversation_id_prev
-        self.parent_id = self.parent_id_prev
+        for i in range(num):
+            self.conversation_id = self.conversation_id_prev_queue.pop()
+            self.parent_id = self.parent_id_prev_queue.pop()
 
     def refresh_session(self) -> None:
         """
