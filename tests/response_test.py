@@ -22,6 +22,9 @@ def test_response():
 
         if response['message'] is None:
             print("Error: response['message'] is None")
+            assert False
+        else:
+            print(f"response['message']: {response['message']}")
 
         print("Success!")
     except Exception as exc:
