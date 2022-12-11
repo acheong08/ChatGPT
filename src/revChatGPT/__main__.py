@@ -2,7 +2,7 @@ import json
 import textwrap
 from os.path import exists
 from os import getenv
-from sys import argv
+from sys import argv, exit
 from svglib.svglib import svg2rlg
 
 from revChatGPT.revChatGPT import Chatbot
