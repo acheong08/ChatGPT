@@ -46,6 +46,10 @@ class Chatbot:
     :param request_timeout: The network request timeout seconds
     :type request_timeout: :obj:`int`, optional
 
+    :param base_url: The base url to chat.openai.com backend server, 
+        useful when set up a reverse proxy to avoid network issue.
+    :type base_url: :obj:`str`, optional
+
     :return: The Chatbot object
     :rtype: :obj:`Chatbot`
     """
@@ -59,19 +63,18 @@ class Chatbot:
     request_timeout: int
     captcha_solver: any
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None):
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None, base_url="https://chat.openai.com/"):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
         self.conversation_id = conversation_id
         self.parent_id = parent_id if parent_id else generate_uuid()
-        self.base_url = "https://chat.openai.com/"
+        self.base_url = base_url
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
         self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys(
         ) else self.config["accept_language"]
         self.headers = {
-            "Host": "chat.openai.com",
             "Accept": "text/event-stream",
             "Authorization": "Bearer ",
             "Content-Type": "application/json",
@@ -117,7 +120,7 @@ class Chatbot:
         :return: None
         """
         response = requests.post(
-            self.base_url+"backend-api/conversation",
+            self.base_url + "backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
             stream=True,
@@ -177,7 +180,7 @@ class Chatbot:
                 "https": self.config["proxy"],
             }
         response = s.post(
-            self.base_url+"backend-api/conversation",
+            self.base_url + "backend-api/conversation",
             data=json.dumps(data),
             timeout=self.request_timeout
         )
