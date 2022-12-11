@@ -373,7 +373,6 @@ class Chatbot:
         else:
             raise Exception("Error logging in")
 
-
     def send_feedback(
         self,
         is_good: bool,
@@ -419,6 +418,7 @@ class Chatbot:
         )
 
         return response
+
 
 class AsyncChatBot(Chatbot):
     async def __get_chat_stream(self, data) -> None:
@@ -498,22 +498,22 @@ class AsyncChatBot(Chatbot):
                 timeout=self.request_timeout,
             )
             # Check for expired token
-        if 'detail' in response.json().keys():
-            if 'code' in response['detail']:
-                if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
-                    self.refresh_session()
-                    return self.__get_chat_text(data)
-        response = response.text.splitlines()[-4]
-        response = response[6:]
-        response = json.loads(response)
-        self.parent_id = response["message"]["id"]
-        self.conversation_id = response["conversation_id"]
-        message = response["message"]["content"]["parts"][0]
-        return {
-            "message": message,
-            "conversation_id": self.conversation_id,
-            "parent_id": self.parent_id,
-        }
+            if 'detail' in response.json().keys():
+                if 'code' in response['detail']:
+                    if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
+                        self.refresh_session()
+                        return self.__get_chat_text(data)
+            response = response.text.splitlines()[-4]
+            response = response[6:]
+            response = json.loads(response)
+            self.parent_id = response["message"]["id"]
+            self.conversation_id = response["conversation_id"]
+            message = response["message"]["content"]["parts"][0]
+            return {
+                "message": message,
+                "conversation_id": self.conversation_id,
+                "parent_id": self.parent_id,
+            }
 
     async def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
         """
