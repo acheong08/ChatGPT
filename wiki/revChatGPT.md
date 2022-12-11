@@ -2,6 +2,10 @@
 
 # revChatGPT
 
+<a id="revChatGPT.Exceptions"></a>
+
+# revChatGPT.Exceptions
+
 <a id="revChatGPT.__main__"></a>
 
 # revChatGPT.\_\_main\_\_
@@ -51,14 +55,14 @@ Generate a UUID for the session -- Internal use only
 
 **Returns**:
 
-`uid` (:obj:`str`): A random UUID
+`:obj:`str``: a random UUID
 
 <a id="revChatGPT.revChatGPT.Chatbot"></a>
 
 ## Chatbot Objects
 
 ```python
-class Chatbot(config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None)
+class Chatbot()
 ```
 
 Initialize the chatbot.
@@ -68,17 +72,16 @@ https://github.com/acheong08/ChatGPT/wiki/Setup
 
 **Arguments**:
 
-- `config` (:obj:`json`): The configuration json
-- `conversation_id` (:obj:`str`, `optional`): The conversation ID
-- `parent_id` (:obj:`str`, `optional`): The parent ID
-- `debug` (:obj:`bool`, `optional`): Whether to enable debug mode
-- `refresh` (:obj:`bool`, `optional`): Whether to refresh the session
-- `request_timeout` (:obj:`int`, `optional`): The network request timeout in seconds
-- `captcha_solver` (:obj:`any`, `optional`): The `CaptchaSolver()` object
+- `config` (`:obj:`json``): The configuration json
+- `conversation_id` (`:obj:`str`, optional`): The conversation ID
+- `parent_id` (`:obj:`str`, optional`): The parent ID
+- `debug` (`:obj:`bool`, optional`): Whether to enable debug mode
+- `refresh` (`:obj:`bool`, optional`): Whether to refresh the session
+- `request_timeout` (`:obj:`int`, optional`): The network request timeout seconds
 
 **Returns**:
 
-`Chatbot` (:obj:`Chatbot`): The chatbot object
+`:obj:`Chatbot``: The Chatbot object
 
 <a id="revChatGPT.revChatGPT.Chatbot.reset_chat"></a>
 
@@ -89,20 +92,6 @@ def reset_chat() -> None
 ```
 
 Reset the conversation ID and parent ID.
-
-**Returns**:
-
-None
-
-<a id="revChatGPT.revChatGPT.Chatbot.__refresh_headers"></a>
-
-#### refresh\_headers
-
-```python
-def __refresh_headers() -> None
-```
-
-Refresh the headers -- Internal use only
 
 **Returns**:
 
@@ -120,20 +109,12 @@ Get the chat response.
 
 **Arguments**:
 
-- `prompt` (:obj:`str`): The message sent to the chatbot
-- `output` (:obj:`str`, `optional`): The type of the output (`"text"` or `"stream"`)
+- `prompt` (`:obj:`str``): The message sent to the chatbot
+- `output` (`:obj:`str`, optional`): The output type `text` or `stream`
 
 **Returns**:
 
-The chat response (:obj:`dict`):
-
-```python
-{"message": returned messages (:obj:`str`), 
- "conversation_id": conversation ID (:obj:`str`),
- "parent_id": parent ID (:obj:`str`)}
-``` 
-
-or None
+`:obj:`dict` or :obj:`None``: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
 
 <a id="revChatGPT.revChatGPT.Chatbot.rollback_conversation"></a>
 
@@ -175,8 +156,49 @@ Log in to OpenAI.
 
 **Arguments**:
 
-- `email` (:obj:`str`): The email
-- `password` (:obj:`str`): The password
+- `email` (`:obj:`str``): The email
+- `password` (`:obj:`str``): The password
+
+**Returns**:
+
+None
+
+<a id="revChatGPT.revChatGPT.asyncChatBot"></a>
+
+## asyncChatBot Objects
+
+```python
+class asyncChatBot(Chatbot)
+```
+
+<a id="revChatGPT.revChatGPT.asyncChatBot.get_chat_response"></a>
+
+#### get\_chat\_response
+
+```python
+async def get_chat_response(prompt: str, output="text") -> dict or None
+```
+
+Get the chat response.
+
+**Arguments**:
+
+- `prompt` (`:obj:`str``): The message sent to the chatbot
+- `output` (`:obj:`str`, optional`): The output type `text` or `stream`
+
+**Returns**:
+
+`:obj:`dict` or :obj:`None``: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
+
+<a id="revChatGPT.revChatGPT.asyncChatBot.rollback_conversation"></a>
+
+#### rollback\_conversation
+
+```python
+def rollback_conversation() -> None
+```
+
+Rollback the conversation.
 
 **Returns**:
 
