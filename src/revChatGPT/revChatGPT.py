@@ -67,6 +67,7 @@ class Chatbot:
         self.base_url = "https://chat.openai.com/"
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
+        self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys() 
         self.headers = {
             "Host": "chat.openai.com",
             "Accept": "text/event-stream",
@@ -76,7 +77,7 @@ class Chatbot:
             "Version/16.1 Safari/605.1.15",
             "X-Openai-Assistant-App-Id": "",
             "Connection": "close",
-            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Language": self.config["accept_language"]+";q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
