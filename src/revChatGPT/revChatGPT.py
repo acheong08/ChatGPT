@@ -380,10 +380,9 @@ class Chatbot:
         is_not_helpful=False,
         description=None,
     ):
-        from dataclasses import dataclass
+        from enum import Enum
 
-        @dataclass
-        class ChatGPTTags:
+        class ChatGPTTags(Enum):
             Harmful = "harmful"
             NotTrue = "false"
             NotHelpful = "not-helpful"
