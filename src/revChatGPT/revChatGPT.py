@@ -185,7 +185,7 @@ class Chatbot:
             timeout=self.request_timeout
         )
         # Check for expired token
-        if 'detail' in response.json().keys():
+        if 'detail' in response.json():
             if 'code' in response['detail']:
                 if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
                     self.refresh_session()
@@ -498,7 +498,7 @@ class AsyncChatBot(Chatbot):
                 timeout=self.request_timeout,
             )
             # Check for expired token
-            if 'detail' in response.json().keys():
+            if 'detail' in response.json():
                 if 'code' in response['detail']:
                     if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
                         self.refresh_session()
