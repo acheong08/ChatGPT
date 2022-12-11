@@ -457,7 +457,7 @@ class Chatbot(AsyncChatbot):
     :rtype: :obj:`Chatbot`
     """
     async def __async_generator_to_list(self, async_generator):
-        return [item async for item in await async_generator]
+        yield [item async for item in await async_generator]
 
     def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
         """
