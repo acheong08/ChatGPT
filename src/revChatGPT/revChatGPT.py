@@ -202,7 +202,7 @@ class Chatbot:
             "parent_id": self.parent_id,
         }
 
-    def get_chat_response(self, prompt: str, output="text") -> dict or None:
+    def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
         """
         Get the chat response.
 
@@ -225,8 +225,8 @@ class Chatbot:
                     "content": {"content_type": "text", "parts": [prompt]},
                 },
             ],
-            "conversation_id": self.conversation_id,
-            "parent_message_id": self.parent_id,
+            "conversation_id": conversation_id or self.conversation_id,
+            "parent_message_id": parent_id or self.parent_id,
             "model": "text-davinci-002-render",
         }
         self.conversation_id_prev = self.conversation_id
