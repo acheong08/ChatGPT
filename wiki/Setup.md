@@ -38,7 +38,7 @@ Go to https://chat.openai.com/chat and log in or sign up
 
 ```json
 {
-    "session_token": "<YOUR_TOKEN>",
+    "session_token": "<YOUR_TOKEN>"
 }
 ```
 Do not put email/password as that overrides tokens
