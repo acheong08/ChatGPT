@@ -220,7 +220,7 @@ class Chatbot:
         """
         self.refresh_session()  # Refreshing session token is fast
         data = {
-            "action": "variant",
+            "action": "next",
             "messages": [
                 {
                     "id": str(generate_uuid()),
