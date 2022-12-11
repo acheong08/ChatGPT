@@ -5,7 +5,12 @@ from revChatGPT.revChatGPT import Chatbot
 EMAIL = environ["OPENAI_EMAIL"]
 PASSWORD = environ["OPENAI_PASSWORD"]
 
-bot = Chatbot(EMAIL, PASSWORD, debug=True)
+config = {
+    "email": EMAIL,
+    "password": PASSWORD, }
+
+
+bot = Chatbot(config=config, debug=True)
 
 try:
     bot.refresh_session()
