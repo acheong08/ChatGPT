@@ -3,7 +3,9 @@ import textwrap
 from os.path import exists
 from os import getenv
 from sys import argv, exit
-from cairosvg import svg2png
+from io import BytesIO
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
 
 from revChatGPT.revChatGPT import Chatbot
 
@@ -27,7 +29,8 @@ class CaptchaSolver:
         svg = raw_svg
         # Save the SVG
         print("Saved captcha.png")
-        svg2png(bytestring=svg, write_to="captcha.png")
+        drawing = svg2rlg(BytesIO(svg))
+        renderPM.drawToFile(drawing, "captcha.png", fmt="PNG", dpi=300)
         # Get input
         solution = input("Please solve the captcha: ")
         # Return the solution
