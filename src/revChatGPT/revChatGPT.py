@@ -425,13 +425,56 @@ class AsyncChatbot:
 
 
 class Chatbot(AsyncChatbot):
-    async def async_generator_to_list(self, async_generator):
+    """
+    Initialize the AsyncChatbot.
+
+    See wiki for the configuration json:
+    https://github.com/acheong08/ChatGPT/wiki/Setup
+
+    :param config: The configuration json
+    :type config: :obj:`json`
+
+    :param conversation_id: The conversation ID
+    :type conversation_id: :obj:`str`, optional
+
+    :param parent_id: The parent ID
+    :type parent_id: :obj:`str`, optional
+
+    :param debug: Whether to enable debug mode
+    :type debug: :obj:`bool`, optional
+
+    :param refresh: Whether to refresh the session
+    :type refresh: :obj:`bool`, optional
+
+    :param request_timeout: The network request timeout seconds
+    :type request_timeout: :obj:`int`, optional
+
+    :param base_url: The base url to chat.openai.com backend server,
+        useful when set up a reverse proxy to avoid network issue.
+    :type base_url: :obj:`str`, optional
+
+    :return: The Chatbot object
+    :rtype: :obj:`Chatbot`
+    """
+    async def __async_generator_to_list(self, async_generator):
         return [item async for item in await async_generator]
 
     def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
+        """
+        Get the chat response.
+
+        :param prompt: The message sent to the chatbot
+        :type prompt: :obj:`str`
+
+        :param output: The output type `text` or `stream`
+        :type output: :obj:`str`, optional
+
+        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
+        :rtype: :obj:`dict` or :obj:`None`
+        """
         coroutine_object = super().get_chat_response(
             prompt, output, conversation_id, parent_id)
         if output == "text":
             return asyncio.run(coroutine_object)
         if output == "stream":
-            return asyncio.run(self.async_generator_to_list(coroutine_object))
+            return asyncio.run(self.__async_generator_to_list(coroutine_object))
