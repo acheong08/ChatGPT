@@ -371,7 +371,7 @@ class Chatbot:
             raise Exception("Error logging in")
 
 
-class asyncChatBot(Chatbot):
+class AsyncChatBot(Chatbot):
     async def __get_chat_stream(self, data) -> None:
         """
         Generator for the chat stream -- Internal use only
