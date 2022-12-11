@@ -3,7 +3,7 @@ import textwrap
 from os.path import exists
 from os import getenv
 from sys import argv, exit
-from svglib.svglib import svg2rlg
+from cairosvg import svg2png
 
 from revChatGPT.revChatGPT import Chatbot
 
@@ -26,10 +26,8 @@ class CaptchaSolver:
         # Get the SVG
         svg = raw_svg
         # Save the SVG
-        with open("captcha.png", "w", encoding="utf-8") as f:
-            print("Captcha saved to captcha.png")
-            png = svg2rlg(svg)
-            f.write(png)
+        print("Saved captcha.png")
+        svg2png(bytestring=svg, write_to="captcha.png")
         # Get input
         solution = input("Please solve the captcha: ")
         # Return the solution
