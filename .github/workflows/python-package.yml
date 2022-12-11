@@ -37,4 +37,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        OPENAI_EMAIL=${{ secrets.OPENAI_EMAIL }} OPENAI_PASSWORD=${{ secrets.OPENAI_PASSWORD }} pytest
+        OPENAI_EMAIL="${{ secrets.OPENAI_EMAIL }}" OPENAI_PASSWORD="${{ secrets.OPENAI_PASSWORD }}" pytest
