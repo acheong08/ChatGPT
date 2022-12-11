@@ -104,7 +104,7 @@ def main():
                     !help - Show this message
                     !reset - Forget the current conversation
                     !refresh - Refresh the session authentication
-                    !rollback - Rollback the conversation by 1 message
+                    !rollback <num> - Rollback the conversation by <num> message(s); <num> is optional, defaults to 1
                     !config - Show the current configuration
                     !exit - Exit the program
                     """,
@@ -118,9 +118,14 @@ def main():
                     chatbot.refresh_session()
                     print("Session refreshed.\n")
                     continue
-                elif prompt == "!rollback":
-                    chatbot.rollback_conversation()
-                    print("Chat session rolled back.")
+                # elif prompt == "!rollback":
+                elif prompt.startswith("!rollback"):
+                    try:
+                        num = int(prompt.split(" ")[1])  # Get the number of messages to rollback
+                    except IndexError:
+                        num = 1
+                    chatbot.rollback_conversation(num)
+                    print(f"Chat session rolled back {num} message(s).")
                     continue
                 elif prompt == "!config":
                     print(json.dumps(config, indent=4))
