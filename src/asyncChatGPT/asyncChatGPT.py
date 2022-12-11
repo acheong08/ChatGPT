@@ -99,9 +99,12 @@ class Chatbot:
 
         :return: None
         """
-        if not self.config.get("Authorization"):
-            self.config["Authorization"] = ""
-        self.headers["Authorization"] = "Bearer " + self.config["Authorization"]
+        access_token = self.config.get("Authorization") or self.config.get("authorization")
+
+        if not access_token:
+            self.headers["Authorization"] = ""
+
+        self.headers["Authorization"] = f'Bearer {access_token}'
 
     async def __get_chat_stream(self, data) -> None:
         """
