@@ -67,7 +67,8 @@ class Chatbot:
         self.base_url = "https://chat.openai.com/"
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
-        self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys() 
+        self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys(
+        ) else self.config["accept_language"]
         self.headers = {
             "Host": "chat.openai.com",
             "Accept": "text/event-stream",
@@ -102,7 +103,8 @@ class Chatbot:
         """
         if not self.config.get("Authorization"):
             self.config["Authorization"] = ""
-        self.headers["Authorization"] = "Bearer " + self.config["Authorization"]
+        self.headers["Authorization"] = "Bearer " + \
+            self.config["Authorization"]
 
     def __get_chat_stream(self, data) -> None:
         """

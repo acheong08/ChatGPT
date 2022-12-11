@@ -67,7 +67,8 @@ class Chatbot:
         self.base_url = "https://chat.openai.com/"
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
-	self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys()
+        self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys(
+        ) else self.config["accept_language"]
         self.headers = {
             "Host": "chat.openai.com",
             "Accept": "text/event-stream",
@@ -100,7 +101,8 @@ class Chatbot:
 
         :return: None
         """
-        access_token = self.config.get("Authorization") or self.config.get("authorization")
+        access_token = self.config.get(
+            "Authorization") or self.config.get("authorization")
 
         if not access_token:
             self.headers["Authorization"] = ""
@@ -118,7 +120,7 @@ class Chatbot:
         """
         s = httpx.AsyncClient()
         async with s.stream(
-            'POST', 
+            'POST',
             self.base_url + "backend-api/conversation",
             headers=self.headers,
             data=json.dumps(data),
@@ -296,7 +298,7 @@ class Chatbot:
                 self.__refresh_headers()
             # If it fails, try to login with email and password to get tokens
             except Exception:
-            # Check if response JSON is empty
+                # Check if response JSON is empty
                 if response.json() == {}:
                     self.debugger.log("Empty response")
                     self.debugger.log("Probably invalid session token")
