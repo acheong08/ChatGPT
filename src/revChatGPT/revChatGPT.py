@@ -181,20 +181,14 @@ class Chatbot:
             data=json.dumps(data),
             timeout=self.request_timeout
         )
-        try:
-            response = response.text.splitlines()[-4]
-            response = response[6:]
-        except Exception as exc:
-            self.debugger.log("Incorrect response from OpenAI API")
-            try:
-                resp = response.json()
-                self.debugger.log(resp)
-                if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
+        # Check for expired token
+        if 'detail' in response.json().keys():
+            if 'code' in response['detail']:
+                if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
                     self.refresh_session()
-            except Exception as exc2:
-                self.debugger.log(response.text)
-                raise Exception("Not a JSON response") from exc2
-            raise Exception("Incorrect response from OpenAI API") from exc
+                    return self.__get_chat_text(data)
+        response = response.text.splitlines()[-4]
+        response = response[6:]
         response = json.loads(response)
         self.parent_id = response["message"]["id"]
         self.conversation_id = response["conversation_id"]
@@ -454,29 +448,23 @@ class asyncChatBot(Chatbot):
                 data=json.dumps(data),
                 timeout=self.request_timeout,
             )
-            try:
-                response = response.text.splitlines()[-4]
-                response = response[6:]
-            except Exception as exc:
-                self.debugger.log("Incorrect response from OpenAI API")
-                try:
-                    resp = response.json()
-                    self.debugger.log(resp)
-                    if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
-                        self.refresh_session()
-                except Exception as exc2:
-                    self.debugger.log(response.text)
-                    raise Exception("Not a JSON response") from exc2
-                raise Exception("Incorrect response from OpenAI API") from exc
-            response = json.loads(response)
-            self.parent_id = response["message"]["id"]
-            self.conversation_id = response["conversation_id"]
-            message = response["message"]["content"]["parts"][0]
-            return {
-                "message": message,
-                "conversation_id": self.conversation_id,
-                "parent_id": self.parent_id,
-            }
+            # Check for expired token
+        if 'detail' in response.json().keys():
+            if 'code' in response['detail']:
+                if response['detail']['code'] == "invalid_api_key" or response['detail']['code'] == "token_expired":
+                    self.refresh_session()
+                    return self.__get_chat_text(data)
+        response = response.text.splitlines()[-4]
+        response = response[6:]
+        response = json.loads(response)
+        self.parent_id = response["message"]["id"]
+        self.conversation_id = response["conversation_id"]
+        message = response["message"]["content"]["parts"][0]
+        return {
+            "message": message,
+            "conversation_id": self.conversation_id,
+            "parent_id": self.parent_id,
+        }
 
     async def get_chat_response(self, prompt: str, output="text") -> dict or None:
         """
