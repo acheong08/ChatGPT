@@ -456,8 +456,46 @@ class Chatbot(AsyncChatbot):
     :return: The Chatbot object
     :rtype: :obj:`Chatbot`
     """
-    async def __async_generator_to_list(self, async_generator):
-        yield [item async for item in await async_generator]
+
+    def __get_chat_stream(self, data) -> None:
+        """
+        Generator for the chat stream -- Internal use only
+
+        :param data: The data to send
+        :type data: :obj:`dict`
+
+        :return: None
+        """
+        s = httpx.Client()
+        with s.stream(
+            'POST',
+            self.base_url + "backend-api/conversation",
+            headers=self.headers,
+            data=json.dumps(data),
+            timeout=self.request_timeout,
+        ) as response:
+            for line in response.iter_lines():
+                try:
+                    line = line[:-1]
+                    if line == "" or line == "data: [DONE]":
+                        continue
+                    line = line[6:]
+                    line = json.loads(line)
+                    if len(line["message"]["content"]["parts"]) == 0:
+                        continue
+                    message = line["message"]["content"]["parts"][0]
+                    self.conversation_id = line["conversation_id"]
+                    self.parent_id = line["message"]["id"]
+                    yield {
+                        "message": message,
+                        "conversation_id": self.conversation_id,
+                        "parent_id": self.parent_id,
+                    }
+                except Exception as exc:
+                    self.debugger.log(
+                        f"Error when handling response, got values{line}")
+                    raise Exception(
+                        f"Error when handling response, got values{line}") from exc
 
     def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
         """
@@ -477,4 +515,4 @@ class Chatbot(AsyncChatbot):
         if output == "text":
             return asyncio.run(coroutine_object)
         if output == "stream":
-            return asyncio.run(self.__async_generator_to_list(coroutine_object))
+            return self.__get_chat_stream()
