@@ -12,27 +12,28 @@ config = {
     "password": PASSWORD, }
 
 
-bot = Chatbot(config=config, debug=True)
+def test_response():
+    bot = Chatbot(config=config, debug=True)
 
-try:
-    bot.refresh_session()
-except Exception as e:
-    print("Error:", e)
-    assert False
-
-try:
-    response = bot.get_chat_response("Hello")
-except Exception as e:
-    print("Error:", e)
-    assert False
-
-try:
-    if response['message'] is None:
-        print("Error: response['message'] is None")
+    try:
+        bot.refresh_session()
+    except Exception as e:
+        print("Error:", e)
         assert False
-except Exception as e:
-    print("Error:", e)
-    assert False
 
-print("Success!")
-assert True
+    try:
+        response = bot.get_chat_response("Hello")
+    except Exception as e:
+        print("Error:", e)
+        assert False
+
+    try:
+        if response['message'] is None:
+            print("Error: response['message'] is None")
+            assert False
+    except Exception as e:
+        print("Error:", e)
+        assert False
+
+    print("Success!")
+    assert True
