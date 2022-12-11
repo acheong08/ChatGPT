@@ -11,9 +11,10 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
 
 def generate_uuid() -> str:
     """
-    Generates a UUID for the session -- Internal use only
+    Generate a UUID for the session -- Internal use only
 
-    :return: str
+    :return: a random UUID
+    :rtype: :obj:`str`
     """
     uid = str(uuid.uuid4())
     return uid
@@ -21,7 +22,7 @@ def generate_uuid() -> str:
 
 class Chatbot:
     """
-    Initializes the chatbot
+    Initialize the chatbot.
 
     See wiki for the configuration json:
     https://github.com/acheong08/ChatGPT/wiki/Setup
@@ -44,7 +45,8 @@ class Chatbot:
     :param request_timeout: The network request timeout seconds
     :type request_timeout: :obj:`int`, optional
 
-    :return: None or Exception
+    :return: The Chatbot object
+    :rtype: :obj:`Chatbot`
     """
     config: json
     conversation_id: str
@@ -65,46 +67,49 @@ class Chatbot:
         self.base_url = "https://chat.openai.com/"
         self.request_timeout = request_timeout
         self.captcha_solver = captcha_solver
+        self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys() 
+        self.headers = {
+            "Host": "chat.openai.com",
+            "Accept": "text/event-stream",
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/16.1 Safari/605.1.15",
+            "X-Openai-Assistant-App-Id": "",
+            "Connection": "close",
+            "Accept-Language": self.config["accept_language"]+";q=0.9",
+            "Referer": "https://chat.openai.com/chat",
+        }
         if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
             self.refresh_session()
         if "Authorization" in config:
-            self.refresh_headers()
+            self.__refresh_headers()
 
     def reset_chat(self) -> None:
         """
-        Resets the conversation ID and parent ID
+        Reset the conversation ID and parent ID.
 
         :return: None
         """
         self.conversation_id = None
         self.parent_id = generate_uuid()
 
-    def refresh_headers(self) -> None:
+    def __refresh_headers(self) -> None:
         """
-        Refreshes the headers -- Internal use only
+        Refresh the headers -- Internal use only
 
         :return: None
         """
         if not self.config.get("Authorization"):
             self.config["Authorization"] = ""
-        self.headers = {
-            "Host": "chat.openai.com",
-            "Accept": "text/event-stream",
-            "Authorization": "Bearer " + self.config["Authorization"],
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
-            "Version/16.1 Safari/605.1.15",
-            "X-Openai-Assistant-App-Id": "",
-            "Connection": "close",
-            "Accept-Language": "zh-CN,zh;q=0.9",
-            "Referer": "https://chat.openai.com/chat",
-        }
+        self.headers["Authorization"] = "Bearer " + self.config["Authorization"]
 
     def __get_chat_stream(self, data) -> None:
         """
-        Generator for chat stream -- Internal use only
+        Generator for the chat stream -- Internal use only
 
         :param data: The data to send
+        :type data: :obj:`dict`
 
         :return: None
         """
@@ -116,29 +121,37 @@ class Chatbot:
             timeout=self.request_timeout,
         )
         for line in response.iter_lines():
-            line = line.decode("utf-8")
-            if line == "" or line == "data: [DONE]":
-                continue
-            line = line[6:]
-            line = json.loads(line)
-            if len(line["message"]["content"]["parts"]) == 0:
-                continue
-            message = line["message"]["content"]["parts"][0]
-            self.conversation_id = line["conversation_id"]
-            self.parent_id = line["message"]["id"]
-            yield {
-                "message": message,
-                "conversation_id": self.conversation_id,
-                "parent_id": self.parent_id,
-            }
+            try:
+                line = line.decode("utf-8")
+                if line == "" or line == "data: [DONE]":
+                    continue
+                line = line[6:]
+                line = json.loads(line)
+                if len(line["message"]["content"]["parts"]) == 0:
+                    continue
+                message = line["message"]["content"]["parts"][0]
+                self.conversation_id = line["conversation_id"]
+                self.parent_id = line["message"]["id"]
+                yield {
+                    "message": message,
+                    "conversation_id": self.conversation_id,
+                    "parent_id": self.parent_id,
+                }
+            except Exception as exc:
+                self.debugger.log(
+                    f"Error when handling response, got values{line}")
+                raise Exception(
+                    f"Error when handling response, got values{line}") from exc
 
     def __get_chat_text(self, data) -> dict:
         """
-        Gets the chat response as text -- Internal use only
+        Get the chat response as text -- Internal use only
 
         :param data: The data to send
+        :type data: :obj:`dict`
 
         :return: The chat response
+        :rtype: :obj:`dict`
         """
         # Create request session
         s = requests.Session()
@@ -191,7 +204,7 @@ class Chatbot:
 
     def get_chat_response(self, prompt: str, output="text") -> dict or None:
         """
-        Gets the chat response
+        Get the chat response.
 
         :param prompt: The message sent to the chatbot
         :type prompt: :obj:`str`
@@ -199,8 +212,8 @@ class Chatbot:
         :param output: The output type `text` or `stream`
         :type output: :obj:`str`, optional
 
-        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}`
-        :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
+        :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
+        :rtype: :obj:`dict` or :obj:`None`
         """
         data = {
             "action": "next",
@@ -226,18 +239,18 @@ class Chatbot:
 
     def rollback_conversation(self) -> None:
         """
-        Rollbacks the conversation
+        Rollback the conversation.
 
         :return: None
         """
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
 
-    def refresh_session(self) -> Exception or None:
+    def refresh_session(self) -> None:
         """
-        Refreshes the session
+        Refresh the session.
 
-        :return: None or Exception
+        :return: None
         """
         # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
@@ -254,16 +267,46 @@ class Chatbot:
             )
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get(
-                self.base_url+"api/auth/session",
+                self.base_url + "api/auth/session",
                 headers={
                     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, "
                     "like Gecko) Version/16.1 Safari/605.1.15 ",
                 },
             )
-            # Check if response JSON is empty
-            if response.json() == {}:
-                self.debugger.log("Empty response")
-                self.debugger.log("Probably invalid session token")
+            # Check the response code
+            if response.status_code != 200:
+                self.debugger.log(
+                    f"Invalid status code: {response.status_code}")
+                raise Exception("Wrong response code")
+            # Try to get new session token and Authorization
+            try:
+                if 'error' in response.json():
+                    self.debugger.log("Error in response JSON")
+                    self.debugger.log(response.json()['error'])
+                    raise Exception
+                self.config["session_token"] = response.cookies.get(
+                    "__Secure-next-auth.session-token",
+                )
+                self.config["Authorization"] = response.json()["accessToken"]
+                self.__refresh_headers()
+            # If it fails, try to login with email and password to get tokens
+            except Exception:
+                # Check if response JSON is empty
+                if response.json() == {}:
+                    self.debugger.log("Empty response")
+                    self.debugger.log("Probably invalid session token")
+                # Check if ['detail']['code'] == 'token_expired' in response JSON
+                # First check if detail is in response JSON
+                elif 'detail' in response.json():
+                    # Check if code is in response JSON
+                    if 'code' in response.json()['detail']:
+                        # Check if code is token_expired
+                        if response.json()['detail']['code'] == 'token_expired':
+                            self.debugger.log("Token expired")
+                else:
+                    self.debugger.log(f"Response: '{response.text}'")
+                self.debugger.log("Cannot refresh the session, try to login")
+                # Try to login
                 if 'email' in self.config and 'password' in self.config:
                     del self.config['session_token']
                     self.login(self.config['email'],
@@ -272,39 +315,7 @@ class Chatbot:
                     self.debugger.log(
                         "Invalid token and no email and password provided")
                     raise ValueError(
-                        "No email and password provided")
-            # Check if ['detail']['code'] == 'token_expired' in response JSON
-            # First check if detail is in response JSON
-            if 'detail' in response.json():
-                # Check if code is in response JSON
-                if 'code' in response.json()['detail']:
-                    # Check if code is token_expired
-                    if response.json()['detail']['code'] == 'token_expired':
-                        self.debugger.log("Token expired")
-                        if 'email' in self.config and 'password' in self.config:
-                            del self.config['session_token']
-                            self.login(self.config['email'],
-                                       self.config['password'])
-                        else:
-                            self.debugger.log(
-                                "Invalid token and no email and password provided")
-                            raise ValueError(
-                                "No email and password provided")
-            if response.status_code != 200:
-                self.debugger.log(
-                    f"Invalid status code: {response.status_code}")
-                raise Exception("Wrong response code")
-            try:
-                self.config["session_token"] = response.cookies.get(
-                    "__Secure-next-auth.session-token",
-                )
-                self.config["Authorization"] = response.json()["accessToken"]
-                self.refresh_headers()
-            except Exception as exc:
-                print("Error refreshing session")
-                self.debugger.log("Response: '" + str(response.text) + "'")
-                self.debugger.log(str(response.status_code))
-                raise Exception("Error refreshing session") from exc
+                        "Error refreshing session: No email and password provided")
         elif "email" in self.config and "password" in self.config:
             try:
                 self.login(self.config["email"], self.config["password"])
@@ -312,7 +323,7 @@ class Chatbot:
                 self.debugger.log("Login failed")
                 raise exc
         elif "Authorization" in self.config:
-            self.refresh_headers()
+            self.__refresh_headers()
         else:
             self.debugger.log(
                 "No session_token, email and password or Authorization provided")
@@ -321,7 +332,7 @@ class Chatbot:
 
     def login(self, email: str, password: str) -> None:
         """
-        Logs in to OpenAI
+        Log in to OpenAI.
 
         :param email: The email
         :type email: :obj:`str`
@@ -357,6 +368,6 @@ class Chatbot:
                         self.config["session_token"] = possible_tokens[0]
                     else:
                         self.config["session_token"] = possible_tokens
-            self.refresh_headers()
+            self.__refresh_headers()
         else:
             raise Exception("Error logging in")

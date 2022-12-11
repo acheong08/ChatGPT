@@ -14,37 +14,38 @@
 def generate_uuid() -> str
 ```
 
-Generates a UUID for the session -- Internal use only
+Generate a UUID for the session -- Internal use only
 
 **Returns**:
 
-str
+`uid` (:obj:`str`): A random UUID
 
 <a id="asyncChatGPT.asyncChatGPT.Chatbot"></a>
 
 ## Chatbot Objects
 
 ```python
-class Chatbot()
+class Chatbot(config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100, captcha_solver=None)
 ```
 
-Initializes the chatbot
+Initialize the chatbot.
 
 See wiki for the configuration json:
 https://github.com/acheong08/ChatGPT/wiki/Setup
 
 **Arguments**:
 
-- `config` (`:obj:`json``): The configuration json
-- `conversation_id` (`:obj:`str`, optional`): The conversation ID
-- `parent_id` (`:obj:`str`, optional`): The parent ID
-- `debug` (`:obj:`bool`, optional`): Whether to enable debug mode
-- `refresh` (`:obj:`bool`, optional`): Whether to refresh the session
-- `request_timeout` (`:obj:`int`, optional`): The network request timeout seconds
+- `config` (:obj:`json`): The configuration json
+- `conversation_id` (:obj:`str`, `optional`): The conversation ID
+- `parent_id` (:obj:`str`, `optional`): The parent ID
+- `debug` (:obj:`bool`, `optional`): Whether to enable debug mode
+- `refresh` (:obj:`bool`, `optional`): Whether to refresh the session
+- `request_timeout` (:obj:`int`, `optional`): The network request timeout in seconds
+- `captcha_solver` (:obj:`any`, `optional`): The `CaptchaSolver()` object
 
 **Returns**:
 
-None or Exception
+`Chatbot` (:obj:`Chatbot`): The chatbot object
 
 <a id="asyncChatGPT.asyncChatGPT.Chatbot.reset_chat"></a>
 
@@ -54,21 +55,21 @@ None or Exception
 def reset_chat() -> None
 ```
 
-Resets the conversation ID and parent ID
+Reset the conversation ID and parent ID.
 
 **Returns**:
 
 None
 
-<a id="asyncChatGPT.asyncChatGPT.Chatbot.refresh_headers"></a>
+<a id="asyncChatGPT.asyncChatGPT.Chatbot.__refresh_headers"></a>
 
 #### refresh\_headers
 
 ```python
-def refresh_headers() -> None
+def __refresh_headers() -> None
 ```
 
-Refreshes the headers -- Internal use only
+Refresh the headers -- Internal use only
 
 **Returns**:
 
@@ -79,20 +80,27 @@ None
 #### get\_chat\_response
 
 ```python
-async def get_chat_response(prompt, output="text") -> dict or None
+async def get_chat_response(prompt: str, output="text") -> dict or None
 ```
 
-Gets the chat response
+Get the chat response.
 
 **Arguments**:
 
-- `prompt` (`:obj:`str``): The message sent to the chatbot
-- `output` (`:obj:`str`, optional`): The output type `text` or `stream`
+- `prompt` (:obj:`str`): The message sent to the chatbot
+- `output` (:obj:`str`, `optional`): The type of the output (`"text"` or `"stream"`)
 
 **Returns**:
 
-The chat response `{"message": "Returned messages", "conversation_id": "conversation ID",
-"parent_id": "parent ID"}` :rtype: :obj:`dict` or :obj:`None` or :obj:`Exception`
+The chat response (:obj:`dict`):
+
+```python
+{"message": returned messages (:obj:`str`), 
+ "conversation_id": conversation ID (:obj:`str`),
+ "parent_id": parent ID (:obj:`str`)}
+``` 
+
+or None
 
 <a id="asyncChatGPT.asyncChatGPT.Chatbot.rollback_conversation"></a>
 
@@ -102,7 +110,7 @@ The chat response `{"message": "Returned messages", "conversation_id": "conversa
 def rollback_conversation() -> None
 ```
 
-Rollbacks the conversation
+Rollback the conversation.
 
 **Returns**:
 
@@ -113,14 +121,14 @@ None
 #### refresh\_session
 
 ```python
-def refresh_session() -> Exception or None
+def refresh_session() -> None
 ```
 
-Refreshes the session
+Refresh the session.
 
 **Returns**:
 
-None or Exception
+None
 
 <a id="asyncChatGPT.asyncChatGPT.Chatbot.login"></a>
 
@@ -130,12 +138,12 @@ None or Exception
 def login(email: str, password: str) -> None
 ```
 
-Logs in to OpenAI
+Log in to OpenAI.
 
 **Arguments**:
 
-- `email` (`:obj:`str``): The email
-- `password` (`:obj:`str``): The password
+- `email` (:obj:`str`): The email
+- `password` (:obj:`str`): The password
 
 **Returns**:
 
