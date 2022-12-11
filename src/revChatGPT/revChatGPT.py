@@ -513,7 +513,13 @@ class Chatbot(AsyncChatbot):
         if output == "text":
             coroutine_object = super().get_chat_response(
                 prompt, output, conversation_id, parent_id)
-            return asyncio.run(coroutine_object)
+            try:
+                return asyncio.run(coroutine_object)
+            except RuntimeError:
+                import nest_asyncio
+                nest_asyncio.apply()
+                return asyncio.run(coroutine_object)
+
         if output == "stream":
             data = {
                 "action": "next",
