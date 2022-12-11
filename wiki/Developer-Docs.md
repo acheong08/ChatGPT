@@ -1,5 +1,5 @@
 # Development
-Full API docs: [standard](https://github.com/acheong08/ChatGPT/wiki/revChatGPT), [async](https://github.com/acheong08/ChatGPT/wiki/asyncChatGPT)
+Full API docs: [here](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
 
 ## Standard use
 
@@ -52,7 +52,7 @@ for res in response:
 `pip3 install revChatGPT --upgrade`
 
 ```python
-from asyncChatGPT.asyncChatGPT import Chatbot
+from revChatGPT.revChatGPT import asyncChatbot as Chatbot
 
 # For the config please go here:
 # https://github.com/acheong08/ChatGPT/wiki/Setup
