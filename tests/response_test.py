@@ -13,27 +13,18 @@ config = {
 
 
 def test_response():
-    bot = Chatbot(config=config, debug=True)
-
     try:
+        bot = Chatbot(config=config, debug=True)
+
         bot.refresh_session()
-    except Exception as e:
-        print("Error:", e)
-        assert False
 
-    try:
         response = bot.get_chat_response("Hello")
-    except Exception as e:
-        print("Error:", e)
-        assert False
 
-    try:
         if response['message'] is None:
             print("Error: response['message'] is None")
-            assert False
-    except Exception as e:
-        print("Error:", e)
-        assert False
 
-    print("Success!")
+        print("Success!")
+    except Exception as exc:
+        print(f"Error: {exc}")
+        assert False
     assert True
