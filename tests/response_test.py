@@ -2,8 +2,10 @@ from os import environ
 
 from revChatGPT.revChatGPT import Chatbot
 
+import base64
+
 EMAIL = environ["OPENAI_EMAIL"]
-PASSWORD = environ["OPENAI_PASSWORD"]
+PASSWORD = base64.b64decode(environ["OPENAI_PASSWORD"]).decode("utf-8")
 
 config = {
     "email": EMAIL,
