@@ -20,9 +20,10 @@ def generate_uuid() -> str:
     uid = str(uuid.uuid4())
     return uid
 
-class AsyncChatBot:
+
+class AsyncChatbot:
     """
-    Initialize the AsyncChatBot.
+    Initialize the AsyncChatbot.
 
     See wiki for the configuration json:
     https://github.com/acheong08/ChatGPT/wiki/Setup
@@ -249,7 +250,7 @@ class AsyncChatBot:
         """
         self.conversation_id = self.conversation_id_prev
         self.parent_id = self.parent_id_prev
-    
+
     def refresh_session(self) -> None:
         """
         Refresh the session.
@@ -423,14 +424,14 @@ class AsyncChatBot:
         return response
 
 
-class ChatBot(AsyncChatBot):
+class Chatbot(AsyncChatbot):
     async def async_generator_to_list(self, async_generator):
         return [item async for item in await async_generator]
 
     def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
-        coroutine_object = super().get_chat_response(prompt, output, conversation_id, parent_id)
+        coroutine_object = super().get_chat_response(
+            prompt, output, conversation_id, parent_id)
         if output == "text":
             return asyncio.run(coroutine_object)
         if output == "stream":
             return asyncio.run(self.async_generator_to_list(coroutine_object))
-            
