@@ -57,15 +57,15 @@ Generate a UUID for the session -- Internal use only
 
 `:obj:`str``: a random UUID
 
-<a id="revChatGPT.revChatGPT.Chatbot"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatbot"></a>
 
-## Chatbot Objects
+## AsyncChatbot Objects
 
 ```python
-class Chatbot()
+class AsyncChatbot()
 ```
 
-Initialize the chatbot.
+Initialize the AsyncChatbot.
 
 See wiki for the configuration json:
 https://github.com/acheong08/ChatGPT/wiki/Setup
@@ -78,12 +78,14 @@ https://github.com/acheong08/ChatGPT/wiki/Setup
 - `debug` (`:obj:`bool`, optional`): Whether to enable debug mode
 - `refresh` (`:obj:`bool`, optional`): Whether to refresh the session
 - `request_timeout` (`:obj:`int`, optional`): The network request timeout seconds
+- `base_url` (`:obj:`str`, optional`): The base url to chat.openai.com backend server,
+useful when set up a reverse proxy to avoid network issue.
 
 **Returns**:
 
 `:obj:`Chatbot``: The Chatbot object
 
-<a id="revChatGPT.revChatGPT.Chatbot.reset_chat"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatbot.reset_chat"></a>
 
 #### reset\_chat
 
@@ -97,12 +99,15 @@ Reset the conversation ID and parent ID.
 
 None
 
-<a id="revChatGPT.revChatGPT.Chatbot.get_chat_response"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatbot.get_chat_response"></a>
 
 #### get\_chat\_response
 
 ```python
-def get_chat_response(prompt: str, output="text") -> dict or None
+async def get_chat_response(prompt: str,
+                            output="text",
+                            conversation_id=None,
+                            parent_id=None) -> dict or None
 ```
 
 Get the chat response.
@@ -116,7 +121,7 @@ Get the chat response.
 
 `:obj:`dict` or :obj:`None``: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
 
-<a id="revChatGPT.revChatGPT.Chatbot.rollback_conversation"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatbot.rollback_conversation"></a>
 
 #### rollback\_conversation
 
@@ -130,7 +135,7 @@ Rollback the conversation.
 
 None
 
-<a id="revChatGPT.revChatGPT.Chatbot.refresh_session"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatbot.refresh_session"></a>
 
 #### refresh\_session
 
@@ -144,7 +149,7 @@ Refresh the session.
 
 None
 
-<a id="revChatGPT.revChatGPT.Chatbot.login"></a>
+<a id="revChatGPT.revChatGPT.AsyncChatbot.login"></a>
 
 #### login
 
@@ -158,47 +163,6 @@ Log in to OpenAI.
 
 - `email` (`:obj:`str``): The email
 - `password` (`:obj:`str``): The password
-
-**Returns**:
-
-None
-
-<a id="revChatGPT.revChatGPT.AsyncChatBot"></a>
-
-## AsyncChatBot Objects
-
-```python
-class AsyncChatBot(Chatbot)
-```
-
-<a id="revChatGPT.revChatGPT.AsyncChatBot.get_chat_response"></a>
-
-#### get\_chat\_response
-
-```python
-async def get_chat_response(prompt: str, output="text") -> dict or None
-```
-
-Get the chat response.
-
-**Arguments**:
-
-- `prompt` (`:obj:`str``): The message sent to the chatbot
-- `output` (`:obj:`str`, optional`): The output type `text` or `stream`
-
-**Returns**:
-
-`:obj:`dict` or :obj:`None``: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
-
-<a id="revChatGPT.revChatGPT.AsyncChatBot.rollback_conversation"></a>
-
-#### rollback\_conversation
-
-```python
-def rollback_conversation() -> None
-```
-
-Rollback the conversation.
 
 **Returns**:
 
