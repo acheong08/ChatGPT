@@ -259,7 +259,7 @@ class AsyncChatbot:
         """
         # Either session_token, email and password or Authorization is required
         if self.config.get("session_token"):
-            s = httpx.Client(http2=True)
+            s = httpx.Client()
             if self.config.get("proxy"):
                 s.proxies = {
                     "http": self.config["proxy"],
@@ -426,7 +426,7 @@ class AsyncChatbot:
 
 class Chatbot(AsyncChatbot):
     """
-    Initialize the AsyncChatbot.
+    Initialize the Chatbot.
 
     See wiki for the configuration json:
     https://github.com/acheong08/ChatGPT/wiki/Setup
