@@ -45,6 +45,10 @@ class Chatbot:
     :param request_timeout: The network request timeout seconds
     :type request_timeout: :obj:`int`, optional
 
+    :param base_url: The base url to chat.openai.com backend server, 
+        useful when set up a reverse proxy to avoid network issue.
+    :type base_url: :obj:`str`, optional
+
     :return: The Chatbot object
     :rtype: :obj:`Chatbot`
     """
