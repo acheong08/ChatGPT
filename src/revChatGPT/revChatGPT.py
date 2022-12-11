@@ -370,3 +370,50 @@ class Chatbot:
             self.__refresh_headers()
         else:
             raise Exception("Error logging in")
+
+    # fmt: on
+    def send_feedback(
+        self,
+        is_good: bool,
+        is_harmful=False,
+        is_not_true=False,
+        is_not_helpful=False,
+        description=None,
+    ):
+        from dataclasses import dataclass
+
+        @dataclass
+        class ChatGPTTags:
+            Harmful = "harmful"
+            NotTrue = "false"
+            NotHelpful = "not-helpful"
+
+        url = self.base_url + "backend-api/conversation/message_feedback"
+
+        data = {
+            "conversation_id": self.conversation_id,
+            "message_id": self.parent_id,
+            "rating": "thumbsUp" if is_good else "thumbsDown",
+        }
+
+        if not is_good:
+            tags = list()
+            if is_harmful:
+                tags.append(ChatGPTTags.Harmful)
+            if is_not_true:
+                tags.append(ChatGPTTags.NotTrue)
+            if is_not_helpful:
+                tags.append(ChatGPTTags.NotHelpful)
+            data["tags"] = tags
+
+        if description is not None:
+            data["text"] = description
+
+        response = requests.post(
+            url,
+            headers=self.headers,
+            data=json.dumps(data),
+            timeout=self.request_timeout,
+        )
+
+        return response
