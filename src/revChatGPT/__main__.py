@@ -2,7 +2,7 @@ import json
 import textwrap
 from os.path import exists
 from os import getenv
-from sys import argv
+from sys import argv, exit
 from svglib.svglib import svg2rlg
 
 from revChatGPT.revChatGPT import Chatbot
@@ -163,6 +163,9 @@ def main():
                     print("Something went wrong!")
                     print(exc)
                     continue
+    except KeyboardInterrupt:
+        print("\nGoodbye!")
+        exit()
     except Exception as exc:
         print("Something went wrong! Please run with --debug to see the error.")
         print(exc)
