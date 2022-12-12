@@ -392,6 +392,7 @@ class AsyncChatbot:
         while not self.agent_found or not self.cookie_found:
             print("Waiting for cookies...")
             sleep(5)
+        driver.close()
         driver.quit()
         del driver
 
