@@ -27,7 +27,8 @@ Go to https://chat.openai.com/chat and log in or sign up
 {
   "session_token": "<YOUR_TOKEN>",
   "cf_clearance": "<CLOUDFLARE_TOKEN>",
-  "user_agent": "<USER_AGENT>"
+  "user_agent": "<USER_AGENT>",
+  #"proxy": "<HTTP/HTTPS_PROXY>"
 }
 ```
 
