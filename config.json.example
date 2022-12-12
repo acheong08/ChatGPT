@@ -1,4 +1,4 @@
 {
-    "email":"<EMAIL>",
-    "password": "<PASSWORD>"
+    "session_token": "<YOUR TOKEN>",
+    "cf_clearance": "<cf_clearance cookie value>"
 }
