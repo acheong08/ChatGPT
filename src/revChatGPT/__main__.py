@@ -7,8 +7,6 @@ import re
 
 from revChatGPT.revChatGPT import Chatbot
 
-import undetected_chromedriver as uc
-
 
 class CaptchaSolver:
     """
@@ -75,39 +73,6 @@ def configure():
             debug = True
         else:
             debug = False
-        # Getting cookies via undetected_chromedriver
-
-        def detect_cookies(message):
-            if 'params' in message:
-                if 'headers' in message['params']:
-                    if 'set-cookie' in message['params']['headers']:
-                        # Use regex to get the cookie for cf_clearance=*;
-                        cookie = re.search(
-                            "cf_clearance=.*?;", message['params']['headers']['set-cookie'])
-                        if cookie:
-                            print("Found cookie: " + cookie.group(0))
-                            # remove the semicolon and 'cf_clearance=' from the string
-                            raw_cookie = cookie.group(0)
-                            config['cf_clearance'] = raw_cookie[13:-1]
-
-        def detect_user_agent(message):
-            if 'params' in message:
-                if 'headers' in message['params']:
-                    if 'user-agent' in message['params']['headers']:
-                        # Use regex to get the cookie for cf_clearance=*;
-                        user_agent = message['params']['headers']['user-agent']
-                        config['user_agent'] = user_agent
-        driver = uc.Chrome(enable_cdp_events=True)
-        driver.add_cdp_listener(
-            "Network.responseReceivedExtraInfo", lambda msg: detect_cookies(msg))
-        driver.add_cdp_listener(
-            "Network.requestWillBeSentExtraInfo", lambda msg: detect_user_agent(msg))
-        driver.get("https://chat.openai.com/chat")
-        from time import sleep
-        while 'cf_clearance' not in config or 'user_agent' not in config:
-            print("Waiting for cookies...")
-            sleep(5)
-        driver.quit()
         chatGPT_main(config, debug)
     except KeyboardInterrupt:
         print("\nGoodbye!")
