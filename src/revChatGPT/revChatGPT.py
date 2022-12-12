@@ -380,6 +380,12 @@ class AsyncChatbot:
                         self.agent_found = True
                         self.debugger.log("Found user agent: " + user_agent)
         options = uc.ChromeOptions()
+        options.add_argument("--disable-extensions")
+        options.add_argument('--disable-application-cache')
+        options.add_argument('--disable-gpu')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
         if self.config.get("proxy", "") != "":
             options.add_argument("--proxy-server=" + self.config["proxy"])
         driver = uc.Chrome(enable_cdp_events=True, options=options)
