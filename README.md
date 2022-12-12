@@ -5,7 +5,8 @@
 
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
-# Notice
+# Notice 
+### Only session authentication supported email/password deprecated.
 OpenAI has added cloudflare to protect their services. Please use [session tokens](https://github.com/acheong08/ChatGPT/wiki/Setup#session-token-authentication) along with `cf_clearance` (more details in wiki)
 
 ## If you have a desktop interface (Non-server)
