@@ -33,8 +33,7 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 - No ARM support for email/password. Use session token authentication if on Raspberry Pi
 
 # Help needed
-- Documentation for [OpenAIAuth](https://github.com/acheong08/OpenAIAuth)
-- Update documentation for developers (with examples)
+- Document the new changes (Desktop / Server - In regards to Cloudflare)
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
