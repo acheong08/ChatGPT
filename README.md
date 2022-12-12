@@ -10,7 +10,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 OpenAI has added cloudflare to protect their services. Please use [session tokens](https://github.com/acheong08/ChatGPT/wiki/Setup#session-token-authentication) along with `cf_clearance` (more details in wiki)
 
 ## If you have a desktop interface (Non-server)
-[reChatGPT-alpha](https://github.com/acheong08/ChatGPT/releases/tag/0.0.a39) uses chrome drivers to fetch the cf_clearance
+[reChatGPT-alpha](https://github.com/acheong08/ChatGPT/releases/tag/0.0.a40) uses chrome drivers to fetch the cf_clearance
 
 Refer to [setup](https://github.com/acheong08/ChatGPT/blob/cloudflare/wiki/Setup.md) for instructions
 
