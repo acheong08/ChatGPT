@@ -505,4 +505,7 @@ class Chatbot(AsyncChatbot):
                 "parent_message_id": parent_id or self.parent_id,
                 "model": "text-davinci-002-render",
             }
+            self.conversation_id_prev_queue.append(
+                data["conversation_id"])  # for rollback
+            self.parent_id_prev_queue.append(data["parent_message_id"])
             return self.__get_chat_stream(data)

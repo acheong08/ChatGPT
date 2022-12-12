@@ -77,5 +77,3 @@ Save this in `config.json` in current working directory, in `$XDG_CONFIG_HOME/re
 
 </details>
 
-<details>
-<summary>
