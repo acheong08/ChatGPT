@@ -8,7 +8,7 @@ Make the necessary changes in `config.json.example` and save as `config.json` in
 
 ## Session Token Authentication
 
-Use if using third-party providers (Google / Microsoft Auth) or if email/password is rate limited
+Currently the only one functional
 
 </summary>
 
