@@ -6,7 +6,7 @@
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 # Notice
-OpenAI has added cloudflare to protect their services. Please use [session tokens](https://github.com/acheong08/ChatGPT/wiki/Setup#session-token-authentication) along with `cf_clearance` (more details in wiki)
+OpenAI has added cloudflare to protect their services. Please use [session tokens](https://github.com/acheong08/ChatGPT/wiki/Setup#session-token-authentication)
 
 # Instructions
 Instructions have been moved to the [Wiki](https://github.com/acheong08/ChatGPT/wiki).
