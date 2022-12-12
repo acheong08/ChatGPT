@@ -9,7 +9,7 @@ import httpx
 
 from typing import List
 
-from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
+from OpenAIAuth.OpenAIAuth import Debugger
 
 
 def generate_uuid() -> str:
@@ -92,7 +92,7 @@ class AsyncChatbot:
             "Accept-Language": self.config["accept_language"]+";q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
-        if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
+        if ("session_token" in config) and refresh:
             self.refresh_session()
         if "Authorization" in config:
             self.__refresh_headers()
@@ -331,74 +331,12 @@ class AsyncChatbot:
                         # Check if code is token_expired
                         if response.json()['detail']['code'] == 'token_expired':
                             self.debugger.log("Token expired")
-                else:
-                    self.debugger.log(f"Response: '{response.text}'")
-                self.debugger.log("Cannot refresh the session, try to login")
-                # Try to login
-                if 'email' in self.config and 'password' in self.config:
-                    del self.config['session_token']
-                    self.login(self.config['email'],
-                               self.config['password'])
-                else:
-                    self.debugger.log(
-                        "Invalid token and no email and password provided")
-                    raise ValueError(
-                        "Error refreshing session: No email and password provided")
-        elif "email" in self.config and "password" in self.config:
-            try:
-                self.login(self.config["email"], self.config["password"])
-            except Exception as exc:
-                self.debugger.log("Login failed")
-                raise exc
-        elif "Authorization" in self.config:
-            self.__refresh_headers()
+                raise Exception("Failed to refresh session")
         else:
             self.debugger.log(
                 "No session_token, email and password or Authorization provided")
             raise ValueError(
                 "No session_token, email and password or Authorization provided")
-
-    def login(self, email: str, password: str) -> None:
-        """
-        Log in to OpenAI.
-
-        :param email: The email
-        :type email: :obj:`str`
-
-        :param password: The password
-        :type password: :obj:`str`
-
-        :return: None
-        """
-        self.debugger.log("Logging in...")
-        proxy = self.config.get("proxy")
-        auth = OpenAIAuth(email, password, use_proxy=bool(
-            proxy), proxy=proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver, cf_clearance=self.config.get("cf_clearance"))
-        try:
-            auth.begin()
-        except Exception as exc:
-            # if ValueError with e as "Captcha detected" fail
-            if exc == "Captcha detected":
-                self.debugger.log(
-                    "Captcha not supported. Use session tokens instead.")
-                raise ValueError("Captcha detected") from exc
-            raise exc
-        if auth.access_token is not None:
-            self.config["Authorization"] = auth.access_token
-            if auth.session_token is not None:
-                self.config["session_token"] = auth.session_token
-            else:
-                possible_tokens = auth.session.cookies.get(
-                    "__Secure-next-auth.session-token",
-                )
-                if possible_tokens is not None:
-                    if len(possible_tokens) > 1:
-                        self.config["session_token"] = possible_tokens[0]
-                    else:
-                        self.config["session_token"] = possible_tokens
-            self.__refresh_headers()
-        else:
-            raise Exception("Error logging in")
 
     def send_feedback(
         self,
