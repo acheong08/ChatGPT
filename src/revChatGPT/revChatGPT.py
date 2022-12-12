@@ -384,6 +384,9 @@ class AsyncChatbot:
 
         return response
 
+    def refresh_cookies(self):
+        pass
+
 
 class Chatbot(AsyncChatbot):
     """
