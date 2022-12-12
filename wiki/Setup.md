@@ -24,7 +24,7 @@ Save this in `config.json` in current working directory, in `$XDG_CONFIG_HOME/re
 <summary>
 
 ## Session Token Authentication
-Use if using third-party providers (Google / Microsoft Auth) or if email/password rate limited
+Use if using third-party providers (Google / Microsoft Auth) or if email/password is rate limited
 </summary>
 
 Go to https://chat.openai.com/chat and log in or sign up
