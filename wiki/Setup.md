@@ -2,7 +2,7 @@
 
 ## Install
 
-`pip3 install revChatGPT --upgrade`
+`pip3 install revChatGPT==0.0.a42`
 
 Make the necessary changes in `config.json.example` and save as `config.json` in the current working directory, in `$XDG_CONFIG_HOME/revChatGPT/config.json`, or in `$HOME/revChatGPT/config.json`.
 
