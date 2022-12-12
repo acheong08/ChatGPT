@@ -134,7 +134,6 @@ class AsyncChatbot:
         s = httpx.AsyncClient()
         # Set cloudflare cookies
         if "cf_clearance" in self.config:
-            self.debugger.log("Setting cloudflare cookies")
             s.cookies.set(
                 "cf_clearance",
                 self.config["cf_clearance"],
@@ -183,7 +182,6 @@ class AsyncChatbot:
             s.headers = self.headers
             # Set cloudflare cookies
             if "cf_clearance" in self.config:
-                self.debugger.log("Setting cloudflare cookies")
                 s.cookies.set(
                     "cf_clearance",
                     self.config["cf_clearance"],
@@ -488,7 +486,6 @@ class Chatbot(AsyncChatbot):
         s = httpx.Client()
         # Set cloudflare cookies
         if "cf_clearance" in self.config:
-            self.debugger.log("Setting cloudflare cookies")
             s.cookies.set(
                 "cf_clearance",
                 self.config["cf_clearance"],
