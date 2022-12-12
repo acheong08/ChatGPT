@@ -386,6 +386,7 @@ class AsyncChatbot:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-setuid-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--incognito")
         if self.config.get("proxy", "") != "":
             options.add_argument("--proxy-server=" + self.config["proxy"])
         driver = uc.Chrome(enable_cdp_events=True, options=options)
