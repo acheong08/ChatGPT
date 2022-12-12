@@ -390,6 +390,7 @@ class AsyncChatbot:
             print("Waiting for cookies...")
             sleep(5)
         driver.quit()
+        del driver
 
     def send_feedback(
         self,
