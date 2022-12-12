@@ -17,10 +17,9 @@ Go to https://chat.openai.com/chat and log in or sign up
 1. Open console with `F12`
 2. Open `Application` tab > Cookies
    ![image](https://user-images.githubusercontent.com/36258159/205494773-32ef651a-994d-435a-9f76-a26699935dac.png)
-3. Copy the value for `__Secure-next-auth.session-token` and paste it into `config.json.example` under `session_token`. You do not need to fill out `Authorization`
-   ![image](https://user-images.githubusercontent.com/36258159/205495076-664a8113-eda5-4d1e-84d3-6fad3614cfd8.png)
-4. Find your cf_clearance cookie and paste it under "cf_clearance"
-5. Get your user-agent and paste it under "user_agent"
+3. Copy the value for `__Secure-next-auth.session-token` and paste it into `config.json.example` under `session_token`. 
+4. Find your `cf_clearance` cookie and paste it under "cf_clearance"
+5. Get your `user-agent` and paste it under "user_agent"
 6. Save the modified file as `config.json` in the current working directory, as `$XDG_CONFIG_HOME/revChatGPT/config.json`, or as `$HOME/revChatGPT/config.json`.
 
 ```json
