@@ -379,7 +379,9 @@ class AsyncChatbot:
                         self.config['user_agent'] = user_agent
                         self.agent_found = True
                         self.debugger.log("Found user agent: " + user_agent)
-        driver = uc.Chrome(enable_cdp_events=True)
+        options = uc.ChromeOptions()
+        options.add_argument("--window-size=1,1")
+        driver = uc.Chrome(enable_cdp_events=True, options=options)
         driver.add_cdp_listener(
             "Network.responseReceivedExtraInfo", lambda msg: detect_cookies(msg))
         driver.add_cdp_listener(
