@@ -80,12 +80,13 @@ class AsyncChatbot:
         self.parent_id_prev_queue = []
         self.config["accept_language"] = 'en-US,en' if "accept_language" not in self.config.keys(
         ) else self.config["accept_language"]
+        self.config["user_agent"] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36" if "user_agent" not in self.config.keys(
+        ) else self.config["user_agent"]
         self.headers = {
             "Accept": "text/event-stream",
             "Authorization": "Bearer ",
             "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) "
-            "Version/16.1 Safari/605.1.15",
+            "User-Agent": self.config["user_agent"],
             "X-Openai-Assistant-App-Id": "",
             "Connection": "close",
             "Accept-Language": self.config["accept_language"]+";q=0.9",
@@ -126,6 +127,13 @@ class AsyncChatbot:
         :return: None
         """
         s = httpx.AsyncClient()
+        # Set cloudflare cookies
+        if "cf_clearance" in self.config:
+            self.debugger.log("Setting cloudflare cookies")
+            s.cookies.set(
+                "cf_clearance",
+                self.config["cf_clearance"],
+            )
         async with s.stream(
             'POST',
             self.base_url + "backend-api/conversation",
@@ -168,16 +176,13 @@ class AsyncChatbot:
         async with httpx.AsyncClient() as s:
             # set headers
             s.headers = self.headers
-            # Set multiple cookies
-            if "session_token" in self.config:
+            # Set cloudflare cookies
+            if "cf_clearance" in self.config:
+                self.debugger.log("Setting cloudflare cookies")
                 s.cookies.set(
-                    "__Secure-next-auth.session-token",
-                    self.config["session_token"],
+                    "cf_clearance",
+                    self.config["cf_clearance"],
                 )
-            s.cookies.set(
-                "__Secure-next-auth.callback-url",
-                self.base_url,
-            )
             # Set proxies
             if self.config.get("proxy", "") != "":
                 s.proxies = {
@@ -239,7 +244,8 @@ class AsyncChatbot:
             "parent_message_id": parent_id or self.parent_id,
             "model": "text-davinci-002-render",
         }
-        self.conversation_id_prev_queue.append(data["conversation_id"])  # for rollback
+        self.conversation_id_prev_queue.append(
+            data["conversation_id"])  # for rollback
         self.parent_id_prev_queue.append(data["parent_message_id"])
         while len(self.conversation_id_prev_queue) > self.max_rollbacks:  # LRU, remove oldest
             self.conversation_id_prev_queue.pop(0)
@@ -281,12 +287,18 @@ class AsyncChatbot:
                 "__Secure-next-auth.session-token",
                 self.config["session_token"],
             )
+            # Set cloudflare cookies
+            if "cf_clearance" in self.config:
+                s.cookies.set(
+                    "cf_clearance",
+                    self.config["cf_clearance"],
+                )
+            self.debugger.log(s.cookies.get("cf_clearance"))
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get(
                 self.base_url + "api/auth/session",
                 headers={
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, "
-                    "like Gecko) Version/16.1 Safari/605.1.15",
+                    "User-Agent": self.config["user_agent"],
                 },
             )
             # Check the response code
@@ -361,7 +373,7 @@ class AsyncChatbot:
         self.debugger.log("Logging in...")
         proxy = self.config.get("proxy")
         auth = OpenAIAuth(email, password, use_proxy=bool(
-            proxy), proxy=proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver)
+            proxy), proxy=proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver, cf_clearance=self.config.get("cf_clearance"))
         try:
             auth.begin()
         except Exception as exc:
@@ -478,6 +490,13 @@ class Chatbot(AsyncChatbot):
         :return: None
         """
         s = httpx.Client()
+        # Set cloudflare cookies
+        if "cf_clearance" in self.config:
+            self.debugger.log("Setting cloudflare cookies")
+            s.cookies.set(
+                "cf_clearance",
+                self.config["cf_clearance"],
+            )
         with s.stream(
             'POST',
             self.base_url + "backend-api/conversation",
