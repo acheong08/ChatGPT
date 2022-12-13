@@ -5,6 +5,8 @@
 
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
+<sup>Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at employment.</sup>
+
 # Notice 
 > # On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
 > > ## As of 13th of December 2022, a usable bypass has been made. Please update your versions as soon as possible. Be aware that it is a heavier package
@@ -14,17 +16,12 @@ For those looking to help, check out the [cloudflare branch](https://github.com/
 # Instructions
 Instructions have been moved to the [Wiki](https://github.com/acheong08/ChatGPT/wiki).
 
-If you were using this prior to version 0.0.31, please update immediately. `pip3 install revChatGPT --upgrade`. Fixes has been done to avoid bot blocking
-
 # Features
 ![image](https://user-images.githubusercontent.com/36258159/205534498-acc59484-c4b4-487d-89a7-d7b884af709b.png)
 - No moderation
 - Programmable.
-- Async version
-- Email/password authentication
+- ~~Async version~~
 - Cookie based authentication
-- Access Token authentication
-- Captcha support 
 
 # Flaws
 - No ARM support for email/password. Use session token authentication if on Raspberry Pi
