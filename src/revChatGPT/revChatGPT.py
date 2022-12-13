@@ -361,8 +361,10 @@ class AsyncChatbot:
             page = browser.new_page()
             sync_stealth(page, pure=False)
             page.goto('https://chat.openai.com/')
+            page_wait_for_url = 'https://chat.openai.com/chat' if self.config.get(
+                'session_token') else None
             res = sync_cf_retry(
-                page, wait_for_url='https://chat.openai.com/chat')
+                page, wait_for_url=page_wait_for_url)
             if res:
                 cookies = page.context.cookies()
                 for cookie in cookies:
