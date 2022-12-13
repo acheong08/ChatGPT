@@ -213,19 +213,19 @@ class AsyncChatbot:
             except Exception as exc:
                 self.debugger.log("Incorrect response from OpenAI API")
                 raise Exception("Incorrect response from OpenAI API") from exc
-            #偶发返回<div>引发异常
-            if response.startswith("{"):           	
-            	response = json.loads(response)
-            	self.parent_id = response["message"]["id"]
-            	self.conversation_id = response["conversation_id"]
-            	message = response["message"]["content"]["parts"][0]
-            	return {
-                "message": message,
-                "conversation_id": self.conversation_id,
-                "parent_id": self.parent_id,
-            	}
-            else:           
-            	return None
+            # Check if it is JSON
+            if response.startswith("{"):
+                response = json.loads(response)
+                self.parent_id = response["message"]["id"]
+                self.conversation_id = response["conversation_id"]
+                message = response["message"]["content"]["parts"][0]
+                return {
+                    "message": message,
+                    "conversation_id": self.conversation_id,
+                    "parent_id": self.parent_id,
+                }
+            else:
+                return None
 
     async def get_chat_response(self, prompt: str, output="text", conversation_id=None, parent_id=None) -> dict or None:
         """
