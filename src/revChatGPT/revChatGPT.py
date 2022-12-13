@@ -359,7 +359,10 @@ class AsyncChatbot:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False)
             page = browser.new_page()
-            sync_stealth(page, pure=False)
+            if 'session_token' in self.config:
+                sync_stealth(page, pure=True)
+            else:
+                sync_stealth(page, pure=False)
             page.goto('https://chat.openai.com/')
             page_wait_for_url = 'https://chat.openai.com/chat' if self.config.get(
                 'session_token') else None
