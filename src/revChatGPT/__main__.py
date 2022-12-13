@@ -73,6 +73,7 @@ def configure():
             debug = True
         else:
             debug = False
+        verify_config(config)
         chatGPT_main(config, debug)
     except KeyboardInterrupt:
         print("\nGoodbye!")
@@ -81,6 +82,18 @@ def configure():
         print("Something went wrong! Please run with --debug to see the error.")
         print(exc)
         exit()
+
+
+def verify_config(config):
+    """
+    Verifies the config
+
+    :param config: The config
+    :type config: :obj:`dict`
+    """
+    # Check if the config is empty
+    if 'email' in config or 'password' in config:
+        print("Email and passwords are no longer supported")
 
 
 def chatGPT_main(config, debug):
