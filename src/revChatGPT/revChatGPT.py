@@ -10,7 +10,7 @@ import httpx
 from typing import List
 
 from playwright.sync_api import sync_playwright
-from cf_clearance import sync_cf_retry, sync_stealth
+from cf_clearance2 import sync_cf_retry, sync_stealth
 
 
 def generate_uuid() -> str:
