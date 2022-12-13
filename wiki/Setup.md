@@ -1,49 +1,40 @@
 # Setup
+`pip3 install --upgrade revChatGPT`
 
-## Install
+## Dependencies
+Run `playwright install` after installing `revChatGPT`
 
-### On desktop environments: `pip3 install revChatGPT==0.0.42.1`
-You also need Google Chrome installed
+## Desktop environments:
+A Chrome/Chromium/Firefox window will show up.
+1. Wait for the Cloudflare checks to pass
+2. Log into OpenAI via the open browser (Google/Email-Password/Etc)
+3. It should automatically redirect you to `https://chat.openai.com/chat` after logging in. If it doesn't, go to this link manually after logging in.
+4. The window should close automatically
+5. You are good to go
 
-### On servers: `pip3 install revChatGPT==0.0.38.8`
-The server and client must use the same IP address. Use your server as a self-hosted VPN if necessary.
+## Servers:
+You must define the session token in the config:
 
-## Basic configuration:
+You can find the session token manually from your browser:
+1. Go to `https://chat.openai.com/api/auth/session`
+2. Press `F12` to open console
+3. Go to `Application` > `Cookies`
+4. Copy the session token value in `__Secure-next-auth.session-token`
+5. Paste it into `config.json` in the current working directory
 ```json
-{
-  "session_token": "<YOUR_TOKEN>",
-  #"cf_clearance": "<CLOUDFLARE_TOKEN>",
-  #"user_agent": "<USER_AGENT>",
-  #"proxy": "<HTTP/HTTPS_PROXY>"
-}
+{"session_token":"<YOUR_TOKEN>"}
 ```
 
-## Getting the details
-**Note: Do not enter cf_clearance and user_agent on `0.0.a42`. It is for server only `0.0.38.8`**
+You can use `Xvfb` to emulate a desktop environment. It should automatically get the `cf_clearance` given no captcha.
 
-https://chat.openai.com/chat and getting the correct information: Press `F12`
+Search it up if you don't know. Ask ChatGPT.
 
-<details>
-<summary>
-Guide for getting `session_token`
-</summary>
 
-- Find the `__Secure-next-auth.session-token` cookie and copy the value into the config
-![image](https://user-images.githubusercontent.com/36258159/207075245-279d8c50-9169-459e-b2b2-9c81b3d05028.png)
-</details>
-
-<details>
-<summary>
-Guide for getting `cf_clearance`
-</summary>
-
-![image](https://user-images.githubusercontent.com/36258159/207074293-30f8dac2-be5c-4762-b296-0001799a518b.png)
-</details>
-
-<details>
-<summary>
-Guide for getting `user_agent`
-</summary>
-
-![image](https://user-images.githubusercontent.com/36258159/207074671-35ec2970-2bee-4bbb-a22a-7dc690ad1a41.png)
-</details>
+# Config options
+```json
+{
+  "session_token": "<token>",
+  "proxy":"<proxy>",
+  "accept_language": "en-US,en"
+}
+```
