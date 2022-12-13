@@ -7,6 +7,8 @@ import asyncio
 
 import httpx
 
+import nest_asyncio
+
 from typing import List
 
 from playwright.async_api import async_playwright
@@ -280,7 +282,11 @@ class AsyncChatbot:
         """
         # Either session_token, email and password or Authorization is required
         if not self.config.get("cf_clearance") or not self.config.get("session_token"):
-            asyncio.run(self.get_cf_cookies())
+            try:
+                asyncio.run(self.get_cf_cookies())
+            except:
+                nest_asyncio.apply()
+                asyncio.run(self.get_cf_cookies())
         if self.config.get("session_token") and self.config.get("cf_clearance"):
             s = httpx.Client()
             if self.config.get("proxy"):
@@ -308,7 +314,11 @@ class AsyncChatbot:
             # Check the response code
             if response.status_code != 200:
                 if response.status_code == 403:
-                    asyncio.run(self.get_cf_cookies())
+                    try:
+                        asyncio.run(self.get_cf_cookies())
+                    except:
+                        nest_asyncio.apply()
+                        asyncio.run(self.get_cf_cookies())
                     self.refresh_session()
                     return
                 else:
@@ -530,7 +540,6 @@ class Chatbot(AsyncChatbot):
             try:
                 return asyncio.run(coroutine_object)
             except RuntimeError:
-                import nest_asyncio
                 nest_asyncio.apply()
                 return asyncio.run(coroutine_object)
 
