@@ -362,7 +362,7 @@ class AsyncChatbot:
             else:
                 sync_stealth(page, pure=False)
             page.goto('https://chat.openai.com/')
-            page_wait_for_url = 'https://chat.openai.com/chat' if self.config.get(
+            page_wait_for_url = 'https://chat.openai.com/chat' if not self.config.get(
                 'session_token') else None
             res = sync_cf_retry(
                 page, wait_for_url=page_wait_for_url)

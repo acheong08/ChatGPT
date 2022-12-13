@@ -62,12 +62,12 @@ def configure():
             config_files.append(f"{user_home}/.config/revChatGPT/config.json")
 
         config_file = next((f for f in config_files if exists(f)), None)
-        if not config_file:
-            print("Please create and populate ./config.json, $XDG_CONFIG_HOME/revChatGPT/config.json, or ~/.config/revChatGPT/config.json to continue")
-            exit()
-
-        with open(config_file, encoding="utf-8") as f:
-            config = json.load(f)
+        if config_file:
+            with open(config_file, encoding="utf-8") as f:
+                config = json.load(f)
+        else:
+            print("No config file found.")
+            config = {}
         if "--debug" in argv:
             print("Debugging enabled.")
             debug = True
