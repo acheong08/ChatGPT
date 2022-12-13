@@ -367,14 +367,14 @@ class AsyncChatbot:
             res = await async_cf_retry(
                 page, wait_for_url=page_wait_for_url)
             if res:
-                cookies = page.context.cookies()
+                cookies = await page.context.cookies()
                 for cookie in cookies:
                     if cookie.get('name') == 'cf_clearance':
                         cf_clearance_value = cookie.get('value')
                         self.debugger.log(cf_clearance_value)
                     elif cookie.get('name') == '__Secure-next-auth.session-token':
                         self.config['session_token'] = cookie.get('value')
-                ua = page.evaluate('() => {return navigator.userAgent}')
+                ua = await page.evaluate('() => {return navigator.userAgent}')
                 self.debugger.log(ua)
             else:
                 self.debugger.log("cf challenge fail")
