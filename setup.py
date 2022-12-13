@@ -17,7 +17,7 @@ setup(
         "nest-asyncio",
         "OpenAIAuth>=0.0.6",
         "playwright",
-        "cf_clearance2",
+        "cf_clearance2>=0.28.3",
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
