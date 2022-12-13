@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="0.0.38.8",
+    version="0.0.a42",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
@@ -16,6 +16,7 @@ setup(
         "httpx",
         "nest-asyncio",
         "OpenAIAuth>=0.0.6",
+        "undetected_chromedriver"
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

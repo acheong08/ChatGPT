@@ -5,11 +5,15 @@ import json
 import uuid
 import asyncio
 
+import re
+
 import httpx
 
 from typing import List
 
-from OpenAIAuth.OpenAIAuth import OpenAIAuth, Debugger
+from OpenAIAuth.OpenAIAuth import Debugger
+
+import undetected_chromedriver as uc
 
 
 def generate_uuid() -> str:
@@ -92,7 +96,7 @@ class AsyncChatbot:
             "Accept-Language": self.config["accept_language"]+";q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
-        if ("session_token" in config or ("email" in config and "password" in config)) and refresh:
+        if ("session_token" in config) and refresh:
             self.refresh_session()
         if "Authorization" in config:
             self.__refresh_headers()
@@ -116,6 +120,7 @@ class AsyncChatbot:
             self.config["Authorization"] = ""
         self.headers["Authorization"] = "Bearer " + \
             self.config["Authorization"]
+        self.headers["User-Agent"] = self.config["user_agent"]
 
     async def __get_chat_stream(self, data) -> None:
         """
@@ -129,7 +134,6 @@ class AsyncChatbot:
         s = httpx.AsyncClient()
         # Set cloudflare cookies
         if "cf_clearance" in self.config:
-            self.debugger.log("Setting cloudflare cookies")
             s.cookies.set(
                 "cf_clearance",
                 self.config["cf_clearance"],
@@ -178,7 +182,6 @@ class AsyncChatbot:
             s.headers = self.headers
             # Set cloudflare cookies
             if "cf_clearance" in self.config:
-                self.debugger.log("Setting cloudflare cookies")
                 s.cookies.set(
                     "cf_clearance",
                     self.config["cf_clearance"],
@@ -303,9 +306,14 @@ class AsyncChatbot:
             )
             # Check the response code
             if response.status_code != 200:
-                self.debugger.log(
-                    f"Invalid status code: {response.status_code}")
-                raise Exception("Wrong response code")
+                if response.status_code == 403:
+                    self.get_cf_cookies()
+                    self.refresh_session()
+                    return
+                else:
+                    self.debugger.log(
+                        f"Invalid status code: {response.status_code}")
+                    raise Exception("Wrong response code")
             # Try to get new session token and Authorization
             try:
                 if 'error' in response.json():
@@ -331,74 +339,69 @@ class AsyncChatbot:
                         # Check if code is token_expired
                         if response.json()['detail']['code'] == 'token_expired':
                             self.debugger.log("Token expired")
-                else:
-                    self.debugger.log(f"Response: '{response.text}'")
-                self.debugger.log("Cannot refresh the session, try to login")
-                # Try to login
-                if 'email' in self.config and 'password' in self.config:
-                    del self.config['session_token']
-                    self.login(self.config['email'],
-                               self.config['password'])
-                else:
-                    self.debugger.log(
-                        "Invalid token and no email and password provided")
-                    raise ValueError(
-                        "Error refreshing session: No email and password provided")
-        elif "email" in self.config and "password" in self.config:
-            try:
-                self.login(self.config["email"], self.config["password"])
-            except Exception as exc:
-                self.debugger.log("Login failed")
-                raise exc
-        elif "Authorization" in self.config:
-            self.__refresh_headers()
+                raise Exception("Failed to refresh session")
         else:
             self.debugger.log(
                 "No session_token, email and password or Authorization provided")
             raise ValueError(
                 "No session_token, email and password or Authorization provided")
 
-    def login(self, email: str, password: str) -> None:
+    def get_cf_cookies(self) -> None:
         """
-        Log in to OpenAI.
-
-        :param email: The email
-        :type email: :obj:`str`
-
-        :param password: The password
-        :type password: :obj:`str`
+        Get cloudflare cookies.
 
         :return: None
         """
-        self.debugger.log("Logging in...")
-        proxy = self.config.get("proxy")
-        auth = OpenAIAuth(email, password, use_proxy=bool(
-            proxy), proxy=proxy, debug=self.debug, use_captcha=True, captcha_solver=self.captcha_solver, cf_clearance=self.config.get("cf_clearance"))
-        try:
-            auth.begin()
-        except Exception as exc:
-            # if ValueError with e as "Captcha detected" fail
-            if exc == "Captcha detected":
-                self.debugger.log(
-                    "Captcha not supported. Use session tokens instead.")
-                raise ValueError("Captcha detected") from exc
-            raise exc
-        if auth.access_token is not None:
-            self.config["Authorization"] = auth.access_token
-            if auth.session_token is not None:
-                self.config["session_token"] = auth.session_token
-            else:
-                possible_tokens = auth.session.cookies.get(
-                    "__Secure-next-auth.session-token",
-                )
-                if possible_tokens is not None:
-                    if len(possible_tokens) > 1:
-                        self.config["session_token"] = possible_tokens[0]
-                    else:
-                        self.config["session_token"] = possible_tokens
-            self.__refresh_headers()
-        else:
-            raise Exception("Error logging in")
+        self.cookie_found = False
+        self.agent_found = False
+
+        def detect_cookies(message):
+            if 'params' in message:
+                if 'headers' in message['params']:
+                    if 'set-cookie' in message['params']['headers']:
+                        # Use regex to get the cookie for cf_clearance=*;
+                        cookie = re.search(
+                            "cf_clearance=.*?;", message['params']['headers']['set-cookie'])
+                        if cookie:
+                            self.debugger.log(
+                                "Found cookie: " + cookie.group(0))
+                            # remove the semicolon and 'cf_clearance=' from the string
+                            raw_cookie = cookie.group(0)
+                            self.config['cf_clearance'] = raw_cookie[13:-1]
+                            self.cookie_found = True
+
+        def detect_user_agent(message):
+            if 'params' in message:
+                if 'headers' in message['params']:
+                    if 'user-agent' in message['params']['headers']:
+                        # Use regex to get the cookie for cf_clearance=*;
+                        user_agent = message['params']['headers']['user-agent']
+                        self.config['user_agent'] = user_agent
+                        self.agent_found = True
+                        self.debugger.log("Found user agent: " + user_agent)
+        options = uc.ChromeOptions()
+        options.add_argument("--disable-extensions")
+        options.add_argument('--disable-application-cache')
+        options.add_argument('--disable-gpu')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--incognito")
+        if self.config.get("proxy", "") != "":
+            options.add_argument("--proxy-server=" + self.config["proxy"])
+        driver = uc.Chrome(enable_cdp_events=True, options=options)
+        driver.add_cdp_listener(
+            "Network.responseReceivedExtraInfo", lambda msg: detect_cookies(msg))
+        driver.add_cdp_listener(
+            "Network.requestWillBeSentExtraInfo", lambda msg: detect_user_agent(msg))
+        driver.get("https://chat.openai.com/chat")
+        from time import sleep
+        while not self.agent_found or not self.cookie_found:
+            print("Waiting for cookies...")
+            sleep(5)
+        driver.close()
+        driver.quit()
+        del driver
 
     def send_feedback(
         self,
@@ -446,6 +449,9 @@ class AsyncChatbot:
 
         return response
 
+    def refresh_cookies(self):
+        pass
+
 
 class Chatbot(AsyncChatbot):
     """
@@ -492,7 +498,6 @@ class Chatbot(AsyncChatbot):
         s = httpx.Client()
         # Set cloudflare cookies
         if "cf_clearance" in self.config:
-            self.debugger.log("Setting cloudflare cookies")
             s.cookies.set(
                 "cf_clearance",
                 self.config["cf_clearance"],
