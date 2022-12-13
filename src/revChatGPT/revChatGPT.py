@@ -5,15 +5,14 @@ import json
 import uuid
 import asyncio
 
-import re
-
 import httpx
 
 from typing import List
 
 from OpenAIAuth.OpenAIAuth import Debugger
 
-import undetected_chromedriver as uc
+from playwright.sync_api import sync_playwright
+from cf_clearance import sync_cf_retry, sync_stealth
 
 
 def generate_uuid() -> str:
@@ -202,14 +201,6 @@ class AsyncChatbot:
                 response = response[6:]
             except Exception as exc:
                 self.debugger.log("Incorrect response from OpenAI API")
-                try:
-                    resp = response.json()
-                    self.debugger.log(resp)
-                    if resp['detail']['code'] == "invalid_api_key" or resp['detail']['code'] == "token_expired":
-                        self.refresh_session()
-                except Exception as exc2:
-                    self.debugger.log(response.text)
-                    raise Exception("Not a JSON response") from exc2
                 raise Exception("Incorrect response from OpenAI API") from exc
             response = json.loads(response)
             self.parent_id = response["message"]["id"]
@@ -234,6 +225,7 @@ class AsyncChatbot:
         :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
         :rtype: :obj:`dict` or :obj:`None`
         """
+        self.refresh_session()
         data = {
             "action": "next",
             "messages": [
@@ -296,7 +288,6 @@ class AsyncChatbot:
                     "cf_clearance",
                     self.config["cf_clearance"],
                 )
-            self.debugger.log(s.cookies.get("cf_clearance"))
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get(
                 self.base_url + "api/auth/session",
@@ -352,55 +343,26 @@ class AsyncChatbot:
 
         :return: None
         """
-        self.cookie_found = False
-        self.agent_found = False
-
-        def detect_cookies(message):
-            if 'params' in message:
-                if 'headers' in message['params']:
-                    if 'set-cookie' in message['params']['headers']:
-                        # Use regex to get the cookie for cf_clearance=*;
-                        cookie = re.search(
-                            "cf_clearance=.*?;", message['params']['headers']['set-cookie'])
-                        if cookie:
-                            self.debugger.log(
-                                "Found cookie: " + cookie.group(0))
-                            # remove the semicolon and 'cf_clearance=' from the string
-                            raw_cookie = cookie.group(0)
-                            self.config['cf_clearance'] = raw_cookie[13:-1]
-                            self.cookie_found = True
-
-        def detect_user_agent(message):
-            if 'params' in message:
-                if 'headers' in message['params']:
-                    if 'user-agent' in message['params']['headers']:
-                        # Use regex to get the cookie for cf_clearance=*;
-                        user_agent = message['params']['headers']['user-agent']
-                        self.config['user_agent'] = user_agent
-                        self.agent_found = True
-                        self.debugger.log("Found user agent: " + user_agent)
-        options = uc.ChromeOptions()
-        options.add_argument("--disable-extensions")
-        options.add_argument('--disable-application-cache')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        if self.config.get("proxy", "") != "":
-            options.add_argument("--proxy-server=" + self.config["proxy"])
-        driver = uc.Chrome(enable_cdp_events=True, options=options)
-        driver.add_cdp_listener(
-            "Network.responseReceivedExtraInfo", lambda msg: detect_cookies(msg))
-        driver.add_cdp_listener(
-            "Network.requestWillBeSentExtraInfo", lambda msg: detect_user_agent(msg))
-        driver.get("https://chat.openai.com/chat")
-        from time import sleep
-        while not self.agent_found or not self.cookie_found:
-            print("Waiting for cookies...")
-            sleep(5)
-        driver.close()
-        driver.quit()
-        del driver
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False)
+            page = browser.new_page()
+            sync_stealth(page, pure=True)
+            page.goto('https://chat.openai.com/')
+            res = sync_cf_retry(page)
+            if res:
+                cookies = page.context.cookies()
+                for cookie in cookies:
+                    if cookie.get('name') == 'cf_clearance':
+                        cf_clearance_value = cookie.get('value')
+                        self.debugger.log(cf_clearance_value)
+                ua = page.evaluate('() => {return navigator.userAgent}')
+                self.debugger.log(ua)
+            else:
+                self.debugger.log("cf challenge fail")
+                raise Exception("cf challenge fail")
+            browser.close()
+            self.config['cf_clearance'] = cf_clearance_value
+            self.config['user_agent'] = ua
 
     def send_feedback(
         self,
@@ -544,6 +506,7 @@ class Chatbot(AsyncChatbot):
         :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
         :rtype: :obj:`dict` or :obj:`None`
         """
+        self.refresh_session()
         if output == "text":
             coroutine_object = super().get_chat_response(
                 prompt, output, conversation_id, parent_id)
