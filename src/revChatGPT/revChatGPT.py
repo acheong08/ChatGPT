@@ -9,8 +9,6 @@ import httpx
 
 from typing import List
 
-from OpenAIAuth.OpenAIAuth import Debugger
-
 from playwright.sync_api import sync_playwright
 from cf_clearance import sync_cf_retry, sync_stealth
 
@@ -24,6 +22,20 @@ def generate_uuid() -> str:
     """
     uid = str(uuid.uuid4())
     return uid
+
+
+class Debugger:
+    def __init__(self, debug: bool = False):
+        if debug:
+            print("Debugger enabled on OpenAIAuth")
+        self.debug = debug
+
+    def set_debug(self, debug: bool):
+        self.debug = debug
+
+    def log(self, message: str, end: str = "\n"):
+        if self.debug:
+            print(message, end=end)
 
 
 class AsyncChatbot:
@@ -331,6 +343,7 @@ class AsyncChatbot:
                         if response.json()['detail']['code'] == 'token_expired':
                             self.debugger.log("Token expired")
                 raise Exception("Failed to refresh session")
+            return
         else:
             self.debugger.log(
                 "No session_token, email and password or Authorization provided")
@@ -374,7 +387,7 @@ class AsyncChatbot:
     ):
         from dataclasses import dataclass
 
-        @dataclass
+        @ dataclass
         class ChatGPTTags:
             Harmful = "harmful"
             NotTrue = "false"
