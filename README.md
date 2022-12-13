@@ -5,8 +5,10 @@
 
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
-# Notice
-OpenAI has added cloudflare to protect their services. Please use [session tokens](https://github.com/acheong08/ChatGPT/wiki/Setup#session-token-authentication)
+# Notice 
+> # On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
+
+For those looking to help, check out the [cloudflare branch](https://github.com/acheong08/ChatGPT/tree/cloudflare) for the code related to cloudflare bypass
 
 # Instructions
 Instructions have been moved to the [Wiki](https://github.com/acheong08/ChatGPT/wiki).
@@ -27,8 +29,7 @@ If you were using this prior to version 0.0.31, please update immediately. `pip3
 - No ARM support for email/password. Use session token authentication if on Raspberry Pi
 
 # Help needed
-- Documentation for [OpenAIAuth](https://github.com/acheong08/OpenAIAuth)
-- Update documentation for developers (with examples)
+- Document the new changes (Desktop / Server - In regards to Cloudflare)
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
