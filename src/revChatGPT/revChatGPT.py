@@ -329,7 +329,7 @@ class AsyncChatbot:
                 self.config["Authorization"] = response.json()["accessToken"]
                 self.__refresh_headers()
             # If it fails, try to login with email and password to get tokens
-            except Exception:
+            except Exception as exc:
                 # Check if response JSON is empty
                 if response.json() == {}:
                     self.debugger.log("Empty response")
@@ -342,7 +342,7 @@ class AsyncChatbot:
                         # Check if code is token_expired
                         if response.json()['detail']['code'] == 'token_expired':
                             self.debugger.log("Token expired")
-                raise Exception("Failed to refresh session")
+                raise Exception("Failed to refresh session") from exc
             return
         else:
             self.debugger.log(
@@ -359,15 +359,18 @@ class AsyncChatbot:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False)
             page = browser.new_page()
-            sync_stealth(page, pure=True)
+            sync_stealth(page, pure=False)
             page.goto('https://chat.openai.com/')
-            res = sync_cf_retry(page)
+            res = sync_cf_retry(
+                page, wait_for_url='https://chat.openai.com/chat')
             if res:
                 cookies = page.context.cookies()
                 for cookie in cookies:
                     if cookie.get('name') == 'cf_clearance':
                         cf_clearance_value = cookie.get('value')
                         self.debugger.log(cf_clearance_value)
+                    elif cookie.get('name') == '__Secure-next-auth.session-token':
+                        self.config['session_token'] = cookie.get('value')
                 ua = page.evaluate('() => {return navigator.userAgent}')
                 self.debugger.log(ua)
             else:
