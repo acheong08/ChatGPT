@@ -80,7 +80,7 @@ class AsyncChatbot:
     request_timeout: int
     captcha_solver: any
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, refresh=True, request_timeout=100,
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, request_timeout=100,
                  captcha_solver=None, base_url="https://chat.openai.com/", max_rollbacks=20):
         self.debugger = Debugger(debug)
         self.debug = debug
@@ -107,10 +107,7 @@ class AsyncChatbot:
             "Accept-Language": self.config["accept_language"]+";q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
-        if ("session_token" in config) and refresh:
-            self.refresh_session()
-        if "Authorization" in config:
-            self.__refresh_headers()
+        self.refresh_session()
 
     def reset_chat(self) -> None:
         """
@@ -282,7 +279,9 @@ class AsyncChatbot:
         :return: None
         """
         # Either session_token, email and password or Authorization is required
-        if self.config.get("session_token"):
+        if not self.config.get("cf_clearance") or not self.config.get("session_token"):
+            self.get_cf_cookies()
+        if self.config.get("session_token") and self.config.get("cf_clearance"):
             s = httpx.Client()
             if self.config.get("proxy"):
                 s.proxies = {
@@ -294,12 +293,11 @@ class AsyncChatbot:
                 "__Secure-next-auth.session-token",
                 self.config["session_token"],
             )
-            # Set cloudflare cookies
-            if "cf_clearance" in self.config:
-                s.cookies.set(
-                    "cf_clearance",
-                    self.config["cf_clearance"],
-                )
+
+            s.cookies.set(
+                "cf_clearance",
+                self.config["cf_clearance"],
+            )
             # s.cookies.set("__Secure-next-auth.csrf-token", self.config['csrf_token'])
             response = s.get(
                 self.base_url + "api/auth/session",
