@@ -107,7 +107,7 @@ class AsyncChatbot:
             "Accept-Language": self.config["accept_language"]+";q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
-        asyncio.run(self.refresh_session())
+        self.refresh_session()
 
     def reset_chat(self) -> None:
         """
