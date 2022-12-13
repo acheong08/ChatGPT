@@ -2,7 +2,7 @@
 `pip3 install --upgrade revChatGPT`
 
 ## Dependencies
-Run `playwright install` after installing `revChatGPT`
+Run `python3 -m playwright install` after installing `revChatGPT`
 
 ## Desktop environments:
 A Chrome/Chromium/Firefox window will show up.
