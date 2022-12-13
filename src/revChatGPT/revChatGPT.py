@@ -9,8 +9,8 @@ import httpx
 
 from typing import List
 
-from playwright.sync_api import sync_playwright
-from cf_clearance2 import sync_cf_retry, sync_stealth
+from playwright.async_api import async_playwright
+from cf_clearance2 import async_cf_retry, async_stealth
 
 
 def generate_uuid() -> str:
@@ -107,7 +107,7 @@ class AsyncChatbot:
             "Accept-Language": self.config["accept_language"]+";q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
-        self.refresh_session()
+        asyncio.run(self.refresh_session())
 
     def reset_chat(self) -> None:
         """
@@ -280,7 +280,7 @@ class AsyncChatbot:
         """
         # Either session_token, email and password or Authorization is required
         if not self.config.get("cf_clearance") or not self.config.get("session_token"):
-            self.get_cf_cookies()
+            asyncio.run(self.get_cf_cookies())
         if self.config.get("session_token") and self.config.get("cf_clearance"):
             s = httpx.Client()
             if self.config.get("proxy"):
@@ -308,7 +308,7 @@ class AsyncChatbot:
             # Check the response code
             if response.status_code != 200:
                 if response.status_code == 403:
-                    self.get_cf_cookies()
+                    asyncio.run(self.get_cf_cookies())
                     self.refresh_session()
                     return
                 else:
@@ -348,23 +348,23 @@ class AsyncChatbot:
             raise ValueError(
                 "No session_token, email and password or Authorization provided")
 
-    def get_cf_cookies(self) -> None:
+    async def get_cf_cookies(self) -> None:
         """
         Get cloudflare cookies.
 
         :return: None
         """
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=False)
-            page = browser.new_page()
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=False)
+            page = await browser.new_page()
             if 'session_token' in self.config:
-                sync_stealth(page, pure=True)
+                await async_stealth(page, pure=False)
             else:
-                sync_stealth(page, pure=False)
-            page.goto('https://chat.openai.com/')
+                await async_stealth(page, pure=False)
+            await page.goto('https://chat.openai.com/')
             page_wait_for_url = 'https://chat.openai.com/chat' if not self.config.get(
                 'session_token') else None
-            res = sync_cf_retry(
+            res = await async_cf_retry(
                 page, wait_for_url=page_wait_for_url)
             if res:
                 cookies = page.context.cookies()
@@ -379,7 +379,8 @@ class AsyncChatbot:
             else:
                 self.debugger.log("cf challenge fail")
                 raise Exception("cf challenge fail")
-            browser.close()
+            await browser.close()
+            del browser
             self.config['cf_clearance'] = cf_clearance_value
             self.config['user_agent'] = ua
 
@@ -428,9 +429,6 @@ class AsyncChatbot:
         )
 
         return response
-
-    def refresh_cookies(self):
-        pass
 
 
 class Chatbot(AsyncChatbot):
