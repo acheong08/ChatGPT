@@ -7,6 +7,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 # Notice 
 > # On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
+> > ## As of 13th of December 2022, a usable bypass has been made. Please update your versions as soon as possible. Be aware that it is a heavier package
 
 For those looking to help, check out the [cloudflare branch](https://github.com/acheong08/ChatGPT/tree/cloudflare) for the code related to cloudflare bypass
 
