@@ -1,5 +1,5 @@
 {
-    "session_token": "<YOUR TOKEN>",
-    "cf_clearance": "<cf_clearance cookie value>",
-    "user_agent": "<USER_AGENT>"
+  "session_token": "<token>",
+  "proxy":"<proxy>",
+  "accept_language": "en-US,en"
 }
