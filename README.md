@@ -8,9 +8,10 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 ### Need help?
 Ask for help on our [Discord](https://discord.gg/RvBkdcYUrH)
-### In China? Using Windows?
+### Using a proxy?
 > 先开着代理，运行，等首次浏览器自动关闭了，立马关上代理，建议设置全局快捷键来按。如果顺利完成，浏览器第二次自动打开之后。就能并正确获取参数了。
-(Requires English translation. Please make a pull request if you're multilingual)
+
+> Open the proxy first, run it, wait for the browser to close automatically for the first time, and immediately close the proxy. It is recommended to set a global shortcut key to press. If completed successfully, the browser will automatically open after the second time. The parameters can be obtained correctly.
 
 # Notice 
 > ### On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
