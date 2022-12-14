@@ -8,6 +8,8 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 ### Need help?
 Ask for help on our [Discord](https://discord.gg/RvBkdcYUrH)
+### In China?
+Check out [easyChatGPT](https://github.com/AIGCT/EASYChatGPT)
 
 # Notice 
 > # On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
