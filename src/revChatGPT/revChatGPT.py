@@ -25,8 +25,10 @@ def generate_uuid() -> str:
     uid = str(uuid.uuid4())
     return uid
 
+
 async def __async_func_for_check():
     pass
+
 
 class Debugger:
     def __init__(self, debug: bool = False):
@@ -280,7 +282,7 @@ class AsyncChatbot:
             self.conversation_id = self.conversation_id_prev_queue.pop()
             self.parent_id = self.parent_id_prev_queue.pop()
 
-    def refresh_session(self, running_in_async = False) -> None:
+    async def refresh_session(self, running_in_async=False) -> None:
         """
         Refresh the session.
 
@@ -290,7 +292,7 @@ class AsyncChatbot:
             nest_asyncio.apply()
         # Either session_token, email and password or Authorization is required
         if not self.config.get("cf_clearance") or not self.config.get("session_token"):
-            asyncio.run(self.get_cf_cookies())
+            await self.__get_cf_cookies()
         if self.config.get("session_token") and self.config.get("cf_clearance"):
             s = httpx.Client()
             if self.config.get("proxy"):
@@ -318,7 +320,7 @@ class AsyncChatbot:
             # Check the response code
             if response.status_code != 200:
                 if response.status_code == 403:
-                    asyncio.run(self.get_cf_cookies())
+                    await self.__get_cf_cookies()
                     self.refresh_session(running_in_async=running_in_async)
                     return
                 else:
@@ -358,7 +360,7 @@ class AsyncChatbot:
             raise ValueError(
                 "No session_token, email and password or Authorization provided")
 
-    async def get_cf_cookies(self) -> None:
+    async def __get_cf_cookies(self) -> None:
         """
         Get cloudflare cookies.
 
@@ -474,6 +476,9 @@ class Chatbot(AsyncChatbot):
     :rtype: :obj:`Chatbot`
     """
 
+    def refresh_session(self, running_in_async=False) -> None:
+        return asyncio.run(super().refresh_session(running_in_async))
+
     def __get_chat_stream(self, data) -> None:
         """
         Generator for the chat stream -- Internal use only
@@ -534,7 +539,8 @@ class Chatbot(AsyncChatbot):
         :rtype: :obj:`dict` or :obj:`None`
         """
         try:
-            asyncio.run(__async_func_for_check()) #Check if running in nest use of asyncio.run() 
+            # Check if running in nest use of asyncio.run()
+            asyncio.run(__async_func_for_check())
         except RuntimeError:
             self.debugger.log("detect nest use of asyncio")
             nest_asyncio.apply()
