@@ -534,7 +534,7 @@ class Chatbot(AsyncChatbot):
         """
         try:
             # Check if running in nest use of asyncio.run()
-            asyncio.run(__async_func_for_check())
+            asyncio.run(self.__async_func_for_check())
         except RuntimeError:
             self.debugger.log("detect nest use of asyncio")
             nest_asyncio.apply()
@@ -562,3 +562,6 @@ class Chatbot(AsyncChatbot):
                 data["conversation_id"])  # for rollback
             self.parent_id_prev_queue.append(data["parent_message_id"])
             return self.__get_chat_stream(data)
+
+    async def __async_func_for_check(self):
+        pass
