@@ -6,33 +6,45 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 <sup>Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment.</sup>
 
-### Need help?
-Ask for help on our [Discord](https://discord.gg/RvBkdcYUrH)
-### Using a proxy?
-> 连接代理后运行，等待首次浏览器自动关闭后，立即关闭代理，建议设置全局代理运行。如果顺利完成，等待浏览器第二次自动打开后。将会正确获取到参数。
-
-> Open the proxy first, run it, wait for the browser to close automatically for the first time, and immediately close the proxy. It is recommended to set a global shortcut key to press. If completed successfully, the browser will automatically open after the second time. The parameters can be obtained correctly.
-
 # Notice 
 > ### On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
 > > ### As of 13th of December 2022, a usable bypass has been made. Please update your versions as soon as possible. 
 > > > ### 14th of December 2022: The maintainer is sick. Updates will be slow. Pull requests will still be reviewed
 
-# Instructions
-Instructions have been moved to the [Wiki](https://github.com/acheong08/ChatGPT/wiki).
+# Usage
+## Installation
+`pip3 install --upgrade revChatGPT`
+`python3 -m playwright install`
+## Usage
+python3 -m revChatGPT
+## Configuration (Optional)
+All of these are optional
+```json
+{
+  "session_token": "<token>",
+  "proxy":"<proxy>",
+  "accept_language": "en-US,en"
+}
+```
+## Developer usage
+Take a look at the [`main.py`](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/__main__.py)
+### Basics
+```python
+from revChatGPT.revChatGPT import Chatbot
 
-# Features
-![image](https://user-images.githubusercontent.com/36258159/205534498-acc59484-c4b4-487d-89a7-d7b884af709b.png)
-- No moderation
-- Programmable.
-- Async version
-- Cookie based authentication
+# Do some config
+...
 
-# Flaws
-- No ARM support for email/password. Use session token authentication if on Raspberry Pi
+chatbot = Chatbot({
+   # This could be blank but the dict should be here
+})
 
-# Help needed
-- Document the new changes (Desktop / Server - In regards to Cloudflare)
+chatbot.get_chat_response(prompt, output="text") #output=stream uses async generator
+```
+### Using a proxy?
+> 连接代理后运行，等待首次浏览器自动关闭后，立即关闭代理，建议设置全局代理运行。如果顺利完成，等待浏览器第二次自动打开后。将会正确获取到参数。
+
+> Open the proxy first, run it, wait for the browser to close automatically for the first time, and immediately close the proxy. It is recommended to set a global shortcut key to press. If completed successfully, the browser will automatically open after the second time. The parameters can be obtained correctly.
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
