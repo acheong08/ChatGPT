@@ -239,7 +239,7 @@ class AsyncChatbot:
         :return: The chat response `{"message": "Returned messages", "conversation_id": "conversation ID", "parent_id": "parent ID"}` or None
         :rtype: :obj:`dict` or :obj:`None`
         """
-        self.refresh_session(running_in_async=True)
+        await self.refresh_session()
         data = {
             "action": "next",
             "messages": [
@@ -277,14 +277,12 @@ class AsyncChatbot:
             self.conversation_id = self.conversation_id_prev_queue.pop()
             self.parent_id = self.parent_id_prev_queue.pop()
 
-    async def refresh_session(self, running_in_async=False) -> None:
+    async def refresh_session(self) -> None:
         """
         Refresh the session.
 
         :return: None
         """
-        if running_in_async:
-            nest_asyncio.apply()
         # Either session_token, email and password or Authorization is required
         if not self.config.get("cf_clearance") or not self.config.get("session_token"):
             await self.__get_cf_cookies()
@@ -316,7 +314,7 @@ class AsyncChatbot:
             if response.status_code != 200:
                 if response.status_code == 403:
                     await self.__get_cf_cookies()
-                    self.refresh_session(running_in_async=running_in_async)
+                    await self.refresh_session()
                     return
                 else:
                     self.debugger.log(
@@ -481,8 +479,8 @@ class Chatbot(AsyncChatbot):
         asyncio.run(super().__init__(config, conversation_id, parent_id,
                     debug, request_timeout, captcha_solver, base_url, max_rollbacks))
 
-    def refresh_session(self, running_in_async=False) -> None:
-        return asyncio.run(super().refresh_session(running_in_async))
+    def refresh_session(self) -> None:
+        return asyncio.run(super().refresh_session())
 
     def __get_chat_stream(self, data) -> None:
         """
