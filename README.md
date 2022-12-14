@@ -8,7 +8,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 ### Need help?
 Ask for help on our [Discord](https://discord.gg/RvBkdcYUrH)
-### In China?
+### In China? Using Windows?
 Check out [easyChatGPT](https://github.com/AIGCT/EASYChatGPT)
 
 # Notice 
