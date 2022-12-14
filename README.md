@@ -12,8 +12,9 @@ Ask for help on our [Discord](https://discord.gg/RvBkdcYUrH)
 Check out [easyChatGPT](https://github.com/AIGCT/EASYChatGPT)
 
 # Notice 
-> # On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
-> > ## As of 13th of December 2022, a usable bypass has been made. Please update your versions as soon as possible. Be aware that it is a heavier package
+> ### On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
+> > ### As of 13th of December 2022, a usable bypass has been made. Please update your versions as soon as possible. 
+> > > ### 14th of December 2022: The maintainer is sick. Updates will be slow. Pull requests will still be reviewed
 
 # Instructions
 Instructions have been moved to the [Wiki](https://github.com/acheong08/ChatGPT/wiki).
