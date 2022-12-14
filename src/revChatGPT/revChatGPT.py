@@ -82,8 +82,7 @@ class AsyncChatbot:
     request_timeout: int
     captcha_solver: any
 
-    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, request_timeout=100,
-                 captcha_solver=None, base_url="https://chat.openai.com/", max_rollbacks=20):
+    async def __init__(self, config, conversation_id=None, parent_id=None, debug=False, request_timeout=100, captcha_solver=None, base_url="https://chat.openai.com/", max_rollbacks=20):
         self.debugger = Debugger(debug)
         self.debug = debug
         self.config = config
@@ -109,7 +108,7 @@ class AsyncChatbot:
             "Accept-Language": self.config["accept_language"]+";q=0.9",
             "Referer": "https://chat.openai.com/chat",
         }
-        self.refresh_session()
+        await self.refresh_session()
 
     def reset_chat(self) -> None:
         """
@@ -472,13 +471,17 @@ class Chatbot(AsyncChatbot):
     :rtype: :obj:`Chatbot`
     """
 
-    def refresh_session(self, running_in_async=False) -> None:
+    def __init__(self, config, conversation_id=None, parent_id=None, debug=False, request_timeout=100, captcha_solver=None, base_url="https://chat.openai.com/", max_rollbacks=20):
         try:
             # Check if running in nest use of asyncio.run()
             asyncio.run(self.async_func_for_check())
         except RuntimeError:
             self.debugger.log("detect nest use of asyncio")
             nest_asyncio.apply()
+        asyncio.run(super().__init__(config, conversation_id, parent_id,
+                    debug, request_timeout, captcha_solver, base_url, max_rollbacks))
+
+    def refresh_session(self, running_in_async=False) -> None:
         return asyncio.run(super().refresh_session(running_in_async))
 
     def __get_chat_stream(self, data) -> None:
