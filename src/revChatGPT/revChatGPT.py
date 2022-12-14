@@ -473,6 +473,12 @@ class Chatbot(AsyncChatbot):
     """
 
     def refresh_session(self, running_in_async=False) -> None:
+        try:
+            # Check if running in nest use of asyncio.run()
+            asyncio.run(self.async_func_for_check())
+        except RuntimeError:
+            self.debugger.log("detect nest use of asyncio")
+            nest_asyncio.apply()
         return asyncio.run(super().refresh_session(running_in_async))
 
     def __get_chat_stream(self, data) -> None:
