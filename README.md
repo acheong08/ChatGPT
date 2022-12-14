@@ -9,7 +9,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 ### Need help?
 Ask for help on our [Discord](https://discord.gg/RvBkdcYUrH)
 ### Using a proxy?
-> 先开着代理，运行，等首次浏览器自动关闭了，立马关上代理，建议设置全局快捷键来按。如果顺利完成，浏览器第二次自动打开之后。就能并正确获取参数了。
+> 连接代理后运行，等待首次浏览器自动关闭后，立即关闭代理，建议设置全局代理运行。如果顺利完成，等待浏览器第二次自动打开后。将会正确获取到参数。
 
 > Open the proxy first, run it, wait for the browser to close automatically for the first time, and immediately close the proxy. It is recommended to set a global shortcut key to press. If completed successfully, the browser will automatically open after the second time. The parameters can be obtained correctly.
 
