@@ -12,7 +12,7 @@ Ask for help on our [Discord](https://discord.gg/RvBkdcYUrH)
 # Notice 
 > ### On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
 > > ### As of 13th of December 2022, a usable bypass has been made. Please update your versions as soon as possible. Delete your `config.json` and let the browser handle it. (Requires desktop environment)
-> > > ### 14th of December 2022: The maintainer is sick. Repository updates might be delayed. 
+> > > ### 14th of December 2022: The maintainer is sick. Repository updates might be delayed. Pull requests will still be reviewed
 
 We are hoping for an official API to be released soon to avoid the need for bypassing Cloudflare.
 
