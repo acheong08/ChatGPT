@@ -25,8 +25,10 @@ def generate_uuid() -> str:
     uid = str(uuid.uuid4())
     return uid
 
+
 async def __async_func_for_check():
     pass
+
 
 class Debugger:
     def __init__(self, debug: bool = False):
@@ -280,7 +282,7 @@ class AsyncChatbot:
             self.conversation_id = self.conversation_id_prev_queue.pop()
             self.parent_id = self.parent_id_prev_queue.pop()
 
-    def refresh_session(self, running_in_async = False) -> None:
+    def refresh_session(self, running_in_async=False) -> None:
         """
         Refresh the session.
 
@@ -367,10 +369,7 @@ class AsyncChatbot:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=False)
             page = await browser.new_page()
-            if 'session_token' in self.config:
-                await async_stealth(page, pure=False)
-            else:
-                await async_stealth(page, pure=False)
+            await async_stealth(page, pure=False)
             await page.goto('https://chat.openai.com/')
             page_wait_for_url = 'https://chat.openai.com/chat' if not self.config.get(
                 'session_token') else None
@@ -534,7 +533,8 @@ class Chatbot(AsyncChatbot):
         :rtype: :obj:`dict` or :obj:`None`
         """
         try:
-            asyncio.run(__async_func_for_check()) #Check if running in nest use of asyncio.run() 
+            # Check if running in nest use of asyncio.run()
+            asyncio.run(__async_func_for_check())
         except RuntimeError:
             self.debugger.log("detect nest use of asyncio")
             nest_asyncio.apply()
