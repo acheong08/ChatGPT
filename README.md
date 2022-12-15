@@ -6,10 +6,8 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 <sup>Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment.</sup>
 
-# Notice 
-> ### On the 12th of December 2022, OpenAI added Cloudflare protections to their API. Please refer to the new [wiki](https://github.com/acheong08/ChatGPT/wiki/Setup) for instructions
-> > ### As of 13th of December 2022, a usable bypass has been made. Please update your versions as soon as possible. 
-> > > ### 14th of December 2022: The maintainer is sick. Updates will be slow. Pull requests will still be reviewed
+> # Notice: The project has been archived due to severe limitations by Cloudflare. I have not abandoned ChatGPT. A new version is in the works which completely avoid the mess with Cloudflare. To get notified when the new version is released, you can follow me on [Fosstodon](https://fosstodon.org/@acheong08) or [Twitter](https://twitter.com/GodlyIgnorance).
+
 
 # Usage
 ## Installation
