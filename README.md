@@ -6,7 +6,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 <sup>Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment.</sup>
 
-> # Notice: The project has been archived due to severe limitations by Cloudflare. I have not abandoned ChatGPT. A new version is in the works which completely avoid the mess with Cloudflare. To get notified when the new version is released, you can follow me on [Fosstodon](https://fosstodon.org/@acheong08) or [Twitter](https://twitter.com/GodlyIgnorance).
+> # Notice: The project has been archived in favor of a more robust API system under the [ChatGPT-Hackers](https://github.com/ChatGPT-Hackers/) organization. 
 
 
 # Usage
