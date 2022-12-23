@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="0.0.44",
+    version="0.0.44.1",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
@@ -11,7 +11,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=["revChatGPT"],
-    url="https://github.com/acheong08/ChatGPT",
+    url="https://github.com/ChatGPT-Hackers/revChatGPT",
     install_requires=[
         "httpx",
         "nest-asyncio",
