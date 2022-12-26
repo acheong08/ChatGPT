@@ -11,6 +11,8 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 This is the library implementation. For an API that scales, check out https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
 
+<sup>The API is a separate project and not part of this library.</sup>
+
 # Usage
 
 ## Installation
