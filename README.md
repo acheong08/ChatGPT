@@ -20,7 +20,7 @@ This is the library implementation. For an API that scales, check out https://gi
 `pip3 install --upgrade revChatGPT`
 
 ## Configuration
-
+https://github.com/acheong08/ChatGPT/wiki/Setup
 ```json
 {
   "session_token": "<token>",
