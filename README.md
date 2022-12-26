@@ -7,6 +7,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 <sup>Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment.</sup>
 
 > # Notice: The project has been archived in favor of a more robust API system under the [ChatGPT-Hackers](https://github.com/ChatGPT-Hackers/) organization. 
+> ## Notice: A Python library replacement is available at https://github.com/LanLan69/easyChatGPT. It is even better in that Captcha is 100% automated for free.
 
 
 # Usage
