@@ -9,6 +9,8 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 > ## Notice: A cloudflare bypass has been found. Documentation needs to be updated but it now works.
 
+This is the library implementation. For an API that scales, check out https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
+
 # Usage
 
 ## Installation
