@@ -15,10 +15,6 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 `pip3 install --upgrade revChatGPT`
 
-## Usage
-
-`python3 -m revChatGPT`
-
 ## Configuration
 
 ```json
@@ -29,6 +25,27 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 ```
 
 Proxy is optional
+
+## Usage
+
+`python3 -m revChatGPT`
+
+```python
+from revChatGPT.ChatGPT import Chatbot
+
+chatbot = Chatbot({
+  "session_token": "<YOUR_TOKEN>"
+}, conversation_id=None, parent_id=None) # You can start a custom conversation
+
+response = chatbot.ask("Prompt", conversation_id=None, parent_id=None) # You can specify custom conversation and parent ids. Otherwise it uses the saved conversation (yes. conversations are automatically saved)
+
+print(response)
+# {
+#   "message": message,
+#   "conversation_id": self.conversation_id,
+#   "parent_id": self.parent_id,
+# }
+```
 
 # Awesome ChatGPT
 
