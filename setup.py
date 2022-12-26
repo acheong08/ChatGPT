@@ -11,7 +11,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=["revChatGPT"],
-    url="https://github.com/ChatGPT-Hackers/revChatGPT",
+    url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "undetected_chromedriver",
         "tls_client",
