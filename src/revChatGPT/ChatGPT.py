@@ -39,6 +39,7 @@ class Chatbot:
         self.parent_id = parent_id
 
     def ask(self, prompt, conversation_id=None, parent_id=None):
+        self.refresh_session()
         data = {
             "action": "next",
             "messages": [
