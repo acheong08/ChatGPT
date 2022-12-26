@@ -6,44 +6,23 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 <sup>Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment.</sup>
 
-> # Notice: The project has been archived in favor of a more robust API system under the [ChatGPT-Hackers](https://github.com/ChatGPT-Hackers/) organization. 
-> ## Notice: A Python library replacement is available at https://github.com/LanLan69/easyChatGPT. It is even better in that Captcha is 100% automated for free.
+> ## Notice: A cloudflare bypass has been found. Documentation needs to be updated but it now works.
 
 
 # Usage
 ## Installation
 `pip3 install --upgrade revChatGPT`
-`python3 -m playwright install`
 ## Usage
 python3 -m revChatGPT
-## Configuration (Optional)
-All of these are optional
+## Configuration
 ```json
 {
   "session_token": "<token>",
   "proxy":"<proxy>",
-  "accept_language": "en-US,en"
 }
 ```
-## Developer usage
-Take a look at the [`main.py`](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/__main__.py)
-### Basics
-```python
-from revChatGPT.revChatGPT import Chatbot
+Proxy is optional
 
-# Do some config
-...
-
-chatbot = Chatbot({
-   # This could be blank but the dict should be here
-})
-
-chatbot.get_chat_response(prompt, output="text") #output=stream uses async generator
-```
-### Using a proxy?
-> 连接代理后运行，等待首次浏览器自动关闭后，立即关闭代理，建议设置全局代理运行。如果顺利完成，等待浏览器第二次自动打开后。将会正确获取到参数。
-
-> Open the proxy first, run it, wait for the browser to close automatically for the first time, and immediately close the proxy. It is recommended to set a global shortcut key to press. If completed successfully, the browser will automatically open after the second time. The parameters can be obtained correctly.
 
 # Awesome ChatGPT
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
