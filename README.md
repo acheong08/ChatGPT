@@ -17,7 +17,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
 ## Usage
 
-python3 -m revChatGPT
+`python3 -m revChatGPT`
 
 ## Configuration
 

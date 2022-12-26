@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="0.0.44.1",
+    version="0.0.45",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
@@ -13,11 +13,8 @@ setup(
     py_modules=["revChatGPT"],
     url="https://github.com/ChatGPT-Hackers/revChatGPT",
     install_requires=[
-        "httpx",
-        "nest-asyncio",
-        "OpenAIAuth>=0.0.6",
-        "playwright",
-        "cf_clearance2>=0.28.3",
+        "undetected_chromedriver",
+        "tls_client",
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
