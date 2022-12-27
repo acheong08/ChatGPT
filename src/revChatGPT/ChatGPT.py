@@ -60,6 +60,7 @@ class Chatbot:
         elif "session_token" in config:
             if type(config["session_token"]) != str:
                 raise Exception("Session token must be a string!")
+            self.session_token = config["session_token"]
             self.session.cookies.set(
                 "__Secure-next-auth.session-token", config["session_token"])
             self.get_cf_cookies()
@@ -161,6 +162,8 @@ class Chatbot:
         self.cf_cookie_found = False
         self.session_cookie_found = False
         self.agent_found = False
+        self.cf_clearance = None
+        self.user_agent = None
         options = uc.ChromeOptions()
         options.add_argument("--disable-extensions")
         options.add_argument('--disable-application-cache')
@@ -168,7 +171,9 @@ class Chatbot:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-setuid-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        print("Spawning browser...")
         driver = uc.Chrome(enable_cdp_events=True, options=options)
+        print("Browser spawned.")
         driver.add_cdp_listener(
             "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
         driver.add_cdp_listener(
@@ -177,7 +182,8 @@ class Chatbot:
         while not self.agent_found or not self.cf_cookie_found:
             print("Waiting for cookies...")
             sleep(5)
-        self.refresh_headers()
+        self.refresh_headers(cf_clearance=self.cf_clearance,
+                             user_agent=self.user_agent)
         # Wait for the login button to appear
         WebDriverWait(driver,120).until(EC.element_to_be_clickable(
                 (By.XPATH, "//button[contains(text(), 'Log in')]")))
@@ -232,6 +238,8 @@ class Chatbot:
         """
         self.cf_cookie_found = False
         self.agent_found = False
+        self.cf_clearance = None
+        self.user_agent = None
         options = uc.ChromeOptions()
         options.add_argument("--disable-extensions")
         options.add_argument('--disable-application-cache')
@@ -247,7 +255,7 @@ class Chatbot:
         driver.add_cdp_listener(
             "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
         driver.get("https://chat.openai.com/chat")
-        while not self.agent_found or not self.cookie_found:
+        while not self.agent_found or not self.cf_cookie_found:
             sleep(5)
         driver.quit()
         del driver
@@ -266,21 +274,21 @@ class Chatbot:
                         print("Found Cloudflare Cookie!")
                         # remove the semicolon and 'cf_clearance=' from the string
                         raw_cf_cookie = cf_clearance_cookie.group(0)
-                        self.config['cf_clearance'] = raw_cf_cookie.split("=")[1][:-1]
+                        self.cf_clearance = raw_cf_cookie.split("=")[1][:-1]
                         if self.debug:
                             print(
-                                self.GREEN+"Cloudflare Cookie: "+self.ENDCOLOR + self.config['cf_clearance'])
+                                self.GREEN+"Cloudflare Cookie: "+self.ENDCOLOR + self.cf_clearance)
                         self.cf_cookie_found = True
                     if session_cookie:
                         print("Found Session Token!")
                         # remove the semicolon and '__Secure-next-auth.session-token=' from the string
                         raw_session_cookie = session_cookie.group(0)
-                        self.config['session_token'] = raw_session_cookie.split("=")[1][:-1]
+                        self.session_token = raw_session_cookie.split("=")[1][:-1]
                         self.session.cookies.set(
-                            "__Secure-next-auth.session-token", self.config["session_token"])
+                            "__Secure-next-auth.session-token", self.session_token)
                         if self.debug:
                             print(
-                                self.GREEN+"Session Token: "+self.ENDCOLOR + self.config['session_token'])
+                                self.GREEN+"Session Token: "+self.ENDCOLOR + self.session_token)
                         self.session_cookie_found = True
     def detect_user_agent(self, message):
         if 'params' in message:
@@ -288,7 +296,7 @@ class Chatbot:
                 if 'user-agent' in message['params']['headers']:
                     # Use regex to get the cookie for cf_clearance=*;
                     user_agent = message['params']['headers']['user-agent']
-                    self.config['user_agent'] = user_agent
+                    self.user_agent = user_agent
                     self.agent_found = True
         self.refresh_headers(cf_clearance=self.cf_clearance,
                              user_agent=self.user_agent)
