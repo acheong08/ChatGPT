@@ -5,13 +5,11 @@
 
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
-<sup>
 Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment. 
 <br><br>
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
-</sup>
 
-#### Related works
+### Related works
 This is the library implementation. For an API that scales, check out https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
 
 The API is a separate project and not part of this library.
