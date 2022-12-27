@@ -1,6 +1,6 @@
 from os import environ
 
-from revChatGPT.revChatGPT import Chatbot
+from revChatGPT.ChatGPT import Chatbot
 
 import base64
 
