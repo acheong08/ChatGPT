@@ -15,6 +15,8 @@ setup(
     install_requires=[
         "undetected_chromedriver",
         "tls_client_for_chatGPT",
+        "2captcha-python",
+        ""
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
