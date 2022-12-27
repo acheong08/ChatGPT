@@ -24,10 +24,12 @@ https://github.com/acheong08/ChatGPT/wiki/Setup
 ```json
 {
   "session_token": "<token>",
+  "email": "<EMAIL>", // For Microsoft Login Only
+  "password": "<PASSWORD>", // For Microsoft Login Only
   "proxy": "<proxy>"
 }
 ```
-
+Either (`email` and `password`) OR `session_token`
 Proxy is optional
 
 ## Usage
