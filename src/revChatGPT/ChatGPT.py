@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from time import sleep
+from twocaptcha import TwoCaptcha
 import logging
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
@@ -34,16 +35,18 @@ class Chatbot:
                 "https": config["proxy"],
             }
             self.session.proxies.update(proxies)
-        if "debug" in config:
-            if type(config["debug"]) != bool:
-                raise Exception("Debug must be a boolean!")
-            self.debug = config["debug"]
+        if "verbose" in config:
+            if type(config["verbose"]) != bool:
+                raise Exception("Verbose must be a boolean!")
+            self.verbose = config["verbose"]
         else:
-            self.debug = False
+            self.verbose = False
         self.conversation_id = conversation_id
         self.parent_id = parent_id
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
+        self.isMicrosoftLogin = False
+        self.twocaptcha_key = None
         # stdout colors
         self.GREEN = '\033[92m'
         self.WARNING = '\033[93m'
@@ -55,8 +58,16 @@ class Chatbot:
                 raise Exception("Password must be a string!")
             self.email = config["email"]
             self.password = config["password"]
-            self.isMicrosoftLogin = True
-            self.microsoft_login()
+            if "isMicrosoftLogin" in config and config["isMicrosoftLogin"] == True:
+                self.isMicrosoftLogin = True
+                self.microsoft_login()
+            elif "captcha" in config:
+                if type(config["captcha"]) != str:
+                    raise Exception("2Captcha API Key must be a string!")
+                self.twocaptcha_key = config["captcha"]
+                self.email_login(self.solve_captcha())
+            else:
+                raise Exception("Invalid config!")
         elif "session_token" in config:
             if type(config["session_token"]) != str:
                 raise Exception("Session token must be a string!")
@@ -147,6 +158,8 @@ class Chatbot:
             if self.isMicrosoftLogin:
                 print("Attempting to re-authenticate...")
                 self.microsoft_login()
+            elif self.twocaptcha_key:
+                self.email_login(self.solve_captcha())
             else: 
                 raise Exception("Failed to refresh session!") from exc
 
@@ -160,7 +173,7 @@ class Chatbot:
         self.parent_id = str(uuid.uuid4())
     def microsoft_login(self) -> None:
         """
-        Login to OpenAI.
+        Login to OpenAI via Microsoft Login Authentication.
 
         :return: None
         """
@@ -171,6 +184,7 @@ class Chatbot:
         self.cf_clearance = None
         self.user_agent = None
         options = uc.ChromeOptions()
+        options.add_argument('--start_maximized')
         options.add_argument("--disable-extensions")
         options.add_argument('--disable-application-cache')
         options.add_argument('--disable-gpu')
@@ -234,6 +248,116 @@ class Chatbot:
         driver.close()
         driver.quit()
         del driver
+    
+    def solve_captcha(self) -> str:
+        """
+        Solve the 2Captcha captcha.
+
+        :return: str
+        """
+        twocaptcha_key = self.twocaptcha_key
+        twocaptcha_solver_config = {
+            'apiKey': twocaptcha_key,
+            'defaultTimeout': 120,
+            'recaptchaTimeout': 600,
+            'pollingInterval': 10,
+        }
+        twocaptcha_solver = TwoCaptcha(**twocaptcha_solver_config)
+        print('Waiting for captcha to be solved...')
+        solved_captcha = twocaptcha_solver.recaptcha(sitekey='6Lc-wnQjAAAAADa5SPd68d0O3xmj0030uaVzpnXP', url="https://auth0.openai.com/u/login/identifier")
+        if "code" in solved_captcha:
+            print(self.GREEN + "Captcha solved successfully!" + self.ENDCOLOR)
+            if self.verbose:
+                print(self.GREEN + "Captcha token: " + self.ENDCOLOR + solved_captcha["code"])
+            return solved_captcha
+
+    def email_login(self, solved_captcha) -> None:
+        """
+        Login to OpenAI via Email/Password Authentication and 2Captcha.
+
+        :return: None
+        """
+        # Open the browser
+        self.cf_cookie_found = False
+        self.session_cookie_found = False
+        self.agent_found = False
+        self.cf_clearance = None
+        self.user_agent = None
+        options = uc.ChromeOptions()
+        options.add_argument('--start_maximized')
+        options.add_argument("--disable-extensions")
+        options.add_argument('--disable-application-cache')
+        options.add_argument('--disable-gpu')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        print("Spawning browser...")
+        driver = uc.Chrome(enable_cdp_events=True, options=options)
+        print("Browser spawned.")
+        driver.add_cdp_listener(
+            "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
+        driver.add_cdp_listener(
+            "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
+        driver.get(BASE_URL)
+        while not self.agent_found or not self.cf_cookie_found:
+            sleep(5)
+        self.refresh_headers(cf_clearance=self.cf_clearance,
+                             user_agent=self.user_agent)
+        # Wait for the login button to appear
+        WebDriverWait(driver,120).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[contains(text(), 'Log in')]")))
+        # Click the login button
+        driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
+        # Wait for the email input field to appear
+        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                (By.ID, "username")))
+        # Enter the email
+        driver.find_element(by=By.ID,value="username").send_keys(self.config["email"])
+        # Wait for Recaptcha to appear
+        WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR,"*[name*='g-recaptcha-response']")))
+        # Find Recaptcha
+        google_captcha_response_input = driver.find_element(By.CSS_SELECTOR, "*[name*='g-recaptcha-response']")
+        captcha_input = driver.find_element(By.NAME, 'captcha')
+        # Make input visible
+        driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
+            google_captcha_response_input)
+        driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
+            captcha_input)
+        driver.execute_script("""
+        document.getElementById("g-recaptcha-response").innerHTML = arguments[0]
+        """, solved_captcha.get('code'))
+        driver.execute_script("""
+        document.querySelector("input[name='captcha']").value = arguments[0]
+        """, solved_captcha.get('code'))
+        # Hide the captcha input
+        driver.execute_script("arguments[0].setAttribute('style', 'display:none;');",
+            google_captcha_response_input)
+        # Wait for the Continue button to be clickable
+        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[@type='submit']")))
+        # Click the Continue button
+        driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
+        # Wait for the password input field to appear
+        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                (By.ID, "password")))
+        # Enter the password
+        driver.find_element(by=By.ID,value="password").send_keys(self.config["password"])
+        # Wait for the Sign in button to be clickable
+        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[@type='submit']")))
+        # Click the Sign in button
+        driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
+        # wait for input box to appear (to make sure we're signed in)
+        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//textarea")))
+        while not self.session_cookie_found:
+            sleep(5)
+        print(self.GREEN + "Login successful." + self.ENDCOLOR)
+        # Close the browser
+        driver.close()
+        driver.quit()
+        del driver
+
     def get_cf_cookies(self) -> None:
         """
         Get cloudflare cookies.
@@ -245,6 +369,7 @@ class Chatbot:
         self.cf_clearance = None
         self.user_agent = None
         options = uc.ChromeOptions()
+        options.add_argument('--start_maximized')
         options.add_argument("--disable-extensions")
         options.add_argument('--disable-application-cache')
         options.add_argument('--disable-gpu')
@@ -274,23 +399,23 @@ class Chatbot:
                         "cf_clearance=.*?;", message['params']['headers']['set-cookie'])
                     session_cookie = re.search(
                         "__Secure-next-auth.session-token=.*?;", message['params']['headers']['set-cookie'])
-                    if cf_clearance_cookie:
+                    if cf_clearance_cookie and not self.cf_cookie_found:
                         print("Found Cloudflare Cookie!")
                         # remove the semicolon and 'cf_clearance=' from the string
                         raw_cf_cookie = cf_clearance_cookie.group(0)
                         self.cf_clearance = raw_cf_cookie.split("=")[1][:-1]
-                        if self.debug:
+                        if self.verbose:
                             print(
                                 self.GREEN+"Cloudflare Cookie: "+self.ENDCOLOR + self.cf_clearance)
                         self.cf_cookie_found = True
-                    if session_cookie:
+                    if session_cookie and not self.session_cookie_found:
                         print("Found Session Token!")
                         # remove the semicolon and '__Secure-next-auth.session-token=' from the string
                         raw_session_cookie = session_cookie.group(0)
                         self.session_token = raw_session_cookie.split("=")[1][:-1]
                         self.session.cookies.set(
                             "__Secure-next-auth.session-token", self.session_token)
-                        if self.debug:
+                        if self.verbose:
                             print(
                                 self.GREEN+"Session Token: "+self.ENDCOLOR + self.session_token)
                         self.session_cookie_found = True

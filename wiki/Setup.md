@@ -44,6 +44,6 @@ Search it up if you don't know. Ask ChatGPT.
   "email": "<EMAIL>", 
   "password": "<PASSWORD>",
   "proxy": "<proxy>",
-  "debug": True | False
+  "verbose": True | False
 }
 ```
