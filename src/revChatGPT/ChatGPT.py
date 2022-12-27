@@ -180,7 +180,6 @@ class Chatbot:
             "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
         driver.get(BASE_URL)
         while not self.agent_found or not self.cf_cookie_found:
-            print("Waiting for cookies...")
             sleep(5)
         self.refresh_headers(cf_clearance=self.cf_clearance,
                              user_agent=self.user_agent)
