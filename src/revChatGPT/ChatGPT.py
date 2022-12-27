@@ -32,7 +32,13 @@ class Chatbot:
             }
             self.session.proxies.update(proxies)
         self.get_cf_cookies()
-        self.refresh_session()
+        refresh = True
+        while refresh:
+            try:
+                self.refresh_session()
+                refresh = False
+            except Exception:
+                pass
         self.conversation_id = conversation_id
         self.parent_id = parent_id
         self.conversation_id_prev_queue = []
