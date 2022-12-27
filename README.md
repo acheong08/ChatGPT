@@ -22,16 +22,18 @@ The API is a separate project and not part of this library.
 
 ## Configuration
 https://github.com/acheong08/ChatGPT/wiki/Setup
+
+Example:
 ```json
 {
-  "session_token": "<token>",
-  "email": "<EMAIL>", // For Microsoft Login Only
-  "password": "<PASSWORD>", // For Microsoft Login Only
+  "email": "<EMAIL>",
+  "password": "<PASSWORD>",
+  "captcha": "<2CAPTCHA_API_KEY>",
   "proxy": "<proxy>"
 }
 ```
-Either (`email` and `password`) OR `session_token`
-Proxy is optional
+
+Proxy is optional.
 
 ## Usage
 

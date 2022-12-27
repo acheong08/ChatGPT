@@ -24,17 +24,31 @@ You must define the session token or (email and password) for Microsoft Login in
   { "session_token": "<YOUR_TOKEN>" }
   ```
 
+- ### Email/Password Login Authentication:
+
+  ```json
+  { "email": "<EMAIL>", 
+    "password": "<PASSWORD>",
+    "captcha": "<2CAPTCHA_API_KEY>"
+    }
+  ```
+  **Note: 2Captcha is required for Email/Password Login**
 - ### Microsoft Login Authentication:
 
   ```json
   { "email": "<EMAIL>", 
-    "password":"<PASSWORD>"}
+    "password": "<PASSWORD>",
+    "isMicrosoftLogin": True
+    }
   ```
-  Note: `email` and `password` parameters will override `session_token`
+ **Note: `email` and `password` parameters will override `session_token`**
+ 
+## Server Config:
 
-You can use `Xvfb` to emulate a desktop environment. It should automatically get the `cf_clearance` given no captcha.
-
-Search it up if you don't know. Ask ChatGPT.
+You can use `Xvfb` to emulate a a display buffer.
+```
+xvfb-run -a python3 client.py
+```
 
 # Config options
 
@@ -43,6 +57,8 @@ Search it up if you don't know. Ask ChatGPT.
   "session_token": "<token>",
   "email": "<EMAIL>", 
   "password": "<PASSWORD>",
+  "captcha": "<2CAPTCHA_API_KEY>",
+  "isMicrosoftLogin": True | False
   "proxy": "<proxy>",
   "verbose": True | False
 }
