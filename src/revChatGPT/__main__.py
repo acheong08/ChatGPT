@@ -1,7 +1,6 @@
 import json
 from os.path import exists
 from os import getenv
-from sys import argv, exit
 
 from revChatGPT.ChatGPT import Chatbot
 
@@ -54,6 +53,7 @@ def chatGPT_main(config):
                 !reset - Forget the current conversation
                 !refresh - Refresh the session authentication
                 !config - Show the current configuration
+                !rollback x - Rollback the conversation (x being the number of messages to rollback)
                 !exit - Exit the program
                 """,
                 )
@@ -69,6 +69,15 @@ def chatGPT_main(config):
             elif prompt == "!config":
                 print(json.dumps(chatbot.config, indent=4))
                 continue
+            elif prompt.startswith("!rollback"):
+                # Default to 1 rollback if no number is specified
+                try:
+                    rollback = int(prompt.split(" ")[1])
+                except IndexError:
+                    rollback = 1
+                chatbot.rollback_conversation(rollback)
+                print(f"Rolled back {rollback} messages.")
+                continue
             elif prompt == "!exit":
                 break
         try:
@@ -82,15 +91,6 @@ def chatGPT_main(config):
 
 
 def main():
-    if "--help" in argv:
-        print(
-            """
-        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
-        Repo: github.com/acheong08/ChatGPT
-        Run with --debug to enable debugging
-        """,
-        )
-        exit()
     print(
         """
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)

@@ -22,9 +22,12 @@ class Chatbot:
                 "https": config["proxy"],
             }
             self.session.proxies.update(proxies)
+        self.get_cf_cookies()
         self.refresh_session()
         self.conversation_id = conversation_id
         self.parent_id = parent_id
+        self.conversation_id_prev_queue = []
+        self.parent_id_prev_queue = []
 
     def ask(self, prompt, conversation_id=None, parent_id=None):
         self.refresh_session()
@@ -41,6 +44,9 @@ class Chatbot:
             "parent_message_id": parent_id or self.parent_id or str(uuid.uuid4()),
             "model": "text-davinci-002-render",
         }
+        self.conversation_id_prev_queue.append(
+            data["conversation_id"])  # for rollback
+        self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
             url=BASE_URL + "backend-api/conversation",
             data=json.dumps(data)
@@ -75,7 +81,7 @@ class Chatbot:
         response = self.session.get(url)
         if response.status_code == 403:
             self.get_cf_cookies()
-            self.refresh_headers()
+            sleep(1)
             self.refresh_session()
             return
         try:
@@ -154,6 +160,7 @@ class Chatbot:
         driver.close()
         driver.quit()
         del driver
+        self.refresh_headers()
 
     def refresh_headers(self):
         self.session.cookies.set("cf_clearance", self.config["cf_clearance"])
@@ -167,3 +174,13 @@ class Chatbot:
             "Accept-Language": "en-US,en;q=0.9",
             "Referer": "https://chat.openai.com/chat",
         })
+
+    def rollback_conversation(self, num=1) -> None:
+        """
+        Rollback the conversation.
+        :param num: The number of messages to rollback
+        :return: None
+        """
+        for i in range(num):
+            self.conversation_id = self.conversation_id_prev_queue.pop()
+            self.parent_id = self.parent_id_prev_queue.pop()
