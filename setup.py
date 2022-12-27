@@ -14,7 +14,7 @@ setup(
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "undetected_chromedriver",
-        "tls_client",
+        "tls_client_for_chatGPT",
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

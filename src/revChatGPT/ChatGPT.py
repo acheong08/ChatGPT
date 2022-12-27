@@ -1,7 +1,7 @@
 import uuid
 import re
 import json
-import tls_client
+import tls_client_for_chatGPT as tls_client
 import undetected_chromedriver as uc
 from time import sleep
 import logging
