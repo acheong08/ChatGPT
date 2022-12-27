@@ -4,8 +4,17 @@ import json
 import tls_client
 import undetected_chromedriver as uc
 from time import sleep
+import logging
+# Disable all logging
+logging.basicConfig(level=logging.ERROR)
 
 BASE_URL = "https://chat.openai.com/"
+
+
+class Chrome(uc.Chrome):
+
+    def __del__(self):
+        self.quit()
 
 
 class Chatbot:
@@ -30,7 +39,13 @@ class Chatbot:
         self.parent_id_prev_queue = []
 
     def ask(self, prompt, conversation_id=None, parent_id=None):
-        self.refresh_session()
+        refresh = True
+        while refresh:
+            try:
+                self.refresh_session()
+                refresh = False
+            except Exception:
+                pass
         data = {
             "action": "next",
             "messages": [
@@ -81,9 +96,7 @@ class Chatbot:
         response = self.session.get(url)
         if response.status_code == 403:
             self.get_cf_cookies()
-            sleep(1)
-            self.refresh_session()
-            return
+            raise Exception("Clearance refreshing...")
         try:
             if "error" in response.json():
                 raise Exception(
@@ -115,6 +128,8 @@ class Chatbot:
         """
         self.cookie_found = False
         self.agent_found = False
+        self.cf_clearance = None
+        self.user_agent = None
 
         def detect_cookies(message):
             if 'params' in message:
@@ -124,11 +139,9 @@ class Chatbot:
                         cookie = re.search(
                             "cf_clearance=.*?;", message['params']['headers']['set-cookie'])
                         if cookie:
-                            print(
-                                "Found cookie: " + cookie.group(0))
                             # remove the semicolon and 'cf_clearance=' from the string
                             raw_cookie = cookie.group(0)
-                            self.config['cf_clearance'] = raw_cookie[13:-1]
+                            self.cf_clearance = raw_cookie[13:-1]
                             self.cookie_found = True
 
         def detect_user_agent(message):
@@ -136,8 +149,7 @@ class Chatbot:
                 if 'headers' in message['params']:
                     if 'user-agent' in message['params']['headers']:
                         # Use regex to get the cookie for cf_clearance=*;
-                        user_agent = message['params']['headers']['user-agent']
-                        self.config['user_agent'] = user_agent
+                        self.user_agent = message['params']['headers']['user-agent']
                         self.agent_found = True
         options = uc.ChromeOptions()
         options.add_argument("--disable-extensions")
@@ -146,29 +158,28 @@ class Chatbot:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-setuid-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        print("Spawning browser...")
         driver = uc.Chrome(enable_cdp_events=True, options=options)
-        print("Browser spawned.")
         driver.add_cdp_listener(
             "Network.responseReceivedExtraInfo", lambda msg: detect_cookies(msg))
         driver.add_cdp_listener(
             "Network.requestWillBeSentExtraInfo", lambda msg: detect_user_agent(msg))
         driver.get("https://chat.openai.com/chat")
         while not self.agent_found or not self.cookie_found:
-            print("Waiting for cookies...")
             sleep(5)
-        driver.close()
         driver.quit()
         del driver
-        self.refresh_headers()
+        self.refresh_headers(cf_clearance=self.cf_clearance,
+                             user_agent=self.user_agent)
 
-    def refresh_headers(self):
-        self.session.cookies.set("cf_clearance", self.config["cf_clearance"])
+    def refresh_headers(self, cf_clearance, user_agent):
+        del self.session.cookies["cf_clearance"]
+        self.session.headers.clear()
+        self.session.cookies.set("cf_clearance", cf_clearance)
         self.session.headers.update({
             "Accept": "text/event-stream",
             "Authorization": "Bearer ",
             "Content-Type": "application/json",
-            "User-Agent": self.config["user_agent"],
+            "User-Agent": user_agent,
             "X-Openai-Assistant-App-Id": "",
             "Connection": "close",
             "Accept-Language": "en-US,en;q=0.9",
