@@ -16,18 +16,6 @@ class Chatbot:
         )
         self.session.cookies.set(
             "__Secure-next-auth.session-token", config["session_token"])
-        self.get_cf_cookies()
-        self.session.cookies.set("cf_clearance", config["cf_clearance"])
-        self.session.headers.update({
-            "Accept": "text/event-stream",
-            "Authorization": "Bearer ",
-            "Content-Type": "application/json",
-            "User-Agent": self.config["user_agent"],
-            "X-Openai-Assistant-App-Id": "",
-            "Connection": "close",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Referer": "https://chat.openai.com/chat",
-        })
         if "proxy" in config:
             proxies = {
                 "http": config["proxy"],
@@ -90,15 +78,19 @@ class Chatbot:
             self.refresh_headers()
             self.refresh_session()
             return
-        if "error" in response.json():
-            raise Exception(
-                "Failed to refresh session! Error: " + response.json()["error"])
-        elif response.status_code != 200 or response.json() == {} or "accessToken" not in response.json():
-            raise Exception("Failed to refresh session!")
-        else:
-            self.session.headers.update({
-                "Authorization": "Bearer " + response.json()["accessToken"]
-            })
+        try:
+            if "error" in response.json():
+                raise Exception(
+                    "Failed to refresh session! Error: " + response.json()["error"])
+            elif response.status_code != 200 or response.json() == {} or "accessToken" not in response.json():
+                raise Exception("Failed to refresh session!")
+            else:
+                self.session.headers.update({
+                    "Authorization": "Bearer " + response.json()["accessToken"]
+                })
+        except Exception as exc:
+            print("Failed to refresh session!")
+            raise Exception("Failed to refresh session!") from exc
 
     def reset_chat(self) -> None:
         """
