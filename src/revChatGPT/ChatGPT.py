@@ -3,6 +3,9 @@ import re
 import json
 import tls_client
 import undetected_chromedriver as uc
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from time import sleep
 
 BASE_URL = "https://chat.openai.com/"
@@ -14,20 +17,46 @@ class Chatbot:
         self.session = tls_client.Session(
             client_identifier="chrome_105"
         )
-        self.session.cookies.set(
-            "__Secure-next-auth.session-token", config["session_token"])
         if "proxy" in config:
+            if type(config["proxy"]) != str:
+                raise Exception("Proxy must be a string!")
             proxies = {
                 "http": config["proxy"],
                 "https": config["proxy"],
             }
             self.session.proxies.update(proxies)
-        self.get_cf_cookies()
-        self.refresh_session()
+        if "debug" in config:
+            if type(config["debug"]) != bool:
+                raise Exception("Debug must be a boolean!")
+            self.debug = config["debug"]
+        else:
+            self.debug = False
         self.conversation_id = conversation_id
         self.parent_id = parent_id
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
+        # stdout colors
+        self.GREEN = '\033[92m'
+        self.WARNING = '\033[93m'
+        self.ENDCOLOR = '\033[0m'
+        if "email" in config and "password" in config:
+            if type(config["email"]) != str:
+                raise Exception("Email must be a string!")
+            if type(config["password"]) != str:
+                raise Exception("Password must be a string!")
+            self.email = config["email"]
+            self.password = config["password"]
+            self.isMicrosoftLogin = True
+            self.microsoft_login()
+        elif "session_token" in config:
+            if type(config["session_token"]) != str:
+                raise Exception("Session token must be a string!")
+            self.session.cookies.set(
+                "__Secure-next-auth.session-token", config["session_token"])
+            self.get_cf_cookies()
+        else:
+            raise Exception("Invalid config!")
+        self.refresh_session()
 
     def ask(self, prompt, conversation_id=None, parent_id=None):
         self.refresh_session()
@@ -86,8 +115,7 @@ class Chatbot:
             return
         try:
             if "error" in response.json():
-                raise Exception(
-                    "Failed to refresh session! Error: " + response.json()["error"])
+               raise Exception(f"Failed to refresh session! Error: {response.json()['error']}")
             elif response.status_code != 200 or response.json() == {} or "accessToken" not in response.json():
                 raise Exception("Failed to refresh session!")
             else:
@@ -96,7 +124,11 @@ class Chatbot:
                 })
         except Exception as exc:
             print("Failed to refresh session!")
-            raise Exception("Failed to refresh session!") from exc
+            if self.isMicrosoftLogin:
+                print("Attempting to re-authenticate...")
+                self.microsoft_login()
+            else: 
+                raise Exception("Failed to refresh session!") from exc
 
     def reset_chat(self) -> None:
         """
@@ -106,39 +138,16 @@ class Chatbot:
         """
         self.conversation_id = None
         self.parent_id = str(uuid.uuid4())
-
-    def get_cf_cookies(self) -> None:
+    def microsoft_login(self) -> None:
         """
-        Get cloudflare cookies.
+        Login to OpenAI.
 
         :return: None
         """
-        self.cookie_found = False
+        # Open the browser
+        self.cf_cookie_found = False
+        self.session_cookie_found = False
         self.agent_found = False
-
-        def detect_cookies(message):
-            if 'params' in message:
-                if 'headers' in message['params']:
-                    if 'set-cookie' in message['params']['headers']:
-                        # Use regex to get the cookie for cf_clearance=*;
-                        cookie = re.search(
-                            "cf_clearance=.*?;", message['params']['headers']['set-cookie'])
-                        if cookie:
-                            print(
-                                "Found cookie: " + cookie.group(0))
-                            # remove the semicolon and 'cf_clearance=' from the string
-                            raw_cookie = cookie.group(0)
-                            self.config['cf_clearance'] = raw_cookie[13:-1]
-                            self.cookie_found = True
-
-        def detect_user_agent(message):
-            if 'params' in message:
-                if 'headers' in message['params']:
-                    if 'user-agent' in message['params']['headers']:
-                        # Use regex to get the cookie for cf_clearance=*;
-                        user_agent = message['params']['headers']['user-agent']
-                        self.config['user_agent'] = user_agent
-                        self.agent_found = True
         options = uc.ChromeOptions()
         options.add_argument("--disable-extensions")
         options.add_argument('--disable-application-cache')
@@ -150,17 +159,127 @@ class Chatbot:
         driver = uc.Chrome(enable_cdp_events=True, options=options)
         print("Browser spawned.")
         driver.add_cdp_listener(
-            "Network.responseReceivedExtraInfo", lambda msg: detect_cookies(msg))
+            "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
         driver.add_cdp_listener(
-            "Network.requestWillBeSentExtraInfo", lambda msg: detect_user_agent(msg))
+            "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
+        driver.get(BASE_URL)
+        while not self.agent_found or not self.cf_cookie_found:
+            print("Waiting for cookies...")
+            sleep(5)
+        self.refresh_headers()
+        # Wait for the login button to appear
+        WebDriverWait(driver,120).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[contains(text(), 'Log in')]")))
+        # Click the login button
+        driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
+        # Wait for the Login with Microsoft button to be clickable
+        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[@data-provider='windowslive']")))
+        # Click the Login with Microsoft button
+        driver.find_element(by=By.XPATH,value="//button[@data-provider='windowslive']").click()
+        # Wait for the email input field to appear
+        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//input[@type='email']")))
+        # Enter the email
+        driver.find_element(by=By.XPATH,value="//input[@type='email']").send_keys(self.config["email"])
+        # Wait for the Next button to be clickable
+        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//input[@type='submit']")))
+        # Click the Next button
+        driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
+        # Wait for the password input field to appear
+        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//input[@type='password']")))
+        # Enter the password
+        driver.find_element(by=By.XPATH,value="//input[@type='password']").send_keys(self.config["password"])
+        # Wait for the Sign in button to be clickable
+        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//input[@type='submit']")))
+        # Click the Sign in button
+        driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
+        # Wait for the Allow button to appear
+        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//input[@value='Yes']")))                
+        # click Yes button
+        driver.find_element(by=By.XPATH,value="//input[@value='Yes']").click()
+        # wait for input box to appear (to make sure we're signed in)
+        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//textarea")))
+        while not self.session_cookie_found:
+            print("Waiting for session cookie...")
+            sleep(5)
+        print(self.GREEN + "Login successful." + self.ENDCOLOR)
+        # Close the browser
+        driver.close()
+        driver.quit()
+        del driver
+    def get_cf_cookies(self) -> None:
+        """
+        Get cloudflare cookies.
+
+        :return: None
+        """
+        self.cf_cookie_found = False
+        self.agent_found = False
+        options = uc.ChromeOptions()
+        options.add_argument("--disable-extensions")
+        options.add_argument('--disable-application-cache')
+        options.add_argument('--disable-gpu')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        print("Spawning browser...")
+        driver = uc.Chrome(enable_cdp_events=True, options=options)
+        print("Browser spawned.")
+        driver.add_cdp_listener(
+            "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
+        driver.add_cdp_listener(
+            "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
         driver.get("https://chat.openai.com/chat")
-        while not self.agent_found or not self.cookie_found:
+        while not self.agent_found or not self.cf_cookie_found:
             print("Waiting for cookies...")
             sleep(5)
         driver.close()
         driver.quit()
         del driver
         self.refresh_headers()
+    def detect_cookies(self, message):
+        if 'params' in message:
+            if 'headers' in message['params']:
+                if 'set-cookie' in message['params']['headers']:
+                    # Use regex to get the cookie for cf_clearance=*;
+                    cf_clearance_cookie = re.search(
+                        "cf_clearance=.*?;", message['params']['headers']['set-cookie'])
+                    session_cookie = re.search(
+                        "__Secure-next-auth.session-token=.*?;", message['params']['headers']['set-cookie'])
+                    if cf_clearance_cookie:
+                        print("Found Cloudflare Cookie!")
+                        # remove the semicolon and 'cf_clearance=' from the string
+                        raw_cf_cookie = cf_clearance_cookie.group(0)
+                        self.config['cf_clearance'] = raw_cf_cookie.split("=")[1][:-1]
+                        if self.debug:
+                            print(
+                                self.GREEN+"Cloudflare Cookie: "+self.ENDCOLOR + self.config['cf_clearance'])
+                        self.cf_cookie_found = True
+                    if session_cookie:
+                        print("Found Session Token!")
+                        # remove the semicolon and '__Secure-next-auth.session-token=' from the string
+                        raw_session_cookie = session_cookie.group(0)
+                        self.config['session_token'] = raw_session_cookie.split("=")[1][:-1]
+                        self.session.cookies.set(
+                            "__Secure-next-auth.session-token", self.config["session_token"])
+                        if self.debug:
+                            print(
+                                self.GREEN+"Session Token: "+self.ENDCOLOR + self.config['session_token'])
+                        self.session_cookie_found = True
+    def detect_user_agent(self, message):
+        if 'params' in message:
+            if 'headers' in message['params']:
+                if 'user-agent' in message['params']['headers']:
+                    # Use regex to get the cookie for cf_clearance=*;
+                    user_agent = message['params']['headers']['user-agent']
+                    self.config['user_agent'] = user_agent
+                    self.agent_found = True
 
     def refresh_headers(self):
         self.session.cookies.set("cf_clearance", self.config["cf_clearance"])
