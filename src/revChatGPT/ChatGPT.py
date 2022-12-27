@@ -66,7 +66,13 @@ class Chatbot:
             self.get_cf_cookies()
         else:
             raise Exception("Invalid config!")
-        self.refresh_session()
+        refresh = True
+        while refresh:
+            try:
+                self.refresh_session()
+                refresh = False
+            except Exception:
+                pass
 
     def ask(self, prompt, conversation_id=None, parent_id=None):
         refresh = True
