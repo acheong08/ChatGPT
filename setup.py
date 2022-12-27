@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="0.0.46",
+    version="0.0.47.1",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
@@ -14,7 +14,7 @@ setup(
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "undetected_chromedriver",
-        "tls_client",
+        "tls_client_for_chatGPT",
     ],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

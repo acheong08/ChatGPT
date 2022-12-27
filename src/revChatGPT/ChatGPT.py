@@ -1,14 +1,23 @@
 import uuid
 import re
 import json
-import tls_client
+import tls_client_for_chatGPT as tls_client
 import undetected_chromedriver as uc
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from time import sleep
+import logging
+# Disable all logging
+logging.basicConfig(level=logging.ERROR)
 
 BASE_URL = "https://chat.openai.com/"
+
+
+class Chrome(uc.Chrome):
+
+    def __del__(self):
+        self.quit()
 
 
 class Chatbot:
@@ -59,7 +68,13 @@ class Chatbot:
         self.refresh_session()
 
     def ask(self, prompt, conversation_id=None, parent_id=None):
-        self.refresh_session()
+        refresh = True
+        while refresh:
+            try:
+                self.refresh_session()
+                refresh = False
+            except Exception:
+                pass
         data = {
             "action": "next",
             "messages": [
@@ -110,9 +125,7 @@ class Chatbot:
         response = self.session.get(url)
         if response.status_code == 403:
             self.get_cf_cookies()
-            sleep(1)
-            self.refresh_session()
-            return
+            raise Exception("Clearance refreshing...")
         try:
             if "error" in response.json():
                raise Exception(f"Failed to refresh session! Error: {response.json()['error']}")
@@ -155,9 +168,7 @@ class Chatbot:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-setuid-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        print("Spawning browser...")
         driver = uc.Chrome(enable_cdp_events=True, options=options)
-        print("Browser spawned.")
         driver.add_cdp_listener(
             "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
         driver.add_cdp_listener(
@@ -236,13 +247,12 @@ class Chatbot:
         driver.add_cdp_listener(
             "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
         driver.get("https://chat.openai.com/chat")
-        while not self.agent_found or not self.cf_cookie_found:
-            print("Waiting for cookies...")
+        while not self.agent_found or not self.cookie_found:
             sleep(5)
-        driver.close()
         driver.quit()
         del driver
-        self.refresh_headers()
+        self.refresh_headers(cf_clearance=self.cf_clearance,
+                             user_agent=self.user_agent)
     def detect_cookies(self, message):
         if 'params' in message:
             if 'headers' in message['params']:
@@ -280,14 +290,18 @@ class Chatbot:
                     user_agent = message['params']['headers']['user-agent']
                     self.config['user_agent'] = user_agent
                     self.agent_found = True
+        self.refresh_headers(cf_clearance=self.cf_clearance,
+                             user_agent=self.user_agent)
 
-    def refresh_headers(self):
-        self.session.cookies.set("cf_clearance", self.config["cf_clearance"])
+    def refresh_headers(self, cf_clearance, user_agent):
+        del self.session.cookies["cf_clearance"]
+        self.session.headers.clear()
+        self.session.cookies.set("cf_clearance", cf_clearance)
         self.session.headers.update({
             "Accept": "text/event-stream",
             "Authorization": "Bearer ",
             "Content-Type": "application/json",
-            "User-Agent": self.config["user_agent"],
+            "User-Agent": user_agent,
             "X-Openai-Assistant-App-Id": "",
             "Connection": "close",
             "Accept-Language": "en-US,en;q=0.9",
