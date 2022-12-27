@@ -222,7 +222,6 @@ class Chatbot:
         WebDriverWait(driver,60).until(EC.visibility_of_element_located(
                 (By.XPATH, "//textarea")))
         while not self.session_cookie_found:
-            print("Waiting for session cookie...")
             sleep(5)
         print(self.GREEN + "Login successful." + self.ENDCOLOR)
         # Close the browser
