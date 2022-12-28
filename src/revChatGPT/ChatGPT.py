@@ -251,7 +251,6 @@ class Chatbot:
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
         finally:
             # Close the browser
-            driver.close()
             driver.quit()
             del driver
     
@@ -366,7 +365,6 @@ class Chatbot:
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
         finally:
             # Close the browser
-            # driver.close()
             driver.quit()
             del driver
 
