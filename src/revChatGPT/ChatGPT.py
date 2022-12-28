@@ -192,7 +192,11 @@ class Chatbot:
         options.add_argument("--disable-setuid-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         print("Spawning browser...")
-        driver = uc.Chrome(enable_cdp_events=True, options=options)
+        driver = uc.Chrome(
+            enable_cdp_events=True, options=options,
+            driver_executable_path=self.config.get("driver_exec_path"),
+            browser_executable_path=self.config.get("browser_exec_path")
+        )
         print("Browser spawned.")
         driver.add_cdp_listener(
             "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
@@ -292,7 +296,11 @@ class Chatbot:
         options.add_argument("--disable-setuid-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         print("Spawning browser...")
-        driver = uc.Chrome(enable_cdp_events=True, options=options)
+        driver = uc.Chrome(
+            enable_cdp_events=True, options=options,
+            driver_executable_path=self.config.get("driver_exec_path"),
+            browser_executable_path=self.config.get("browser_exec_path")
+        )
         print("Browser spawned.")
         driver.add_cdp_listener(
             "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
@@ -377,7 +385,11 @@ class Chatbot:
         options.add_argument("--disable-setuid-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         print("Spawning browser...")
-        driver = uc.Chrome(enable_cdp_events=True, options=options)
+        driver = uc.Chrome(
+            enable_cdp_events=True, options=options,
+            driver_executable_path=self.config.get("driver_exec_path"),
+            browser_executable_path=self.config.get("browser_exec_path")
+        )
         print("Browser spawned.")
         driver.add_cdp_listener(
             "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
