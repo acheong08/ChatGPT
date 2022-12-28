@@ -146,7 +146,8 @@ class Chatbot:
             raise Exception("Clearance refreshing...")
         try:
             if "error" in response.json():
-               raise Exception(f"Failed to refresh session! Error: {response.json()['error']}")
+                raise Exception(
+                    f"Failed to refresh session! Error: {response.json()['error']}")
             elif response.status_code != 200 or response.json() == {} or "accessToken" not in response.json():
                 raise Exception("Failed to refresh session!")
             else:
@@ -160,7 +161,7 @@ class Chatbot:
                 self.microsoft_login()
             elif self.twocaptcha_key:
                 self.email_login(self.solve_captcha())
-            else: 
+            else:
                 raise Exception("Failed to refresh session!") from exc
 
     def reset_chat(self) -> None:
@@ -171,6 +172,7 @@ class Chatbot:
         """
         self.conversation_id = None
         self.parent_id = str(uuid.uuid4())
+
     def microsoft_login(self) -> None:
         """
         Login to OpenAI via Microsoft Login Authentication.
@@ -184,14 +186,7 @@ class Chatbot:
             self.agent_found = False
             self.cf_clearance = None
             self.user_agent = None
-            options = uc.ChromeOptions()
-            options.add_argument('--start_maximized')
-            options.add_argument("--disable-extensions")
-            options.add_argument('--disable-application-cache')
-            options.add_argument('--disable-gpu')
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-setuid-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
+            options = self.__get_ChromeOptions()
             print("Spawning browser...")
             driver = uc.Chrome(
                 enable_cdp_events=True, options=options,
@@ -207,45 +202,52 @@ class Chatbot:
             while not self.agent_found or not self.cf_cookie_found:
                 sleep(5)
             self.refresh_headers(cf_clearance=self.cf_clearance,
-                                user_agent=self.user_agent)
+                                 user_agent=self.user_agent)
             # Wait for the login button to appear
-            WebDriverWait(driver,120).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//button[contains(text(), 'Log in')]")))
+            WebDriverWait(driver, 120).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[contains(text(), 'Log in')]")))
             # Click the login button
-            driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
+            driver.find_element(
+                by=By.XPATH, value="//button[contains(text(), 'Log in')]").click()
             # Wait for the Login with Microsoft button to be clickable
-            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//button[@data-provider='windowslive']")))
+            WebDriverWait(driver, 60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[@data-provider='windowslive']")))
             # Click the Login with Microsoft button
-            driver.find_element(by=By.XPATH,value="//button[@data-provider='windowslive']").click()
+            driver.find_element(
+                by=By.XPATH, value="//button[@data-provider='windowslive']").click()
             # Wait for the email input field to appear
-            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                    (By.XPATH, "//input[@type='email']")))
+            WebDriverWait(driver, 60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//input[@type='email']")))
             # Enter the email
-            driver.find_element(by=By.XPATH,value="//input[@type='email']").send_keys(self.config["email"])
+            driver.find_element(
+                by=By.XPATH, value="//input[@type='email']").send_keys(self.config["email"])
             # Wait for the Next button to be clickable
-            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//input[@type='submit']")))
+            WebDriverWait(driver, 60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//input[@type='submit']")))
             # Click the Next button
-            driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
+            driver.find_element(
+                by=By.XPATH, value="//input[@type='submit']").click()
             # Wait for the password input field to appear
-            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                    (By.XPATH, "//input[@type='password']")))
+            WebDriverWait(driver, 60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//input[@type='password']")))
             # Enter the password
-            driver.find_element(by=By.XPATH,value="//input[@type='password']").send_keys(self.config["password"])
+            driver.find_element(
+                by=By.XPATH, value="//input[@type='password']").send_keys(self.config["password"])
             # Wait for the Sign in button to be clickable
-            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//input[@type='submit']")))
+            WebDriverWait(driver, 60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//input[@type='submit']")))
             # Click the Sign in button
-            driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
+            driver.find_element(
+                by=By.XPATH, value="//input[@type='submit']").click()
             # Wait for the Allow button to appear
-            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//input[@value='Yes']")))                
+            WebDriverWait(driver, 60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//input[@value='Yes']")))
             # click Yes button
-            driver.find_element(by=By.XPATH,value="//input[@value='Yes']").click()
+            driver.find_element(
+                by=By.XPATH, value="//input[@value='Yes']").click()
             # wait for input box to appear (to make sure we're signed in)
-            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                    (By.XPATH, "//textarea")))
+            WebDriverWait(driver, 60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//textarea")))
             while not self.session_cookie_found:
                 sleep(5)
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
@@ -253,7 +255,7 @@ class Chatbot:
             # Close the browser
             driver.quit()
             del driver
-    
+
     def solve_captcha(self) -> str:
         """
         Solve the 2Captcha captcha.
@@ -269,11 +271,13 @@ class Chatbot:
         }
         twocaptcha_solver = TwoCaptcha(**twocaptcha_solver_config)
         print('Waiting for captcha to be solved...')
-        solved_captcha = twocaptcha_solver.recaptcha(sitekey='6Lc-wnQjAAAAADa5SPd68d0O3xmj0030uaVzpnXP', url="https://auth0.openai.com/u/login/identifier")
+        solved_captcha = twocaptcha_solver.recaptcha(
+            sitekey='6Lc-wnQjAAAAADa5SPd68d0O3xmj0030uaVzpnXP', url="https://auth0.openai.com/u/login/identifier")
         if "code" in solved_captcha:
             print(self.GREEN + "Captcha solved successfully!" + self.ENDCOLOR)
             if self.verbose:
-                print(self.GREEN + "Captcha token: " + self.ENDCOLOR + solved_captcha["code"])
+                print(self.GREEN + "Captcha token: " +
+                      self.ENDCOLOR + solved_captcha["code"])
             return solved_captcha
 
     def email_login(self, solved_captcha) -> None:
@@ -289,14 +293,7 @@ class Chatbot:
             self.agent_found = False
             self.cf_clearance = None
             self.user_agent = None
-            options = uc.ChromeOptions()
-            options.add_argument('--start_maximized')
-            options.add_argument("--disable-extensions")
-            options.add_argument('--disable-application-cache')
-            options.add_argument('--disable-gpu')
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-setuid-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
+            options = self.__get_ChromeOptions()
             print("Spawning browser...")
             driver = uc.Chrome(
                 enable_cdp_events=True, options=options,
@@ -312,27 +309,31 @@ class Chatbot:
             while not self.agent_found or not self.cf_cookie_found:
                 sleep(5)
             self.refresh_headers(cf_clearance=self.cf_clearance,
-                                user_agent=self.user_agent)
+                                 user_agent=self.user_agent)
             # Wait for the login button to appear
-            WebDriverWait(driver,120).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//button[contains(text(), 'Log in')]")))
+            WebDriverWait(driver, 120).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[contains(text(), 'Log in')]")))
             # Click the login button
-            driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
+            driver.find_element(
+                by=By.XPATH, value="//button[contains(text(), 'Log in')]").click()
             # Wait for the email input field to appear
-            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                    (By.ID, "username")))
+            WebDriverWait(driver, 60).until(EC.visibility_of_element_located(
+                (By.ID, "username")))
             # Enter the email
-            driver.find_element(by=By.ID,value="username").send_keys(self.config["email"])
+            driver.find_element(by=By.ID, value="username").send_keys(
+                self.config["email"])
             # Wait for Recaptcha to appear
-            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR,"*[name*='g-recaptcha-response']")))
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "*[name*='g-recaptcha-response']")))
             # Find Recaptcha
-            google_captcha_response_input = driver.find_element(By.CSS_SELECTOR, "*[name*='g-recaptcha-response']")
+            google_captcha_response_input = driver.find_element(
+                By.CSS_SELECTOR, "*[name*='g-recaptcha-response']")
             captcha_input = driver.find_element(By.NAME, 'captcha')
             # Make input visible
             driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
-                google_captcha_response_input)
+                                  google_captcha_response_input)
             driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
-                captcha_input)
+                                  captcha_input)
             driver.execute_script("""
             document.getElementById("g-recaptcha-response").innerHTML = arguments[0]
             """, solved_captcha.get('code'))
@@ -341,25 +342,28 @@ class Chatbot:
             """, solved_captcha.get('code'))
             # Hide the captcha input
             driver.execute_script("arguments[0].setAttribute('style', 'display:none;');",
-                google_captcha_response_input)
+                                  google_captcha_response_input)
             # Wait for the Continue button to be clickable
-            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//button[@type='submit']")))
+            WebDriverWait(driver, 60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[@type='submit']")))
             # Click the Continue button
-            driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
+            driver.find_element(
+                by=By.XPATH, value="//button[@type='submit']").click()
             # Wait for the password input field to appear
-            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                    (By.ID, "password")))
+            WebDriverWait(driver, 60).until(EC.visibility_of_element_located(
+                (By.ID, "password")))
             # Enter the password
-            driver.find_element(by=By.ID,value="password").send_keys(self.config["password"])
+            driver.find_element(by=By.ID, value="password").send_keys(
+                self.config["password"])
             # Wait for the Sign in button to be clickable
-            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//button[@type='submit']")))
+            WebDriverWait(driver, 60).until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[@type='submit']")))
             # Click the Sign in button
-            driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
+            driver.find_element(
+                by=By.XPATH, value="//button[@type='submit']").click()
             # wait for input box to appear (to make sure we're signed in)
-            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                    (By.XPATH, "//textarea")))
+            WebDriverWait(driver, 60).until(EC.visibility_of_element_located(
+                (By.XPATH, "//textarea")))
             while not self.session_cookie_found:
                 sleep(5)
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
@@ -367,6 +371,19 @@ class Chatbot:
             # Close the browser
             driver.quit()
             del driver
+
+    def __get_ChromeOptions(self):
+        options = uc.ChromeOptions()
+        options.add_argument('--start_maximized')
+        options.add_argument("--disable-extensions")
+        options.add_argument('--disable-application-cache')
+        options.add_argument('--disable-gpu')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        if self.config.get("proxy", "") != "":
+            options.add_argument("--proxy-server=" + self.config["proxy"])
+        return options
 
     def get_cf_cookies(self) -> None:
         """
@@ -379,14 +396,7 @@ class Chatbot:
             self.agent_found = False
             self.cf_clearance = None
             self.user_agent = None
-            options = uc.ChromeOptions()
-            options.add_argument('--start_maximized')
-            options.add_argument("--disable-extensions")
-            options.add_argument('--disable-application-cache')
-            options.add_argument('--disable-gpu')
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-setuid-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
+            options = self.__get_ChromeOptions()
             print("Spawning browser...")
             driver = uc.Chrome(
                 enable_cdp_events=True, options=options,
@@ -406,7 +416,8 @@ class Chatbot:
             driver.quit()
             del driver
             self.refresh_headers(cf_clearance=self.cf_clearance,
-                                user_agent=self.user_agent)
+                                 user_agent=self.user_agent)
+
     def detect_cookies(self, message):
         if 'params' in message:
             if 'headers' in message['params']:
@@ -429,13 +440,15 @@ class Chatbot:
                         print("Found Session Token!")
                         # remove the semicolon and '__Secure-next-auth.session-token=' from the string
                         raw_session_cookie = session_cookie.group(0)
-                        self.session_token = raw_session_cookie.split("=")[1][:-1]
+                        self.session_token = raw_session_cookie.split("=")[
+                            1][:-1]
                         self.session.cookies.set(
                             "__Secure-next-auth.session-token", self.session_token)
                         if self.verbose:
                             print(
                                 self.GREEN+"Session Token: "+self.ENDCOLOR + self.session_token)
                         self.session_cookie_found = True
+
     def detect_user_agent(self, message):
         if 'params' in message:
             if 'headers' in message['params']:
