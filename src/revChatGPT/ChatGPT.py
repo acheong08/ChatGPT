@@ -177,77 +177,83 @@ class Chatbot:
 
         :return: None
         """
-        # Open the browser
-        self.cf_cookie_found = False
-        self.session_cookie_found = False
-        self.agent_found = False
-        self.cf_clearance = None
-        self.user_agent = None
-        options = uc.ChromeOptions()
-        options.add_argument('--start_maximized')
-        options.add_argument("--disable-extensions")
-        options.add_argument('--disable-application-cache')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        print("Spawning browser...")
-        driver = uc.Chrome(enable_cdp_events=True, options=options)
-        print("Browser spawned.")
-        driver.add_cdp_listener(
-            "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
-        driver.add_cdp_listener(
-            "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
-        driver.get(BASE_URL)
-        while not self.agent_found or not self.cf_cookie_found:
-            sleep(5)
-        self.refresh_headers(cf_clearance=self.cf_clearance,
-                             user_agent=self.user_agent)
-        # Wait for the login button to appear
-        WebDriverWait(driver,120).until(EC.element_to_be_clickable(
-                (By.XPATH, "//button[contains(text(), 'Log in')]")))
-        # Click the login button
-        driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
-        # Wait for the Login with Microsoft button to be clickable
-        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                (By.XPATH, "//button[@data-provider='windowslive']")))
-        # Click the Login with Microsoft button
-        driver.find_element(by=By.XPATH,value="//button[@data-provider='windowslive']").click()
-        # Wait for the email input field to appear
-        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                (By.XPATH, "//input[@type='email']")))
-        # Enter the email
-        driver.find_element(by=By.XPATH,value="//input[@type='email']").send_keys(self.config["email"])
-        # Wait for the Next button to be clickable
-        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                (By.XPATH, "//input[@type='submit']")))
-        # Click the Next button
-        driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
-        # Wait for the password input field to appear
-        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                (By.XPATH, "//input[@type='password']")))
-        # Enter the password
-        driver.find_element(by=By.XPATH,value="//input[@type='password']").send_keys(self.config["password"])
-        # Wait for the Sign in button to be clickable
-        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                (By.XPATH, "//input[@type='submit']")))
-        # Click the Sign in button
-        driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
-        # Wait for the Allow button to appear
-        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                (By.XPATH, "//input[@value='Yes']")))                
-        # click Yes button
-        driver.find_element(by=By.XPATH,value="//input[@value='Yes']").click()
-        # wait for input box to appear (to make sure we're signed in)
-        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                (By.XPATH, "//textarea")))
-        while not self.session_cookie_found:
-            sleep(5)
-        print(self.GREEN + "Login successful." + self.ENDCOLOR)
-        # Close the browser
-        driver.close()
-        driver.quit()
-        del driver
+        try:
+            # Open the browser
+            self.cf_cookie_found = False
+            self.session_cookie_found = False
+            self.agent_found = False
+            self.cf_clearance = None
+            self.user_agent = None
+            options = uc.ChromeOptions()
+            options.add_argument('--start_maximized')
+            options.add_argument("--disable-extensions")
+            options.add_argument('--disable-application-cache')
+            options.add_argument('--disable-gpu')
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-setuid-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            print("Spawning browser...")
+            driver = uc.Chrome(
+                enable_cdp_events=True, options=options,
+                driver_executable_path=self.config.get("driver_exec_path"),
+                browser_executable_path=self.config.get("browser_exec_path")
+            )
+            print("Browser spawned.")
+            driver.add_cdp_listener(
+                "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
+            driver.add_cdp_listener(
+                "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
+            driver.get(BASE_URL)
+            while not self.agent_found or not self.cf_cookie_found:
+                sleep(5)
+            self.refresh_headers(cf_clearance=self.cf_clearance,
+                                user_agent=self.user_agent)
+            # Wait for the login button to appear
+            WebDriverWait(driver,120).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[contains(text(), 'Log in')]")))
+            # Click the login button
+            driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
+            # Wait for the Login with Microsoft button to be clickable
+            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[@data-provider='windowslive']")))
+            # Click the Login with Microsoft button
+            driver.find_element(by=By.XPATH,value="//button[@data-provider='windowslive']").click()
+            # Wait for the email input field to appear
+            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                    (By.XPATH, "//input[@type='email']")))
+            # Enter the email
+            driver.find_element(by=By.XPATH,value="//input[@type='email']").send_keys(self.config["email"])
+            # Wait for the Next button to be clickable
+            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//input[@type='submit']")))
+            # Click the Next button
+            driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
+            # Wait for the password input field to appear
+            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                    (By.XPATH, "//input[@type='password']")))
+            # Enter the password
+            driver.find_element(by=By.XPATH,value="//input[@type='password']").send_keys(self.config["password"])
+            # Wait for the Sign in button to be clickable
+            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//input[@type='submit']")))
+            # Click the Sign in button
+            driver.find_element(by=By.XPATH,value="//input[@type='submit']").click()
+            # Wait for the Allow button to appear
+            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//input[@value='Yes']")))                
+            # click Yes button
+            driver.find_element(by=By.XPATH,value="//input[@value='Yes']").click()
+            # wait for input box to appear (to make sure we're signed in)
+            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                    (By.XPATH, "//textarea")))
+            while not self.session_cookie_found:
+                sleep(5)
+            print(self.GREEN + "Login successful." + self.ENDCOLOR)
+        finally:
+            # Close the browser
+            driver.close()
+            driver.quit()
+            del driver
     
     def solve_captcha(self) -> str:
         """
@@ -278,85 +284,91 @@ class Chatbot:
         :return: None
         """
         # Open the browser
-        self.cf_cookie_found = False
-        self.session_cookie_found = False
-        self.agent_found = False
-        self.cf_clearance = None
-        self.user_agent = None
-        options = uc.ChromeOptions()
-        options.add_argument('--start_maximized')
-        options.add_argument("--disable-extensions")
-        options.add_argument('--disable-application-cache')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        print("Spawning browser...")
-        driver = uc.Chrome(enable_cdp_events=True, options=options)
-        print("Browser spawned.")
-        driver.add_cdp_listener(
-            "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
-        driver.add_cdp_listener(
-            "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
-        driver.get(BASE_URL)
-        while not self.agent_found or not self.cf_cookie_found:
-            sleep(5)
-        self.refresh_headers(cf_clearance=self.cf_clearance,
-                             user_agent=self.user_agent)
-        # Wait for the login button to appear
-        WebDriverWait(driver,120).until(EC.element_to_be_clickable(
-                (By.XPATH, "//button[contains(text(), 'Log in')]")))
-        # Click the login button
-        driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
-        # Wait for the email input field to appear
-        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                (By.ID, "username")))
-        # Enter the email
-        driver.find_element(by=By.ID,value="username").send_keys(self.config["email"])
-        # Wait for Recaptcha to appear
-        WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR,"*[name*='g-recaptcha-response']")))
-        # Find Recaptcha
-        google_captcha_response_input = driver.find_element(By.CSS_SELECTOR, "*[name*='g-recaptcha-response']")
-        captcha_input = driver.find_element(By.NAME, 'captcha')
-        # Make input visible
-        driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
-            google_captcha_response_input)
-        driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
-            captcha_input)
-        driver.execute_script("""
-        document.getElementById("g-recaptcha-response").innerHTML = arguments[0]
-        """, solved_captcha.get('code'))
-        driver.execute_script("""
-        document.querySelector("input[name='captcha']").value = arguments[0]
-        """, solved_captcha.get('code'))
-        # Hide the captcha input
-        driver.execute_script("arguments[0].setAttribute('style', 'display:none;');",
-            google_captcha_response_input)
-        # Wait for the Continue button to be clickable
-        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                (By.XPATH, "//button[@type='submit']")))
-        # Click the Continue button
-        driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
-        # Wait for the password input field to appear
-        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                (By.ID, "password")))
-        # Enter the password
-        driver.find_element(by=By.ID,value="password").send_keys(self.config["password"])
-        # Wait for the Sign in button to be clickable
-        WebDriverWait(driver,60).until(EC.element_to_be_clickable(
-                (By.XPATH, "//button[@type='submit']")))
-        # Click the Sign in button
-        driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
-        # wait for input box to appear (to make sure we're signed in)
-        WebDriverWait(driver,60).until(EC.visibility_of_element_located(
-                (By.XPATH, "//textarea")))
-        while not self.session_cookie_found:
-            sleep(5)
-        print(self.GREEN + "Login successful." + self.ENDCOLOR)
-        # Close the browser
-        driver.close()
-        driver.quit()
-        del driver
+        try:
+            self.cf_cookie_found = False
+            self.session_cookie_found = False
+            self.agent_found = False
+            self.cf_clearance = None
+            self.user_agent = None
+            options = uc.ChromeOptions()
+            options.add_argument('--start_maximized')
+            options.add_argument("--disable-extensions")
+            options.add_argument('--disable-application-cache')
+            options.add_argument('--disable-gpu')
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-setuid-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            print("Spawning browser...")
+            driver = uc.Chrome(
+                enable_cdp_events=True, options=options,
+                driver_executable_path=self.config.get("driver_exec_path"),
+                browser_executable_path=self.config.get("browser_exec_path")
+            )
+            print("Browser spawned.")
+            driver.add_cdp_listener(
+                "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
+            driver.add_cdp_listener(
+                "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
+            driver.get(BASE_URL)
+            while not self.agent_found or not self.cf_cookie_found:
+                sleep(5)
+            self.refresh_headers(cf_clearance=self.cf_clearance,
+                                user_agent=self.user_agent)
+            # Wait for the login button to appear
+            WebDriverWait(driver,120).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[contains(text(), 'Log in')]")))
+            # Click the login button
+            driver.find_element(by=By.XPATH,value="//button[contains(text(), 'Log in')]").click()
+            # Wait for the email input field to appear
+            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                    (By.ID, "username")))
+            # Enter the email
+            driver.find_element(by=By.ID,value="username").send_keys(self.config["email"])
+            # Wait for Recaptcha to appear
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR,"*[name*='g-recaptcha-response']")))
+            # Find Recaptcha
+            google_captcha_response_input = driver.find_element(By.CSS_SELECTOR, "*[name*='g-recaptcha-response']")
+            captcha_input = driver.find_element(By.NAME, 'captcha')
+            # Make input visible
+            driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
+                google_captcha_response_input)
+            driver.execute_script("arguments[0].setAttribute('style','type: text; visibility:visible;');",
+                captcha_input)
+            driver.execute_script("""
+            document.getElementById("g-recaptcha-response").innerHTML = arguments[0]
+            """, solved_captcha.get('code'))
+            driver.execute_script("""
+            document.querySelector("input[name='captcha']").value = arguments[0]
+            """, solved_captcha.get('code'))
+            # Hide the captcha input
+            driver.execute_script("arguments[0].setAttribute('style', 'display:none;');",
+                google_captcha_response_input)
+            # Wait for the Continue button to be clickable
+            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[@type='submit']")))
+            # Click the Continue button
+            driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
+            # Wait for the password input field to appear
+            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                    (By.ID, "password")))
+            # Enter the password
+            driver.find_element(by=By.ID,value="password").send_keys(self.config["password"])
+            # Wait for the Sign in button to be clickable
+            WebDriverWait(driver,60).until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[@type='submit']")))
+            # Click the Sign in button
+            driver.find_element(by=By.XPATH,value="//button[@type='submit']").click()
+            # wait for input box to appear (to make sure we're signed in)
+            WebDriverWait(driver,60).until(EC.visibility_of_element_located(
+                    (By.XPATH, "//textarea")))
+            while not self.session_cookie_found:
+                sleep(5)
+            print(self.GREEN + "Login successful." + self.ENDCOLOR)
+        finally:
+            # Close the browser
+            # driver.close()
+            driver.quit()
+            del driver
 
     def get_cf_cookies(self) -> None:
         """
