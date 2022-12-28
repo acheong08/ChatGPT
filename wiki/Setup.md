@@ -6,6 +6,8 @@
 
 Make sure Chrome or Chromium is installed
 
+If you need to select a different version of chrome/chromium, use the `driver_exec_path` and `browser_exec_path` config options
+
 ## Authentication:
 
 You must define the session token or (email and password) for Microsoft Login in the config:
@@ -27,39 +29,48 @@ You must define the session token or (email and password) for Microsoft Login in
 - ### Email/Password Login Authentication:
 
   ```json
-  { "email": "<EMAIL>", 
+  {
+    "email": "<EMAIL>",
     "password": "<PASSWORD>",
     "captcha": "<2CAPTCHA_API_KEY>"
-    }
+  }
   ```
+
   **Note: 2Captcha is required for Email/Password Login**
+
 - ### Microsoft Login Authentication:
 
   ```json
-  { "email": "<EMAIL>", 
+  {
+    "email": "<EMAIL>",
     "password": "<PASSWORD>",
     "isMicrosoftLogin": True
-    }
+  }
   ```
- **Note: `email` and `password` parameters will override `session_token`**
- 
+
+  **Note: `email` and `password` parameters will override `session_token`**
+
 ## Server Config:
 
 You can use `Xvfb` to emulate a a display buffer.
+
 ```
 xvfb-run -a python3 client.py
 ```
 
-# Config options
+# Config options (Optional)
 
 ```json
 {
   "session_token": "<token>",
-  "email": "<EMAIL>", 
+  "email": "<EMAIL>",
   "password": "<PASSWORD>",
   "captcha": "<2CAPTCHA_API_KEY>",
-  "isMicrosoftLogin": True | False
+  "isMicrosoftLogin": True | False,
   "proxy": "<proxy>",
+  "driver_exec_path": "./path/to/driver",
+  "browser_exec_path": "./path/to/browser",
+  "conversation": "<DEFAULT CONVERSATION UUID>",
   "verbose": True | False
 }
 ```
