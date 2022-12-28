@@ -391,18 +391,22 @@ class Chatbot:
 
         :return: None
         """
+
+        print("Spawning browser...")
+
+        options = self.__get_ChromeOptions()
+
+        driver = uc.Chrome(
+            enable_cdp_events=True, options=options,
+            driver_executable_path=self.config.get("driver_exec_path"),
+            browser_executable_path=self.config.get("browser_exec_path")
+        )
+
         try:
             self.cf_cookie_found = False
             self.agent_found = False
             self.cf_clearance = None
             self.user_agent = None
-            options = self.__get_ChromeOptions()
-            print("Spawning browser...")
-            driver = uc.Chrome(
-                enable_cdp_events=True, options=options,
-                driver_executable_path=self.config.get("driver_exec_path"),
-                browser_executable_path=self.config.get("browser_exec_path")
-            )
             print("Browser spawned.")
             driver.add_cdp_listener(
                 "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
