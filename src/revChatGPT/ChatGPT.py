@@ -374,36 +374,39 @@ class Chatbot:
 
         :return: None
         """
-        self.cf_cookie_found = False
-        self.agent_found = False
-        self.cf_clearance = None
-        self.user_agent = None
-        options = uc.ChromeOptions()
-        options.add_argument('--start_maximized')
-        options.add_argument("--disable-extensions")
-        options.add_argument('--disable-application-cache')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        print("Spawning browser...")
-        driver = uc.Chrome(
-            enable_cdp_events=True, options=options,
-            driver_executable_path=self.config.get("driver_exec_path"),
-            browser_executable_path=self.config.get("browser_exec_path")
-        )
-        print("Browser spawned.")
-        driver.add_cdp_listener(
-            "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
-        driver.add_cdp_listener(
-            "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
-        driver.get("https://chat.openai.com/chat")
-        while not self.agent_found or not self.cf_cookie_found:
-            sleep(5)
-        driver.quit()
-        del driver
-        self.refresh_headers(cf_clearance=self.cf_clearance,
-                             user_agent=self.user_agent)
+        try:
+            self.cf_cookie_found = False
+            self.agent_found = False
+            self.cf_clearance = None
+            self.user_agent = None
+            options = uc.ChromeOptions()
+            options.add_argument('--start_maximized')
+            options.add_argument("--disable-extensions")
+            options.add_argument('--disable-application-cache')
+            options.add_argument('--disable-gpu')
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-setuid-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            print("Spawning browser...")
+            driver = uc.Chrome(
+                enable_cdp_events=True, options=options,
+                driver_executable_path=self.config.get("driver_exec_path"),
+                browser_executable_path=self.config.get("browser_exec_path")
+            )
+            print("Browser spawned.")
+            driver.add_cdp_listener(
+                "Network.responseReceivedExtraInfo", lambda msg: self.detect_cookies(msg))
+            driver.add_cdp_listener(
+                "Network.requestWillBeSentExtraInfo", lambda msg: self.detect_user_agent(msg))
+            driver.get("https://chat.openai.com/chat")
+            while not self.agent_found or not self.cf_cookie_found:
+                sleep(5)
+        finally:
+            # Close the browser
+            driver.quit()
+            del driver
+            self.refresh_headers(cf_clearance=self.cf_clearance,
+                                user_agent=self.user_agent)
     def detect_cookies(self, message):
         if 'params' in message:
             if 'headers' in message['params']:
