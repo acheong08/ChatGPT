@@ -89,7 +89,8 @@ def chatGPT_main(config):
                 break
         try:
             print("Chatbot: ")
-            message = chatbot.ask(prompt, conversation_id=chatbot.config.get("conversation"))
+            message = chatbot.ask(
+                prompt, conversation_id=chatbot.config.get("conversation"))
             print(message["message"])
         except Exception as exc:
             print("Something went wrong!")
@@ -102,7 +103,6 @@ def main():
         """
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-        Run with --debug to enable debugging
         """,
     )
     print("Type '!help' to show commands")
