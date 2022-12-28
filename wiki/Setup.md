@@ -6,6 +6,8 @@
 
 Make sure Chrome or Chromium is installed
 
+If you need to select a different version of chrome/chromium, use the `driver_exec_path` and `browser_exec_path` config options
+
 ## Authentication:
 
 You must define the session token or (email and password) for Microsoft Login in the config:
@@ -60,6 +62,9 @@ xvfb-run -a python3 client.py
   "captcha": "<2CAPTCHA_API_KEY>",
   "isMicrosoftLogin": True | False
   "proxy": "<proxy>",
+  "driver_exec_path": "./path/to/driver",
+  "browser_exec_path": "./path/to/browser",
+  "conversation": "<DEFAULT CONVERSATION UUID>",
   "verbose": True | False
 }
 ```

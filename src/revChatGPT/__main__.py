@@ -78,11 +78,18 @@ def chatGPT_main(config):
                 chatbot.rollback_conversation(rollback)
                 print(f"Rolled back {rollback} messages.")
                 continue
+            elif prompt.startswith("!setconversation"):
+                try:
+                    chatbot.config["conversation"] = prompt.split(" ")[1]
+                    print("Conversation has been changed")
+                except IndexError:
+                    print("Please include conversation UUID in command")
+                continue
             elif prompt == "!exit":
                 break
         try:
             print("Chatbot: ")
-            message = chatbot.ask(prompt)
+            message = chatbot.ask(prompt, conversation_id=chatbot.config.get("conversation"))
             print(message["message"])
         except Exception as exc:
             print("Something went wrong!")
