@@ -21,15 +21,8 @@ The API is a separate project and not part of this library.
 `pip3 install --upgrade revChatGPT`
 
 ## Configuration
-https://github.com/acheong08/ChatGPT/wiki/Setup
-```json
-{
-  "session_token": "<token>",
-  "proxy": "<proxy>"
-}
-```
 
-Proxy is optional
+Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for more information.
 
 ## Usage
 
