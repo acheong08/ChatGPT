@@ -29,7 +29,6 @@ Please update your packages before reporting! `pip3 install --upgrade OpenAIAuth
  - OS: [e.g. Linux, MacOS, Windows]
  - Python version: `python -V`
  - ChatGPT Version: `pip3 show revChatGPT`
- - OpenAI Version: `pip3 show OpenAIAuth`
 
 **Additional context**
 Add any other context about the problem here.
