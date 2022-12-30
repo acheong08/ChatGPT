@@ -2,6 +2,8 @@
 
 `pip3 install --upgrade revChatGPT`
 
+(MacOS might need `brew install --cask chromedriver`. View [#380](https://github.com/acheong08/ChatGPT/issues/380))
+
 ## Dependencies
 
 Make sure Chrome or Chromium is installed
@@ -47,6 +49,10 @@ You must define the session token or (email and password) for Microsoft Login in
     "isMicrosoftLogin": True
   }
   ```
+```
+True → Python dict
+true → JSON
+```
 
   **Note: `email` and `password` parameters will override `session_token`**
 
@@ -73,4 +79,10 @@ xvfb-run -a python3 client.py
   "conversation": "<DEFAULT CONVERSATION UUID>",
   "verbose": True | False
 }
+```
+
+`"driver_exec_path": "/usr/local/bin/chromedriver"` might be necessary for MacOS
+```
+True → Python dict
+true → JSON
 ```
