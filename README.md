@@ -10,9 +10,10 @@ Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
 
 ### Related works
-This is the library implementation. For an API that scales, check out https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
+- API that scales: https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
+- Lightweight version: https://github.com/acheong08/ChatGPT-lite (In collaboration with [Pawan](https://github.com/PawanOsman/))
 
-The API is a separate project and not part of this library.
+*These are separate works and not part of this library*
 
 # Usage
 
