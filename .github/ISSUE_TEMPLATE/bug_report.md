@@ -25,7 +25,7 @@ In the correct directory, run `python3 -m revChatGPT --debug`
 
 **Environment (please complete the following information):**
 
-Please update your packages before reporting! `pip3 install --upgrade OpenAIAuth revChatGPT`
+Please update your packages before reporting! `pip3 install --upgrade revChatGPT`
  - OS: [e.g. Linux, MacOS, Windows]
  - Python version: `python -V`
  - ChatGPT Version: `pip3 show revChatGPT`
