@@ -5,7 +5,7 @@
 
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
 
-Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment. 
+Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment (in the far future). 
 <br><br>
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
 
