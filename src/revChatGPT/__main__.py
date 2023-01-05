@@ -90,7 +90,7 @@ def chatGPT_main(config):
         try:
             print("Chatbot: ")
             message = chatbot.ask(
-                prompt, conversation_id=chatbot.config.get("conversation"))
+                prompt, conversation_id=chatbot.config.get("conversation"), parent_id=chatbot.config.get("parent_id"))
             print(message["message"])
         except Exception as exc:
             print("Something went wrong!")

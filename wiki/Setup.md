@@ -77,9 +77,11 @@ xvfb-run -a python3 client.py
   "driver_exec_path": "./path/to/driver",
   "browser_exec_path": "./path/to/browser",
   "conversation": "<DEFAULT CONVERSATION UUID>",
+  "parent_id": "<DEFAULT PARENT ID>"
   "verbose": True | False
 }
 ```
+It is impossible to easily get the parent_id and conversation_id from the website. You can only get it programmatically. Don't mess with it unless you know what you are doing
 
 `"driver_exec_path": "/usr/local/bin/chromedriver"` might be necessary for MacOS
 ```
