@@ -60,9 +60,7 @@ true → JSON
 
 You can use `Xvfb` to emulate a a display buffer.
 
-```
-xvfb-run -a python3 client.py
-```
+https://github.com/ultrafunkamsterdam/undetected-chromedriver/issues/743#issuecomment-1366847803
 
 # Config options (Optional)
 
