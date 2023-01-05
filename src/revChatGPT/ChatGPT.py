@@ -111,7 +111,8 @@ class Chatbot:
         self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
             url=BASE_URL + "backend-api/conversation",
-            data=json.dumps(data)
+            data=json.dumps(data),
+            timeout_seconds=180
         )
         if response.status_code != 200:
             print(response.text)

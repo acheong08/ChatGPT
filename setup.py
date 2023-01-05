@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="0.0.48.4",
+    version="0.0.49",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
@@ -15,7 +15,7 @@ setup(
     install_requires=[
         "undetected_chromedriver>=3.1.7",
         "selenium>=4.7.2",
-        "tls_client_for_chatGPT>=0.2",
+        "tls_client>=0.1.7",
         "2captcha-python>=1.1.3"
     ],
     long_description=open("README.md", encoding="utf-8").read(),
