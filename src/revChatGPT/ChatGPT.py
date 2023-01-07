@@ -43,6 +43,7 @@ class Chatbot:
             self.verbose = False
         self.conversation_id = conversation_id
         self.parent_id = parent_id
+        self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
         self.isMicrosoftLogin = False
@@ -93,6 +94,11 @@ class Chatbot:
                 refresh = False
             except Exception:
                 pass
+        self.map_conversations()
+        if conversation_id == None:
+            conversation_id = self.conversation_id
+        if parent_id == None:
+            parent_id = self.parent_id if conversation_id == self.conversation_id else self.conversation_mapping[conversation_id]
         data = {
             "action": "next",
             "messages": [
@@ -102,8 +108,8 @@ class Chatbot:
                     "content": {"content_type": "text", "parts": [prompt]},
                 },
             ],
-            "conversation_id": conversation_id or self.conversation_id,
-            "parent_message_id": parent_id or self.parent_id or str(uuid.uuid4()),
+            "conversation_id": conversation_id,
+            "parent_message_id": parent_id,
             "model": "text-davinci-002-render",
         }
         self.conversation_id_prev_queue.append(
@@ -167,6 +173,12 @@ class Chatbot:
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.check_response(response)
+
+    def map_conversations(self):
+        conversations = self.get_conversations()
+        histories = [self.get_msg_history(x["id"]) for x in conversations]
+        for x, y in zip(conversations, histories):
+            self.conversation_mapping[x["id"]] = y["current_node"]
 
     def refresh_session(self):
         url = BASE_URL + "api/auth/session"
