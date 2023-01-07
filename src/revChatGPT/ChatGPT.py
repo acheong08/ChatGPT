@@ -139,6 +139,35 @@ class Chatbot:
             else:
                 return None
 
+    def check_response(self, response):
+        if response.status_code != 200:
+            print(response.text)
+            raise Exception("Response code error: ", response.status_code)
+
+    def get_conversations(self, offset=0, limit=20):
+        url = BASE_URL + f"backend-api/conversations?offset={offset}&limit={limit}"
+        response = self.session.get(url)
+        self.check_response(response)
+        data = json.loads(response.text)
+        return data["items"]
+
+    def get_msg_history(self, id):
+        url = BASE_URL + f"backend-api/conversation/{id}"
+        response = self.session.get(url)
+        self.check_response(response)
+        data = json.loads(response.text)
+        return data
+
+    def change_title(self, id, title):
+        url = BASE_URL + f"backend-api/conversation/{id}"
+        response = self.session.patch(url, data=f'{{"title": {title}}}')
+        self.check_response(response)
+
+    def delete_conversation(self, id):
+        url = BASE_URL + f"backend-api/conversation/{id}"
+        response = self.session.patch(url, data='{"is_visible": false}')
+        self.check_response(response)
+
     def refresh_session(self):
         url = BASE_URL + "api/auth/session"
         response = self.session.get(url)
