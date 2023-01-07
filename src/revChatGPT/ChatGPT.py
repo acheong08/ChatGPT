@@ -139,7 +139,7 @@ class Chatbot:
                 }
                 if gen_title and new_conv:
                     try:
-                        title = self.gen_title(self.conversation_id, self.parent_id)
+                        title = self.gen_title(self.conversation_id, self.parent_id)["title"]
                     except Exception as exc:
                         split = prompt.split(" ")
                         title = " ".join(split[:3]) + ("..." if len(split)>3 else "")
