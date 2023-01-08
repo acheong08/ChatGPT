@@ -85,7 +85,7 @@ class Chatbot:
             except Exception:
                 pass
 
-    def ask(self, prompt, conversation_id=None, parent_id=None):
+    def ask(self, prompt, conversation_id=None, parent_id=None, gen_title = False):
         refresh = True
         while refresh:
             try:
@@ -106,6 +106,7 @@ class Chatbot:
             "parent_message_id": parent_id or self.parent_id or str(uuid.uuid4()),
             "model": "text-davinci-002-render",
         }
+        new_conv = data["conversation_id"] is None
         self.conversation_id_prev_queue.append(
             data["conversation_id"])  # for rollback
         self.parent_id_prev_queue.append(data["parent_message_id"])
@@ -131,11 +132,19 @@ class Chatbot:
                 self.parent_id = response["message"]["id"]
                 self.conversation_id = response["conversation_id"]
                 message = response["message"]["content"]["parts"][0]
-                return {
+                res = {
                     "message": message,
                     "conversation_id": self.conversation_id,
                     "parent_id": self.parent_id,
                 }
+                if gen_title and new_conv:
+                    try:
+                        title = self.gen_title(self.conversation_id, self.parent_id)["title"]
+                    except Exception as exc:
+                        split = prompt.split(" ")
+                        title = " ".join(split[:3]) + ("..." if len(split)>3 else "")
+                    res["title"] = title
+                return res 
             else:
                 return None
 
@@ -154,6 +163,13 @@ class Chatbot:
     def get_msg_history(self, id):
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.get(url)
+        self.check_response(response)
+        data = json.loads(response.text)
+        return data 
+    
+    def gen_title(self, id, message_id):
+        url = BASE_URL + f"backend-api/conversation/gen_title/{id}"
+        response = self.session.post(url, data=json.dumps({"message_id": message_id, "model": "text-davinci-002-render"}))
         self.check_response(response)
         data = json.loads(response.text)
         return data
@@ -202,7 +218,7 @@ class Chatbot:
         """
         self.conversation_id = None
         self.parent_id = str(uuid.uuid4())
-
+        
     def microsoft_login(self) -> None:
         """
         Login to OpenAI via Microsoft Login Authentication.
