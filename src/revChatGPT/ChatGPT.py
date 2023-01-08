@@ -186,7 +186,7 @@ class Chatbot:
 
     def refresh_session(self):
         url = BASE_URL + "api/auth/session"
-        response = self.session.get(url)
+        response = self.session.get(url, timeout_seconds=180)
         if response.status_code == 403:
             self.get_cf_cookies()
             raise Exception("Clearance refreshing...")
