@@ -3,7 +3,7 @@
 [![PyPi](https://img.shields.io/pypi/v/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
 [![PyPi](https://img.shields.io/pypi/dm/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
 
-Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc.
+Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment (in the far future). 
 <br><br>
