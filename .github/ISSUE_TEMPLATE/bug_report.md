@@ -8,29 +8,29 @@ assignees: ''
 
 ---
 
-**Description**          
+**Description**                                                          
 A clear and concise description of what the bug is.
 
-**Steps to Reproduce**         
-Go to '...'
-Click on '....'
-Scroll down to '....'
-See error
+**Steps to Reproduce**                                                                                 
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
-**Expected behavior**         
+**Expected behavior**                                 
 A clear and concise description of what you expected to happen.
 
-**Output**         
+**Output**                                                                 
 In the correct directory, run the following command:
-python3 -m revChatGPT --debug
+`python3 -m revChatGPT --debug`
 
-**Environment**         
+**Environment**                                                                                         
 Please update your packages before reporting the issue:
-pip3 install --upgrade revChatGPT
+`pip3 install --upgrade revChatGPT`
 
-OS: [e.g. Linux, MacOS, Windows]
-Python version: python -V
-ChatGPT Version: pip3 show revChatGPT
+ - OS: [e.g. Linux, MacOS, Windows]
+ - Python version: python -V
+ - ChatGPT Version: pip3 show revChatGPT
 
-**Additional context**         
+**Additional context**                                         
 Add any other context about the problem here.
