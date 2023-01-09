@@ -230,8 +230,8 @@ class Chatbot:
                 self.session.headers.update({
                     "Authorization": "Bearer " + response.json()["accessToken"]
                 })
-            self.session_token = self.session.cookies.get(
-                "__Secure-next-auth.session-token")
+            self.session_token = self.session.cookies._find(
+                "__Secure-next-auth.session-token", )
         except Exception as exc:
             print("Failed to refresh session!")
             if self.isMicrosoftLogin:
