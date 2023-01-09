@@ -61,5 +61,5 @@ def refresh():
     return jsonify({"session_token": chatbot.session_token}), 200
 
 
-if __name__ == "__main__":
+def main():
     app.run(host="127.0.0.1", port=8080)
