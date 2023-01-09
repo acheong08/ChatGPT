@@ -1,4 +1,5 @@
 ---
+
 name: Bug report
 about: Create a report to help us improve
 title: "[BUG]"
@@ -7,28 +8,29 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+**Description**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Steps to Reproduce**
+Go to '...'
+Click on '....'
+Scroll down to '....'
+See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
 **Output**
-In the correct directory, run `python3 -m revChatGPT --debug`
+In the correct directory, run the following command:
+python3 -m revChatGPT --debug
 
-**Environment (please complete the following information):**
+**Environment**
+Please update your packages before reporting the issue:
+pip3 install --upgrade revChatGPT
 
-Please update your packages before reporting! `pip3 install --upgrade revChatGPT`
- - OS: [e.g. Linux, MacOS, Windows]
- - Python version: `python -V`
- - ChatGPT Version: `pip3 show revChatGPT`
+OS: [e.g. Linux, MacOS, Windows]
+Python version: python -V
+ChatGPT Version: pip3 show revChatGPT
 
 **Additional context**
 Add any other context about the problem here.
