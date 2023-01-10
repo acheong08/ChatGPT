@@ -6,19 +6,25 @@ from revChatGPT.ChatGPT import Chatbot
 
 
 def get_input(prompt):
-    # prompt for input
-    lines = []
+    # Display the prompt
     print(prompt, end="")
+
+    # Initialize an empty list to store the input lines
+    lines = []
+
+    # Read lines of input until the user enters an empty line
     while True:
         line = input()
         if line == "":
             break
         lines.append(line)
 
-    # Join the lines, separated by newlines, and print the result
+    # Join the lines, separated by newlines, and store the result
     user_input = "\n".join(lines)
-    # print(user_input)
+
+    # Return the input
     return user_input
+ 
 
 
 def configure():
@@ -54,17 +60,17 @@ def chatGPT_main(config):
                 !refresh - Refresh the session authentication
                 !config - Show the current configuration
                 !rollback x - Rollback the conversation (x being the number of messages to rollback)
-                !exit - Exit the program
+                !exit - Exit this program
                 """,
                 )
                 continue
             elif prompt == "!reset":
                 chatbot.reset_chat()
-                print("Chat session reset.")
+                print("Chat session successfully reset.")
                 continue
             elif prompt == "!refresh":
                 chatbot.refresh_session()
-                print("Session refreshed.\n")
+                print("Session successfully refreshed.\n")
                 continue
             elif prompt == "!config":
                 print(json.dumps(chatbot.config, indent=4))
@@ -105,7 +111,7 @@ def main():
         Repo: github.com/acheong08/ChatGPT
         """,
     )
-    print("Type '!help' to show commands")
+    print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
     chatGPT_main(configure())
 
