@@ -25,7 +25,7 @@ class Chatbot:
     def __init__(self, config, conversation_id=None, parent_id=None, no_refresh=False) -> None:
         self.config = config
         self.session = tls_client.Session(
-            client_identifier="chrome_108"
+            client_identifier="chrome_109"
         )
         if "proxy" in config:
             if type(config["proxy"]) != str:
