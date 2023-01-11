@@ -319,10 +319,10 @@ class Chatbot:
                 by=By.XPATH, value="//input[@type='submit']").click()
             # Wait for the Allow button to appear
             WebDriverWait(driver, 60).until(EC.element_to_be_clickable(
-                (By.XPATH, "//input[@value='Yes']")))
+                (By.XPATH, "//input[@type='submit']")))
             # click Yes button
             driver.find_element(
-                by=By.XPATH, value="//input[@value='Yes']").click()
+                by=By.XPATH, value="//input[@type='submit']").click()
             # wait for input box to appear (to make sure we're signed in)
             WebDriverWait(driver, 60).until(EC.visibility_of_element_located(
                 (By.XPATH, "//textarea")))
