@@ -58,6 +58,7 @@ This is not an official OpenAI product. This is a personal project and is not af
 
 # Credits
 
+- [virtualharby](https://twitter.com/virtualharby) - Memes for emotional support
 - [rawandahmad698](https://github.com/rawandahmad698) - Reverse engineering Auth0
 - [FlorianREGAZ](https://github.com/FlorianREGAZ) - TLS client
 - [PyRo1121](https://github.com/PyRo1121) - Linting
