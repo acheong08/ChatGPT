@@ -1,14 +1,10 @@
-import uuid
-import re
-import json
-import tls_client
+import uuid, re, json, tls_client, logging
 import undetected_chromedriver as uc
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from time import sleep
 from twocaptcha import TwoCaptcha
-import logging
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
 
