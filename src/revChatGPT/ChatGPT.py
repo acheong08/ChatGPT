@@ -86,9 +86,9 @@ class Chatbot:
             try:
                 self.refresh_session()
                 refresh = False
-            except Exception:
+            except Exception as exc:
                 if retries == 0:
-                    raise Exception("Failed to refresh session!")
+                    raise exc
                 retries -= 1
 
     def ask(self, prompt, conversation_id=None, parent_id=None, gen_title=False, session_token=None):
@@ -221,7 +221,7 @@ class Chatbot:
                 raise Exception(
                     f"Failed to refresh session! Error: {response.json()['error']}")
             elif response.status_code != 200 or response.json() == {} or "accessToken" not in response.json():
-                raise Exception("Failed to refresh session!")
+                raise Exception(f'Response code: {response.status_code} \n Response: {response.text}')
             else:
                 self.session.headers.update({
                     "Authorization": "Bearer " + response.json()["accessToken"]
