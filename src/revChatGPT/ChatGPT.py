@@ -212,7 +212,7 @@ class Chatbot:
             self.session_token = session_token
             self.config["session_token"] = session_token
         url = BASE_URL + "api/auth/session"
-        response = self.session.get(url, timeout_seconds=180)
+        response = self.session.get(url, timeout_seconds=30)
         if response.status_code == 403:
             self.get_cf_cookies()
             raise Exception("Clearance refreshing...")
