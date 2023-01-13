@@ -37,7 +37,7 @@ def chat():
     parent_id = data.get("parent_id", None)
 
     # Return rate limit if token_available is false
-    if token_available[data.get("session_token")] != None and not token_available[data.get("session_token")]:
+    if token_available.get(data.get("session_token")) != None and not token_available.get(data.get("session_token")):
         return jsonify({"error": "Rate limited"}), 429
     
     token_available[data.get("session_token")] = False
