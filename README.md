@@ -5,15 +5,16 @@
 
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
-Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment (in the far future). 
+Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. I'm graduating high school soon and knowing some people might help my chances at finding employment (in the far future).
 <br><br>
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
 
 ### Related works
+
 - API that scales: https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
 - Lightweight version: https://github.com/acheong08/ChatGPT-lite (In collaboration with [Pawan](https://github.com/PawanOsman/))
 
-*These are separate works and not part of this library*
+_These are separate works and not part of this library_
 
 # Usage
 
@@ -26,6 +27,30 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for more information.
 
 ## Usage
+
+`python3 -m revApiGPT`
+
+HTTP POST request:
+
+```json
+{
+  "session_token": "eyJhbGciOiJkaXIiL...",
+  "prompt": "Your prompt here"
+}
+```
+
+Optional:
+
+```json
+{
+  "session_token": "eyJhbGciOiJkaXIiL...",
+  "prompt": "Your prompt here",
+  "conversation_id": "UUID...",
+  "parent_id": "UUID..."
+}
+```
+
+- Rate limiting is enabled by default to prevent simultaneous requests
 
 `python3 -m revChatGPT`
 
