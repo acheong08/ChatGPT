@@ -191,7 +191,7 @@ class Chatbot:
 
     def change_title(self, id, title):
         url = BASE_URL + f"backend-api/conversation/{id}"
-        response = self.session.patch(url, data=f'{{"title": {title}}}')
+        response = self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.check_response(response)
 
     def delete_conversation(self, id):
