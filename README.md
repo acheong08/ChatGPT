@@ -9,6 +9,8 @@ Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support
 <br><br>
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
 
+> [OpenAI releasing official API soon](https://twitter.com/GodlyIgnorance/status/1615193797423697920)
+
 ### Related works
 
 - API that scales: https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
