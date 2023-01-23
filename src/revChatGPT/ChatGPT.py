@@ -199,6 +199,11 @@ class Chatbot:
         response = self.session.patch(url, data='{"is_visible": false}')
         self.check_response(response)
 
+    def clear_conversations(self):
+        url = BASE_URL + "backend-api/conversations"
+        response = self.session.patch(url, data='{"is_visible": false}')
+        self.check_response(response)
+        
     def map_conversations(self):
         conversations = self.get_conversations()
         histories = [self.get_msg_history(x["id"]) for x in conversations]
