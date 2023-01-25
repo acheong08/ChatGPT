@@ -1,5 +1,6 @@
 import uuid, re, json, tls_client, logging
 import undetected_chromedriver as uc
+from requests.exceptions import HTTPError
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -129,7 +130,7 @@ class Chatbot:
         if response.status_code != 200:
             print(response.text)
             self.refresh_session()
-            raise Exception("Wrong response code! Refreshing session...")
+            raise HTTPError(f"Wrong response code: {response.status_code}! Refreshing session...")
         else:
             try:
                 response = response.text.splitlines()[-4]
