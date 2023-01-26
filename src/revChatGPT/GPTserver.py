@@ -9,14 +9,13 @@ app = Flask(__name__)
 # Session token based rate limiting
 token_available: dict = {}
 
-chatbot = Chatbot(config={"session_token": "None"},
-                  conversation_id=None, parent_id=None, no_refresh=True)
+chatbot = Chatbot(config={}, conversation_id=None, parent_id=None, no_refresh=True)
 
 def verify_data(data: dict) -> bool:
     """
     Verifies that the required fields are present in the data.
     """
-    # Required fields: "message", "session_token"
+    # Required fields: "prompt", "session_token"
     if "prompt" not in data or "session_token" not in data:
         return False
     return True
@@ -46,6 +45,7 @@ def chat():
         response = chatbot.ask(
             prompt=data["prompt"], session_token=data["session_token"], parent_id=parent_id, conversation_id=conversation_id)
     except Exception as exc:
+        token_available[data.get("session_token")] = True
         return jsonify({"error": str(exc)}), 500
 
     response["session_token"] = chatbot.session_token
@@ -63,7 +63,8 @@ def refresh():
     data = request.get_json()
     if "session_token" not in data:
         return jsonify({"error": "Invalid data."}), 400
-
+    if not token_available.get(data.get("session_token")) :
+        return jsonify({"error": "Invalid token."}), 400
     chatbot.session_token = data["session_token"]
     try:
         chatbot.refresh_session()
