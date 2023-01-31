@@ -31,7 +31,7 @@ Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for 
 
 ## Usage
 
-`python3 -m revApiGPT`
+`python3 -m revChatGPT`
 
 HTTP POST request:
 
