@@ -75,7 +75,7 @@ def ask(user_request: str) -> dict
 
 Send a request to ChatGPT and return the response
 ```json
-Response: {
+{
     "id": "...",
     "object": "text_completion",
     "created": <time>,
