@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
-
 import time
 
+from flask import Flask
+from flask import jsonify
+from flask import request
 from revChatGPT.ChatGPT import Chatbot
 
 app = Flask(__name__)
@@ -10,6 +11,7 @@ app = Flask(__name__)
 token_available: dict = {}
 
 chatbot = Chatbot(config={}, conversation_id=None, parent_id=None, no_refresh=True)
+
 
 def verify_data(data: dict) -> bool:
     """
@@ -21,7 +23,7 @@ def verify_data(data: dict) -> bool:
     return True
 
 
-@app.route('/chat', methods=['POST'])
+@app.route("/chat", methods=["POST"])
 def chat():
     """
     The main chat endpoint.
@@ -36,14 +38,20 @@ def chat():
     parent_id = data.get("parent_id", None)
 
     # Return rate limit if token_available is false
-    if token_available.get(data.get("session_token")) != None and not token_available.get(data.get("session_token")):
+    if token_available.get(
+        data.get("session_token")
+    ) != None and not token_available.get(data.get("session_token")):
         return jsonify({"error": "Rate limited"}), 429
-    
+
     token_available[data.get("session_token")] = False
 
     try:
         response = chatbot.ask(
-            prompt=data["prompt"], session_token=data["session_token"], parent_id=parent_id, conversation_id=conversation_id)
+            prompt=data["prompt"],
+            session_token=data["session_token"],
+            parent_id=parent_id,
+            conversation_id=conversation_id,
+        )
     except Exception as exc:
         token_available[data.get("session_token")] = True
         return jsonify({"error": str(exc)}), 500
@@ -63,7 +71,7 @@ def refresh():
     data = request.get_json()
     if "session_token" not in data:
         return jsonify({"error": "Invalid data."}), 400
-    if not token_available.get(data.get("session_token")) :
+    if not token_available.get(data.get("session_token")):
         return jsonify({"error": "Invalid token."}), 400
     chatbot.session_token = data["session_token"]
     try:

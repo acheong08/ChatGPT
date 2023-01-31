@@ -1,6 +1,6 @@
 import json
-from os.path import exists
 from os import getenv
+from os.path import exists
 
 from revChatGPT.ChatGPT import Chatbot
 
@@ -24,7 +24,6 @@ def get_input(prompt):
 
     # Return the input
     return user_input
- 
 
 
 def configure():
@@ -96,7 +95,10 @@ def chatGPT_main(config):
         try:
             print("Chatbot: ")
             message = chatbot.ask(
-                prompt, conversation_id=chatbot.config.get("conversation"), parent_id=chatbot.config.get("parent_id"))
+                prompt,
+                conversation_id=chatbot.config.get("conversation"),
+                parent_id=chatbot.config.get("parent_id"),
+            )
             print(message["message"])
         except Exception as exc:
             print("Something went wrong!")
