@@ -79,11 +79,12 @@ class Chatbot:
         """
         self.prompt.chat_history = []
 
+
 class AsyncChatbot(Chatbot):
     """
     Official ChatGPT API (async)
     """
-    
+
     async def ask(self, user_request: str) -> dict:
         """
         Send a request to ChatGPT and return the response
@@ -131,6 +132,7 @@ class AsyncChatbot(Chatbot):
             + "\n\n\n",
         )
         return completion
+
 
 class Prompt:
     """
@@ -211,7 +213,7 @@ def main():
             !rollback - Rollback chat history
             !reset - Reset chat history
             !exit - Quit chat
-            """
+            """,
             )
         elif cmd == "!exit":
             exit()
