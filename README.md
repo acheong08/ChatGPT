@@ -12,7 +12,9 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <details>
 <summary>
 
-# Official API (Browserless, COMPLETELY FREE AND NO RATE LIMITS (Unpatched Bug - Might be fixed later))
+# Official API (Browserless)
+    
+COMPLETELY FREE AND NO RATE LIMITS (Unpatched Bug - Might be fixed later)
 
 </summary>
 
