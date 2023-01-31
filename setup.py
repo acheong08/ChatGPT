@@ -3,14 +3,14 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="0.3.1",
+    version="1.0.0",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    py_modules=["revChatGPT", "GPTserver"],
+    py_modules=["revChatGPT", "GPTserver", "Official"],
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "openai",
@@ -31,6 +31,7 @@ setup(
         "console_scripts": [
             "revChatGPT = revChatGPT.__main__:main",
             "revApiGPT = revChatGPT.GPTserver:main",
+            "OfficialChatGPT = revChatGPT.Official:main",
         ],
     },
 )

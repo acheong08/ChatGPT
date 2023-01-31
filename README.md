@@ -12,24 +12,138 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 > [OpenAI releasing official API soon](https://twitter.com/GodlyIgnorance/status/1615193797423697920)
 > ### [Official API released!](https://twitter.com/GodlyIgnorance/status/1620283216191160322) I will add it to this repository soon -- Browserless!
 
-### Related works
+<details>
+<summary>
 
-- API that scales: https://github.com/ChatGPT-Hackers/ChatGPT-API-server (By me as well)
-- Lightweight version: https://github.com/acheong08/ChatGPT-lite (In collaboration with [Pawan](https://github.com/PawanOsman/))
+# Official API (Browserless, token required, paid)
 
-_These are separate works and not part of this library_
-
-# Usage
+</summary>
 
 ## Installation
+`pip3 install revChatGPT`
 
-`pip3 install --upgrade revChatGPT`
+## Setup
+
+1. Create account on [OpenAI](https://platform.openai.com/) 
+2. Go to https://platform.openai.com/account/api-keys
+3. Copy API key
+
+## Usage
+
+### Command line
+`OfficialChatGPT --api_key API_KEY` (Assumes Python PyPi in PATH)
+
+<details>
+<summary>
+
+### Developer
+</summary>
+
+<a id="revChatGPT.Official"></a>
+
+# revChatGPT.Official
+
+A simple wrapper for the official ChatGPT API
+
+<a id="revChatGPT.Official.Chatbot"></a>
+
+## Chatbot Objects
+
+```python
+class Chatbot()
+```
+
+Official ChatGPT API
+
+<a id="revChatGPT.Official.Chatbot.__init__"></a>
+
+#### \_\_init\_\_
+
+```python
+def __init__(api_key: str) -> None
+```
+
+Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
+
+<a id="revChatGPT.Official.Chatbot.ask"></a>
+
+#### ask
+
+```python
+def ask(user_request: str) -> dict
+```
+
+Send a request to ChatGPT and return the response
+```json
+Response: {
+    "id": "...",
+    "object": "text_completion",
+    "created": <time>,
+    "model": "text-chat-davinci-002-20230126",
+    "choices": [
+        {
+        "text": "<Response here>",
+        "index": 0,
+        "logprobs": null,
+        "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
+        }
+    ],
+    "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
+}
+```
+
+<a id="revChatGPT.Official.Chatbot.rollback"></a>
+
+#### rollback
+
+```python
+def rollback(num: int) -> None
+```
+
+Rollback chat history num times
+
+<a id="revChatGPT.Official.Chatbot.reset"></a>
+
+#### reset
+
+```python
+def reset() -> None
+```
+
+Reset chat history
+
+</details>
+
+</details>
+
+<details>
+<summary>
+
+# Unofficial API (Browser required, free)
+
+</summary>
+
+## Installation
+`pip3 install revChatGPT[unofficial]`
 
 ## Configuration
 
 Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for more information.
 
 ## Usage
+
+### Command line
+
+`python3 -m revChatGPT`
+
+```
+!help - Show this message
+!reset - Forget the current conversation
+!refresh - Refresh the session authentication
+!config - Show the current configuration
+!rollback x - Rollback the conversation (x being the number of messages to rollback)
+!exit - Exit this program
+```
 
 ### API
 `python3 -m GPTserver`
@@ -56,10 +170,6 @@ Optional:
 
 - Rate limiting is enabled by default to prevent simultaneous requests
 
-### Command line
-
-`python3 -m revChatGPT`
-
 ### Developer
 
 ```python
@@ -78,6 +188,8 @@ print(response)
 #   "parent_id": self.parent_id,
 # }
 ```
+
+</details>
 
 # Awesome ChatGPT
 
