@@ -191,6 +191,9 @@ print(response)
 
 </details>
 
+# Detailed Documentation (Auto-generated)
+In [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
+
 # Awesome ChatGPT
 
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
