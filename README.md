@@ -10,6 +10,7 @@ Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
 
 > [OpenAI releasing official API soon](https://twitter.com/GodlyIgnorance/status/1615193797423697920)
+> ### [Official API released!](https://twitter.com/GodlyIgnorance/status/1620283216191160322) I will add it to this repository soon -- Browserless! 
 
 ### Related works
 
