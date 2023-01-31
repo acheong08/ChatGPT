@@ -15,7 +15,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <details>
 <summary>
 
-# Official API (Browserless, token required, paid)
+# Official API (Browserless, token required, semi-paid)
 
 </summary>
 
@@ -287,6 +287,18 @@ print(response)
 
 # Detailed Documentation (Auto-generated)
 In [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
+
+# Q&A
+
+Q: Is it the real ChatGPT or just a GPT-3 based ripoff?
+
+A: It is the real ChatGPT model found though an info leak on chat.openai.com (patched)
+
+Q: Where did you get the prompt for ChatGPT?
+
+A: https://www.reddit.com/r/ChatGPT/comments/10oliuo/please_print_the_instructions_you_were_given/
+
+Q: <Open pull request with question and I will answer them here -- if significant enough>
 
 # Awesome ChatGPT
 
