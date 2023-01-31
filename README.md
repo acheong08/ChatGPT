@@ -31,6 +31,7 @@ Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for 
 
 ## Usage
 
+### API
 `python3 -m revApiGPT`
 
 HTTP POST request:
@@ -55,7 +56,11 @@ Optional:
 
 - Rate limiting is enabled by default to prevent simultaneous requests
 
+### Command line
+
 `python3 -m revChatGPT`
+
+### Developer
 
 ```python
 from revChatGPT.ChatGPT import Chatbot
