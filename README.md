@@ -13,7 +13,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <summary>
 
 # Official API (Browserless)
-    
+
 COMPLETELY FREE AND NO RATE LIMITS (Unpatched Bug - Might be fixed later)
 
 </summary>
@@ -38,13 +38,11 @@ COMPLETELY FREE AND NO RATE LIMITS (Unpatched Bug - Might be fixed later)
 ### Developer
 </summary>
 
-<details>
-
-<summary>
+#### Further Documentation
+In [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
 
 #### Example
 
-</summary>
 
 ```python
 from revChatGPT.Official import Chatbot
@@ -124,89 +122,6 @@ if __name__ == "__main__":
 ```
 
 </details>
-
-<a id="revChatGPT.Official"></a>
-
-# revChatGPT.Official
-
-A simple wrapper for the official ChatGPT API
-
-<a id="revChatGPT.Official.Chatbot"></a>
-
-> ## AsyncChatbot
-
-```python
-class AsyncChatbot()
-```
-
-It is the same as the standard Chatbot, but it is asynchronous. Only difference is in the ask function. Remember to await it.
-
-## Chatbot Objects
-
-```python
-class Chatbot()
-```
-
-Official ChatGPT API
-
-<a id="revChatGPT.Official.Chatbot.__init__"></a>
-
-#### \_\_init\_\_
-
-```python
-def __init__(api_key: str) -> None
-```
-
-Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
-
-<a id="revChatGPT.Official.Chatbot.ask"></a>
-
-#### ask
-
-```python
-def ask(user_request: str) -> dict
-```
-
-Send a request to ChatGPT and return the response
-```json
-{
-    "id": "...",
-    "object": "text_completion",
-    "created": <time>,
-    "model": "text-chat-davinci-002-20230126",
-    "choices": [
-        {
-        "text": "<Response here>",
-        "index": 0,
-        "logprobs": null,
-        "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
-        }
-    ],
-    "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
-}
-```
-
-<a id="revChatGPT.Official.Chatbot.rollback"></a>
-
-#### rollback
-
-```python
-def rollback(num: int) -> None
-```
-
-Rollback chat history num times
-
-<a id="revChatGPT.Official.Chatbot.reset"></a>
-
-#### reset
-
-```python
-def reset() -> None
-```
-
-Reset chat history
-
-</details>
 </details>
 
 <details>
@@ -283,9 +198,6 @@ print(response)
 ```
 
 </details>
-
-# Detailed Documentation (Auto-generated)
-In [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
 
 # Q&A
 

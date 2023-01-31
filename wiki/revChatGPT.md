@@ -1,4 +1,3 @@
-
 <a id="revChatGPT.Official"></a>
 
 # revChatGPT.Official
@@ -34,8 +33,7 @@ def ask(user_request: str) -> dict
 ```
 
 Send a request to ChatGPT and return the response
-```json
-{
+Response: {
     "id": "...",
     "object": "text_completion",
     "created": <time>,
@@ -50,7 +48,6 @@ Send a request to ChatGPT and return the response
     ],
     "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
 }
-```
 
 <a id="revChatGPT.Official.Chatbot.rollback"></a>
 
@@ -71,142 +68,148 @@ def reset() -> None
 ```
 
 Reset chat history
-<a id="revChatGPT"></a>
 
-# revChatGPT
+<a id="revChatGPT.Official.Chatbot.save_conversation"></a>
 
-<a id="revChatGPT.GPTserver"></a>
-
-# revChatGPT.GPTserver
-
-<a id="revChatGPT.GPTserver.verify_data"></a>
-
-#### verify\_data
+#### save\_conversation
 
 ```python
-def verify_data(data: dict) -> bool
+def save_conversation(conversation_id: str) -> None
 ```
 
-Verifies that the required fields are present in the data.
+Save conversation to conversations dict
 
-<a id="revChatGPT.GPTserver.chat"></a>
+<a id="revChatGPT.Official.Chatbot.load_conversation"></a>
 
-#### chat
+#### load\_conversation
 
 ```python
-@app.route("/chat", methods=["POST"])
-def chat()
+def load_conversation(conversation_id: str) -> None
 ```
 
-The main chat endpoint.
+Load conversation from conversations dict
 
-<a id="revChatGPT.GPTserver.refresh"></a>
+<a id="revChatGPT.Official.Chatbot.delete_conversation"></a>
 
-#### refresh
+#### delete\_conversation
 
 ```python
-@app.route("/refresh", methods=["POST"])
-def refresh()
+def delete_conversation(conversation_id: str) -> None
 ```
 
-The refresh endpoint.
+Delete conversation from conversations dict
 
-<a id="revChatGPT.ChatGPT"></a>
+<a id="revChatGPT.Official.Chatbot.get_conversations"></a>
 
-# revChatGPT.ChatGPT
-
-<a id="revChatGPT.ChatGPT.Chatbot"></a>
-
-## Chatbot Objects
+#### get\_conversations
 
 ```python
-class Chatbot()
+def get_conversations() -> dict
 ```
 
-<a id="revChatGPT.ChatGPT.Chatbot.reset_chat"></a>
+Get all conversations
 
-#### reset\_chat
+<a id="revChatGPT.Official.Chatbot.dump_conversation_history"></a>
+
+#### dump\_conversation\_history
 
 ```python
-def reset_chat() -> None
+def dump_conversation_history() -> None
 ```
 
-Reset the conversation ID and parent ID.
+Save all conversations history to a json file
 
-**Returns**:
+<a id="revChatGPT.Official.Chatbot.load_conversation_history"></a>
 
-None
-
-<a id="revChatGPT.ChatGPT.Chatbot.microsoft_login"></a>
-
-#### microsoft\_login
+#### load\_conversation\_history
 
 ```python
-def microsoft_login() -> None
+def load_conversation_history() -> None
 ```
 
-Login to OpenAI via Microsoft Login Authentication.
+Load conversation history from json files
 
-**Returns**:
+<a id="revChatGPT.Official.AsyncChatbot"></a>
 
-None
-
-<a id="revChatGPT.ChatGPT.Chatbot.solve_captcha"></a>
-
-#### solve\_captcha
+## AsyncChatbot Objects
 
 ```python
-def solve_captcha() -> str
+class AsyncChatbot(Chatbot)
 ```
 
-Solve the 2Captcha captcha.
+Official ChatGPT API (async)
 
-**Returns**:
+<a id="revChatGPT.Official.AsyncChatbot.ask"></a>
 
-str
-
-<a id="revChatGPT.ChatGPT.Chatbot.email_login"></a>
-
-#### email\_login
+#### ask
 
 ```python
-def email_login(solved_captcha) -> None
+async def ask(user_request: str) -> dict
 ```
 
-Login to OpenAI via Email/Password Authentication and 2Captcha.
+Send a request to ChatGPT and return the response
+{
+    "id": "...",
+    "object": "text_completion",
+    "created": <time>,
+    "model": "text-chat-davinci-002-20230126",
+    "choices": [
+        {
+        "text": "<Response here>",
+        "index": 0,
+        "logprobs": null,
+        "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
+        }
+    ],
+    "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
+}
 
-**Returns**:
+<a id="revChatGPT.Official.Prompt"></a>
 
-None
-
-<a id="revChatGPT.ChatGPT.Chatbot.get_cf_cookies"></a>
-
-#### get\_cf\_cookies
+## Prompt Objects
 
 ```python
-def get_cf_cookies() -> None
+class Prompt()
 ```
 
-Get cloudflare cookies.
+Prompt class with methods to construct prompt
 
-**Returns**:
+<a id="revChatGPT.Official.Prompt.__init__"></a>
 
-None
-
-<a id="revChatGPT.ChatGPT.Chatbot.rollback_conversation"></a>
-
-#### rollback\_conversation
+#### \_\_init\_\_
 
 ```python
-def rollback_conversation(num=1) -> None
+def __init__() -> None
 ```
 
-Rollback the conversation.
+Initialize prompt with base prompt
 
-**Arguments**:
+<a id="revChatGPT.Official.Prompt.add_to_chat_history"></a>
 
-- `num`: The number of messages to rollback
+#### add\_to\_chat\_history
 
-**Returns**:
+```python
+def add_to_chat_history(chat: str) -> None
+```
 
-None
+Add chat to chat history for next prompt
+
+<a id="revChatGPT.Official.Prompt.history"></a>
+
+#### history
+
+```python
+def history() -> str
+```
+
+Return chat history
+
+<a id="revChatGPT.Official.Prompt.construct_prompt"></a>
+
+#### construct\_prompt
+
+```python
+def construct_prompt(new_prompt: str) -> str
+```
+
+Construct prompt based on chat history and request
