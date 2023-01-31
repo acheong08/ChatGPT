@@ -1,7 +1,8 @@
 """
 A simple wrapper for the official ChatGPT API
 """
-from os import environ
+import json
+import os
 
 import openai
 
@@ -15,8 +16,9 @@ class Chatbot:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
-        openai.api_key = api_key or environ.get("OPENAI_API_KEY")
+        openai.api_key = api_key or os.environ.get("OPENAI_API_KEY")
         self.prompt = Prompt()
+        self.conversations = {}
 
     def ask(self, user_request: str) -> dict:
         """
@@ -78,6 +80,77 @@ class Chatbot:
         Reset chat history
         """
         self.prompt.chat_history = []
+
+    def save_conversation(self, conversation_id: str) -> None:
+        """
+        Save conversation to conversations dict
+        """
+        self.conversations[conversation_id] = self.prompt
+
+    def load_conversation(self, conversation_id: str) -> None:
+        """
+        Load conversation from conversations dict
+        """
+        self.prompt = self.conversations[conversation_id]
+
+    def delete_conversation(self, conversation_id: str) -> None:
+        """
+        Delete conversation from conversations dict
+        """
+        self.conversations.pop(conversation_id)
+
+    def get_conversations(self) -> dict:
+        """
+        Get all conversations
+        """
+        return self.conversations
+
+    def dump_conversation_history(self) -> None:
+        """
+        Save all conversations history to a json file
+        """
+        for conversation_id, prompt in self.conversations.items():
+            # ~/.config/revChatGPT/conversations/<conversation_id>.json
+            with open(
+                os.path.join(
+                    os.path.expanduser("~"),
+                    ".config",
+                    "revChatGPT",
+                    "conversations",
+                    conversation_id + ".json",
+                ),
+                "w",
+                encoding="utf-8",
+            ) as f:
+                json.dump(prompt.chat_history, f)
+
+    def load_conversation_history(self) -> None:
+        """
+        Load conversation history from json files
+        """
+        # List all conversation files
+        conversation_files = os.listdir(
+            os.path.join(
+                os.path.expanduser("~"),
+                ".config",
+                "revChatGPT",
+                "conversations",
+            ),
+        )
+        for conversation_file in conversation_files:
+            conversation_id = conversation_file[:-5]
+            with open(
+                os.path.join(
+                    os.path.expanduser("~"),
+                    ".config",
+                    "revChatGPT",
+                    "conversations",
+                    conversation_file,
+                ),
+                encoding="utf-8",
+            ) as f:
+                self.conversations[conversation_id] = Prompt()
+                self.conversations[conversation_id].chat_history = json.load(f)
 
 
 class AsyncChatbot(Chatbot):
@@ -144,7 +217,7 @@ class Prompt:
         Initialize prompt with base prompt
         """
         self.base_prompt = (
-            environ.get("CUSTOM_BASE_PROMPT")
+            os.environ.get("CUSTOM_BASE_PROMPT")
             or "You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. Don't be verbose).\n"
         )
         # Track chat history
