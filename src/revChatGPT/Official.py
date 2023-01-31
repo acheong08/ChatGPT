@@ -79,6 +79,58 @@ class Chatbot:
         """
         self.prompt.chat_history = []
 
+class AsyncChatbot(Chatbot):
+    """
+    Official ChatGPT API (async)
+    """
+    
+    async def ask(self, user_request: str) -> dict:
+        """
+        Send a request to ChatGPT and return the response
+        Response: {
+            "id": "...",
+            "object": "text_completion",
+            "created": <time>,
+            "model": "text-chat-davinci-002-20230126",
+            "choices": [
+                {
+                "text": "<Response here>",
+                "index": 0,
+                "logprobs": null,
+                "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
+                }
+            ],
+            "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
+        }
+        """
+        prompt = self.prompt.construct_prompt(user_request)
+        completion = await openai.Completion.acreate(
+            engine="text-chat-davinci-002-20230126",
+            prompt=prompt,
+            temperature=0.5,
+            max_tokens=1024,
+            stop=["\n\n\n"],
+        )
+        if completion.get("choices") is None:
+            raise Exception("ChatGPT API returned no choices")
+        if len(completion["choices"]) == 0:
+            raise Exception("ChatGPT API returned no choices")
+        if completion["choices"][0].get("text") is None:
+            raise Exception("ChatGPT API returned no text")
+        completion["choices"][0]["text"] = completion["choices"][0]["text"].replace(
+            "<|im_end|>",
+            "",
+        )
+        # Add to chat history
+        self.prompt.add_to_chat_history(
+            "User: "
+            + user_request
+            + "\n\n\n"
+            + "ChatGPT: "
+            + completion["choices"][0]["text"]
+            + "\n\n\n",
+        )
+        return completion
 
 class Prompt:
     """

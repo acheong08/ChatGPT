@@ -113,7 +113,6 @@ def reset() -> None
 Reset chat history
 
 </details>
-
 </details>
 
 <details>
