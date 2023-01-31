@@ -15,7 +15,7 @@ class Chatbot:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
-        openai.api_key = api_key
+        openai.api_key = api_key or environ.get("OPENAI_API_KEY")
         self.prompt = Prompt()
 
     def ask(self, request: str) -> dict:
