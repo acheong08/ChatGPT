@@ -87,7 +87,7 @@ class AsyncChatbot(Chatbot):
     async def ask(self, user_request: str) -> dict:
         """
         Send a request to ChatGPT and return the response
-        Response: {
+        {
             "id": "...",
             "object": "text_completion",
             "created": <time>,
