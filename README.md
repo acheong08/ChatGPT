@@ -24,7 +24,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 ## Setup
 
-1. Create account on [OpenAI](https://platform.openai.com/) 
+1. Create account on [OpenAI](https://platform.openai.com/)
 2. Go to https://platform.openai.com/account/api-keys
 3. Copy API key
 

@@ -25,7 +25,11 @@ class Chrome(uc.Chrome):
 
 class Chatbot:
     def __init__(
-        self, config, conversation_id=None, parent_id=None, no_refresh=False
+        self,
+        config,
+        conversation_id=None,
+        parent_id=None,
+        no_refresh=False,
     ) -> None:
         self.config = config
         self.session = tls_client.Session(
@@ -153,7 +157,7 @@ class Chatbot:
             print(response.text)
             self.refresh_session()
             raise HTTPError(
-                f"Wrong response code: {response.status_code}! Refreshing session..."
+                f"Wrong response code: {response.status_code}! Refreshing session...",
             )
         else:
             try:
@@ -263,13 +267,13 @@ class Chatbot:
                 or "accessToken" not in response.json()
             ):
                 raise Exception(
-                    f"Response code: {response.status_code} \n Response: {response.text}"
+                    f"Response code: {response.status_code} \n Response: {response.text}",
                 )
             else:
                 self.session.headers.update(
                     {
                         "Authorization": "Bearer " + response.json()["accessToken"],
-                    }
+                    },
                 )
             self.session_token = self.session.cookies._find(
                 "__Secure-next-auth.session-token",
@@ -717,7 +721,7 @@ class Chatbot:
                 "Connection": "close",
                 "Accept-Language": "en-US,en;q=0.9",
                 "Referer": "https://chat.openai.com/chat",
-            }
+            },
         )
 
     def rollback_conversation(self, num=1) -> None:

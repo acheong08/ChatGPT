@@ -65,12 +65,14 @@ class Chatbot:
             + "\n\n\n",
         )
         return completion
+
     def rollback(self, num: int) -> None:
         """
         Rollback chat history num times
         """
         for _ in range(num):
             self.prompt.chat_history.pop()
+
     def reset(self) -> None:
         """
         Reset chat history
@@ -110,7 +112,9 @@ class Prompt:
         """
         Construct prompt based on chat history and request
         """
-        prompt = self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
+        prompt = (
+            self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
+        )
         # Check if prompt over 4000*4 characters
         if len(prompt) > 4000 * 4:
             # Remove oldest chat
@@ -119,7 +123,6 @@ class Prompt:
             prompt = self.construct_prompt(new_prompt)
         return prompt
 
-        
 
 def main():
     def get_input(prompt):
@@ -144,17 +147,20 @@ def main():
 
         # Return the input
         return user_input
+
     def chatbot_commands(cmd: str) -> bool:
         """
         Handle chatbot commands
         """
         if cmd == "!help":
-            print("""
+            print(
+                """
             !help - Display this message
             !rollback - Rollback chat history
             !reset - Reset chat history
             !exit - Quit chat
-            """)
+            """
+            )
         elif cmd == "!exit":
             exit()
         elif cmd == "!rollback":
@@ -164,7 +170,9 @@ def main():
         else:
             return False
         return True
+
     import argparse
+
     # Get API key from command line
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -184,6 +192,7 @@ def main():
                 continue
         response = chatbot.ask(PROMPT)
         print("ChatGPT: " + response["choices"][0]["text"])
+
 
 if __name__ == "__main__":
     main()
