@@ -1,6 +1,7 @@
 """
 A simple wrapper for the official ChatGPT API
 """
+import argparse
 import json
 import os
 
@@ -182,7 +183,7 @@ class AsyncChatbot(Chatbot):
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=1024,
+            max_tokens=3072,
             stop=["\n\n\n"],
         )
         if completion.get("choices") is None:
@@ -218,7 +219,7 @@ class Prompt:
         """
         self.base_prompt = (
             os.environ.get("CUSTOM_BASE_PROMPT")
-            or "You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. Don't be verbose).\n"
+            or "You are ChatGPT, a large language model trained by OpenAI. You try to answer concisely for each response (e.g. Don't be overly verbose).\n"
         )
         # Track chat history
         self.chat_history: list = []
@@ -306,8 +307,6 @@ def main():
         else:
             return False
         return True
-
-    import argparse
 
     # Get API key from command line
     parser = argparse.ArgumentParser()
