@@ -15,7 +15,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <details>
 <summary>
 
-# Official API (Browserless, token required, semi-paid)
+# Official API (Browserless, semi-paid)
 
 </summary>
 
