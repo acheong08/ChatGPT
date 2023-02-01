@@ -423,7 +423,11 @@ def main():
     chatbot = Chatbot(api_key=args.api_key)
     # Start chat
     while True:
-        prompt = get_input("\nUser:\n")
+        try:
+            prompt = get_input("\nUser:\n")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            sys.exit()
         if prompt.startswith("!"):
             if chatbot_commands(prompt):
                 continue
