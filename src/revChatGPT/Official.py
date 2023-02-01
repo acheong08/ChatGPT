@@ -35,7 +35,7 @@ class Chatbot:
         """
         return 4000 - len(self.enc.encode(prompt))
 
-    def ask(self, user_request: str) -> dict:
+    def ask(self, user_request: str, temperature: float = 0.5) -> dict:
         """
         Send a request to ChatGPT and return the response
         Response: {
@@ -58,7 +58,7 @@ class Chatbot:
         completion = openai.Completion.create(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
-            temperature=0.5,
+            temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
         )
@@ -80,7 +80,7 @@ class Chatbot:
         )
         return completion
 
-    def ask_stream(self, user_request: str) -> str:
+    def ask_stream(self, user_request: str, temperature: float = 0.5) -> str:
         """
         Send a request to ChatGPT and yield the response
         """
@@ -88,7 +88,7 @@ class Chatbot:
         completion = openai.Completion.create(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
-            temperature=0.5,
+            temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
             stream=True,
@@ -208,7 +208,7 @@ class AsyncChatbot(Chatbot):
     Official ChatGPT API (async)
     """
 
-    async def ask(self, user_request: str) -> dict:
+    async def ask(self, user_request: str, temperature: float = 0.5) -> dict:
         """
         Send a request to ChatGPT and return the response
         Response: {
@@ -231,7 +231,7 @@ class AsyncChatbot(Chatbot):
         completion = await openai.Completion.acreate(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
-            temperature=0.5,
+            temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
         )
@@ -256,7 +256,7 @@ class AsyncChatbot(Chatbot):
         )
         return completion
 
-    async def ask_stream(self, user_request: str) -> str:
+    async def ask_stream(self, user_request: str, temperature: float = 0.5) -> str:
         """
         Send a request to ChatGPT and yield the response
         """
@@ -264,7 +264,7 @@ class AsyncChatbot(Chatbot):
         completion = await openai.Completion.acreate(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
-            temperature=0.5,
+            temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
             stream=True,
