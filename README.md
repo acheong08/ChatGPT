@@ -127,7 +127,9 @@ if __name__ == "__main__":
 <details>
 <summary>
 
-# Unofficial API (Browser required, free)
+# Reversed API (Browser required)
+
+This breaks terms of service
 
 </summary>
 
