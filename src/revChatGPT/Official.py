@@ -66,7 +66,7 @@ class Chatbot:
             + "\n\n\n"
             + "ChatGPT: "
             + completion["choices"][0]["text"]
-            + "\n\n\n",
+            + "<|im_end|>\n",
         )
         return completion
 
@@ -100,7 +100,12 @@ class Chatbot:
 
         # Add to chat history
         self.prompt.add_to_chat_history(
-            "User: " + user_request + "\n\n\n" + "ChatGPT: " + full_response + "\n\n\n",
+            "User: "
+            + user_request
+            + "\n\n\n"
+            + "ChatGPT: "
+            + full_response
+            + "<|im_end|>\n",
         )
 
     def rollback(self, num: int) -> None:
@@ -196,7 +201,7 @@ class AsyncChatbot(Chatbot):
     async def ask(self, user_request: str) -> dict:
         """
         Send a request to ChatGPT and return the response
-        {
+        Response: {
             "id": "...",
             "object": "text_completion",
             "created": <time>,
@@ -213,7 +218,7 @@ class AsyncChatbot(Chatbot):
         }
         """
         prompt = self.prompt.construct_prompt(user_request)
-        completion = await openai.Completion.acreate(
+        completion = openai.Completion.acreate(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
@@ -237,16 +242,16 @@ class AsyncChatbot(Chatbot):
             + "\n\n\n"
             + "ChatGPT: "
             + completion["choices"][0]["text"]
-            + "\n\n\n",
+            + "<|im_end|>\n",
         )
         return completion
 
-    async def ask_stream(self, user_request: str) -> dict:
+    async def ask_stream(self, user_request: str) -> str:
         """
         Send a request to ChatGPT and yield the response
         """
         prompt = self.prompt.construct_prompt(user_request)
-        completion = await openai.Completion.acreate(
+        completion = openai.Completion.acreate(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
@@ -261,17 +266,22 @@ class AsyncChatbot(Chatbot):
             if len(response["choices"]) == 0:
                 raise Exception("ChatGPT API returned no choices")
             if response["choices"][0].get("finish_details") is not None:
-                return
+                break
             if response["choices"][0].get("text") is None:
                 raise Exception("ChatGPT API returned no text")
             if response["choices"][0]["text"] == "<|im_end|>":
-                return
+                break
             yield response["choices"][0]["text"]
             full_response += response["choices"][0]["text"]
 
         # Add to chat history
         self.prompt.add_to_chat_history(
-            "User: " + user_request + "\n\n\n" + "ChatGPT: " + full_response + "\n\n\n",
+            "User: "
+            + user_request
+            + "\n\n\n"
+            + "ChatGPT: "
+            + full_response
+            + "<|im_end|>\n",
         )
 
 
@@ -286,7 +296,7 @@ class Prompt:
         """
         self.base_prompt = (
             os.environ.get("CUSTOM_BASE_PROMPT")
-            or "You are ChatGPT, a large language model trained by OpenAI.\n"
+            or "You are ChatGPT, a large language model trained by OpenAI.\n\n"
         )
         # Track chat history
         self.chat_history: list = []
@@ -301,7 +311,7 @@ class Prompt:
         """
         Return chat history
         """
-        return "\n\n\n\n".join(self.chat_history)
+        return "\n".join(self.chat_history)
 
     def construct_prompt(self, new_prompt: str) -> str:
         """
@@ -362,6 +372,7 @@ def main():
             !help - Display this message
             !rollback - Rollback chat history
             !reset - Reset chat history
+            !prompt - Show current prompt
             !exit - Quit chat
             """,
             )
@@ -371,6 +382,8 @@ def main():
             chatbot.rollback(1)
         elif cmd == "!reset":
             chatbot.reset()
+        elif cmd == "!prompt":
+            print(chatbot.prompt.construct_prompt(""))
         else:
             return False
         return True
