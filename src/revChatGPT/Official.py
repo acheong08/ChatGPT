@@ -218,7 +218,7 @@ class AsyncChatbot(Chatbot):
         }
         """
         prompt = self.prompt.construct_prompt(user_request)
-        completion = openai.Completion.acreate(
+        completion = await openai.Completion.acreate(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
@@ -251,7 +251,7 @@ class AsyncChatbot(Chatbot):
         Send a request to ChatGPT and yield the response
         """
         prompt = self.prompt.construct_prompt(user_request)
-        completion = openai.Completion.acreate(
+        completion = await openai.Completion.acreate(
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
