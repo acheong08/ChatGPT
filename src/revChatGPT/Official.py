@@ -55,10 +55,7 @@ class Chatbot:
             raise Exception("ChatGPT API returned no choices")
         if completion["choices"][0].get("text") is None:
             raise Exception("ChatGPT API returned no text")
-        completion["choices"][0]["text"] = completion["choices"][0]["text"].replace(
-            "<|im_end|>",
-            "",
-        )
+        completion["choices"][0]["text"] = completion["choices"][0]["text"].rstrip("<|im_end|>")
         # Add to chat history
         self.prompt.add_to_chat_history(
             "User: "
