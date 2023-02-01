@@ -46,7 +46,7 @@ class Chatbot:
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=4000-len(prompt),
+            max_tokens=4000-int(len(prompt)/4),
             stop=["\n\n\n"],
         )
         if completion.get("choices") is None:
@@ -79,7 +79,7 @@ class Chatbot:
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=3072,
+            max_tokens=4000-int(len(prompt)/4),
             stop=["\n\n\n"],
             stream=True,
         )
@@ -222,7 +222,7 @@ class AsyncChatbot(Chatbot):
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=3072,
+            max_tokens=4000-int(len(prompt)/4),
             stop=["\n\n\n"],
         )
         if completion.get("choices") is None:
@@ -255,7 +255,7 @@ class AsyncChatbot(Chatbot):
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=3072,
+            max_tokens=4000-int(len(prompt)/4),
             stop=["\n\n\n"],
             stream=True,
         )
@@ -321,7 +321,7 @@ class Prompt:
             self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
-        if len(prompt) > 4000 * 4:
+        if len(prompt) > 3000 * 4:
             # Remove oldest chat
             self.chat_history.pop(0)
             # Construct prompt again
