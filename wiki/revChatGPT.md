@@ -49,6 +49,16 @@ Response: {
     "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
 }
 
+<a id="revChatGPT.Official.Chatbot.ask_stream"></a>
+
+#### ask\_stream
+
+```python
+def ask_stream(user_request: str) -> str
+```
+
+Send a request to ChatGPT and yield the response
+
 <a id="revChatGPT.Official.Chatbot.rollback"></a>
 
 #### rollback
@@ -164,6 +174,16 @@ Send a request to ChatGPT and return the response
     "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
 }
 
+<a id="revChatGPT.Official.AsyncChatbot.ask_stream"></a>
+
+#### ask\_stream
+
+```python
+async def ask_stream(user_request: str) -> dict
+```
+
+Send a request to ChatGPT and yield the response
+
 <a id="revChatGPT.Official.Prompt"></a>
 
 ## Prompt Objects
@@ -213,3 +233,4 @@ def construct_prompt(new_prompt: str) -> str
 ```
 
 Construct prompt based on chat history and request
+
