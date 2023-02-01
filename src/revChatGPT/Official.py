@@ -4,7 +4,8 @@ A simple wrapper for the official ChatGPT API
 import argparse
 import json
 import os
-
+import sys
+import time
 import openai
 
 
@@ -68,7 +69,44 @@ class Chatbot:
             + "\n\n\n",
         )
         return completion
-
+    
+    def ask_stream(self, user_request: str) -> str:
+        """
+        Send a request to ChatGPT and yield the response
+        """
+        prompt = self.prompt.construct_prompt(user_request)
+        completion = openai.Completion.create(
+            engine="text-chat-davinci-002-20230126",
+            prompt=prompt,
+            temperature=0.5,
+            max_tokens=1024,
+            stop=["\n\n\n"],
+            stream=True,
+        )
+        full_response = ""
+        for response in completion:
+            if response.get("choices") is None:
+                raise Exception("ChatGPT API returned no choices")
+            if len(response["choices"]) == 0:
+                raise Exception("ChatGPT API returned no choices")
+            if response["choices"][0].get("finish_details") is not None:
+                break
+            if response["choices"][0].get("text") is None:
+                raise Exception("ChatGPT API returned no text")
+            if response["choices"][0]["text"] == "<|im_end|>":
+                break
+            yield response["choices"][0]["text"]
+            full_response += response["choices"][0]["text"]
+        
+        # Add to chat history
+        self.prompt.add_to_chat_history(
+            "User: "
+            + user_request
+            + "\n\n\n"
+            + "ChatGPT: "
+            + full_response
+            + "\n\n\n",
+        )
     def rollback(self, num: int) -> None:
         """
         Rollback chat history num times
@@ -206,6 +244,44 @@ class AsyncChatbot(Chatbot):
             + "\n\n\n",
         )
         return completion
+        
+    async def ask_stream(self, user_request: str) -> dict:
+        """
+        Send a request to ChatGPT and yield the response
+        """
+        prompt = self.prompt.construct_prompt(user_request)
+        completion = await openai.Completion.acreate(
+            engine="text-chat-davinci-002-20230126",
+            prompt=prompt,
+            temperature=0.5,
+            max_tokens=1024,
+            stop=["\n\n\n"],
+            stream=True,
+        )
+        full_response = ""
+        for response in completion:
+            if response.get("choices") is None:
+                raise Exception("ChatGPT API returned no choices")
+            if len(response["choices"]) == 0:
+                raise Exception("ChatGPT API returned no choices")
+            if response["choices"][0].get("finish_details") is not None:
+                return
+            if response["choices"][0].get("text") is None:
+                raise Exception("ChatGPT API returned no text")
+            if response["choices"][0]["text"] == "<|im_end|>":
+                return
+            yield response["choices"][0]["text"]
+            full_response += response["choices"][0]["text"]
+        
+        # Add to chat history
+        self.prompt.add_to_chat_history(
+            "User: "
+            + user_request
+            + "\n\n\n"
+            + "ChatGPT: "
+            + full_response
+            + "\n\n\n",
+        )
 
 
 class Prompt:
@@ -316,6 +392,11 @@ def main():
         required=True,
         help="OpenAI API key",
     )
+    parser.add_argument(
+        "--stream",
+        action="store_true",
+        help="Stream response",
+    )
     args = parser.parse_args()
     # Initialize chatbot
     chatbot = Chatbot(api_key=args.api_key)
@@ -325,8 +406,17 @@ def main():
         if PROMPT.startswith("!"):
             if chatbot_commands(PROMPT):
                 continue
-        response = chatbot.ask(PROMPT)
-        print("ChatGPT: " + response["choices"][0]["text"])
+        if not args.stream:
+            response = chatbot.ask(PROMPT)
+            print("ChatGPT: " + response["choices"][0]["text"])
+        else:
+            print("ChatGPT: ", end="")
+            sys.stdout.flush()
+            for response in chatbot.ask_stream(PROMPT):
+                print(response, end="")
+                sys.stdout.flush()
+            print()
+
 
 
 if __name__ == "__main__":
