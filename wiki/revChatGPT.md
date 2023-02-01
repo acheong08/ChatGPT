@@ -233,4 +233,3 @@ def construct_prompt(new_prompt: str) -> str
 ```
 
 Construct prompt based on chat history and request
-
