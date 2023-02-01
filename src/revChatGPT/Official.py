@@ -5,7 +5,7 @@ import argparse
 import json
 import os
 import sys
-import time
+
 import openai
 
 
@@ -69,7 +69,7 @@ class Chatbot:
             + "\n\n\n",
         )
         return completion
-    
+
     def ask_stream(self, user_request: str) -> str:
         """
         Send a request to ChatGPT and yield the response
@@ -97,16 +97,12 @@ class Chatbot:
                 break
             yield response["choices"][0]["text"]
             full_response += response["choices"][0]["text"]
-        
+
         # Add to chat history
         self.prompt.add_to_chat_history(
-            "User: "
-            + user_request
-            + "\n\n\n"
-            + "ChatGPT: "
-            + full_response
-            + "\n\n\n",
+            "User: " + user_request + "\n\n\n" + "ChatGPT: " + full_response + "\n\n\n",
         )
+
     def rollback(self, num: int) -> None:
         """
         Rollback chat history num times
@@ -244,7 +240,7 @@ class AsyncChatbot(Chatbot):
             + "\n\n\n",
         )
         return completion
-        
+
     async def ask_stream(self, user_request: str) -> dict:
         """
         Send a request to ChatGPT and yield the response
@@ -272,15 +268,10 @@ class AsyncChatbot(Chatbot):
                 return
             yield response["choices"][0]["text"]
             full_response += response["choices"][0]["text"]
-        
+
         # Add to chat history
         self.prompt.add_to_chat_history(
-            "User: "
-            + user_request
-            + "\n\n\n"
-            + "ChatGPT: "
-            + full_response
-            + "\n\n\n",
+            "User: " + user_request + "\n\n\n" + "ChatGPT: " + full_response + "\n\n\n",
         )
 
 
@@ -416,7 +407,6 @@ def main():
                 print(response, end="")
                 sys.stdout.flush()
             print()
-
 
 
 if __name__ == "__main__":
