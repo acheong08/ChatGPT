@@ -286,7 +286,7 @@ class Prompt:
         """
         self.base_prompt = (
             os.environ.get("CUSTOM_BASE_PROMPT")
-            or "You are ChatGPT, a large language model trained by OpenAI. You try to answer concisely for each response (e.g. Don't be overly verbose).\n"
+            or "You are ChatGPT, a large language model trained by OpenAI.\n"
         )
         # Track chat history
         self.chat_history: list = []
