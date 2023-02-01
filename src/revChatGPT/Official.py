@@ -332,7 +332,7 @@ class Prompt:
             self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
-        if len(self.enc.encode(prompt)) > 4000:
+        if len(self.enc.encode(prompt)) > 3200:
             # Remove oldest chat
             self.chat_history.pop(0)
             # Construct prompt again
@@ -435,7 +435,7 @@ def main():
             response = chatbot.ask(prompt, temperature=args.temperature)
             print("ChatGPT: " + response["choices"][0]["text"])
         else:
-            print("ChatGPT: ", end="")
+            print("ChatGPT: ")
             sys.stdout.flush()
             for response in chatbot.ask_stream(prompt, temperature=args.temperature):
                 print(response, end="")
