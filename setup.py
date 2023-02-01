@@ -14,6 +14,7 @@ setup(
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "openai",
+        "tiktoken",
     ],
     # optional dependencies
     extras_require={

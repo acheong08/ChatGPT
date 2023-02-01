@@ -1,2 +1,3 @@
 openai
 pre-commit
+tiktoken

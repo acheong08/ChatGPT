@@ -7,6 +7,7 @@ import os
 import sys
 
 import openai
+import tiktoken
 
 
 class Chatbot:
@@ -19,8 +20,17 @@ class Chatbot:
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
         openai.api_key = api_key or os.environ.get("OPENAI_API_KEY")
-        self.prompt = Prompt()
         self.conversations = {}
+        print("Initializing tokenizer...")
+        self.enc = tiktoken.get_encoding("gpt2")
+        print("Done")
+        self.prompt = Prompt(enc=self.enc)
+
+    def get_max_tokens(self, prompt: str) -> int:
+        """
+        Get the max tokens for a prompt
+        """
+        return 4000 - len(self.enc.encode(prompt))
 
     def ask(self, user_request: str) -> dict:
         """
@@ -46,7 +56,7 @@ class Chatbot:
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=4000 - int(len(prompt) / 3),
+            max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
         )
         if completion.get("choices") is None:
@@ -76,7 +86,7 @@ class Chatbot:
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=4000 - int(len(prompt) / 3),
+            max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
             stream=True,
         )
@@ -186,7 +196,7 @@ class Chatbot:
                 ),
                 encoding="utf-8",
             ) as f:
-                self.conversations[conversation_id] = Prompt()
+                self.conversations[conversation_id] = Prompt(self.enc)
                 self.conversations[conversation_id].chat_history = json.load(f)
 
 
@@ -219,7 +229,7 @@ class AsyncChatbot(Chatbot):
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=4000 - int(len(prompt) / 3),
+            max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
         )
         if completion.get("choices") is None:
@@ -252,7 +262,7 @@ class AsyncChatbot(Chatbot):
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=4000 - int(len(prompt) / 3),
+            max_tokens=self.get_max_tokens(prompt),
             stop=["\n\n\n"],
             stream=True,
         )
@@ -287,7 +297,7 @@ class Prompt:
     Prompt class with methods to construct prompt
     """
 
-    def __init__(self) -> None:
+    def __init__(self, enc) -> None:
         """
         Initialize prompt with base prompt
         """
@@ -297,6 +307,7 @@ class Prompt:
         )
         # Track chat history
         self.chat_history: list = []
+        self.enc = enc
 
     def add_to_chat_history(self, chat: str) -> None:
         """
@@ -318,7 +329,7 @@ class Prompt:
             self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
-        if len(prompt) > 3000 * 4:
+        if len(self.enc.encode(prompt)) > 4000:
             # Remove oldest chat
             self.chat_history.pop(0)
             # Construct prompt again
