@@ -46,7 +46,7 @@ class Chatbot:
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=3072,
+            max_tokens=4000-len(prompt),
             stop=["\n\n\n"],
         )
         if completion.get("choices") is None:
