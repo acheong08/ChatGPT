@@ -46,7 +46,7 @@ class Chatbot:
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=1024,
+            max_tokens=3072,
             stop=["\n\n\n"],
         )
         if completion.get("choices") is None:
@@ -79,7 +79,7 @@ class Chatbot:
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=1024,
+            max_tokens=3072,
             stop=["\n\n\n"],
             stream=True,
         )
@@ -250,7 +250,7 @@ class AsyncChatbot(Chatbot):
             engine="text-chat-davinci-002-20230126",
             prompt=prompt,
             temperature=0.5,
-            max_tokens=1024,
+            max_tokens=3072,
             stop=["\n\n\n"],
             stream=True,
         )
