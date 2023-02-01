@@ -30,7 +30,7 @@ COMPLETELY FREE AND NO RATE LIMITS (Unpatched Bug - Might be fixed later)
 ## Usage
 
 ### Command line
-`OfficialChatGPT --api_key API_KEY` (Assumes Python PyPi in PATH)
+`OfficialChatGPT --api_key API_KEY --stream` (Assumes Python PyPi in PATH)
 
 <details>
 <summary>
