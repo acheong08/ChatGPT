@@ -412,6 +412,12 @@ def main():
         action="store_true",
         help="Stream response",
     )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.5,
+        help="Temperature for response",
+    )
     args = parser.parse_args()
     # Initialize chatbot
     chatbot = Chatbot(api_key=args.api_key)
@@ -422,12 +428,12 @@ def main():
             if chatbot_commands(prompt):
                 continue
         if not args.stream:
-            response = chatbot.ask(prompt)
+            response = chatbot.ask(prompt, temperature=args.temperature)
             print("ChatGPT: " + response["choices"][0]["text"])
         else:
             print("ChatGPT: ", end="")
             sys.stdout.flush()
-            for response in chatbot.ask_stream(prompt):
+            for response in chatbot.ask_stream(prompt, temperature=args.temperature):
                 print(response, end="")
                 sys.stdout.flush()
             print()
