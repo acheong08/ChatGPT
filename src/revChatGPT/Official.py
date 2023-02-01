@@ -393,17 +393,17 @@ def main():
     chatbot = Chatbot(api_key=args.api_key)
     # Start chat
     while True:
-        PROMPT = get_input("\nUser:\n")
-        if PROMPT.startswith("!"):
-            if chatbot_commands(PROMPT):
+        prompt = get_input("\nUser:\n")
+        if prompt.startswith("!"):
+            if chatbot_commands(prompt):
                 continue
         if not args.stream:
-            response = chatbot.ask(PROMPT)
+            response = chatbot.ask(prompt)
             print("ChatGPT: " + response["choices"][0]["text"])
         else:
             print("ChatGPT: ", end="")
             sys.stdout.flush()
-            for response in chatbot.ask_stream(PROMPT):
+            for response in chatbot.ask_stream(prompt):
                 print(response, end="")
                 sys.stdout.flush()
             print()
