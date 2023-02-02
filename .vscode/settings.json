@@ -1,8 +1,5 @@
 {
   "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
-  "cSpell.words": [
-    "Browserless",
-    "endoftext"
-  ]
+  "cSpell.words": ["acreate", "Browserless", "endoftext"]
 }

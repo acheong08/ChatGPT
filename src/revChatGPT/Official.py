@@ -12,7 +12,16 @@ import tiktoken
 
 ENGINE = "text-chat-davinci-002-20230126"
 
-# Import date to get the current date
+print("Initializing tokenizer...")
+ENCODER = tiktoken.get_encoding("gpt2")
+print("Done")
+
+
+def get_max_tokens(prompt: str) -> int:
+    """
+    Get the max tokens for a prompt
+    """
+    return 4000 - len(ENCODER.encode(prompt))
 
 
 class Chatbot:
@@ -25,45 +34,25 @@ class Chatbot:
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
         openai.api_key = api_key or os.environ.get("OPENAI_API_KEY")
-        self.conversations = {}
-        print("Initializing tokenizer...")
-        self.enc = tiktoken.get_encoding("gpt2")
-        print("Done")
-        self.prompt = Prompt(enc=self.enc, buffer=buffer)
+        self.conversations = Conversation()
+        self.prompt = Prompt(buffer=buffer)
 
-    def get_max_tokens(self, prompt: str) -> int:
+    def _get_completion(
+        self, prompt: str, temperature: float = 0.5, stream: bool = False
+    ):
         """
-        Get the max tokens for a prompt
+        Get the completion function
         """
-        return 4000 - len(self.enc.encode(prompt))
-
-    def ask(self, user_request: str, temperature: float = 0.5) -> dict:
-        """
-        Send a request to ChatGPT and return the response
-        Response: {
-            "id": "...",
-            "object": "text_completion",
-            "created": <time>,
-            "model": "text-chat-davinci-002-20230126",
-            "choices": [
-                {
-                "text": "<Response here>",
-                "index": 0,
-                "logprobs": null,
-                "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
-                }
-            ],
-            "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
-        }
-        """
-        prompt = self.prompt.construct_prompt(user_request)
-        completion = openai.Completion.create(
+        return openai.Completion.create(
             engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
-            max_tokens=self.get_max_tokens(prompt),
+            max_tokens=get_max_tokens(prompt),
             stop=["\n\n\n"],
+            stream=stream,
         )
+
+    def _process_completion(self, user_request: str, completion: dict) -> dict:
         if completion.get("choices") is None:
             raise Exception("ChatGPT API returned no choices")
         if len(completion["choices"]) == 0:
@@ -84,19 +73,22 @@ class Chatbot:
         )
         return completion
 
+    def ask(self, user_request: str, temperature: float = 0.5) -> dict:
+        """
+        Send a request to ChatGPT and return the response
+        """
+        completion = self._get_completion(
+            self.prompt.construct_prompt(user_request),
+            temperature,
+        )
+        return self._process_completion(user_request, completion)
+
     def ask_stream(self, user_request: str, temperature: float = 0.5) -> str:
         """
         Send a request to ChatGPT and yield the response
         """
         prompt = self.prompt.construct_prompt(user_request)
-        completion = openai.Completion.create(
-            engine=ENGINE,
-            prompt=prompt,
-            temperature=temperature,
-            max_tokens=self.get_max_tokens(prompt),
-            stop=["\n\n\n"],
-            stream=True,
-        )
+        completion = self._get_completion(prompt, temperature, stream=True)
         full_response = ""
         for response in completion:
             if response.get("choices") is None:
@@ -135,140 +127,46 @@ class Chatbot:
         """
         self.prompt.chat_history = []
 
-    def save_conversation(self, conversation_id: str) -> None:
-        """
-        Save conversation to conversations dict
-        """
-        self.conversations[conversation_id] = self.prompt
-
-    def load_conversation(self, conversation_id: str) -> None:
-        """
-        Load conversation from conversations dict
-        """
-        self.prompt = self.conversations[conversation_id]
-
-    def delete_conversation(self, conversation_id: str) -> None:
-        """
-        Delete conversation from conversations dict
-        """
-        self.conversations.pop(conversation_id)
-
-    def get_conversations(self) -> dict:
-        """
-        Get all conversations
-        """
-        return self.conversations
-
-    def dump_conversation_history(self) -> None:
-        """
-        Save all conversations history to a json file
-        """
-        for conversation_id, prompt in self.conversations.items():
-            # ~/.config/revChatGPT/conversations/<conversation_id>.json
-            with open(
-                os.path.join(
-                    os.path.expanduser("~"),
-                    ".config",
-                    "revChatGPT",
-                    "conversations",
-                    conversation_id + ".json",
-                ),
-                "w",
-                encoding="utf-8",
-            ) as f:
-                json.dump(prompt.chat_history, f)
-
-    def load_conversation_history(self) -> None:
-        """
-        Load conversation history from json files
-        """
-        # List all conversation files
-        conversation_files = os.listdir(
-            os.path.join(
-                os.path.expanduser("~"),
-                ".config",
-                "revChatGPT",
-                "conversations",
-            ),
-        )
-        for conversation_file in conversation_files:
-            conversation_id = conversation_file[:-5]
-            with open(
-                os.path.join(
-                    os.path.expanduser("~"),
-                    ".config",
-                    "revChatGPT",
-                    "conversations",
-                    conversation_file,
-                ),
-                encoding="utf-8",
-            ) as f:
-                self.conversations[conversation_id] = Prompt(self.enc)
-                self.conversations[conversation_id].chat_history = json.load(f)
-
 
 class AsyncChatbot(Chatbot):
     """
     Official ChatGPT API (async)
     """
-
-    async def ask(self, user_request: str, temperature: float = 0.5) -> dict:
+    async def _get_completion(
+        self, prompt: str, temperature: float = 0.5, stream: bool = False
+    ):
         """
-        Send a request to ChatGPT and return the response
-        Response: {
-            "id": "...",
-            "object": "text_completion",
-            "created": <time>,
-            "model": "text-chat-davinci-002-20230126",
-            "choices": [
-                {
-                "text": "<Response here>",
-                "index": 0,
-                "logprobs": null,
-                "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
-                }
-            ],
-            "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
-        }
+        Get the completion function
         """
-        prompt = self.prompt.construct_prompt(user_request)
-        completion = await openai.Completion.acreate(
+        return await openai.Completion.acreate(
             engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
-            max_tokens=self.get_max_tokens(prompt),
+            max_tokens=get_max_tokens(prompt),
             stop=["\n\n\n"],
+            stream=stream,
         )
-        if completion.get("choices") is None:
-            raise Exception("ChatGPT API returned no choices")
-        if len(completion["choices"]) == 0:
-            raise Exception("ChatGPT API returned no choices")
-        if completion["choices"][0].get("text") is None:
-            raise Exception("ChatGPT API returned no text")
-        completion["choices"][0]["text"] = completion["choices"][0]["text"].rstrip(
-            "<|im_end|>",
+    async def ask(self, user_request: str, temperature: float = 0.5) -> dict:
+        """
+        Same as Chatbot.ask but async
+        }
+        """
+        completion = await self._get_completion(
+            self.prompt.construct_prompt(user_request),
+            temperature,
         )
-        # Add to chat history
-        self.prompt.add_to_chat_history(
-            "User: "
-            + user_request
-            + "\n\n\n"
-            + "ChatGPT: "
-            + completion["choices"][0]["text"]
-            + "<|im_end|>\n",
-        )
-        return completion
+        return self._process_completion(user_request, completion)
 
     async def ask_stream(self, user_request: str, temperature: float = 0.5) -> str:
         """
-        Send a request to ChatGPT and yield the response
+        Same as Chatbot.ask_stream but async
         """
         prompt = self.prompt.construct_prompt(user_request)
         completion = await openai.Completion.acreate(
             engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
-            max_tokens=self.get_max_tokens(prompt),
+            max_tokens=get_max_tokens(prompt),
             stop=["\n\n\n"],
             stream=True,
         )
@@ -303,7 +201,7 @@ class Prompt:
     Prompt class with methods to construct prompt
     """
 
-    def __init__(self, enc, buffer: int = None) -> None:
+    def __init__(self, buffer: int = None) -> None:
         """
         Initialize prompt with base prompt
         """
@@ -315,7 +213,6 @@ class Prompt:
         )
         # Track chat history
         self.chat_history: list = []
-        self.enc = enc
         self.buffer = buffer
 
     def add_to_chat_history(self, chat: str) -> None:
@@ -342,12 +239,52 @@ class Prompt:
             max_tokens = 4000 - self.buffer
         else:
             max_tokens = 3200
-        if len(self.enc.encode(prompt)) > max_tokens:
+        if len(ENCODER.encode(prompt)) > max_tokens:
             # Remove oldest chat
             self.chat_history.pop(0)
             # Construct prompt again
             prompt = self.construct_prompt(new_prompt)
         return prompt
+
+
+class Conversation:
+    """
+    For handling multiple conversations
+    """
+
+    def __init__(self) -> None:
+        self.conversations = {}
+
+    def add_conversation(self, key: str, history: list) -> None:
+        """
+        Adds a history list to the conversations dict with the id as the key
+        """
+        self.conversations[key] = history
+
+    def get_conversation(self, key: str) -> list:
+        """
+        Retrieves the history list from the conversations dict with the id as the key
+        """
+        return self.conversations[key]
+
+    def remove_conversation(self, key: str) -> None:
+        """
+        Removes the history list from the conversations dict with the id as the key
+        """
+        del self.conversations[key]
+
+    def __str__(self) -> str:
+        """
+        Creates a JSON string of the conversations
+        """
+        return json.dumps(self.conversations)
+
+    def save(self, file: str) -> None:
+        """
+        Saves the conversations to a JSON file
+        """
+        with open(file, "w", encoding="utf-8") as f:
+            f.write(str(self))
 
 
 def main():
