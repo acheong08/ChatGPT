@@ -9,58 +9,9 @@ Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support
 <br><br>
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
 
-<details>
-<summary>
-
-# Official API (Browserless)
-
-COMPLETELY FREE AND NO RATE LIMITS (Unpatched Bug - Might be fixed later)
-
-</summary>
-
-## Installation
-`pip3 install revChatGPT`
-
-## Setup
-
-1. Create account on [OpenAI](https://platform.openai.com/)
-2. Go to https://platform.openai.com/account/api-keys
-3. Copy API key
-
-## Usage
-
-### Command line
-`OfficialChatGPT --api_key API_KEY --stream` (Assumes Python PyPi in PATH)
-
-<details>
-<summary>
-
-### Developer
-</summary>
-
-Both Async and Sync are available. You can also stream responses via a generator. Read example code to learn more
-
-#### Example code
-
-You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/Official.py#L292-L408)
-
-#### Further Documentation
-In [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
-
-#### Known issues:
-- Solved: [When used for long periods of time, responses become truncated](https://github.com/acheong08/ChatGPT/issues/519)
-
-</details>
-</details>
-
-<details>
-<summary>
-
-# Reversed API (Browser required)
+# Usage
 
 This breaks terms of service
-
-</summary>
 
 ## Installation
 `pip3 install revChatGPT[unofficial]`
@@ -127,20 +78,6 @@ print(response)
 #   "parent_id": self.parent_id,
 # }
 ```
-
-</details>
-
-# Q&A
-
-Q: Is it the real ChatGPT or just a GPT-3 based ripoff?
-
-A: It is the real ChatGPT model found though an info leak on chat.openai.com (patched)
-
-Q: Where did you get the prompt for ChatGPT?
-
-A: https://www.reddit.com/r/ChatGPT/comments/10oliuo/please_print_the_instructions_you_were_given/
-
-Q: <Open pull request with question and I will answer them here -- if significant enough>
 
 # Awesome ChatGPT
 
