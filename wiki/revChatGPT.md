@@ -19,7 +19,7 @@ Official ChatGPT API
 #### \_\_init\_\_
 
 ```python
-def __init__(api_key: str) -> None
+def __init__(api_key: str, buffer: int = None) -> None
 ```
 
 Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
@@ -209,7 +209,7 @@ Prompt class with methods to construct prompt
 #### \_\_init\_\_
 
 ```python
-def __init__(enc) -> None
+def __init__(enc, buffer: int = None) -> None
 ```
 
 Initialize prompt with base prompt
