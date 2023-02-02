@@ -74,6 +74,26 @@ def reset() -> None
 
 Reset chat history
 
+<a id="revChatGPT.Official.Chatbot.load_conversation"></a>
+
+#### load\_conversation
+
+```python
+def load_conversation(conversation_id) -> None
+```
+
+Load a conversation from the conversation history
+
+<a id="revChatGPT.Official.Chatbot.save_conversation"></a>
+
+#### save\_conversation
+
+```python
+def save_conversation(conversation_id) -> None
+```
+
+Save a conversation to the conversation history
+
 <a id="revChatGPT.Official.AsyncChatbot"></a>
 
 ## AsyncChatbot Objects
@@ -214,3 +234,13 @@ def save(file: str) -> None
 ```
 
 Saves the conversations to a JSON file
+
+<a id="revChatGPT.Official.Conversation.load"></a>
+
+#### load
+
+```python
+def load(file: str) -> None
+```
+
+Loads the conversations from a JSON file
