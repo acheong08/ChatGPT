@@ -24,12 +24,22 @@ def __init__(api_key: str) -> None
 
 Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
 
+<a id="revChatGPT.Official.Chatbot.get_max_tokens"></a>
+
+#### get\_max\_tokens
+
+```python
+def get_max_tokens(prompt: str) -> int
+```
+
+Get the max tokens for a prompt
+
 <a id="revChatGPT.Official.Chatbot.ask"></a>
 
 #### ask
 
 ```python
-def ask(user_request: str) -> dict
+def ask(user_request: str, temperature: float = 0.5) -> dict
 ```
 
 Send a request to ChatGPT and return the response
@@ -54,7 +64,7 @@ Response: {
 #### ask\_stream
 
 ```python
-def ask_stream(user_request: str) -> str
+def ask_stream(user_request: str, temperature: float = 0.5) -> str
 ```
 
 Send a request to ChatGPT and yield the response
@@ -154,11 +164,11 @@ Official ChatGPT API (async)
 #### ask
 
 ```python
-async def ask(user_request: str) -> dict
+async def ask(user_request: str, temperature: float = 0.5) -> dict
 ```
 
 Send a request to ChatGPT and return the response
-{
+Response: {
     "id": "...",
     "object": "text_completion",
     "created": <time>,
@@ -179,7 +189,7 @@ Send a request to ChatGPT and return the response
 #### ask\_stream
 
 ```python
-async def ask_stream(user_request: str) -> dict
+async def ask_stream(user_request: str, temperature: float = 0.5) -> str
 ```
 
 Send a request to ChatGPT and yield the response
@@ -199,7 +209,7 @@ Prompt class with methods to construct prompt
 #### \_\_init\_\_
 
 ```python
-def __init__() -> None
+def __init__(enc) -> None
 ```
 
 Initialize prompt with base prompt

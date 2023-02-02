@@ -5,12 +5,12 @@ import argparse
 import json
 import os
 import sys
-
-# Import date to get the current date
 from datetime import date
 
 import openai
 import tiktoken
+
+# Import date to get the current date
 
 
 class Chatbot:
@@ -68,7 +68,9 @@ class Chatbot:
             raise Exception("ChatGPT API returned no choices")
         if completion["choices"][0].get("text") is None:
             raise Exception("ChatGPT API returned no text")
-        completion["choices"][0]["text"] = completion["choices"][0]["text"].rstrip("<|im_end|>")
+        completion["choices"][0]["text"] = completion["choices"][0]["text"].rstrip(
+            "<|im_end|>"
+        )
         # Add to chat history
         self.prompt.add_to_chat_history(
             "User: "
@@ -306,7 +308,9 @@ class Prompt:
         """
         self.base_prompt = (
             os.environ.get("CUSTOM_BASE_PROMPT")
-            or "You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short. Current date: "+ str(date.today()) +"\n\n"
+            or "You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short. Current date: "
+            + str(date.today())
+            + "\n\n"
         )
         # Track chat history
         self.chat_history: list = []
