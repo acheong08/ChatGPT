@@ -4,6 +4,16 @@
 
 A simple wrapper for the official ChatGPT API
 
+<a id="revChatGPT.Official.get_max_tokens"></a>
+
+#### get\_max\_tokens
+
+```python
+def get_max_tokens(prompt: str) -> int
+```
+
+Get the max tokens for a prompt
+
 <a id="revChatGPT.Official.Chatbot"></a>
 
 ## Chatbot Objects
@@ -24,16 +34,6 @@ def __init__(api_key: str, buffer: int = None) -> None
 
 Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
 
-<a id="revChatGPT.Official.Chatbot.get_max_tokens"></a>
-
-#### get\_max\_tokens
-
-```python
-def get_max_tokens(prompt: str) -> int
-```
-
-Get the max tokens for a prompt
-
 <a id="revChatGPT.Official.Chatbot.ask"></a>
 
 #### ask
@@ -43,21 +43,6 @@ def ask(user_request: str, temperature: float = 0.5) -> dict
 ```
 
 Send a request to ChatGPT and return the response
-Response: {
-    "id": "...",
-    "object": "text_completion",
-    "created": <time>,
-    "model": "text-chat-davinci-002-20230126",
-    "choices": [
-        {
-        "text": "<Response here>",
-        "index": 0,
-        "logprobs": null,
-        "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
-        }
-    ],
-    "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
-}
 
 <a id="revChatGPT.Official.Chatbot.ask_stream"></a>
 
@@ -89,66 +74,6 @@ def reset() -> None
 
 Reset chat history
 
-<a id="revChatGPT.Official.Chatbot.save_conversation"></a>
-
-#### save\_conversation
-
-```python
-def save_conversation(conversation_id: str) -> None
-```
-
-Save conversation to conversations dict
-
-<a id="revChatGPT.Official.Chatbot.load_conversation"></a>
-
-#### load\_conversation
-
-```python
-def load_conversation(conversation_id: str) -> None
-```
-
-Load conversation from conversations dict
-
-<a id="revChatGPT.Official.Chatbot.delete_conversation"></a>
-
-#### delete\_conversation
-
-```python
-def delete_conversation(conversation_id: str) -> None
-```
-
-Delete conversation from conversations dict
-
-<a id="revChatGPT.Official.Chatbot.get_conversations"></a>
-
-#### get\_conversations
-
-```python
-def get_conversations() -> dict
-```
-
-Get all conversations
-
-<a id="revChatGPT.Official.Chatbot.dump_conversation_history"></a>
-
-#### dump\_conversation\_history
-
-```python
-def dump_conversation_history() -> None
-```
-
-Save all conversations history to a json file
-
-<a id="revChatGPT.Official.Chatbot.load_conversation_history"></a>
-
-#### load\_conversation\_history
-
-```python
-def load_conversation_history() -> None
-```
-
-Load conversation history from json files
-
 <a id="revChatGPT.Official.AsyncChatbot"></a>
 
 ## AsyncChatbot Objects
@@ -167,21 +92,7 @@ Official ChatGPT API (async)
 async def ask(user_request: str, temperature: float = 0.5) -> dict
 ```
 
-Send a request to ChatGPT and return the response
-Response: {
-    "id": "...",
-    "object": "text_completion",
-    "created": <time>,
-    "model": "text-chat-davinci-002-20230126",
-    "choices": [
-        {
-        "text": "<Response here>",
-        "index": 0,
-        "logprobs": null,
-        "finish_details": { "type": "stop", "stop": "<|endoftext|>" }
-        }
-    ],
-    "usage": { "prompt_tokens": x, "completion_tokens": y, "total_tokens": z }
+Same as Chatbot.ask but async
 }
 
 <a id="revChatGPT.Official.AsyncChatbot.ask_stream"></a>
@@ -192,7 +103,7 @@ Response: {
 async def ask_stream(user_request: str, temperature: float = 0.5) -> str
 ```
 
-Send a request to ChatGPT and yield the response
+Same as Chatbot.ask_stream but async
 
 <a id="revChatGPT.Official.Prompt"></a>
 
@@ -209,7 +120,7 @@ Prompt class with methods to construct prompt
 #### \_\_init\_\_
 
 ```python
-def __init__(enc, buffer: int = None) -> None
+def __init__(buffer: int = None) -> None
 ```
 
 Initialize prompt with base prompt
@@ -243,3 +154,63 @@ def construct_prompt(new_prompt: str) -> str
 ```
 
 Construct prompt based on chat history and request
+
+<a id="revChatGPT.Official.Conversation"></a>
+
+## Conversation Objects
+
+```python
+class Conversation()
+```
+
+For handling multiple conversations
+
+<a id="revChatGPT.Official.Conversation.add_conversation"></a>
+
+#### add\_conversation
+
+```python
+def add_conversation(key: str, history: list) -> None
+```
+
+Adds a history list to the conversations dict with the id as the key
+
+<a id="revChatGPT.Official.Conversation.get_conversation"></a>
+
+#### get\_conversation
+
+```python
+def get_conversation(key: str) -> list
+```
+
+Retrieves the history list from the conversations dict with the id as the key
+
+<a id="revChatGPT.Official.Conversation.remove_conversation"></a>
+
+#### remove\_conversation
+
+```python
+def remove_conversation(key: str) -> None
+```
+
+Removes the history list from the conversations dict with the id as the key
+
+<a id="revChatGPT.Official.Conversation.__str__"></a>
+
+#### \_\_str\_\_
+
+```python
+def __str__() -> str
+```
+
+Creates a JSON string of the conversations
+
+<a id="revChatGPT.Official.Conversation.save"></a>
+
+#### save
+
+```python
+def save(file: str) -> None
+```
+
+Saves the conversations to a JSON file

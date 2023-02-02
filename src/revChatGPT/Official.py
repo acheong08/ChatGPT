@@ -132,6 +132,18 @@ class Chatbot:
         Reset chat history
         """
         self.prompt.chat_history = []
+    
+    def load_conversation(self, conversation_id) -> None:
+        """
+        Load a conversation from the conversation history
+        """
+        self.prompt.chat_history = self.conversations.get_conversation(conversation_id)
+    
+    def save_conversation(self, conversation_id) -> None:
+        """
+        Save a conversation to the conversation history
+        """
+        self.conversations.add_conversation(conversation_id, self.prompt.chat_history)
 
 
 class AsyncChatbot(Chatbot):
@@ -268,6 +280,13 @@ class Conversation:
         """
         with open(file, "w", encoding="utf-8") as f:
             f.write(str(self))
+    
+    def load(self, file: str) -> None:
+        """
+        Loads the conversations from a JSON file
+        """
+        with open(file, "r", encoding="utf-8") as f:
+            self.conversations = json.loads(f.read())
 
 
 def main():
@@ -314,6 +333,10 @@ def main():
             !rollback - Rollback chat history
             !reset - Reset chat history
             !prompt - Show current prompt
+            !save_c <conversation_name> - Save history to a conversation
+            !load_c <conversation_name> - Load history from a conversation
+            !save_f <file_name> - Save all conversations to a file
+            !load_f <file_name> - Load all conversations from a file
             !exit - Quit chat
             """,
             )
@@ -325,6 +348,14 @@ def main():
             chatbot.reset()
         elif cmd == "!prompt":
             print(chatbot.prompt.construct_prompt(""))
+        elif cmd.startswith("!save_c"):
+            chatbot.save_conversation(cmd.split(" ")[1])
+        elif cmd.startswith("!load_c"):
+            chatbot.load_conversation(cmd.split(" ")[1])
+        elif cmd.startswith("!save_f"):
+            chatbot.conversations.save(cmd.split(" ")[1])
+        elif cmd.startswith("!load_f"):
+            chatbot.conversations.load(cmd.split(" ")[1])
         else:
             return False
         return True
