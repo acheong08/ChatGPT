@@ -141,7 +141,7 @@ class Chatbot:
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id or str(uuid.uuid4()),
-            "model": "text-davinci-002-render-next",
+            "model": "text-davinci-002-render",
         }
         new_conv = data["conversation_id"] is None
         self.conversation_id_prev_queue.append(
@@ -215,7 +215,7 @@ class Chatbot:
         response = self.session.post(
             url,
             data=json.dumps(
-                {"message_id": message_id, "model": "text-davinci-002-render-next"},
+                {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
         )
         self.check_response(response)
