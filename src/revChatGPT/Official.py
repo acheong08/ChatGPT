@@ -338,7 +338,11 @@ class Prompt:
             self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
-        if len(self.enc.encode(prompt)) > (4000 - self.buffer or 3200):
+        if self.buffer is not None:
+            max_tokens = 4000 - self.buffer
+        else:
+            max_tokens = 3200
+        if len(self.enc.encode(prompt)) > max_tokens:
             # Remove oldest chat
             self.chat_history.pop(0)
             # Construct prompt again
