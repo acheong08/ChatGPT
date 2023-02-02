@@ -38,7 +38,10 @@ class Chatbot:
         self.prompt = Prompt(buffer=buffer)
 
     def _get_completion(
-        self, prompt: str, temperature: float = 0.5, stream: bool = False
+        self,
+        prompt: str,
+        temperature: float = 0.5,
+        stream: bool = False,
     ):
         """
         Get the completion function
@@ -73,22 +76,7 @@ class Chatbot:
         )
         return completion
 
-    def ask(self, user_request: str, temperature: float = 0.5) -> dict:
-        """
-        Send a request to ChatGPT and return the response
-        """
-        completion = self._get_completion(
-            self.prompt.construct_prompt(user_request),
-            temperature,
-        )
-        return self._process_completion(user_request, completion)
-
-    def ask_stream(self, user_request: str, temperature: float = 0.5) -> str:
-        """
-        Send a request to ChatGPT and yield the response
-        """
-        prompt = self.prompt.construct_prompt(user_request)
-        completion = self._get_completion(prompt, temperature, stream=True)
+    def _process_completion_stream(self, user_request: str, completion: dict) -> str:
         full_response = ""
         for response in completion:
             if response.get("choices") is None:
@@ -112,6 +100,26 @@ class Chatbot:
             + "ChatGPT: "
             + full_response
             + "<|im_end|>\n",
+        )
+
+    def ask(self, user_request: str, temperature: float = 0.5) -> dict:
+        """
+        Send a request to ChatGPT and return the response
+        """
+        completion = self._get_completion(
+            self.prompt.construct_prompt(user_request),
+            temperature,
+        )
+        return self._process_completion(user_request, completion)
+
+    def ask_stream(self, user_request: str, temperature: float = 0.5) -> str:
+        """
+        Send a request to ChatGPT and yield the response
+        """
+        prompt = self.prompt.construct_prompt(user_request)
+        return self._process_completion_stream(
+            user_request=user_request,
+            completion=self._get_completion(prompt, temperature, stream=True),
         )
 
     def rollback(self, num: int) -> None:
@@ -132,8 +140,12 @@ class AsyncChatbot(Chatbot):
     """
     Official ChatGPT API (async)
     """
+
     async def _get_completion(
-        self, prompt: str, temperature: float = 0.5, stream: bool = False
+        self,
+        prompt: str,
+        temperature: float = 0.5,
+        stream: bool = False,
     ):
         """
         Get the completion function
@@ -146,6 +158,7 @@ class AsyncChatbot(Chatbot):
             stop=["\n\n\n"],
             stream=stream,
         )
+
     async def ask(self, user_request: str, temperature: float = 0.5) -> dict:
         """
         Same as Chatbot.ask but async
@@ -162,37 +175,9 @@ class AsyncChatbot(Chatbot):
         Same as Chatbot.ask_stream but async
         """
         prompt = self.prompt.construct_prompt(user_request)
-        completion = await openai.Completion.acreate(
-            engine=ENGINE,
-            prompt=prompt,
-            temperature=temperature,
-            max_tokens=get_max_tokens(prompt),
-            stop=["\n\n\n"],
-            stream=True,
-        )
-        full_response = ""
-        for response in completion:
-            if response.get("choices") is None:
-                raise Exception("ChatGPT API returned no choices")
-            if len(response["choices"]) == 0:
-                raise Exception("ChatGPT API returned no choices")
-            if response["choices"][0].get("finish_details") is not None:
-                break
-            if response["choices"][0].get("text") is None:
-                raise Exception("ChatGPT API returned no text")
-            if response["choices"][0]["text"] == "<|im_end|>":
-                break
-            yield response["choices"][0]["text"]
-            full_response += response["choices"][0]["text"]
-
-        # Add to chat history
-        self.prompt.add_to_chat_history(
-            "User: "
-            + user_request
-            + "\n\n\n"
-            + "ChatGPT: "
-            + full_response
-            + "<|im_end|>\n",
+        return self._process_completion_stream(
+            user_request=user_request,
+            completion=await self._get_completion(prompt, temperature, stream=True),
         )
 
 
