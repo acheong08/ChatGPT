@@ -18,7 +18,7 @@ class Chatbot:
     Official ChatGPT API
     """
 
-    def __init__(self, api_key: str, buffer: int=None) -> None:
+    def __init__(self, api_key: str, buffer: int = None) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
@@ -27,7 +27,7 @@ class Chatbot:
         print("Initializing tokenizer...")
         self.enc = tiktoken.get_encoding("gpt2")
         print("Done")
-        self.prompt = Prompt(enc=self.enc,buffer=buffer)
+        self.prompt = Prompt(enc=self.enc, buffer=buffer)
 
     def get_max_tokens(self, prompt: str) -> int:
         """
@@ -69,7 +69,7 @@ class Chatbot:
         if completion["choices"][0].get("text") is None:
             raise Exception("ChatGPT API returned no text")
         completion["choices"][0]["text"] = completion["choices"][0]["text"].rstrip(
-            "<|im_end|>"
+            "<|im_end|>",
         )
         # Add to chat history
         self.prompt.add_to_chat_history(
@@ -244,7 +244,7 @@ class AsyncChatbot(Chatbot):
         if completion["choices"][0].get("text") is None:
             raise Exception("ChatGPT API returned no text")
         completion["choices"][0]["text"] = completion["choices"][0]["text"].rstrip(
-            "<|im_end|>"
+            "<|im_end|>",
         )
         # Add to chat history
         self.prompt.add_to_chat_history(
@@ -301,7 +301,7 @@ class Prompt:
     Prompt class with methods to construct prompt
     """
 
-    def __init__(self, enc, buffer: int=None) -> None:
+    def __init__(self, enc, buffer: int = None) -> None:
         """
         Initialize prompt with base prompt
         """
@@ -336,7 +336,7 @@ class Prompt:
             self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
-        if len(self.enc.encode(prompt)) > (self.buffer or 3200):
+        if len(self.enc.encode(prompt)) > (4000 - self.buffer or 3200):
             # Remove oldest chat
             self.chat_history.pop(0)
             # Construct prompt again
