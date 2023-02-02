@@ -18,7 +18,7 @@ class Chatbot:
     Official ChatGPT API
     """
 
-    def __init__(self, api_key: str) -> None:
+    def __init__(self, api_key: str, buffer: int=None) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
@@ -27,7 +27,7 @@ class Chatbot:
         print("Initializing tokenizer...")
         self.enc = tiktoken.get_encoding("gpt2")
         print("Done")
-        self.prompt = Prompt(enc=self.enc)
+        self.prompt = Prompt(enc=self.enc,buffer=buffer)
 
     def get_max_tokens(self, prompt: str) -> int:
         """
@@ -301,7 +301,7 @@ class Prompt:
     Prompt class with methods to construct prompt
     """
 
-    def __init__(self, enc) -> None:
+    def __init__(self, enc, buffer: int=None) -> None:
         """
         Initialize prompt with base prompt
         """
@@ -314,6 +314,7 @@ class Prompt:
         # Track chat history
         self.chat_history: list = []
         self.enc = enc
+        self.buffer = buffer
 
     def add_to_chat_history(self, chat: str) -> None:
         """
@@ -335,7 +336,7 @@ class Prompt:
             self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
-        if len(self.enc.encode(prompt)) > 3200:
+        if len(self.enc.encode(prompt)) > (self.buffer or 3200):
             # Remove oldest chat
             self.chat_history.pop(0)
             # Construct prompt again
