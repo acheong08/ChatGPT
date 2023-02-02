@@ -12,9 +12,7 @@ import tiktoken
 
 ENGINE = os.environ.get("GPT_ENGINE") or "text-chat-davinci-002-20230126"
 
-print("Initializing tokenizer...")
 ENCODER = tiktoken.get_encoding("gpt2")
-print("Done")
 
 
 def get_max_tokens(prompt: str) -> int:
