@@ -132,13 +132,13 @@ class Chatbot:
         Reset chat history
         """
         self.prompt.chat_history = []
-    
+
     def load_conversation(self, conversation_id) -> None:
         """
         Load a conversation from the conversation history
         """
         self.prompt.chat_history = self.conversations.get_conversation(conversation_id)
-    
+
     def save_conversation(self, conversation_id) -> None:
         """
         Save a conversation to the conversation history
@@ -280,12 +280,12 @@ class Conversation:
         """
         with open(file, "w", encoding="utf-8") as f:
             f.write(str(self))
-    
+
     def load(self, file: str) -> None:
         """
         Loads the conversations from a JSON file
         """
-        with open(file, "r", encoding="utf-8") as f:
+        with open(file, encoding="utf-8") as f:
             self.conversations = json.loads(f.read())
 
 
