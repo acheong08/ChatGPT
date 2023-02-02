@@ -10,6 +10,8 @@ from datetime import date
 import openai
 import tiktoken
 
+ENGINE = "text-chat-davinci-002-20230126"
+
 # Import date to get the current date
 
 
@@ -56,7 +58,7 @@ class Chatbot:
         """
         prompt = self.prompt.construct_prompt(user_request)
         completion = openai.Completion.create(
-            engine="text-chat-davinci-002-20230126",
+            engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
@@ -88,7 +90,7 @@ class Chatbot:
         """
         prompt = self.prompt.construct_prompt(user_request)
         completion = openai.Completion.create(
-            engine="text-chat-davinci-002-20230126",
+            engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
@@ -231,7 +233,7 @@ class AsyncChatbot(Chatbot):
         """
         prompt = self.prompt.construct_prompt(user_request)
         completion = await openai.Completion.acreate(
-            engine="text-chat-davinci-002-20230126",
+            engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
@@ -263,7 +265,7 @@ class AsyncChatbot(Chatbot):
         """
         prompt = self.prompt.construct_prompt(user_request)
         completion = await openai.Completion.acreate(
-            engine="text-chat-davinci-002-20230126",
+            engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
             max_tokens=self.get_max_tokens(prompt),
