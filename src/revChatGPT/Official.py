@@ -53,6 +53,7 @@ class Chatbot:
             max_tokens=get_max_tokens(prompt),
             stop=["\n\n\n"],
             stream=stream,
+            disallowed_special=()
         )
 
     def _process_completion(self, user_request: str, completion: dict) -> dict:
@@ -157,6 +158,7 @@ class AsyncChatbot(Chatbot):
             max_tokens=get_max_tokens(prompt),
             stop=["\n\n\n"],
             stream=stream,
+            disallowed_special=()
         )
 
     async def ask(self, user_request: str, temperature: float = 0.5) -> dict:
