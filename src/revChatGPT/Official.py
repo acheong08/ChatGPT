@@ -10,7 +10,7 @@ from datetime import date
 import openai
 import tiktoken
 
-ENGINE = os.environ.get("GPT_ENGINE") or "text-chat-davinci-002-20230126"
+ENGINE = os.environ.get("GPT_ENGINE") or "text-chat-davinci-002-20221122"
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
