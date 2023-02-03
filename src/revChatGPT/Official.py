@@ -160,7 +160,7 @@ class AsyncChatbot(Chatbot):
         """
         Get the completion function
         """
-        return await openai.Completion.acreate(
+        return openai.Completion.acreate(
             engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
