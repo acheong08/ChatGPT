@@ -66,14 +66,7 @@ class Chatbot:
             "<|im_end|>",
         )
         # Add to chat history
-        self.prompt.add_to_chat_history(
-            "User: "
-            + user_request
-            + "\n\n\n"
-            + "ChatGPT: "
-            + completion["choices"][0]["text"]
-            + "<|im_end|>\n",
-        )
+        self.prompt.add_to_history(user_request, completion["choices"][0]["text"])
         if conversation_id is not None:
             self.save_conversation(conversation_id)
         return completion
@@ -97,14 +90,7 @@ class Chatbot:
             full_response += response["choices"][0]["text"]
 
         # Add to chat history
-        self.prompt.add_to_chat_history(
-            "User: "
-            + user_request
-            + "\n\n\n"
-            + "ChatGPT: "
-            + full_response
-            + "<|im_end|>\n",
-        )
+        self.prompt.add_to_history(user_request, full_response)
         if conversation_id is not None:
             self.save_conversation(conversation_id)
 
@@ -242,6 +228,19 @@ class Prompt:
         Add chat to chat history for next prompt
         """
         self.chat_history.append(chat)
+    
+    def add_to_history(self, user_request: str, response: str) -> None:
+        """
+        Add request/response to chat history for next prompt
+        """
+        self.add_to_chat_history(
+            "User: "
+            + user_request
+            + "\n\n\n"
+            + "ChatGPT: "
+            + response
+            + "<|im_end|>\n"
+        )
 
     def history(self, custom_history: list = None) -> str:
         """
