@@ -53,7 +53,7 @@ class Chatbot:
             stream=stream,
         )
 
-    def _process_completion(self, user_request: str, completion: dict) -> dict:
+    def _process_completion(self, user_request: str, completion: dict, conversation_id: str=None) -> dict:
         if completion.get("choices") is None:
             raise Exception("ChatGPT API returned no choices")
         if len(completion["choices"]) == 0:
@@ -72,9 +72,11 @@ class Chatbot:
             + completion["choices"][0]["text"]
             + "<|im_end|>\n",
         )
+        if conversation_id is not None:
+            self.save_conversation(conversation_id)
         return completion
 
-    def _process_completion_stream(self, user_request: str, completion: dict) -> str:
+    def _process_completion_stream(self, user_request: str, completion: dict, conversation_id: str=None) -> str:
         full_response = ""
         for response in completion:
             if response.get("choices") is None:
@@ -99,26 +101,38 @@ class Chatbot:
             + full_response
             + "<|im_end|>\n",
         )
+        if conversation_id is not None:
+            self.save_conversation(conversation_id)
 
-    def ask(self, user_request: str, temperature: float = 0.5) -> dict:
+    def ask(self, user_request: str, temperature: float = 0.5, conversation_id: str = None) -> dict:
         """
         Send a request to ChatGPT and return the response
         """
+        if conversation_id is not None:
+            self.load_conversation(conversation_id)
         completion = self._get_completion(
             self.prompt.construct_prompt(user_request),
             temperature,
         )
         return self._process_completion(user_request, completion)
 
-    def ask_stream(self, user_request: str, temperature: float = 0.5) -> str:
+    def ask_stream(self, user_request: str, temperature: float = 0.5, conversation_id: str = None) -> str:
         """
         Send a request to ChatGPT and yield the response
         """
+        if conversation_id is not None:
+            self.load_conversation(conversation_id)
         prompt = self.prompt.construct_prompt(user_request)
         return self._process_completion_stream(
             user_request=user_request,
             completion=self._get_completion(prompt, temperature, stream=True),
         )
+
+    def make_conversation(self, conversation_id: str) -> None:
+        """
+        Make a conversation
+        """
+        self.conversations.add_conversation(conversation_id, [])
 
     def rollback(self, num: int) -> None:
         """
@@ -137,6 +151,9 @@ class Chatbot:
         """
         Load a conversation from the conversation history
         """
+        if conversation_id not in self.conversations.conversations:
+            # Create a new conversation
+            self.make_conversation(conversation_id)
         self.prompt.chat_history = self.conversations.get_conversation(conversation_id)
 
     def save_conversation(self, conversation_id) -> None:
@@ -216,18 +233,18 @@ class Prompt:
         """
         self.chat_history.append(chat)
 
-    def history(self) -> str:
+    def history(self, custom_history: list=None) -> str:
         """
         Return chat history
         """
-        return "\n".join(self.chat_history)
+        return "\n".join(custom_history or self.chat_history)
 
-    def construct_prompt(self, new_prompt: str) -> str:
+    def construct_prompt(self, new_prompt: str, custom_history:list=None) -> str:
         """
         Construct prompt based on chat history and request
         """
         prompt = (
-            self.base_prompt + self.history() + "User: " + new_prompt + "\nChatGPT:"
+            self.base_prompt + self.history(custom_history=custom_history) + "User: " + new_prompt + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
         if self.buffer is not None:
