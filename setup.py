@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="1.0.13",
+    version="1.1.1",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
