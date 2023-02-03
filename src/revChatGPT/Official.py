@@ -202,7 +202,7 @@ class Prompt:
         """
         self.base_prompt = (
             os.environ.get("CUSTOM_BASE_PROMPT")
-            or "You are ChatGPT, a large language model trained by OpenAI. Answer conversationally. Current date: "
+            or "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally. Current date: "
             + str(date.today())
             + "\n\n"
         )
