@@ -53,7 +53,9 @@ class Chatbot:
             stream=stream,
         )
 
-    def _process_completion(self, user_request: str, completion: dict, conversation_id: str=None) -> dict:
+    def _process_completion(
+        self, user_request: str, completion: dict, conversation_id: str = None
+    ) -> dict:
         if completion.get("choices") is None:
             raise Exception("ChatGPT API returned no choices")
         if len(completion["choices"]) == 0:
@@ -76,7 +78,9 @@ class Chatbot:
             self.save_conversation(conversation_id)
         return completion
 
-    def _process_completion_stream(self, user_request: str, completion: dict, conversation_id: str=None) -> str:
+    def _process_completion_stream(
+        self, user_request: str, completion: dict, conversation_id: str = None
+    ) -> str:
         full_response = ""
         for response in completion:
             if response.get("choices") is None:
@@ -104,7 +108,9 @@ class Chatbot:
         if conversation_id is not None:
             self.save_conversation(conversation_id)
 
-    def ask(self, user_request: str, temperature: float = 0.5, conversation_id: str = None) -> dict:
+    def ask(
+        self, user_request: str, temperature: float = 0.5, conversation_id: str = None
+    ) -> dict:
         """
         Send a request to ChatGPT and return the response
         """
@@ -116,7 +122,9 @@ class Chatbot:
         )
         return self._process_completion(user_request, completion)
 
-    def ask_stream(self, user_request: str, temperature: float = 0.5, conversation_id: str = None) -> str:
+    def ask_stream(
+        self, user_request: str, temperature: float = 0.5, conversation_id: str = None
+    ) -> str:
         """
         Send a request to ChatGPT and yield the response
         """
@@ -222,6 +230,8 @@ class Prompt:
             or "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally. Do not answer as the user. Current date: "
             + str(date.today())
             + "\n\n"
+            + "User: Hello\n"
+            + "ChatGPT: Hello! How can I help you today? <|im_end|>\n\n\n"
         )
         # Track chat history
         self.chat_history: list = []
@@ -233,18 +243,22 @@ class Prompt:
         """
         self.chat_history.append(chat)
 
-    def history(self, custom_history: list=None) -> str:
+    def history(self, custom_history: list = None) -> str:
         """
         Return chat history
         """
         return "\n".join(custom_history or self.chat_history)
 
-    def construct_prompt(self, new_prompt: str, custom_history:list=None) -> str:
+    def construct_prompt(self, new_prompt: str, custom_history: list = None) -> str:
         """
         Construct prompt based on chat history and request
         """
         prompt = (
-            self.base_prompt + self.history(custom_history=custom_history) + "User: " + new_prompt + "\nChatGPT:"
+            self.base_prompt
+            + self.history(custom_history=custom_history)
+            + "User: "
+            + new_prompt
+            + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
         if self.buffer is not None:
