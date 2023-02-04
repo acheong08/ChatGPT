@@ -39,7 +39,10 @@ Initialize Chatbot with API key (from https://platform.openai.com/account/api-ke
 #### ask
 
 ```python
-def ask(user_request: str, temperature: float = 0.5) -> dict
+def ask(user_request: str,
+        temperature: float = 0.5,
+        conversation_id: str = None,
+        user: str = "User") -> dict
 ```
 
 Send a request to ChatGPT and return the response
@@ -49,10 +52,23 @@ Send a request to ChatGPT and return the response
 #### ask\_stream
 
 ```python
-def ask_stream(user_request: str, temperature: float = 0.5) -> str
+def ask_stream(user_request: str,
+               temperature: float = 0.5,
+               conversation_id: str = None,
+               user: str = "User") -> str
 ```
 
 Send a request to ChatGPT and yield the response
+
+<a id="revChatGPT.Official.Chatbot.make_conversation"></a>
+
+#### make\_conversation
+
+```python
+def make_conversation(conversation_id: str) -> None
+```
+
+Make a conversation
 
 <a id="revChatGPT.Official.Chatbot.rollback"></a>
 
@@ -109,7 +125,9 @@ Official ChatGPT API (async)
 #### ask
 
 ```python
-async def ask(user_request: str, temperature: float = 0.5) -> dict
+async def ask(user_request: str,
+              temperature: float = 0.5,
+              user: str = "User") -> dict
 ```
 
 Same as Chatbot.ask but async
@@ -120,7 +138,9 @@ Same as Chatbot.ask but async
 #### ask\_stream
 
 ```python
-async def ask_stream(user_request: str, temperature: float = 0.5) -> str
+async def ask_stream(user_request: str,
+                     temperature: float = 0.5,
+                     user: str = "User") -> str
 ```
 
 Same as Chatbot.ask_stream but async
@@ -155,12 +175,24 @@ def add_to_chat_history(chat: str) -> None
 
 Add chat to chat history for next prompt
 
+<a id="revChatGPT.Official.Prompt.add_to_history"></a>
+
+#### add\_to\_history
+
+```python
+def add_to_history(user_request: str,
+                   response: str,
+                   user: str = "User") -> None
+```
+
+Add request/response to chat history for next prompt
+
 <a id="revChatGPT.Official.Prompt.history"></a>
 
 #### history
 
 ```python
-def history() -> str
+def history(custom_history: list = None) -> str
 ```
 
 Return chat history
@@ -170,7 +202,9 @@ Return chat history
 #### construct\_prompt
 
 ```python
-def construct_prompt(new_prompt: str) -> str
+def construct_prompt(new_prompt: str,
+                     custom_history: list = None,
+                     user: str = "User") -> str
 ```
 
 Construct prompt based on chat history and request

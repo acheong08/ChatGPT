@@ -54,7 +54,11 @@ class Chatbot:
         )
 
     def _process_completion(
-        self, user_request: str, completion: dict, conversation_id: str = None, user: str = "User"
+        self,
+        user_request: str,
+        completion: dict,
+        conversation_id: str = None,
+        user: str = "User",
     ) -> dict:
         if completion.get("choices") is None:
             raise Exception("ChatGPT API returned no choices")
@@ -66,13 +70,21 @@ class Chatbot:
             "<|im_end|>",
         )
         # Add to chat history
-        self.prompt.add_to_history(user_request, completion["choices"][0]["text"], user=user)
+        self.prompt.add_to_history(
+            user_request,
+            completion["choices"][0]["text"],
+            user=user,
+        )
         if conversation_id is not None:
             self.save_conversation(conversation_id)
         return completion
 
     def _process_completion_stream(
-        self, user_request: str, completion: dict, conversation_id: str = None, user: str = "User"
+        self,
+        user_request: str,
+        completion: dict,
+        conversation_id: str = None,
+        user: str = "User",
     ) -> str:
         full_response = ""
         for response in completion:
@@ -95,7 +107,11 @@ class Chatbot:
             self.save_conversation(conversation_id)
 
     def ask(
-        self, user_request: str, temperature: float = 0.5, conversation_id: str = None, user: str = "User"
+        self,
+        user_request: str,
+        temperature: float = 0.5,
+        conversation_id: str = None,
+        user: str = "User",
     ) -> dict:
         """
         Send a request to ChatGPT and return the response
@@ -109,7 +125,11 @@ class Chatbot:
         return self._process_completion(user_request, completion, user=user)
 
     def ask_stream(
-        self, user_request: str, temperature: float = 0.5, conversation_id: str = None, user: str = "User"
+        self,
+        user_request: str,
+        temperature: float = 0.5,
+        conversation_id: str = None,
+        user: str = "User",
     ) -> str:
         """
         Send a request to ChatGPT and yield the response
@@ -181,7 +201,12 @@ class AsyncChatbot(Chatbot):
             stream=stream,
         )
 
-    async def ask(self, user_request: str, temperature: float = 0.5, user: str = "User") -> dict:
+    async def ask(
+        self,
+        user_request: str,
+        temperature: float = 0.5,
+        user: str = "User",
+    ) -> dict:
         """
         Same as Chatbot.ask but async
         }
@@ -192,7 +217,12 @@ class AsyncChatbot(Chatbot):
         )
         return self._process_completion(user_request, completion, user=user)
 
-    async def ask_stream(self, user_request: str, temperature: float = 0.5, user: str = "User") -> str:
+    async def ask_stream(
+        self,
+        user_request: str,
+        temperature: float = 0.5,
+        user: str = "User",
+    ) -> str:
         """
         Same as Chatbot.ask_stream but async
         """
@@ -230,18 +260,24 @@ class Prompt:
         Add chat to chat history for next prompt
         """
         self.chat_history.append(chat)
-    
-    def add_to_history(self, user_request: str, response: str, user: str = "User") -> None:
+
+    def add_to_history(
+        self,
+        user_request: str,
+        response: str,
+        user: str = "User",
+    ) -> None:
         """
         Add request/response to chat history for next prompt
         """
         self.add_to_chat_history(
-            user+": "
+            user
+            + ": "
             + user_request
             + "\n\n\n"
             + "ChatGPT: "
             + response
-            + "<|im_end|>\n"
+            + "<|im_end|>\n",
         )
 
     def history(self, custom_history: list = None) -> str:
@@ -250,14 +286,20 @@ class Prompt:
         """
         return "\n".join(custom_history or self.chat_history)
 
-    def construct_prompt(self, new_prompt: str, custom_history: list = None, user: str = "User") -> str:
+    def construct_prompt(
+        self,
+        new_prompt: str,
+        custom_history: list = None,
+        user: str = "User",
+    ) -> str:
         """
         Construct prompt based on chat history and request
         """
         prompt = (
             self.base_prompt
             + self.history(custom_history=custom_history)
-            + user+": "
+            + user
+            + ": "
             + new_prompt
             + "\nChatGPT:"
         )
