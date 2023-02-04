@@ -44,14 +44,17 @@ class Chatbot:
         """
         Get the completion function
         """
-        return openai.Completion.create(
-            engine=ENGINE,
-            prompt=prompt,
-            temperature=temperature,
-            max_tokens=get_max_tokens(prompt),
-            stop=["\n\n\n"],
-            stream=stream,
-        )
+        try:
+            return openai.Completion.create(
+                engine=ENGINE,
+                prompt=prompt,
+                temperature=temperature,
+                max_tokens=get_max_tokens(prompt),
+                stop=["\n\n\n"],
+                stream=stream,
+            )
+        except Exception as e:
+            print("Failed to create due to ", e )
 
     def _process_completion(
         self,
@@ -469,8 +472,11 @@ def main():
             if chatbot_commands(prompt):
                 continue
         if not args.stream:
-            response = chatbot.ask(prompt, temperature=args.temperature)
-            print("ChatGPT: " + response["choices"][0]["text"])
+            try:
+                response = chatbot.ask(prompt, temperature=args.temperature)
+                print("ChatGPT: " + response["choices"][0]["text"])
+            except Exception as e:
+                print("Failed to ask.", e )
         else:
             print("ChatGPT: ")
             sys.stdout.flush()
