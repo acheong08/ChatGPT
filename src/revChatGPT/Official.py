@@ -192,7 +192,7 @@ class AsyncChatbot(Chatbot):
         """
         Get the completion function
         """
-        return openai.Completion.acreate(
+        return await openai.Completion.acreate(
             engine=ENGINE,
             prompt=prompt,
             temperature=temperature,
@@ -211,7 +211,7 @@ class AsyncChatbot(Chatbot):
         Same as Chatbot.ask but async
         }
         """
-        completion = await self._get_completion(
+        completion = self._get_completion(
             self.prompt.construct_prompt(user_request, user=user),
             temperature,
         )
@@ -229,7 +229,7 @@ class AsyncChatbot(Chatbot):
         prompt = self.prompt.construct_prompt(user_request, user=user)
         return self._process_completion_stream(
             user_request=user_request,
-            completion=await self._get_completion(prompt, temperature, stream=True),
+            completion=self._get_completion(prompt, temperature, stream=True),
             user=user,
         )
 
