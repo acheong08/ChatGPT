@@ -616,6 +616,7 @@ class Chatbot:
 
         :return: None
         """
+        driver=None
         try:
             self.cf_cookie_found = False
             self.agent_found = False
@@ -643,8 +644,9 @@ class Chatbot:
                 sleep(5)
         finally:
             # Close the browser
-            driver.quit()
-            del driver
+            if driver is not None:
+                driver.quit()
+                del driver
             self.refresh_headers(
                 cf_clearance=self.cf_clearance,
                 user_agent=self.user_agent,
