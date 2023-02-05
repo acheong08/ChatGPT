@@ -303,6 +303,7 @@ class Chatbot:
 
         :return: None
         """
+        driver=None 
         try:
             # Open the browser
             self.cf_cookie_found = False
@@ -422,8 +423,9 @@ class Chatbot:
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
         finally:
             # Close the browser
-            driver.quit()
-            del driver
+            if driver is not None :
+                driver.quit()
+                del driver
 
     def solve_captcha(self) -> str:
         """
@@ -462,6 +464,7 @@ class Chatbot:
         :return: None
         """
         # Open the browser
+        driver =None 
         try:
             self.cf_cookie_found = False
             self.session_cookie_found = False
@@ -593,9 +596,10 @@ class Chatbot:
                 sleep(5)
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
         finally:
-            # Close the browser
-            driver.quit()
-            del driver
+            if driver is not None :
+                # Close the browser
+                driver.quit()
+                del driver
 
     def __get_ChromeOptions(self):
         options = uc.ChromeOptions()
