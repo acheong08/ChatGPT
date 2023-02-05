@@ -132,3 +132,4 @@ dmypy.json
 
 # JetBrains IDEs configuration
 .idea/
+src/revChatGPT/test.py

@@ -27,13 +27,14 @@ class Chatbot:
     Official ChatGPT API
     """
 
-    def __init__(self, api_key: str, buffer: int = None) -> None:
+    def __init__(self, api_key: str, buffer: int = None, engine: str = None) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
         openai.api_key = api_key or os.environ.get("OPENAI_API_KEY")
         self.conversations = Conversation()
         self.prompt = Prompt(buffer=buffer)
+        self.engine = engine or ENGINE
 
     def _get_completion(
         self,
@@ -45,7 +46,7 @@ class Chatbot:
         Get the completion function
         """
         return openai.Completion.create(
-            engine=ENGINE,
+            engine=self.engine,
             prompt=prompt,
             temperature=temperature,
             max_tokens=get_max_tokens(prompt),
@@ -193,7 +194,7 @@ class AsyncChatbot(Chatbot):
         Get the completion function
         """
         return await openai.Completion.acreate(
-            engine=ENGINE,
+            engine=self.engine,
             prompt=prompt,
             temperature=temperature,
             max_tokens=get_max_tokens(prompt),
@@ -211,7 +212,7 @@ class AsyncChatbot(Chatbot):
         Same as Chatbot.ask but async
         }
         """
-        completion = self._get_completion(
+        completion = await self._get_completion(
             self.prompt.construct_prompt(user_request, user=user),
             temperature,
         )
@@ -229,7 +230,7 @@ class AsyncChatbot(Chatbot):
         prompt = self.prompt.construct_prompt(user_request, user=user)
         return self._process_completion_stream(
             user_request=user_request,
-            completion=self._get_completion(prompt, temperature, stream=True),
+            completion=await self._get_completion(prompt, temperature, stream=True),
             user=user,
         )
 
