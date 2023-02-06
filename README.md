@@ -134,7 +134,7 @@ print(response)
 
 Q: Is it the real ChatGPT or just a GPT-3 based ripoff?
 
-A: It is the real ChatGPT model found though an info leak on chat.openai.com (patched)
+A: It is the real ChatGPT model found through an info leak on chat.openai.com (patched)
 
 Q: Where did you get the prompt for ChatGPT?
 
