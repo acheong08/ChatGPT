@@ -29,7 +29,7 @@ Official ChatGPT API
 #### \_\_init\_\_
 
 ```python
-def __init__(api_key: str, buffer: int = None) -> None
+def __init__(api_key: str, buffer: int = None, engine: str = None) -> None
 ```
 
 Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)

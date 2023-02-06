@@ -1,6 +1,8 @@
 import argparse
 import sys
+
 from revChatGPT.Official import Chatbot
+
 
 def main():
     print(
