@@ -288,3 +288,4 @@ def load(file: str) -> None
 ```
 
 Loads the conversations from a JSON file
+
