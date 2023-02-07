@@ -33,6 +33,7 @@ setup(
             "revChatGPT = revChatGPT.__main__:main",
             "revApiGPT = revChatGPT.GPTserver:main",
             "OfficialChatGPT = revChatGPT.Official:main",
+            "UnofficialChatGPT = revChatGPT.revChatGPT:main"
         ],
     },
 )
