@@ -12,7 +12,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <details>
 <summary>
 
-# Official API (Browserless)
+# Base model API (Browserless)
 
 Free and no rate limits. Uses an outdated ChatGPT model
 
@@ -56,7 +56,7 @@ You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
 <details>
 <summary>
 
-# Reversed API (Browser required)
+# ChatGPT website version (Browser required)
 
 This breaks terms of service
 
