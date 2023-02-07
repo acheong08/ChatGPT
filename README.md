@@ -12,9 +12,9 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <details>
 <summary>
 
-# Base model API (Browserless)
+# Base model API
 
-Free and no rate limits. Uses an outdated ChatGPT model
+Browserless, free, and no rate limits. Uses an outdated ChatGPT model leaked (Currently officially supported)
 
 </summary>
 
@@ -30,7 +30,7 @@ Free and no rate limits. Uses an outdated ChatGPT model
 ## Usage
 
 ### Command line
-`python3 -m revChatGPT.Official --api_key API_KEY --stream` (Assumes Python PyPi in PATH)
+`python3 -m revChatGPT.Official --api_key API_KEY --stream`
 
 <details>
 <summary>
@@ -53,9 +53,9 @@ You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
 <details>
 <summary>
 
-# ChatGPT website version (Browser required)
+# ChatGPT website version
 
-This breaks terms of service
+Browser is required. Breaks terms of service. No longer supported by developer
 
 </summary>
 
