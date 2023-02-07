@@ -45,7 +45,7 @@ Both Async and Sync are available. You can also stream responses via a generator
 You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/Official.py#L292-L408)
 
 #### Further Documentation
-In [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
+You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
 
 #### Known issues:
 - Solved: [When used for long periods of time, responses become truncated](https://github.com/acheong08/ChatGPT/issues/519)
