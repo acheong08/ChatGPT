@@ -14,7 +14,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 # Official API (Browserless)
 
-COMPLETELY FREE AND NO RATE LIMITS (Unpatched Bug - Might be fixed later)
+Free and no rate limits. Uses an outdated ChatGPT model
 
 </summary>
 
