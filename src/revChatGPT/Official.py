@@ -36,11 +36,12 @@ class Chatbot:
     Official ChatGPT API
     """
 
-    def __init__(self, api_key: str, buffer: int = None, engine: str = None) -> None:
+    def __init__(self, api_key: str, buffer: int = None, engine: str = None, proxy: str = None) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
         openai.api_key = api_key or os.environ.get("OPENAI_API_KEY")
+        openai.proxy = proxy or os.environ.get("OPENAI_API_PROXY")
         self.conversations = Conversation()
         self.prompt = Prompt(buffer=buffer)
         self.engine = engine or ENGINE
