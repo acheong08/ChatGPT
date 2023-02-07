@@ -84,7 +84,7 @@ Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for 
 ### Developer
 
 ```python
-from revChatGPT.ChatGPT import Chatbot
+from revChatGPT.Unofficial import Chatbot
 
 chatbot = Chatbot({
   "session_token": "<YOUR_TOKEN>"
@@ -105,7 +105,7 @@ print(response)
 <summary>
 
 ### API
-`python3 -m Official.GPTserver`
+`python3 -m revChatGPT.GPTserver`
 
 </summary>
 
