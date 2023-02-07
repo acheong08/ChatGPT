@@ -36,7 +36,13 @@ class Chatbot:
     Official ChatGPT API
     """
 
-    def __init__(self, api_key: str, buffer: int = None, engine: str = None, proxy: str = None) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        buffer: int = None,
+        engine: str = None,
+        proxy: str = None,
+    ) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
@@ -78,7 +84,8 @@ class Chatbot:
         if completion["choices"][0].get("text") is None:
             raise Exception("ChatGPT API returned no text")
         completion["choices"][0]["text"] = remove_suffix(
-            completion["choices"][0]["text"], "<|im_end|>"
+            completion["choices"][0]["text"],
+            "<|im_end|>",
         )
         # Add to chat history
         self.prompt.add_to_history(

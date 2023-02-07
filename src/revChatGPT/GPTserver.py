@@ -6,7 +6,7 @@ from revChatGPT.ChatGPT import Chatbot
 app = Flask(__name__)
 
 token_available = {}
-chatbot = Chatbot(no_refresh=True)
+chatbot = Chatbot(config={}, no_refresh=True)
 
 
 def verify_request_data(data: dict) -> bool:

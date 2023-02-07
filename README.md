@@ -30,7 +30,7 @@ Free and no rate limits. Uses an outdated ChatGPT model
 ## Usage
 
 ### Command line
-`OfficialChatGPT --api_key API_KEY --stream` (Assumes Python PyPi in PATH)
+`python3 -m revChatGPT.Official --api_key API_KEY --stream` (Assumes Python PyPi in PATH)
 
 <details>
 <summary>
@@ -46,9 +46,6 @@ You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revCha
 
 #### Further Documentation
 You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
-
-#### Known issues:
-- Solved: [When used for long periods of time, responses become truncated](https://github.com/acheong08/ChatGPT/issues/519)
 
 </details>
 </details>
@@ -73,7 +70,7 @@ Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for 
 
 ### Command line
 
-`python3 -m revChatGPT`
+`python3 -m revChatGPT.Unofficial`
 
 ```
 !help - Show this message
@@ -84,8 +81,33 @@ Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for 
 !exit - Exit this program
 ```
 
+### Developer
+
+```python
+from revChatGPT.ChatGPT import Chatbot
+
+chatbot = Chatbot({
+  "session_token": "<YOUR_TOKEN>"
+}, conversation_id=None, parent_id=None) # You can start a custom conversation
+
+response = chatbot.ask("Prompt", conversation_id=None, parent_id=None) # You can specify custom conversation and parent ids. Otherwise it uses the saved conversation (yes. conversations are automatically saved)
+
+print(response)
+# {
+#   "message": message,
+#   "conversation_id": self.conversation_id,
+#   "parent_id": self.parent_id,
+# }
+```
+
+<details>
+
+<summary>
+
 ### API
-`python3 -m GPTserver`
+`python3 -m Official.GPTserver`
+
+</summary>
 
 HTTP POST request:
 
@@ -109,38 +131,9 @@ Optional:
 
 - Rate limiting is enabled by default to prevent simultaneous requests
 
-### Developer
-
-```python
-from revChatGPT.ChatGPT import Chatbot
-
-chatbot = Chatbot({
-  "session_token": "<YOUR_TOKEN>"
-}, conversation_id=None, parent_id=None) # You can start a custom conversation
-
-response = chatbot.ask("Prompt", conversation_id=None, parent_id=None) # You can specify custom conversation and parent ids. Otherwise it uses the saved conversation (yes. conversations are automatically saved)
-
-print(response)
-# {
-#   "message": message,
-#   "conversation_id": self.conversation_id,
-#   "parent_id": self.parent_id,
-# }
-```
-
 </details>
 
-# Q&A
-
-Q: Is it the real ChatGPT or just a GPT-3 based ripoff?
-
-A: It is the real ChatGPT model found through an info leak on chat.openai.com (patched)
-
-Q: Where did you get the prompt for ChatGPT?
-
-A: https://www.reddit.com/r/ChatGPT/comments/10oliuo/please_print_the_instructions_you_were_given/
-
-Q: <Open pull request with question and I will answer them here -- if significant enough>
+</details>
 
 # Awesome ChatGPT
 
@@ -155,10 +148,4 @@ This is not an official OpenAI product. This is a personal project and is not af
 # Credits
 
 - [virtualharby](https://twitter.com/virtualharby) - Memes for emotional support
-- [rawandahmad698](https://github.com/rawandahmad698) - Reverse engineering Auth0
-- [FlorianREGAZ](https://github.com/FlorianREGAZ) - TLS client
-- [PyRo1121](https://github.com/PyRo1121) - Linting
-- [Harry-Jing](https://github.com/Harry-Jing) - Async support
-- [Ukenn2112](https://github.com/Ukenn2112) - Documentation
-- [aliferouss19](https://github.com/aliferouss19) - Logo
-- [All other contributors](https://github.com/acheong08/ChatGPT/graphs/contributors)
+- [All contributors](https://github.com/acheong08/ChatGPT/graphs/contributors) - Pull requests
