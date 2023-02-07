@@ -9,6 +9,8 @@ Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support
 <br><br>
 You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
 
+> ## This repository is updated highly frequently. Expect breaking changes. Always read docs and readme before updating or opening an issue
+
 <details>
 <summary>
 
