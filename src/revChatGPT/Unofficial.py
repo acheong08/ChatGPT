@@ -740,6 +740,7 @@ class Chatbot:
             self.conversation_id = self.conversation_id_prev_queue.pop()
             self.parent_id = self.parent_id_prev_queue.pop()
 
+
 def get_input(prompt):
     # Display the prompt
     print(prompt, end="")
@@ -760,8 +761,10 @@ def get_input(prompt):
     # Return the input
     return user_input
 
+
 from os import getenv
 from os.path import exists
+
 
 def configure():
     config_files = ["config.json"]
