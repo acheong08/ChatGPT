@@ -8,6 +8,7 @@ app = Flask(__name__)
 token_available = {}
 chatbot = Chatbot(no_refresh=True)
 
+
 def verify_request_data(data: dict) -> bool:
     """
     Verifies that the required fields are present in the data.
@@ -16,6 +17,7 @@ def verify_request_data(data: dict) -> bool:
     if "prompt" not in data or "session_token" not in data:
         return False
     return True
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -33,7 +35,12 @@ def chat():
     token_available[data.get("session_token")] = False
 
     try:
-        response = chatbot.ask(prompt=data["prompt"], session_token=data["session_token"], parent_id=data.get("parent_id"), conversation_id=data.get("conversation_id"))
+        response = chatbot.ask(
+            prompt=data["prompt"],
+            session_token=data["session_token"],
+            parent_id=data.get("parent_id"),
+            conversation_id=data.get("conversation_id"),
+        )
     except Exception as exc:
         token_available[data.get("session_token")] = True
         return jsonify({"error": str(exc)}), 500
@@ -42,6 +49,7 @@ def chat():
     token_available[data.get("session_token")] = True
 
     return jsonify(response), 200
+
 
 @app.route("/refresh", methods=["POST"])
 def refresh():
@@ -62,6 +70,7 @@ def refresh():
         return jsonify({"error": str(exc)}), 400
 
     return jsonify({"session_token": chatbot.session_token}), 200
+
 
 def main():
     app.run(host="127.0.0.1", port=8080)

@@ -14,6 +14,16 @@ def get_max_tokens(prompt: str) -> int
 
 Get the max tokens for a prompt
 
+<a id="revChatGPT.Official.remove_suffix"></a>
+
+#### remove\_suffix
+
+```python
+def remove_suffix(input_string, suffix)
+```
+
+Remove suffix from string (Support for Python 3.8)
+
 <a id="revChatGPT.Official.Chatbot"></a>
 
 ## Chatbot Objects

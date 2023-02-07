@@ -22,6 +22,15 @@ def get_max_tokens(prompt: str) -> int:
     return 4000 - len(ENCODER.encode(prompt))
 
 
+def remove_suffix(input_string, suffix):
+    """
+    Remove suffix from string (Support for Python 3.8)
+    """
+    if suffix and input_string.endswith(suffix):
+        return input_string[: -len(suffix)]
+    return input_string
+
+
 class Chatbot:
     """
     Official ChatGPT API
@@ -67,8 +76,8 @@ class Chatbot:
             raise Exception("ChatGPT API returned no choices")
         if completion["choices"][0].get("text") is None:
             raise Exception("ChatGPT API returned no text")
-        completion["choices"][0]["text"] = completion["choices"][0]["text"].removesuffix(
-            "<|im_end|>"
+        completion["choices"][0]["text"] = remove_suffix(
+            completion["choices"][0]["text"], "<|im_end|>"
         )
         # Add to chat history
         self.prompt.add_to_history(
