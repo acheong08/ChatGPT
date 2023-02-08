@@ -17,7 +17,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 # Base model API
 
-> ## Update 2 2023/02/08: After a brief downtime, the model is available once again.
+> ## Update2 2023/02/08: After a brief downtime, the model is available once again.
 
 Free, browserless, and without rate limits. Uses an outdated base model for ChatGPT.
 
