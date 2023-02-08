@@ -17,7 +17,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 # Base model API
 
-> ## Update2 2023/02/08: After a brief downtime, the model is available once again.
+> ## Update3 2023/02/08: The model is consistently overloaded. I am resuming efforts on making a ChatGPT proxy (browserless) service. Please use the browser version until further notice.
 
 Free, browserless, and without rate limits. Uses an outdated base model for ChatGPT.
 
