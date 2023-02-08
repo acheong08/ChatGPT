@@ -67,12 +67,12 @@ class Chatbot:
             self.password = config["password"]
             if "isMicrosoftLogin" in config and config["isMicrosoftLogin"] == True:
                 self.isMicrosoftLogin = True
-                self.microsoft_login()
+                self.__microsoft_login()
             else:
-                self.email_login()
+                self.__email_login()
         elif "session_token" in config:
             if no_refresh:
-                self.get_cf_cookies()
+                self.__get_cf_cookies()
                 return
             if type(config["session_token"]) != str:
                 raise Exception("Session token must be a string!")
@@ -81,17 +81,17 @@ class Chatbot:
                 "__Secure-next-auth.session-token",
                 config["session_token"],
             )
-            self.get_cf_cookies()
+            self.__get_cf_cookies()
         else:
             raise Exception("Invalid config!")
-        self.retry_refresh()
+        self.__retry_refresh()
 
-    def retry_refresh(self):
+    def __retry_refresh(self):
         retries = 5
         refresh = True
         while refresh:
             try:
-                self.refresh_session()
+                self.__refresh_session()
                 refresh = False
             except Exception as exc:
                 if retries == 0:
@@ -113,8 +113,8 @@ class Chatbot:
             )
             self.session_token = session_token
             self.config["session_token"] = session_token
-        self.retry_refresh()
-        self.map_conversations()
+        self.__retry_refresh()
+        self.__map_conversations()
         if conversation_id == None:
             conversation_id = self.conversation_id
         if parent_id == None:
@@ -148,7 +148,7 @@ class Chatbot:
         )
         if response.status_code != 200:
             print(response.text)
-            self.refresh_session()
+            self.__refresh_session()
             raise HTTPError(
                 f"Wrong response code: {response.status_code}! Refreshing session...",
             )
@@ -184,7 +184,7 @@ class Chatbot:
             else:
                 return None
 
-    def check_response(self, response):
+    def __check_response(self, response):
         if response.status_code != 200:
             print(response.text)
             raise Exception("Response code error: ", response.status_code)
@@ -192,14 +192,14 @@ class Chatbot:
     def get_conversations(self, offset=0, limit=20):
         url = BASE_URL + f"backend-api/conversations?offset={offset}&limit={limit}"
         response = self.session.get(url)
-        self.check_response(response)
+        self.__check_response(response)
         data = json.loads(response.text)
         return data["items"]
 
     def get_msg_history(self, id):
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.get(url)
-        self.check_response(response)
+        self.__check_response(response)
         data = json.loads(response.text)
         return data
 
@@ -211,32 +211,32 @@ class Chatbot:
                 {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
         )
-        self.check_response(response)
+        self.__check_response(response)
         data = json.loads(response.text)
         return data
 
     def change_title(self, id, title):
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.patch(url, data=f'{{"title": "{title}"}}')
-        self.check_response(response)
+        self.__check_response(response)
 
     def delete_conversation(self, id):
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.patch(url, data='{"is_visible": false}')
-        self.check_response(response)
+        self.__check_response(response)
 
     def clear_conversations(self):
         url = BASE_URL + "backend-api/conversations"
         response = self.session.patch(url, data='{"is_visible": false}')
-        self.check_response(response)
+        self.__check_response(response)
 
-    def map_conversations(self):
+    def __map_conversations(self):
         conversations = self.get_conversations()
         histories = [self.get_msg_history(x["id"]) for x in conversations]
         for x, y in zip(conversations, histories):
             self.conversation_mapping[x["id"]] = y["current_node"]
 
-    def refresh_session(self, session_token=None):
+    def __refresh_session(self, session_token=None):
         if session_token:
             self.session.cookies.set(
                 "__Secure-next-auth.session-token",
@@ -247,7 +247,7 @@ class Chatbot:
         url = BASE_URL + "api/auth/session"
         response = self.session.get(url, timeout_seconds=180)
         if response.status_code == 403:
-            self.get_cf_cookies()
+            self.__get_cf_cookies()
             raise Exception("Clearance refreshing...")
         try:
             if "error" in response.json():
@@ -275,9 +275,9 @@ class Chatbot:
             print("Failed to refresh session!")
             if self.isMicrosoftLogin:
                 print("Attempting to re-authenticate...")
-                self.microsoft_login()
+                self.__microsoft_login()
             else:
-                self.email_login()
+                self.__email_login()
 
     def reset_chat(self) -> None:
         """
@@ -288,7 +288,7 @@ class Chatbot:
         self.conversation_id = None
         self.parent_id = str(uuid.uuid4())
 
-    def microsoft_login(self) -> None:
+    def __microsoft_login(self) -> None:
         """
         Login to OpenAI via Microsoft Login Authentication.
 
@@ -313,16 +313,16 @@ class Chatbot:
             print("Browser spawned.")
             driver.add_cdp_listener(
                 "Network.responseReceivedExtraInfo",
-                lambda msg: self.detect_cookies(msg),
+                lambda msg: self.__detect_cookies(msg),
             )
             driver.add_cdp_listener(
                 "Network.requestWillBeSentExtraInfo",
-                lambda msg: self.detect_user_agent(msg),
+                lambda msg: self.__detect_user_agent(msg),
             )
             driver.get(BASE_URL)
             while not self.agent_found or not self.cf_cookie_found:
                 sleep(5)
-            self.refresh_headers(
+            self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
                 user_agent=self.user_agent,
             )
@@ -418,7 +418,7 @@ class Chatbot:
                 driver.quit()
                 del driver
 
-    def email_login(self) -> None:
+    def __email_login(self) -> None:
         """
         Login to OpenAI via Email/Password Authentication and 2Captcha.
 
@@ -443,16 +443,16 @@ class Chatbot:
             print("Browser spawned.")
             driver.add_cdp_listener(
                 "Network.responseReceivedExtraInfo",
-                lambda msg: self.detect_cookies(msg),
+                lambda msg: self.__detect_cookies(msg),
             )
             driver.add_cdp_listener(
                 "Network.requestWillBeSentExtraInfo",
-                lambda msg: self.detect_user_agent(msg),
+                lambda msg: self.__detect_user_agent(msg),
             )
             driver.get(BASE_URL)
             while not self.agent_found or not self.cf_cookie_found:
                 sleep(5)
-            self.refresh_headers(
+            self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
                 user_agent=self.user_agent,
             )
@@ -537,7 +537,7 @@ class Chatbot:
             options.add_argument("--proxy-server=" + self.config["proxy"])
         return options
 
-    def get_cf_cookies(self) -> None:
+    def __get_cf_cookies(self) -> None:
         """
         Get cloudflare cookies.
 
@@ -560,11 +560,11 @@ class Chatbot:
             print("Browser spawned.")
             driver.add_cdp_listener(
                 "Network.responseReceivedExtraInfo",
-                lambda msg: self.detect_cookies(msg),
+                lambda msg: self.__detect_cookies(msg),
             )
             driver.add_cdp_listener(
                 "Network.requestWillBeSentExtraInfo",
-                lambda msg: self.detect_user_agent(msg),
+                lambda msg: self.__detect_user_agent(msg),
             )
             driver.get("https://chat.openai.com/chat")
             while not self.agent_found or not self.cf_cookie_found:
@@ -574,12 +574,12 @@ class Chatbot:
             if driver is not None:
                 driver.quit()
                 del driver
-            self.refresh_headers(
+            self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
                 user_agent=self.user_agent,
             )
 
-    def detect_cookies(self, message):
+    def __detect_cookies(self, message):
         if "params" in message:
             if "headers" in message["params"]:
                 if "set-cookie" in message["params"]["headers"]:
@@ -623,7 +623,7 @@ class Chatbot:
                             )
                         self.session_cookie_found = True
 
-    def detect_user_agent(self, message):
+    def __detect_user_agent(self, message):
         if "params" in message:
             if "headers" in message["params"]:
                 if "user-agent" in message["params"]["headers"]:
@@ -631,12 +631,12 @@ class Chatbot:
                     user_agent = message["params"]["headers"]["user-agent"]
                     self.user_agent = user_agent
                     self.agent_found = True
-        self.refresh_headers(
+        self.__refresh_headers(
             cf_clearance=self.cf_clearance,
             user_agent=self.user_agent,
         )
 
-    def refresh_headers(self, cf_clearance, user_agent):
+    def __refresh_headers(self, cf_clearance, user_agent):
         del self.session.cookies["cf_clearance"]
         self.session.headers.clear()
         self.session.cookies.set("cf_clearance", cf_clearance)
@@ -731,7 +731,7 @@ def chatGPT_main(config):
                 print("Chat session successfully reset.")
                 continue
             elif prompt == "!refresh":
-                chatbot.refresh_session()
+                chatbot.__refresh_session()
                 print("Session successfully refreshed.\n")
                 continue
             elif prompt == "!config":

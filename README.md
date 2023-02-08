@@ -67,7 +67,29 @@ Browser is required. Breaks terms of service. No longer supported by developer
 
 ## Configuration
 
-Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for more information.
+1. Create account on [OpenAI's ChatGPT](https://chat.openai.com/)
+2. Save your email and password
+
+Required configuration:
+
+```json
+{
+  "email": "<your email>",
+  "password": "your password"
+}
+```
+
+Optional configuration:
+
+```json
+{
+  "conversation_id": "UUID...",
+  "parent_id": "UUID...",
+  "proxy": "...",
+}
+```
+
+3. Save this as `$HOME/.config/revChatGPT/config.json`
 
 ## Usage
 
@@ -90,7 +112,8 @@ Refer to the setup [guide](https://github.com/acheong08/ChatGPT/wiki/Setup) for 
 from revChatGPT.Unofficial import Chatbot
 
 chatbot = Chatbot({
-  "session_token": "<YOUR_TOKEN>"
+  "email": "<your email>",
+  "password": "your password"
 }, conversation_id=None, parent_id=None) # You can start a custom conversation
 
 response = chatbot.ask("Prompt", conversation_id=None, parent_id=None) # You can specify custom conversation and parent ids. Otherwise it uses the saved conversation (yes. conversations are automatically saved)
@@ -102,6 +125,8 @@ print(response)
 #   "parent_id": self.parent_id,
 # }
 ```
+
+Refer to [wiki](https://github.com/acheong08/ChatGPT/wiki/V1---Outdated-version) for advanced developer usage
 
 <details>
 
