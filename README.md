@@ -14,51 +14,9 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <details>
 <summary>
 
-# Base model API
-
-> ## Update 2023/02/08: This model has been revoked by OpenAI. We are working towards a new model.
-> As a temporary workaround, set environment variable `export GPT_ENGINE="text-davinci-003"` (Costs credit)
-
-</summary>
-
-## Installation
-`pip3 install revChatGPT`
-
-## Setup
-
-1. Create account on [OpenAI](https://platform.openai.com/)
-2. Go to https://platform.openai.com/account/api-keys
-3. Copy API key
-
-## Usage
-
-### Command line
-`python3 -m revChatGPT.Official --api_key API_KEY --stream`
-
-<details>
-<summary>
-
-### Developer
-</summary>
-
-Both Async and Sync are available. You can also stream responses via a generator. Read example code to learn more
-
-#### Example code
-
-You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/Official.py#L292-L408)
-
-#### Further Documentation
-You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
-
-</details>
-</details>
-
-<details>
-<summary>
-
 # ChatGPT website version
 
-Browser is required. Breaks terms of service. No longer supported by developer
+Browser is required. Breaks terms of service.
 
 </summary>
 
@@ -161,6 +119,48 @@ Optional:
 
 </details>
 
+</details>
+
+<details>
+<summary>
+
+# Base model API
+
+> ## Update 2023/02/08: This model has been revoked by OpenAI. We are working towards a new model.
+> As a temporary workaround, set environment variable `export GPT_ENGINE="text-davinci-003"` (Costs credit)
+
+</summary>
+
+## Installation
+`pip3 install revChatGPT`
+
+## Setup
+
+1. Create account on [OpenAI](https://platform.openai.com/)
+2. Go to https://platform.openai.com/account/api-keys
+3. Copy API key
+
+## Usage
+
+### Command line
+`python3 -m revChatGPT.Official --api_key API_KEY --stream`
+
+<details>
+<summary>
+
+### Developer
+</summary>
+
+Both Async and Sync are available. You can also stream responses via a generator. Read example code to learn more
+
+#### Example code
+
+You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/Official.py#L292-L408)
+
+#### Further Documentation
+You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
+
+</details>
 </details>
 
 # Awesome ChatGPT
