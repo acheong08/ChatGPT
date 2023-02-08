@@ -23,7 +23,7 @@ setup(
             "selenium>=4.7.2",
             "tls_client>=0.1.7",
             "2captcha-python>=1.1.3",
-            "flask"
+            "flask",
         ],
     },
     long_description=open("README.md", encoding="utf-8").read(),
