@@ -1,3 +1,0 @@
-openai
-pre-commit
-tiktoken
