@@ -106,6 +106,14 @@ class Chatbot:
         gen_title=False,
         session_token=None,
     ):
+        """
+        Ask a question to the chatbot
+        :param prompt: String
+        :param conversation_id: UUID
+        :param parent_id: UUID
+        :param gen_title: Boolean
+        :param session_token: String
+        """
         if session_token:
             self.session.cookies.set(
                 "__Secure-next-auth.session-token",
@@ -172,7 +180,7 @@ class Chatbot:
                 }
                 if gen_title and new_conv:
                     try:
-                        title = self.gen_title(
+                        title = self.__gen_title(
                             self.conversation_id,
                             self.parent_id,
                         )["title"]
@@ -190,6 +198,11 @@ class Chatbot:
             raise Exception("Response code error: ", response.status_code)
 
     def get_conversations(self, offset=0, limit=20):
+        """
+        Get conversations
+        :param offset: Integer
+        :param limit: Integer
+        """
         url = BASE_URL + f"backend-api/conversations?offset={offset}&limit={limit}"
         response = self.session.get(url)
         self.__check_response(response)
@@ -197,13 +210,20 @@ class Chatbot:
         return data["items"]
 
     def get_msg_history(self, id):
+        """
+        Get message history
+        :param id: UUID of conversation
+        """
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
         return data
 
-    def gen_title(self, id, message_id):
+    def __gen_title(self, id, message_id):
+        """
+        Generate title for conversation
+        """
         url = BASE_URL + f"backend-api/conversation/gen_title/{id}"
         response = self.session.post(
             url,
@@ -216,16 +236,28 @@ class Chatbot:
         return data
 
     def change_title(self, id, title):
+        """
+        Change title of conversation
+        :param id: UUID of conversation
+        :param title: String
+        """
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
     def delete_conversation(self, id):
+        """
+        Delete conversation
+        :param id: UUID of conversation
+        """
         url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
     def clear_conversations(self):
+        """
+        Delete all conversations
+        """
         url = BASE_URL + "backend-api/conversations"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
