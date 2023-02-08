@@ -18,18 +18,12 @@ setup(
     ],
     # optional dependencies
     extras_require={
-        "api": [
-            "flask",
-            "undetected_chromedriver>=3.1.7",
-            "selenium>=4.7.2",
-            "tls_client>=0.1.7",
-            "2captcha-python>=1.1.3",
-        ],
         "unofficial": [
             "undetected_chromedriver>=3.1.7",
             "selenium>=4.7.2",
             "tls_client>=0.1.7",
             "2captcha-python>=1.1.3",
+            "flask"
         ],
     },
     long_description=open("README.md", encoding="utf-8").read(),
