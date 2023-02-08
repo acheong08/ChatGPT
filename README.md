@@ -16,7 +16,8 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 # Base model API
 
-Browserless, free, and no rate limits. Uses an outdated ChatGPT model leaked (Currently officially supported)
+> ## Update 2023/02/08: This model has been revoked by OpenAI. We are working towards a new model.
+> As a temporary workaround, set environment variable `export GPT_ENGINE="text-davinci-003"` (Costs credit)
 
 </summary>
 
