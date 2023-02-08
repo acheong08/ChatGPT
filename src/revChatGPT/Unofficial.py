@@ -10,7 +10,6 @@ from requests.exceptions import HTTPError
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from twocaptcha import TwoCaptcha
 
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
@@ -55,7 +54,6 @@ class Chatbot:
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
         self.isMicrosoftLogin = False
-        self.twocaptcha_key = None
         # stdout colors
         self.GREEN = "\033[92m"
         self.WARNING = "\033[93m"
@@ -70,13 +68,8 @@ class Chatbot:
             if "isMicrosoftLogin" in config and config["isMicrosoftLogin"] == True:
                 self.isMicrosoftLogin = True
                 self.microsoft_login()
-            elif "captcha" in config:
-                if type(config["captcha"]) != str:
-                    raise Exception("2Captcha API Key must be a string!")
-                self.twocaptcha_key = config["captcha"]
-                self.email_login(self.solve_captcha())
             else:
-                raise Exception("Invalid config!")
+                self.email_login()
         elif "session_token" in config:
             if no_refresh:
                 self.get_cf_cookies()
@@ -278,15 +271,13 @@ class Chatbot:
             self.session_token = self.session.cookies._find(
                 "__Secure-next-auth.session-token",
             )
-        except Exception as exc:
+        except Exception:
             print("Failed to refresh session!")
             if self.isMicrosoftLogin:
                 print("Attempting to re-authenticate...")
                 self.microsoft_login()
-            elif self.twocaptcha_key:
-                self.email_login(self.solve_captcha())
             else:
-                raise Exception("Failed to refresh session!") from exc
+                self.email_login()
 
     def reset_chat(self) -> None:
         """
@@ -427,37 +418,7 @@ class Chatbot:
                 driver.quit()
                 del driver
 
-    def solve_captcha(self) -> str:
-        """
-        Solve the 2Captcha captcha.
-
-        :return: str
-        """
-        twocaptcha_key = self.twocaptcha_key
-        twocaptcha_solver_config = {
-            "apiKey": twocaptcha_key,
-            "defaultTimeout": 120,
-            "recaptchaTimeout": 600,
-            "pollingInterval": 10,
-        }
-        twocaptcha_solver = TwoCaptcha(**twocaptcha_solver_config)
-        print("Waiting for captcha to be solved...")
-        solved_captcha = twocaptcha_solver.recaptcha(
-            sitekey="6Lc-wnQjAAAAADa5SPd68d0O3xmj0030uaVzpnXP",
-            url="https://auth0.openai.com/u/login/identifier",
-        )
-        if "code" in solved_captcha:
-            print(self.GREEN + "Captcha solved successfully!" + self.ENDCOLOR)
-            if self.verbose:
-                print(
-                    self.GREEN
-                    + "Captcha token: "
-                    + self.ENDCOLOR
-                    + solved_captcha["code"],
-                )
-            return solved_captcha
-
-    def email_login(self, solved_captcha) -> None:
+    def email_login(self) -> None:
         """
         Login to OpenAI via Email/Password Authentication and 2Captcha.
 
@@ -515,44 +476,6 @@ class Chatbot:
             # Enter the email
             driver.find_element(by=By.ID, value="username").send_keys(
                 self.config["email"],
-            )
-            # Wait for Recaptcha to appear
-            WebDriverWait(driver, 60).until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, "*[name*='g-recaptcha-response']"),
-                ),
-            )
-            # Find Recaptcha
-            google_captcha_response_input = driver.find_element(
-                By.CSS_SELECTOR,
-                "*[name*='g-recaptcha-response']",
-            )
-            captcha_input = driver.find_element(By.NAME, "captcha")
-            # Make input visible
-            driver.execute_script(
-                "arguments[0].setAttribute('style','type: text; visibility:visible;');",
-                google_captcha_response_input,
-            )
-            driver.execute_script(
-                "arguments[0].setAttribute('style','type: text; visibility:visible;');",
-                captcha_input,
-            )
-            driver.execute_script(
-                """
-            document.getElementById("g-recaptcha-response").innerHTML = arguments[0]
-            """,
-                solved_captcha.get("code"),
-            )
-            driver.execute_script(
-                """
-            document.querySelector("input[name='captcha']").value = arguments[0]
-            """,
-                solved_captcha.get("code"),
-            )
-            # Hide the captcha input
-            driver.execute_script(
-                "arguments[0].setAttribute('style', 'display:none;');",
-                google_captcha_response_input,
             )
             # Wait for the Continue button to be clickable
             WebDriverWait(driver, 60).until(
