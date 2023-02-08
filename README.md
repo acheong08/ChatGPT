@@ -15,53 +15,9 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 <details>
 <summary>
 
-# Base model API
+# V1 Browser automation
 
-> ## Update3 2023/02/08: The model is consistently overloaded. I am resuming efforts on making a ChatGPT proxy (browserless) service. Please use the browser version until further notice.
-
-Free, browserless, and without rate limits. Uses an outdated base model for ChatGPT.
-
-</summary>
-
-## Installation
-`pip3 install revChatGPT`
-
-## Setup
-
-1. Create account on [OpenAI](https://platform.openai.com/)
-2. Go to https://platform.openai.com/account/api-keys
-3. Copy API key
-
-## Usage
-
-### Command line
-`python3 -m revChatGPT.Official --api_key API_KEY --stream`
-
-<details>
-<summary>
-
-### Developer
-</summary>
-
-Both Async and Sync are available. You can also stream responses via a generator. Read example code to learn more
-
-#### Example code
-
-You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/Official.py#L292-L408)
-
-#### Further Documentation
-You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
-
-</details>
-</details>
-
-
-<details>
-<summary>
-
-# ChatGPT website version
-
-Browser is required. Breaks terms of service.
+Browser is required on startup to fetch cookies. Breaks terms of service.
 
 </summary>
 
@@ -165,6 +121,51 @@ Optional:
 </details>
 
 </details>
+
+
+<details>
+<summary>
+
+# V2: Base model
+
+> ## Update3 2023/02/08: The model is consistently overloaded. I am resuming efforts on making a ChatGPT proxy (browserless) service. Please use V1 until further notice
+
+Free, browserless, and without rate limits. Uses an outdated base model for ChatGPT.
+
+</summary>
+
+## Installation
+`pip3 install revChatGPT`
+
+## Setup
+
+1. Create account on [OpenAI](https://platform.openai.com/)
+2. Go to https://platform.openai.com/account/api-keys
+3. Copy API key
+
+## Usage
+
+### Command line
+`python3 -m revChatGPT.Official --api_key API_KEY --stream`
+
+<details>
+<summary>
+
+### Developer
+</summary>
+
+Both Async and Sync are available. You can also stream responses via a generator. Read example code to learn more
+
+#### Example code
+
+You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/Official.py#L292-L408)
+
+#### Further Documentation
+You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
+
+</details>
+</details>
+
 
 # Awesome ChatGPT
 
