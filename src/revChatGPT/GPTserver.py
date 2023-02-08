@@ -65,7 +65,7 @@ def refresh():
 
     chatbot.session_token = data["session_token"]
     try:
-        chatbot.refresh_session()
+        chatbot.__refresh_session()
     except Exception as exc:
         return jsonify({"error": str(exc)}), 400
 
