@@ -131,7 +131,7 @@ Optional:
 
 # V2: Base model
 
-> ## Update3 2023/02/08: The model is consistently overloaded. I am resuming efforts on making a ChatGPT proxy (browserless) service. Please use V1 until further notice
+> ## Update 2023/02/10 This model has been removed by OpenAI. Please use V1 as detailed above
 
 Free, browserless, and without rate limits. Uses an outdated base model for ChatGPT.
 
