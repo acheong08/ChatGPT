@@ -20,10 +20,12 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 Browser is required on startup to fetch cookies. Breaks terms of service.
 
+> ## Working version
+
 </summary>
 
 ## Installation
-`pip3 install revChatGPT[unofficial]`
+`pip3 install revChatGPT`
 
 ## Configuration
 
