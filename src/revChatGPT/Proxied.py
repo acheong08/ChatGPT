@@ -307,7 +307,6 @@ def chatGPT_main(config):
                     """
                 !help - Show this message
                 !reset - Forget the current conversation
-                !refresh - Refresh the session authentication
                 !config - Show the current configuration
                 !rollback x - Rollback the conversation (x being the number of messages to rollback)
                 !exit - Exit this program
@@ -317,10 +316,6 @@ def chatGPT_main(config):
             elif prompt == "!reset":
                 chatbot.reset_chat()
                 print("Chat session successfully reset.")
-                continue
-            elif prompt == "!refresh":
-                chatbot.__refresh_session()
-                print("Session successfully refreshed.\n")
                 continue
             elif prompt == "!config":
                 print(json.dumps(chatbot.config, indent=4))
