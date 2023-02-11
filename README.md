@@ -19,7 +19,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 > ## Update 2023/02/11 A new model has been found! It works!
 
-Free, browserless, and without rate limits. Uses an outdated base model for ChatGPT.
+Free, browserless, and without rate limits. Uses the most recent ChatGPT model.
 
 </summary>
 
