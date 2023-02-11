@@ -61,7 +61,7 @@ Required configuration:
 ```json
 {
   "email": "<your email>",
-  "password": "your password"
+  "password": "your password",
 }
 ```
 
@@ -72,6 +72,7 @@ Optional configuration:
   "conversation_id": "UUID...",
   "parent_id": "UUID...",
   "proxy": "...",
+  "paid": false
 }
 ```
 
