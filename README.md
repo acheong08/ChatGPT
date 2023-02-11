@@ -47,7 +47,7 @@ Both Async and Sync are available. You can also stream responses via a generator
 
 #### Example code
 
-You can find it [here](https://github.com/acheong08/ChatGPT/blob/main/src/revChatGPT/Official.py#L292-L408)
+You can find it [here](https://github.com/acheong08/ChatGPT/blob/189a2bfe5d1c659d480e992767325dffe67536f6/src/revChatGPT/Official.py#L386-L502)
 
 #### Further Documentation
 You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
