@@ -26,7 +26,7 @@ from revChatGPT.Proxied import Chatbot
 ```
 
 ## Notes
-It is open source at https://github.com/acheong08/ChatGPT-Proxy
+Proxy server is open source at https://github.com/acheong08/ChatGPT-Proxy
 
 ## Usage
 - Save your email and password to `$HOME/.config/revChatGPT/config.json`
