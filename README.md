@@ -12,48 +12,30 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 > ## [BingGPT](https://github.com/acheong08/BingGPT) is out! It's just like ChatGPT but with live internet access. Reverse engineered from the pre-release by Microsoft.
 > You need to be waitlisted by Microsoft/Bing
 
-<details>
-<summary>
 
-# V2: Base model
+# V1.1 Proxy API
 
-> ## Update 2023/02/11 A new model has been found! It works!
+The proxy is identical to V1 but uses a proxy to bypass the browser automation. This is the recommended version. You can read up on the documentation below
 
-Free, browserless, and without rate limits. Uses the most recent ChatGPT model.
+## Differences:
+- Automatic session refresh on client side
+- Browserless
 
-</summary>
+```python
+from revChatGPT.Proxied import Chatbot
+```
 
-## Installation
-`pip3 install revChatGPT`
-
-## Setup
-
-1. Create account on [OpenAI](https://platform.openai.com/)
-2. Go to https://platform.openai.com/account/api-keys
-3. Copy API key
+## Notes
+It is open source at https://github.com/acheong08/ChatGPT-Proxy
 
 ## Usage
+- Save your email and password to `$HOME/.config/revChatGPT/config.json`
+```json
+{"email": "<your username>", "password": "<your password>"}
+```
 
-### Command line
-`python3 -m revChatGPT.Official --api_key API_KEY --stream`
+`python3 -m revChatGPT.Proxied`
 
-<details>
-<summary>
-
-### Developer
-</summary>
-
-Both Async and Sync are available. You can also stream responses via a generator. Read example code to learn more
-
-#### Example code
-
-You can find it [here](https://github.com/acheong08/ChatGPT/blob/189a2bfe5d1c659d480e992767325dffe67536f6/src/revChatGPT/Official.py#L386-L502)
-
-#### Further Documentation
-You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
-
-</details>
-</details>
 
 <details>
 <summary>
@@ -61,8 +43,6 @@ You can find it [wiki](https://github.com/acheong08/ChatGPT/wiki/revChatGPT)
 # V1 Browser automation
 
 Browser is required on startup to fetch cookies. Breaks terms of service.
-
-> ## Developer support dropped...
 
 </summary>
 

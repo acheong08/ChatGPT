@@ -3,9 +3,8 @@ import logging
 import uuid
 from os import environ
 
-from OpenAIAuth.OpenAIAuth import OpenAIAuth
-
 import tls_client
+from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
