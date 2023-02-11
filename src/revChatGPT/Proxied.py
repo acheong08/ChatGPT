@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.ERROR)
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "http://127.0.0.1:5000/"
 
+
 class Chatbot:
     def __init__(
         self,
@@ -47,7 +48,7 @@ class Chatbot:
         if "password" not in config:
             raise Exception("Password not found in config!")
         self.__login()
-        
+
     def __refresh_headers(self, access_token):
         self.session.headers.clear()
         self.session.headers.update(
@@ -61,9 +62,13 @@ class Chatbot:
                 "Referer": "https://chat.openai.com/chat",
             },
         )
-    
+
     def __login(self):
-        auth = OpenAIAuth(email_address=self.config.get("email"), password=self.config.get("password"), proxy=self.config.get("proxy"))
+        auth = OpenAIAuth(
+            email_address=self.config.get("email"),
+            password=self.config.get("password"),
+            proxy=self.config.get("proxy"),
+        )
         auth.begin()
         access_token = auth.get_access_token()
         self.__refresh_headers(access_token)
@@ -115,7 +120,7 @@ class Chatbot:
             timeout_seconds=180,
         )
         if response.status_code != 200:
-            print(response.text)
+            self.__login()
             raise Exception(
                 f"Wrong response code: {response.status_code}! Refreshing session...",
             )
