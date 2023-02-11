@@ -15,6 +15,8 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 # V1.1 Proxy API
 
+> ## Update 2023/02/11 - I am getting DDOSed. I might not be able to keep hosting it. Use V1 or host a bypass server yourself
+
 The proxy is identical to V1 but uses a proxy to bypass the browser automation. This is the recommended version. You can read up on the documentation below
 
 ## Differences:
