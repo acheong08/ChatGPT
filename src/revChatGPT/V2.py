@@ -153,11 +153,12 @@ class Chatbot:
             headers={"Authorization": f"Bearer {self.api_key}"},
             timeout=1080,
         ) as response:
+            full_result = ""
             async for line in response.aiter_lines():
                 if response.status_code != 200:
                     self.login(self.email, self.password, self.proxy, self.insecure)
                     yield "Error... Logging in again"
-                    return
+                    break
                 line = line.strip()
                 if line == "\n" or line == "":
                     continue
@@ -168,9 +169,14 @@ class Chatbot:
                     data = json.loads(line[6:])
                     if data is None:
                         continue
+                    full_result += data["text"]
                     yield data
                 except json.JSONDecodeError:
                     continue
+            self.conversations.add_message(
+                Message(full_result, "ChatGPT"),
+                conversation_id="default",
+            )
 
     def __get_config(self) -> dict:
         return {
@@ -305,17 +311,11 @@ async def main():
                 if commands(prompt):
                     continue
             print("ChatGPT:")
-            full_result = ""
             async for line in chatbot.ask(prompt=prompt):
                 result = line["choices"][0]["text"].replace("<|im_end|>", "")
-                full_result += result
                 print(result, end="")
                 sys.stdout.flush()
             print()
-            chatbot.conversations.add_message(
-                Message(full_result, "ChatGPT"),
-                conversation_id="default",
-            )
     except KeyboardInterrupt:
         print("Exiting...")
         sys.exit(0)
