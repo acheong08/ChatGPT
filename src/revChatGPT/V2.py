@@ -7,6 +7,7 @@ import os
 import sys
 
 import httpx
+import requests
 import tiktoken
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
@@ -196,11 +197,8 @@ class Chatbot:
             auth.begin()
             self.api_key = auth.access_token
         else:
-            response = httpx.post(
-                url=PROXY_URL + "/auth",
-                data={"email": email, "password": password},
-            )
-            self.api_key = response.json()["accessToken"]
+            auth_request = requests.post(PROXY_URL + "/auth", json={"email": email, "password": password})
+            self.api_key = auth_request.json()["accessToken"]
 
 
 def get_input(prompt):
