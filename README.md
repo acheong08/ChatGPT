@@ -45,7 +45,6 @@ async def main():
         print(line["choices"][0]["text"].replace("<|im_end|>", ""), end="")
         sys.stdout.flush()
     print()
-    print(response["choices"][0]["text"])
 
 if __name__ == "__main__":
     import asyncio
