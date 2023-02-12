@@ -169,7 +169,7 @@ class Chatbot:
                     data = json.loads(line[6:])
                     if data is None:
                         continue
-                    full_result += data["text"]
+                    full_result += data["choices"][0]["text"].replace("<|im_end|>", "")
                     yield data
                 except json.JSONDecodeError:
                     continue
