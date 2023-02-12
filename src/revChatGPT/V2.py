@@ -114,11 +114,13 @@ class Chatbot:
     Handles everything seamlessly
     """
 
-    def __init__(self, email: str, password: str, paid: bool = False) -> None:
+    def __init__(
+        self, email: str, password: str, paid: bool = False, proxy=None
+    ) -> None:
         self.api_key: str
         self.paid: bool = paid
         self.conversations = Conversations()
-        self.login(email, password)
+        self.login(email, password, proxy)
 
     async def ask(self, prompt: str, conversation_id: str = None) -> dict:
         """
@@ -166,11 +168,11 @@ class Chatbot:
             "paid": self.paid,
         }
 
-    def login(self, email, password) -> None:
+    def login(self, email, password, proxy) -> None:
         """
         Login to the API
         """
-        auth = OpenAIAuth(email_address=email, password=password)
+        auth = OpenAIAuth(email_address=email, password=password, proxy=proxy)
         auth.begin()
         self.api_key = auth.access_token
 
@@ -226,10 +228,17 @@ async def main():
         help="Use the paid API",
         action="store_true",
     )
+    parser.add_argument(
+        "--proxy",
+        help="Use a proxy",
+        required=False,
+        type=str,
+        default=None,
+    )
     args = parser.parse_args()
 
     print("Logging in...")
-    chatbot = Chatbot(args.email, args.password, paid=args.paid)
+    chatbot = Chatbot(args.email, args.password, paid=args.paid, proxy=args.proxy)
     print("Logged in\n")
 
     print("Type '!help' to show a full list of commands")
