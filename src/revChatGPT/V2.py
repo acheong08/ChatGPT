@@ -172,7 +172,7 @@ class Chatbot:
         """
         auth = OpenAIAuth(email_address=email, password=password)
         auth.begin()
-        self.api_key = auth.get_access_token()
+        self.api_key = auth.access_token
 
 
 def get_input(prompt):
