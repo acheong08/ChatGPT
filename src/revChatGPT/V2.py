@@ -146,7 +146,7 @@ class Chatbot:
         body = self.__get_config()
         body["prompt"] = BASE_PROMPT + conversation + "ChatGPT: "
         body["max_tokens"] = get_max_tokens(conversation)
-        async with httpx.AsyncClient().stream(
+        async with httpx.AsyncClient(proxies=self.proxy if self.proxy else None).stream(
             method="POST",
             url=PROXY_URL + "/completions",
             data=json.dumps(body),
