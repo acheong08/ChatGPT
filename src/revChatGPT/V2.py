@@ -133,12 +133,13 @@ class Chatbot:
         # Build request body
         body = self.__get_config()
         body["prompt"] = BASE_PROMPT + conversation + "ChatGPT: "
+        body["max_tokens"] = get_max_tokens(conversation)
         async with httpx.AsyncClient().stream(
             method="POST",
             url=PROXY_URL + "/completions",
             data=json.dumps(body),
             headers={"Authorization": f"Bearer {self.api_key}"},
-            timeout=360,
+            timeout=1080,
         ) as response:
             async for line in response.aiter_lines():
                 line = line.strip()
@@ -157,7 +158,6 @@ class Chatbot:
 
     def __get_config(self) -> dict:
         return {
-            "max_tokens": int(os.environ.get("MAX_TOKENS") or 150),
             "temperature": float(os.environ.get("TEMPERATURE") or 0.5),
             "top_p": float(os.environ.get("TOP_P") or 1),
             "stop": ["<|im_end|>", "<|im_sep|>"],
