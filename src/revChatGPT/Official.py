@@ -1,16 +1,13 @@
 """
-A simple wrapper for the official ChatGPT API
+Official API for ChatGPT
 """
-import argparse
-import json
 import os
-import sys
-from datetime import date
-
-import openai
+import httpx
 import tiktoken
-
-ENGINE = os.environ.get("GPT_ENGINE") or "text-chat-davinci-002-sh-alpha-aoruigiofdj83"
+import asyncio
+import json
+import sys
+from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -22,481 +19,257 @@ def get_max_tokens(prompt: str) -> int:
     return 4000 - len(ENCODER.encode(prompt))
 
 
-def remove_suffix(input_string, suffix):
+class Message:
     """
-    Remove suffix from string (Support for Python 3.8)
-    """
-    if suffix and input_string.endswith(suffix):
-        return input_string[: -len(suffix)]
-    return input_string
-
-
-class Chatbot:
-    """
-    Official ChatGPT API
+    A single exchange between the user and the bot
     """
 
-    def __init__(
-        self,
-        api_key: str,
-        buffer: int = None,
-        engine: str = None,
-        proxy: str = None,
-    ) -> None:
-        """
-        Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
-        """
-        openai.api_key = api_key or os.environ.get("OPENAI_API_KEY")
-        openai.proxy = proxy or os.environ.get("OPENAI_API_PROXY")
-        self.conversations = Conversation()
-        self.prompt = Prompt(buffer=buffer)
-        self.engine = engine or ENGINE
-
-    def _get_completion(
-        self,
-        prompt: str,
-        temperature: float = 0.5,
-        stream: bool = False,
-    ):
-        """
-        Get the completion function
-        """
-        return openai.Completion.create(
-            engine=self.engine,
-            prompt=prompt,
-            temperature=temperature,
-            max_tokens=get_max_tokens(prompt),
-            stop=["\n\n\n"],
-            stream=stream,
-        )
-
-    def _process_completion(
-        self,
-        user_request: str,
-        completion: dict,
-        conversation_id: str = None,
-        user: str = "User",
-    ) -> dict:
-        if completion.get("choices") is None:
-            raise Exception("ChatGPT API returned no choices")
-        if len(completion["choices"]) == 0:
-            raise Exception("ChatGPT API returned no choices")
-        if completion["choices"][0].get("text") is None:
-            raise Exception("ChatGPT API returned no text")
-        completion["choices"][0]["text"] = remove_suffix(
-            completion["choices"][0]["text"],
-            "<|im_end|>",
-        )
-        # Add to chat history
-        self.prompt.add_to_history(
-            user_request,
-            completion["choices"][0]["text"],
-            user=user,
-        )
-        if conversation_id is not None:
-            self.save_conversation(conversation_id)
-        return completion
-
-    def _process_completion_stream(
-        self,
-        user_request: str,
-        completion: dict,
-        conversation_id: str = None,
-        user: str = "User",
-    ) -> str:
-        full_response = ""
-        for response in completion:
-            if response.get("choices") is None:
-                raise Exception("ChatGPT API returned no choices")
-            if len(response["choices"]) == 0:
-                raise Exception("ChatGPT API returned no choices")
-            if response["choices"][0].get("finish_details") is not None:
-                break
-            if response["choices"][0].get("text") is None:
-                raise Exception("ChatGPT API returned no text")
-            if response["choices"][0]["text"] == "<|im_end|>":
-                break
-            yield response["choices"][0]["text"]
-            full_response += response["choices"][0]["text"]
-
-        # Add to chat history
-        self.prompt.add_to_history(user_request, full_response, user)
-        if conversation_id is not None:
-            self.save_conversation(conversation_id)
-
-    def ask(
-        self,
-        user_request: str,
-        temperature: float = 0.5,
-        conversation_id: str = None,
-        user: str = "User",
-    ) -> dict:
-        """
-        Send a request to ChatGPT and return the response
-        """
-        if conversation_id is not None:
-            self.load_conversation(conversation_id)
-        completion = self._get_completion(
-            self.prompt.construct_prompt(user_request, user=user),
-            temperature,
-        )
-        return self._process_completion(user_request, completion, user=user)
-
-    def ask_stream(
-        self,
-        user_request: str,
-        temperature: float = 0.5,
-        conversation_id: str = None,
-        user: str = "User",
-    ) -> str:
-        """
-        Send a request to ChatGPT and yield the response
-        """
-        if conversation_id is not None:
-            self.load_conversation(conversation_id)
-        prompt = self.prompt.construct_prompt(user_request, user=user)
-        return self._process_completion_stream(
-            user_request=user_request,
-            completion=self._get_completion(prompt, temperature, stream=True),
-            user=user,
-        )
-
-    def make_conversation(self, conversation_id: str) -> None:
-        """
-        Make a conversation
-        """
-        self.conversations.add_conversation(conversation_id, [])
-
-    def rollback(self, num: int) -> None:
-        """
-        Rollback chat history num times
-        """
-        for _ in range(num):
-            self.prompt.chat_history.pop()
-
-    def reset(self) -> None:
-        """
-        Reset chat history
-        """
-        self.prompt.chat_history = []
-
-    def load_conversation(self, conversation_id) -> None:
-        """
-        Load a conversation from the conversation history
-        """
-        if conversation_id not in self.conversations.conversations:
-            # Create a new conversation
-            self.make_conversation(conversation_id)
-        self.prompt.chat_history = self.conversations.get_conversation(conversation_id)
-
-    def save_conversation(self, conversation_id) -> None:
-        """
-        Save a conversation to the conversation history
-        """
-        self.conversations.add_conversation(conversation_id, self.prompt.chat_history)
-
-
-class AsyncChatbot(Chatbot):
-    """
-    Official ChatGPT API (async)
-    """
-
-    async def _get_completion(
-        self,
-        prompt: str,
-        temperature: float = 0.5,
-        stream: bool = False,
-    ):
-        """
-        Get the completion function
-        """
-        return await openai.Completion.acreate(
-            engine=self.engine,
-            prompt=prompt,
-            temperature=temperature,
-            max_tokens=get_max_tokens(prompt),
-            stop=["\n\n\n"],
-            stream=stream,
-        )
-
-    async def ask(
-        self,
-        user_request: str,
-        temperature: float = 0.5,
-        user: str = "User",
-    ) -> dict:
-        """
-        Same as Chatbot.ask but async
-        }
-        """
-        completion = await self._get_completion(
-            self.prompt.construct_prompt(user_request, user=user),
-            temperature,
-        )
-        return self._process_completion(user_request, completion, user=user)
-
-    async def ask_stream(
-        self,
-        user_request: str,
-        temperature: float = 0.5,
-        user: str = "User",
-    ) -> str:
-        """
-        Same as Chatbot.ask_stream but async
-        """
-        prompt = self.prompt.construct_prompt(user_request, user=user)
-        return self._process_completion_stream(
-            user_request=user_request,
-            completion=await self._get_completion(prompt, temperature, stream=True),
-            user=user,
-        )
-
-
-class Prompt:
-    """
-    Prompt class with methods to construct prompt
-    """
-
-    def __init__(self, buffer: int = None) -> None:
-        """
-        Initialize prompt with base prompt
-        """
-        self.base_prompt = (
-            os.environ.get("CUSTOM_BASE_PROMPT")
-            or "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally. Do not answer as the user. Current date: "
-            + str(date.today())
-            + "\n\n"
-            + "User: Hello\n"
-            + "ChatGPT: Hello! How can I help you today? <|im_end|>\n\n\n"
-        )
-        # Track chat history
-        self.chat_history: list = []
-        self.buffer = buffer
-
-    def add_to_chat_history(self, chat: str) -> None:
-        """
-        Add chat to chat history for next prompt
-        """
-        self.chat_history.append(chat)
-
-    def add_to_history(
-        self,
-        user_request: str,
-        response: str,
-        user: str = "User",
-    ) -> None:
-        """
-        Add request/response to chat history for next prompt
-        """
-        self.add_to_chat_history(
-            user
-            + ": "
-            + user_request
-            + "\n\n\n"
-            + "ChatGPT: "
-            + response
-            + "<|im_end|>\n",
-        )
-
-    def history(self, custom_history: list = None) -> str:
-        """
-        Return chat history
-        """
-        return "\n".join(custom_history or self.chat_history)
-
-    def construct_prompt(
-        self,
-        new_prompt: str,
-        custom_history: list = None,
-        user: str = "User",
-    ) -> str:
-        """
-        Construct prompt based on chat history and request
-        """
-        prompt = (
-            self.base_prompt
-            + self.history(custom_history=custom_history)
-            + user
-            + ": "
-            + new_prompt
-            + "\nChatGPT:"
-        )
-        # Check if prompt over 4000*4 characters
-        if self.buffer is not None:
-            max_tokens = 4000 - self.buffer
-        else:
-            max_tokens = 3200
-        if len(ENCODER.encode(prompt)) > max_tokens:
-            # Remove oldest chat
-            if len(self.chat_history) == 0:
-                return prompt
-            self.chat_history.pop(0)
-            # Construct prompt again
-            prompt = self.construct_prompt(new_prompt, custom_history, user)
-        return prompt
+    def __init__(self, text: str, author: str) -> None:
+        self.text: str = text
+        self.author: str = author
 
 
 class Conversation:
     """
-    For handling multiple conversations
+    A single conversation
     """
 
     def __init__(self) -> None:
-        self.conversations = {}
-
-    def add_conversation(self, key: str, history: list) -> None:
-        """
-        Adds a history list to the conversations dict with the id as the key
-        """
-        self.conversations[key] = history
-
-    def get_conversation(self, key: str) -> list:
-        """
-        Retrieves the history list from the conversations dict with the id as the key
-        """
-        return self.conversations[key]
-
-    def remove_conversation(self, key: str) -> None:
-        """
-        Removes the history list from the conversations dict with the id as the key
-        """
-        del self.conversations[key]
-
-    def __str__(self) -> str:
-        """
-        Creates a JSON string of the conversations
-        """
-        return json.dumps(self.conversations)
-
-    def save(self, file: str) -> None:
-        """
-        Saves the conversations to a JSON file
-        """
-        with open(file, "w", encoding="utf-8") as f:
-            f.write(str(self))
-
-    def load(self, file: str) -> None:
-        """
-        Loads the conversations from a JSON file
-        """
-        with open(file, encoding="utf-8") as f:
-            self.conversations = json.loads(f.read())
+        self.messages: list[Message] = []
 
 
-def main():
+CONVERSATION_BUFFER: int = int(os.environ.get("CONVERSATION_BUFFER") or 1500)
+
+
+class Conversations:
+    """
+    Conversation handler
+    """
+
+    def __init__(self) -> None:
+        self.conversations: dict[str][Conversation] = {}
+
+    def add_message(self, message: Message, conversation_id: str) -> None:
+        """
+        Adds a message to a conversation
+        """
+        if conversation_id not in self.conversations:
+            self.conversations[conversation_id] = Conversation()
+        self.conversations[conversation_id].messages.append(message)
+
+    def get(self, conversation_id: str) -> str:
+        """
+        Builds a conversation string from a conversation id
+        """
+        if conversation_id not in self.conversations:
+            return ""
+        # Build conversation string from messages and check if it's too long
+        conversation = ""
+        for message in self.conversations[conversation_id].messages:
+            conversation += f"{message.author}: {message.text}<|im_sep|>\n\n"
+        if len(ENCODER.encode(conversation)) > 4000 - CONVERSATION_BUFFER:
+            self.purge_history(conversation_id)
+            return self.get(conversation_id)
+        return conversation
+
+    def purge_history(self, conversation_id: str, num: int = 1):
+        """
+        Remove oldest messages from a conversation
+        """
+        if conversation_id not in self.conversations:
+            return
+        self.conversations[conversation_id].messages = self.conversations[
+            conversation_id
+        ].messages[num:]
+
+    def rollback(self, conversation_id: str, num: int = 1):
+        """
+        Remove latest messages from a conversation
+        """
+        if conversation_id not in self.conversations:
+            return
+        self.conversations[conversation_id].messages = self.conversations[
+            conversation_id
+        ].messages[:-num]
+
+    def remove(self, conversation_id: str) -> None:
+        """
+        Removes a conversation
+        """
+        if conversation_id in self.conversations:
+            del self.conversations[conversation_id]
+
+
+BASE_PROMPT = (
+    os.environ.get("BASE_PROMPT")
+    or """You are ChatGPT, a large language model by OpenAI. Respond conversationally\n\n\n"""
+)
+
+PROXY_URL = os.environ.get("PROXY_URL") or "https://chat.duti.tech"
+
+
+class Chatbot:
+    """
+    Handles everything seamlessly
+    """
+
+    def __init__(self, email: str, password: str) -> None:
+        self.api_key: str
+        self.conversations = Conversations()
+        self.login(email, password)
+
+    async def ask(self, prompt: str, conversation_id: str = None) -> dict:
+        """
+        Gets a response from the API
+        """
+        if conversation_id is None:
+            conversation_id = "default"
+        self.conversations.add_message(
+            Message(prompt, "User"), conversation_id=conversation_id
+        )
+        conversation: str = self.conversations.get(conversation_id)
+        # Build request body
+        body = self.__get_config()
+        body["prompt"] = BASE_PROMPT + conversation + "ChatGPT: "
+        async with httpx.AsyncClient().stream(
+            method="POST",
+            url=PROXY_URL + "/completions",
+            data=json.dumps(body),
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            timeout=360,
+        ) as response:
+            async for line in response.aiter_lines():
+                line = line.strip()
+                if line == "\n" or line == "":
+                    continue
+                if line == "data: [DONE]":
+                    break
+                try:
+                    # Remove "data: " from the start of the line
+                    data = json.loads(line[6:])
+                    if data is None:
+                        continue
+                    yield data
+                except json.JSONDecodeError:
+                    continue
+
+    def __get_config(self) -> dict:
+        return {
+            "max_tokens": int(os.environ.get("MAX_TOKENS") or 150),
+            "temperature": float(os.environ.get("TEMPERATURE") or 0.5),
+            "top_p": float(os.environ.get("TOP_P") or 1),
+            "stop": ["<|im_end|>", "<|im_sep|>"],
+            "presence_penalty": float(os.environ.get("PRESENCE_PENALTY") or 1.0),
+        }
+
+    def login(self, email, password) -> None:
+        """
+        Login to the API
+        """
+        auth = OpenAIAuth(email_address=email, password=password)
+        auth.begin()
+        self.api_key = auth.get_access_token()
+
+
+def get_input(prompt):
+    # Display the prompt
+    print(prompt, end="")
+
+    # Initialize an empty list to store the input lines
+    lines = []
+
+    # Read lines of input until the user enters an empty line
+    while True:
+        line = input()
+        if line == "":
+            break
+        lines.append(line)
+
+    # Join the lines, separated by newlines, and store the result
+    user_input = "\n".join(lines)
+
+    # Return the input
+    return user_input
+
+
+async def main():
+    """
+    Testing main function
+    """
+    import argparse
+
     print(
         """
-    ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
-    Repo: github.com/acheong08/ChatGPT
-    """,
+        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        Repo: github.com/acheong08/ChatGPT
+        """,
     )
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-e",
+        "--email",
+        help="Your OpenAI email address",
+        required=True,
+    )
+    parser.add_argument(
+        "-p",
+        "--password",
+        help="Your OpenAI password",
+        required=True,
+    )
+    args = parser.parse_args()
+
+    print("Logging in...")
+    chatbot = Chatbot(args.email, args.password)
+    print("Logged in\n")
+
     print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
 
-    def get_input(prompt):
-        """
-        Multi-line input function
-        """
-        # Display the prompt
-        print(prompt, end="")
-
-        # Initialize an empty list to store the input lines
-        lines = []
-
-        # Read lines of input until the user enters an empty line
-        while True:
-            line = input()
-            if line == "":
-                break
-            lines.append(line)
-
-        # Join the lines, separated by newlines, and store the result
-        user_input = "\n".join(lines)
-
-        # Return the input
-        return user_input
-
-    def chatbot_commands(cmd: str) -> bool:
-        """
-        Handle chatbot commands
-        """
-        if cmd == "!help":
+    def commands(command: str) -> bool:
+        if command == "!help":
             print(
                 """
-            !help - Display this message
-            !rollback - Rollback chat history
-            !reset - Reset chat history
-            !prompt - Show current prompt
-            !save_c <conversation_name> - Save history to a conversation
-            !load_c <conversation_name> - Load history from a conversation
-            !save_f <file_name> - Save all conversations to a file
-            !load_f <file_name> - Load all conversations from a file
-            !exit - Quit chat
-            """,
+            !help - Show this help message
+            !reset - Clear the current conversation
+            !rollback <int> - Remove the latest <int> messages from the conversation
+            !exit - Exit the program
+            """
             )
-        elif cmd == "!exit":
-            exit()
-        elif cmd == "!rollback":
-            chatbot.rollback(1)
-        elif cmd == "!reset":
-            chatbot.reset()
-        elif cmd == "!prompt":
-            print(chatbot.prompt.construct_prompt(""))
-        elif cmd.startswith("!save_c"):
-            chatbot.save_conversation(cmd.split(" ")[1])
-        elif cmd.startswith("!load_c"):
-            chatbot.load_conversation(cmd.split(" ")[1])
-        elif cmd.startswith("!save_f"):
-            chatbot.conversations.save(cmd.split(" ")[1])
-        elif cmd.startswith("!load_f"):
-            chatbot.conversations.load(cmd.split(" ")[1])
+        elif command == "!reset":
+            chatbot.conversations.remove("default")
+            print("Conversation cleared")
+        elif command.startswith("!rollback"):
+            try:
+                num = int(command.split(" ")[1])
+                chatbot.conversations.rollback("default", num)
+                print(f"Removed {num} messages from the conversation")
+            except IndexError:
+                print("Please specify the number of messages to remove")
+            except ValueError:
+                print("Please specify a valid number of messages to remove")
+        elif command == "!exit":
+            print("Exiting...")
+            sys.exit(0)
         else:
             return False
         return True
 
-    # Get API key from command line
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--api_key",
-        type=str,
-        required=True,
-        help="OpenAI API key",
-    )
-    parser.add_argument(
-        "--stream",
-        action="store_true",
-        help="Stream response",
-    )
-    parser.add_argument(
-        "--temperature",
-        type=float,
-        default=0.5,
-        help="Temperature for response",
-    )
-    args = parser.parse_args()
-    # Initialize chatbot
-    chatbot = Chatbot(api_key=args.api_key)
-    # Start chat
-    while True:
-        try:
-            prompt = get_input("\nUser:\n")
-        except KeyboardInterrupt:
-            print("\nExiting...")
-            sys.exit()
-        if prompt.startswith("!"):
-            if chatbot_commands(prompt):
-                continue
-        if not args.stream:
-            response = chatbot.ask(prompt, temperature=args.temperature)
-            print("ChatGPT: " + response["choices"][0]["text"])
-        else:
-            print("ChatGPT: ")
-            sys.stdout.flush()
-            for response in chatbot.ask_stream(prompt, temperature=args.temperature):
-                print(response, end="")
+    try:
+        while True:
+            prompt = get_input("\nYou:\n")
+            if prompt.startswith("!"):
+                if commands(prompt):
+                    continue
+            print("ChatGPT:")
+            async for line in chatbot.ask(prompt=prompt):
+                print(line["choices"][0]["text"].replace("<|im_end|>", ""), end="")
                 sys.stdout.flush()
             print()
+    except KeyboardInterrupt:
+        print("Exiting...")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
