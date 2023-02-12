@@ -41,7 +41,10 @@ from revChatGPT.V2 import Chatbot
 
 async def main():
     chatbot = Chatbot(email="...", password="...")
-    response = await chatbot.ask("Hello")
+    async for line in chatbot.ask("Hello"):
+        print(line["choices"][0]["text"].replace("<|im_end|>", ""), end="")
+        sys.stdout.flush()
+    print()
     print(response["choices"][0]["text"])
 
 if __name__ == "__main__":
