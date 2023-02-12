@@ -11,7 +11,7 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth
 logging.basicConfig(level=logging.ERROR)
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or choice(
-    ["https://chatgpt.duti.tech/", "https://sathoro.duti.tech/"]
+    ["https://chatgpt.duti.tech/", "https://sathoro.duti.tech/"],
 )
 
 

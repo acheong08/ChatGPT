@@ -1,12 +1,13 @@
 """
 Official API for ChatGPT
 """
-import os
-import httpx
-import tiktoken
 import asyncio
 import json
+import os
 import sys
+
+import httpx
+import tiktoken
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -125,7 +126,8 @@ class Chatbot:
         if conversation_id is None:
             conversation_id = "default"
         self.conversations.add_message(
-            Message(prompt, "User"), conversation_id=conversation_id
+            Message(prompt, "User"),
+            conversation_id=conversation_id,
         )
         conversation: str = self.conversations.get(conversation_id)
         # Build request body
@@ -234,7 +236,7 @@ async def main():
             !reset - Clear the current conversation
             !rollback <int> - Remove the latest <int> messages from the conversation
             !exit - Exit the program
-            """
+            """,
             )
         elif command == "!reset":
             chatbot.conversations.remove("default")
