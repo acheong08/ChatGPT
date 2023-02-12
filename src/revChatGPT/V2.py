@@ -117,6 +117,9 @@ class Chatbot:
     def __init__(
         self, email: str, password: str, paid: bool = False, proxy=None
     ) -> None:
+        self.proxy = proxy
+        self.email: str = email
+        self.password: str = password
         self.api_key: str
         self.paid: bool = paid
         self.conversations = Conversations()
@@ -145,6 +148,10 @@ class Chatbot:
             timeout=1080,
         ) as response:
             async for line in response.aiter_lines():
+                if response.status_code != 200:
+                    self.login(self.email, self.password, self.proxy)
+                    yield "Error... Logging in again"
+                    return
                 line = line.strip()
                 if line == "\n" or line == "":
                     continue
