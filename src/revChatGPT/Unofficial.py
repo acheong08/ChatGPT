@@ -613,7 +613,11 @@ class Chatbot:
                 lambda msg: self.__detect_user_agent(msg),
             )
             driver.get("https://chat.openai.com/chat")
-            while not self.agent_found or not self.cf_cookie_found or not self.puid_cookie_found:
+            while (
+                not self.agent_found
+                or not self.cf_cookie_found
+                or not self.puid_cookie_found
+            ):
                 sleep(5)
         finally:
             # Close the browser
