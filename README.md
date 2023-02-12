@@ -30,8 +30,8 @@ options:
                         Your OpenAI email address
   -p PASSWORD, --password PASSWORD
                         Your OpenAI password
-  --paid                Use the paid API
-  --proxy PROXY         Use a proxy
+  --paid                Use the paid API (Optional)
+  --proxy PROXY         Use a proxy (Optional)
 ```
 
 ## Developers
