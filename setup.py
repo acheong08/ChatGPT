@@ -23,7 +23,7 @@ setup(
             "requests",
             "undetected_chromedriver",
             "selenium",
-            "tls_client",
+            "tls_client==0.1.1",
             "requests",
         ],
     },
