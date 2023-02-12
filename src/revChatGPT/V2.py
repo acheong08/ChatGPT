@@ -115,15 +115,21 @@ class Chatbot:
     """
 
     def __init__(
-        self, email: str, password: str, paid: bool = False, proxy=None
+        self,
+        email: str,
+        password: str,
+        paid: bool = False,
+        proxy=None,
+        insecure: bool = False,
     ) -> None:
         self.proxy = proxy
         self.email: str = email
         self.password: str = password
+        self.insecure: bool = insecure
         self.api_key: str
         self.paid: bool = paid
         self.conversations = Conversations()
-        self.login(email, password, proxy)
+        self.login(email, password, proxy, insecure)
 
     async def ask(self, prompt: str, conversation_id: str = None) -> dict:
         """
@@ -149,7 +155,7 @@ class Chatbot:
         ) as response:
             async for line in response.aiter_lines():
                 if response.status_code != 200:
-                    self.login(self.email, self.password, self.proxy)
+                    self.login(self.email, self.password, self.proxy, self.insecure)
                     yield "Error... Logging in again"
                     return
                 line = line.strip()
@@ -175,13 +181,20 @@ class Chatbot:
             "paid": self.paid,
         }
 
-    def login(self, email, password, proxy) -> None:
+    def login(self, email, password, proxy, insecure) -> None:
         """
         Login to the API
         """
-        auth = OpenAIAuth(email_address=email, password=password, proxy=proxy)
-        auth.begin()
-        self.api_key = auth.access_token
+        if not insecure:
+            auth = OpenAIAuth(email_address=email, password=password, proxy=proxy)
+            auth.begin()
+            self.api_key = auth.access_token
+        else:
+            response = httpx.post(
+                url=PROXY_URL + "/auth",
+                data={"email": email, "password": password},
+            )
+            self.api_key = response.json()["accessToken"]
 
 
 def get_input(prompt):
@@ -241,6 +254,11 @@ async def main():
         required=False,
         type=str,
         default=None,
+    )
+    parser.add_argument(
+        "--insecure-auth",
+        help="Use an insecure authentication method to bypass OpenAI's geo-blocking",
+        action="store_true",
     )
     args = parser.parse_args()
 
