@@ -337,9 +337,11 @@ class Chatbot:
         try:
             # Open the browser
             self.cf_cookie_found = False
+            self.puid_cookie_found = False
             self.session_cookie_found = False
             self.agent_found = False
             self.cf_clearance = None
+            self.puid_cookie = None
             self.user_agent = None
             options = self.__get_ChromeOptions()
             print("Spawning browser...")
@@ -363,6 +365,7 @@ class Chatbot:
                 sleep(5)
             self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
+                puid_cookie=self.puid_cookie,
                 user_agent=self.user_agent,
             )
             # Wait for the login button to appear
@@ -467,9 +470,11 @@ class Chatbot:
         driver = None
         try:
             self.cf_cookie_found = False
+            self.puid_cookie_found = False
             self.session_cookie_found = False
             self.agent_found = False
             self.cf_clearance = None
+            self.puid_cookie = None
             self.user_agent = None
             options = self.__get_ChromeOptions()
             print("Spawning browser...")
@@ -493,6 +498,7 @@ class Chatbot:
                 sleep(5)
             self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
+                puid_cookie=self.puid_cookie,
                 user_agent=self.user_agent,
             )
             # Wait for the login button to appear
@@ -554,7 +560,7 @@ class Chatbot:
                     (By.XPATH, "//textarea"),
                 ),
             )
-            while not self.session_cookie_found:
+            while not self.session_cookie_found or not self.puid_cookie_found:
                 sleep(5)
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
         finally:
@@ -587,6 +593,7 @@ class Chatbot:
             self.cf_cookie_found = False
             self.agent_found = False
             self.cf_clearance = None
+            self.puid_cookie = None
             self.user_agent = None
             options = self.__get_ChromeOptions()
             print("Spawning browser...")
@@ -606,7 +613,7 @@ class Chatbot:
                 lambda msg: self.__detect_user_agent(msg),
             )
             driver.get("https://chat.openai.com/chat")
-            while not self.agent_found or not self.cf_cookie_found:
+            while not self.agent_found or not self.cf_cookie_found or not self.puid_cookie_found:
                 sleep(5)
         finally:
             # Close the browser
@@ -615,6 +622,7 @@ class Chatbot:
                 del driver
             self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
+                puid_cookie=self.puid_cookie,
                 user_agent=self.user_agent,
             )
 
@@ -625,6 +633,10 @@ class Chatbot:
                     # Use regex to get the cookie for cf_clearance=*;
                     cf_clearance_cookie = re.search(
                         "cf_clearance=.*?;",
+                        message["params"]["headers"]["set-cookie"],
+                    )
+                    puid_cookie = re.search(
+                        "_puid=.*?;",
                         message["params"]["headers"]["set-cookie"],
                     )
                     session_cookie = re.search(
@@ -644,6 +656,21 @@ class Chatbot:
                                 + self.cf_clearance,
                             )
                         self.cf_cookie_found = True
+                    if puid_cookie and not self.puid_cookie_found:
+                        raw_puid_cookie = puid_cookie.group(0)
+                        self.puid_cookie = raw_puid_cookie.split("=")[1][:-1]
+                        self.session.cookies.set(
+                            "_puid",
+                            self.puid_cookie,
+                        )
+                        if self.verbose:
+                            print(
+                                self.GREEN
+                                + "puid Cookie: "
+                                + self.ENDCOLOR
+                                + self.puid_cookie,
+                            )
+                        self.puid_cookie_found = True
                     if session_cookie and not self.session_cookie_found:
                         print("Found Session Token!")
                         # remove the semicolon and '__Secure-next-auth.session-token=' from the string
@@ -672,13 +699,16 @@ class Chatbot:
                     self.agent_found = True
         self.__refresh_headers(
             cf_clearance=self.cf_clearance,
+            puid_cookie=self.puid_cookie,
             user_agent=self.user_agent,
         )
 
-    def __refresh_headers(self, cf_clearance, user_agent):
+    def __refresh_headers(self, cf_clearance, puid_cookie, user_agent):
         del self.session.cookies["cf_clearance"]
+        del self.session.cookies["_puid"]
         self.session.headers.clear()
         self.session.cookies.set("cf_clearance", cf_clearance)
+        self.session.cookies.set("_puid", puid_cookie)
         self.session.headers.update(
             {
                 "Accept": "text/event-stream",
