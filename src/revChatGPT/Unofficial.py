@@ -592,6 +592,7 @@ class Chatbot:
         try:
             self.cf_cookie_found = False
             self.agent_found = False
+            self.puid_cookie_found = False
             self.cf_clearance = None
             self.puid_cookie = None
             self.user_agent = None
