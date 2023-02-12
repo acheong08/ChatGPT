@@ -15,7 +15,7 @@ setup(
     install_requires=[
         "asyncio",
         "httpx",
-        "OpenAIAuth",
+        "OpenAIAuth==0.1.1",
         "tiktoken",
     ],
     extras_require={
@@ -23,7 +23,7 @@ setup(
             "requests",
             "undetected_chromedriver",
             "selenium",
-            "tls_client==0.1.1",
+            "tls_client",
             "requests",
         ],
     },
