@@ -12,6 +12,49 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 > ## [BingGPT](https://github.com/acheong08/BingGPT) is out! It's just like ChatGPT but with live internet access. Reverse engineered from the pre-release by Microsoft.
 > You need to be waitlisted by Microsoft/Bing
 
+# V2 Browserless ChatGPT
+
+`pip3 install --upgrade revChatGPT`
+
+```bash
+ $ python3 -m revChatGPT.V2 -h
+
+        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        Repo: github.com/acheong08/ChatGPT
+
+usage: V2.py [-h] -e EMAIL -p PASSWORD
+
+options:
+  -h, --help            show this help message and exit
+  -e EMAIL, --email EMAIL
+                        Your OpenAI email address
+  -p PASSWORD, --password PASSWORD
+                        Your OpenAI password
+```
+
+## Developers
+Wiki: https://github.com/acheong08/ChatGPT/wiki/V2
+
+Example code:
+```python
+from revChatGPT.V2 import Chatbot
+
+async def main():
+    chatbot = Chatbot(email="...", password="...")
+    response = await chatbot.ask("Hello")
+    print(response["choices"][0]["text"])
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
+```
+
+<details>
+
+<summary>
+
+# Outdated V1 versions
+</summary>
 
 # V1.1 Proxy API
 
@@ -150,6 +193,7 @@ Optional:
 
 </details>
 
+</details>
 
 # Awesome ChatGPT
 
