@@ -305,10 +305,17 @@ async def main():
                 if commands(prompt):
                     continue
             print("ChatGPT:")
+            full_result = ""
             async for line in chatbot.ask(prompt=prompt):
-                print(line["choices"][0]["text"].replace("<|im_end|>", ""), end="")
+                result = line["choices"][0]["text"].replace("<|im_end|>", "")
+                full_result += result
+                print(result, end="")
                 sys.stdout.flush()
             print()
+            chatbot.conversations.add_message(
+                Message(full_result, "ChatGPT"),
+                conversation_id="default",
+            )
     except KeyboardInterrupt:
         print("Exiting...")
         sys.exit(0)
