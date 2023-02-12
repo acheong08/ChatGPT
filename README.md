@@ -17,12 +17,12 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 `pip3 install --upgrade revChatGPT`
 
 ```bash
- $ python3 -m revChatGPT.V2 -h
+ $ python3 -m revChatGPT.V2 -h                                                                
 
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-
-usage: V2.py [-h] -e EMAIL -p PASSWORD
+        
+usage: V2.py [-h] -e EMAIL -p PASSWORD [--paid] [--proxy PROXY]
 
 options:
   -h, --help            show this help message and exit
@@ -30,6 +30,8 @@ options:
                         Your OpenAI email address
   -p PASSWORD, --password PASSWORD
                         Your OpenAI password
+  --paid                Use the paid API
+  --proxy PROXY         Use a proxy
 ```
 
 ## Developers
