@@ -194,6 +194,7 @@ class Chatbot:
             "stop": ["<|im_end|>", "<|im_sep|>"],
             "presence_penalty": float(os.environ.get("PRESENCE_PENALTY") or 1.0),
             "paid": self.paid,
+            "stream": True,
         }
 
     def login(self, email, password, proxy, insecure) -> None:
@@ -205,7 +206,11 @@ class Chatbot:
             auth.begin()
             self.api_key = auth.access_token
         else:
-            auth_request = requests.post(PROXY_URL + "/auth", json={"email": email, "password": password})
+            auth_request = requests.post(
+                PROXY_URL + "/auth",
+                json={"email": email, "password": password},
+                timeout=10,
+            )
             self.api_key = auth_request.json()["accessToken"]
 
 
