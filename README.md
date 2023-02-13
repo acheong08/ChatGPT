@@ -57,13 +57,11 @@ Wiki: https://github.com/acheong08/ChatGPT/wiki/V2
 Example code:
 ```python
 from revChatGPT.V2 import Chatbot
-import sys
 
 async def main():
     chatbot = Chatbot(email="...", password="...")
     async for line in chatbot.ask("Hello"):
-        print(line["choices"][0]["text"].replace("<|im_end|>", ""), end="")
-        sys.stdout.flush()
+        print(line["choices"][0]["text"].replace("<|im_end|>", ""), end="", flush = True)
     print()
 
 if __name__ == "__main__":
@@ -124,7 +122,6 @@ Optional configuration:
 Basic example:
 ```python
 from revChatGPT.V1 import Chatbot
-import sys
 
 chatbot = Chatbot(config={
   "email": "<your email>",
@@ -136,8 +133,7 @@ for data in chatbot.ask(
   conversation_id=chatbot.config.get("conversation"),
   parent_id=chatbot.config.get("parent_id"),
 ):
-  print(data["message"], end="")
-  sys.stdout.flush()
+  print(data["message"], end="", flush = True)
 print()
 ```
 
