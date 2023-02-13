@@ -1,36 +1,82 @@
----
+name: Bug Report
+description: You think somethings is broken in the UI
+title: "[Bug]: "
+labels: ["bug-report"]
 
-name: Bug report
-about: Create a report to help us improve
-title: "[BUG]"
-labels: bug
-assignees: ''
-
----
-
-**Description**
-A clear and concise description of what the bug is.
-
-**Steps to Reproduce**
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
-**Output**
-In the correct directory, run the following command:
-`python3 -m revChatGPT --debug`
-
-**Environment**
-Please update your packages before reporting the issue:
-`pip3 install --upgrade revChatGPT`
-
- - OS: [e.g. Linux, MacOS, Windows]
- - Python version: python -V
- - ChatGPT Version: pip3 show revChatGPT
-
-**Additional context**
-Add any other context about the problem here.
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered, and that it hasn't been fixed in a recent build/commit.
+      options:
+        - label: I have searched the existing issues and checked the recent builds/commits
+          required: true
+  - type: markdown
+    attributes:
+      value: |
+        *Please fill this form with as much information as possible, don't forget to fill "What OS..." and "What browsers" and *provide screenshots if possible**
+  - type: textarea
+    id: what-did
+    attributes:
+      label: What happened?
+      description: Tell us what happened in a very clear and simple way
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce the problem
+      description: Please provide us with precise step by step information on how to reproduce the bug
+      value: |
+        1. Go to .... 
+        2. Press ....
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: what-should
+    attributes:
+      label: What should have happened?
+      description: Tell what you think the normal behavior should be
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit where the problem happens
+      description: Which commit are you running ? (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or from the cmd/terminal if you can't launch it.)
+    validations:
+      required: true
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: What platforms do you use to access the UI ?
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - MacOS
+        - iOS
+        - Android
+        - Other/Cloud
+  - type: textarea
+    id: cmdargs
+    attributes:
+      label: Command Line Arguments
+      description: Are you using any launching parameters/command line arguments (modified webui-user .bat/.sh) ? If yes, please write them below. Write "No" otherwise.
+      render: Shell
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console logs
+      description: Please provide **full** cmd/terminal logs from the moment you started UI to the end of it, after your bug happened. If it's very long, provide a link to pastebin or similar service.
+      render: Shell
+    validations:
+      required: true
+  - type: textarea
+    id: misc
+    attributes:
+      label: Additional information
+      description: Please provide us with any relevant additional info or context.
