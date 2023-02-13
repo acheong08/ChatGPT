@@ -16,6 +16,8 @@ Discord community: https://discord.gg/WMNtbDUjUv
 
 # V2 Browserless ChatGPT
 
+Using cloudflare bypass server (no browser on server either). Check out the server source code: https://github.com/acheong08/ChatGPT-Proxy-V2
+
 `pip3 install --upgrade revChatGPT`
 
 ```
