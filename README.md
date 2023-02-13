@@ -121,6 +121,7 @@ Optional configuration:
 Basic example:
 ```python
 from revChatGPT.V1 import Chatbot
+import sys
 
 chatbot = Chatbot(config={
   "email": "<your email>",
