@@ -17,6 +17,7 @@ setup(
         "httpx[socks]",
         "OpenAIAuth==0.1.1",
         "tiktoken",
+        "requests",
     ],
     extras_require={
         "unofficial": [
