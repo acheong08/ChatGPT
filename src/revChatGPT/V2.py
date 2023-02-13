@@ -186,7 +186,7 @@ class Chatbot:
                     continue
             self.conversations.add_message(
                 Message(full_result, "ChatGPT"),
-                conversation_id="default",
+                conversation_id=conversation_id,
             )
 
     def __get_config(self) -> dict:
