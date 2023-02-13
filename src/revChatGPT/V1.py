@@ -7,7 +7,7 @@ import uuid
 from os import environ
 from os import getenv
 from os.path import exists
-
+import sys
 import requests
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
@@ -92,7 +92,7 @@ class Chatbot:
         prompt,
         conversation_id=None,
         parent_id=None,
-        gen_title=False,
+        # gen_title=True,
     ):
         """
         Ask a question to the chatbot
@@ -101,16 +101,17 @@ class Chatbot:
         :param parent_id: UUID
         :param gen_title: Boolean
         """
-        if conversation_id is not None and parent_id is None:
-            self.__map_conversations()
+        # if conversation_id is not None and parent_id is None:
+        #     self.__map_conversations()
         if conversation_id is None:
             conversation_id = self.conversation_id
-        if parent_id is None:
-            parent_id = (
-                self.parent_id
-                if conversation_id == self.conversation_id
-                else self.conversation_mapping[conversation_id]
-            )
+        # if parent_id is None:
+        #     parent_id = (
+        #         self.parent_id
+        #         if conversation_id == self.conversation_id
+        #         else self.conversation_mapping[conversation_id]
+        # )
+        # new_conv = conversation_id is None
         data = {
             "action": "next",
             "messages": [
@@ -124,7 +125,7 @@ class Chatbot:
             "parent_message_id": parent_id or str(uuid.uuid4()),
             "model": "text-davinci-002-render",
         }
-        new_conv = data["conversation_id"] is None
+        # new_conv = data["conversation_id"] is None
         self.conversation_id_prev_queue.append(
             data["conversation_id"],
         )  # for rollback
@@ -133,39 +134,50 @@ class Chatbot:
             url=BASE_URL + "backend-api/conversation",
             data=json.dumps(data),
             timeout=360,
+            stream=True,
         )
-        if response.status_code != 200:
-            self.__login()
-            raise Exception(
-                f"Wrong response code: {response.status_code}! Refreshing session...",
-            )
-        else:
+        self.__check_response(response)
+
+        compounded_resp = ""
+
+        for line in response.iter_lines():
+            line = str(line)[2:-1]
+            if line == "" or line is None:
+                continue
+            if "data: " in line:
+                line = line[6:]
+            if line == "[DONE]":
+                break
+            # Try parse JSON
             try:
-                response = response.text.splitlines()[-4]
-                response = response[6:]
-            except Exception as exc:
-                print("Incorrect response from OpenAI API")
-                raise Exception("Incorrect response from OpenAI API") from exc
-            # Check if it is JSON
-            if response.startswith("{"):
-                response = json.loads(response)
-                self.parent_id = response["message"]["id"]
-                self.conversation_id = response["conversation_id"]
-                message = response["message"]["content"]["parts"][0]
-                res = {
-                    "message": message,
-                    "conversation_id": self.conversation_id,
-                    "parent_id": self.parent_id,
-                }
-                if gen_title and new_conv:
-                    title = self.__gen_title(
-                        self.conversation_id,
-                        self.parent_id,
-                    )["title"]
-                    res["title"] = title
-                return res
-            else:
-                return None
+                line = json.loads(line)
+            except json.decoder.JSONDecodeError:
+                continue
+            if not self.__check_fields(line):
+                continue
+            message = line["message"]["content"]["parts"][0][len(compounded_resp) :]
+            compounded_resp += message
+            conversation_id = line["conversation_id"]
+            parent_id = line["message"]["id"]
+            yield {
+                "message": message,
+                "conversation_id": conversation_id,
+                "parent_id": parent_id,
+            }
+        # if gen_title and new_conv:
+        #     self.__gen_title(
+        #         self.conversation_id,
+        #         parent_id,
+        #     )
+
+    def __check_fields(self, data: dict) -> bool:
+        try:
+            data["message"]["content"]
+        except TypeError:
+            return False
+        except KeyError:
+            return False
+        return True
 
     def __check_response(self, response):
         if response.status_code != 200:
@@ -211,8 +223,6 @@ class Chatbot:
             ),
         )
         self.__check_response(response)
-        data = json.loads(response.text)
-        return data
 
     def change_title(self, convo_id, title):
         """
@@ -359,12 +369,15 @@ def main(config):
             elif prompt == "!exit":
                 break
         print("Chatbot: ")
-        message = chatbot.ask(
+        for data in chatbot.ask(
             prompt,
             conversation_id=chatbot.config.get("conversation"),
             parent_id=chatbot.config.get("parent_id"),
-        )
-        print(message["message"])
+        ):
+            print(data["message"], end="")
+            sys.stdout.flush()
+        print()
+        # print(message["message"])
 
 
 if __name__ == "__main__":
