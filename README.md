@@ -30,11 +30,11 @@ Using cloudflare bypass server (no browser on server either). Check out the serv
 `pip3 install --upgrade revChatGPT`
 
 ```
- $ python3 -m revChatGPT.V2 -h                                                                
+ $ python3 -m revChatGPT.V2 -h
 
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-        
+
 usage: V2.py [-h] [-e EMAIL] [-p PASSWORD] [--paid] [--proxy PROXY] [--insecure-auth]
              [--session_token SESSION_TOKEN]
 

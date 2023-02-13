@@ -1,7 +1,12 @@
+"""
+Standard ChatGPT
+"""
 import json
 import logging
 import uuid
 from os import environ
+from os import getenv
+from os.path import exists
 
 import requests
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
@@ -13,6 +18,10 @@ BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
 class Chatbot:
+    """
+    Chatbot class for ChatGPT
+    """
+
     def __init__(
         self,
         config,
@@ -271,11 +280,10 @@ def get_input(prompt):
     return user_input
 
 
-from os import getenv
-from os.path import exists
-
-
 def configure():
+    """
+    Looks for a config file in the following locations:
+    """
     config_files = ["config.json"]
     xdg_config_home = getenv("XDG_CONFIG_HOME")
     if xdg_config_home:
@@ -295,6 +303,9 @@ def configure():
 
 
 def chatGPT_main(config):
+    """
+    Main function for the chatGPT program.
+    """
     print("Logging in...")
     chatbot = Chatbot(config)
     while True:
