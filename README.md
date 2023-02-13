@@ -71,6 +71,7 @@ if __name__ == "__main__":
 ```
 
 # V1 Standard ChatGPT
+> ## Under maintenance. May be unavailable
 
 ## Installation
 `pip3 install revChatGPT`
