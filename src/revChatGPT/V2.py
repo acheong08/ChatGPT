@@ -166,7 +166,6 @@ class Chatbot:
                     raise Exception("OpenAI error!")
                 elif response.status_code != 200:
                     print("error: " + "Unknown error")
-                    print(response.text)
                     raise Exception("Unknown error")
                 line = line.strip()
                 if line == "\n" or line == "":
