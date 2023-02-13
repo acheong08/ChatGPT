@@ -24,6 +24,7 @@ Using cloudflare bypass server (no browser on server either). Check out the serv
 >  - *Unless you use `--insecure-auth`*. This is meant for users who are blocked from accessing OpenAI websites
 > - The server is open source: https://github.com/acheong08/ChatGPT-Proxy-V2 but with a `config.json` missing to avoid OpenAI detection.
 > - Rate limits: 180 requests per minute (IP based)
+> - I am running the server right now
 
 ## Usage
 
