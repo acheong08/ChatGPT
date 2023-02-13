@@ -56,6 +56,7 @@ Wiki: https://github.com/acheong08/ChatGPT/wiki/V2
 Example code:
 ```python
 from revChatGPT.V2 import Chatbot
+import sys
 
 async def main():
     chatbot = Chatbot(email="...", password="...")
