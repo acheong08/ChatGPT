@@ -18,6 +18,14 @@ Discord community: https://discord.gg/WMNtbDUjUv
 
 Using cloudflare bypass server (no browser on server either). Check out the server source code: https://github.com/acheong08/ChatGPT-Proxy-V2
 
+> ### Notices
+> It seems I wasn't clear enough in my explanations and lead to some misunderstandings:
+> - Your email and password are not sent to me. Authentication is done locally with https://github.com/acheong08/OpenAIAuth
+>  - *Unless you use `--insecure-auth`*. This is meant for users who are blocked from accessing OpenAI websites
+> - The server is open source: https://github.com/acheong08/ChatGPT-Proxy-V2 but with a `config.json` missing to avoid OpenAI detection.
+
+## Usage
+
 `pip3 install --upgrade revChatGPT`
 
 ```
