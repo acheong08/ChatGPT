@@ -3,7 +3,6 @@ Standard ChatGPT
 """
 import json
 import logging
-import sys
 import uuid
 from os import environ
 from os import getenv
@@ -377,8 +376,7 @@ def main(config):
             conversation_id=chatbot.config.get("conversation"),
             parent_id=chatbot.config.get("parent_id"),
         ):
-            print(data["message"], end="")
-            sys.stdout.flush()
+            print(data["message"], end="", flush = True)
         print()
         # print(message["message"])
 
