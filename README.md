@@ -30,12 +30,13 @@ Using cloudflare bypass server (no browser on server either). Check out the serv
 `pip3 install --upgrade revChatGPT`
 
 ```
- $ python3 -m revChatGPT.V2 -h
+ $ python3 -m revChatGPT.V2 -h                                                                
 
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-
-usage: V2.py [-h] -e EMAIL -p PASSWORD [--paid] [--proxy PROXY] [--insecure-auth]
+        
+usage: V2.py [-h] [-e EMAIL] [-p PASSWORD] [--paid] [--proxy PROXY] [--insecure-auth]
+             [--session_token SESSION_TOKEN]
 
 options:
   -h, --help            show this help message and exit
@@ -44,8 +45,9 @@ options:
   -p PASSWORD, --password PASSWORD
                         Your OpenAI password
   --paid                Use the paid API
-  --proxy PROXY         Use a proxy (e.g. socks5://IP:PORT)
-  --insecure-auth       Use an insecure authentication method to bypass OpenAI's geo-blocking (not recommended)
+  --proxy PROXY         Use a proxy
+  --insecure-auth       Use an insecure authentication method to bypass OpenAI's geo-blocking
+  --session_token SESSION_TOKEN Alternative to email and password authentication. Use this if you have Google/Microsoft account.
 ```
 
 ## Developers
