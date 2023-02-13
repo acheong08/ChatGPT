@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="2.1.11",
+    version="2.1.12",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
@@ -15,7 +15,7 @@ setup(
     install_requires=[
         "asyncio",
         "httpx[socks]",
-        "OpenAIAuth==0.1.1",
+        "OpenAIAuth==0.2.0",
         "tiktoken",
         "requests",
     ],

@@ -207,7 +207,7 @@ class Chatbot:
             auth = OpenAIAuth(email_address=email, password=password, proxy=proxy)
             if session_token:
                 auth.session_token = session_token
-                auth.__get_access_token()
+                auth.get_access_token()
                 self.api_key = auth.access_token
                 if self.api_key is None:
                     self.session_token = None
@@ -266,13 +266,13 @@ async def main():
         "-e",
         "--email",
         help="Your OpenAI email address",
-        required=True,
+        required=False,
     )
     parser.add_argument(
         "-p",
         "--password",
         help="Your OpenAI password",
-        required=True,
+        required=False,
     )
     parser.add_argument(
         "--paid",
