@@ -161,6 +161,9 @@ class Chatbot:
                 if response.status_code == 429:
                     print("error: " + "Too many requests")
                     raise Exception("Too many requests")
+                elif response.status_code == 523:
+                    print("error: " + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
+                    raise Exception("Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
                 elif response.status_code == 503:
                     print("error: " + "OpenAI error!")
                     raise Exception("OpenAI error!")
