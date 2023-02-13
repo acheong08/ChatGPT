@@ -50,7 +50,7 @@ body:
   - type: dropdown
     id: platforms
     attributes:
-      label: What platforms do you use to access the UI ?
+      label: What is your operating system ?
       multiple: true
       options:
         - Windows
