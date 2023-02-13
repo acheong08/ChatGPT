@@ -12,6 +12,8 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 > ## [BingGPT](https://github.com/acheong08/BingGPT) is out! It's just like ChatGPT but with live internet access. Reverse engineered from the pre-release by Microsoft.
 > You need to be waitlisted by Microsoft/Bing
 
+Discord community: https://discord.gg/WMNtbDUjUv
+
 # V2 Browserless ChatGPT
 
 `pip3 install --upgrade revChatGPT`
