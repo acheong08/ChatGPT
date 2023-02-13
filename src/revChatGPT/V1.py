@@ -17,6 +17,14 @@ logging.basicConfig(level=logging.ERROR)
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
+class Error(Exception):
+    """Base class for exceptions in this module."""
+
+    source: str
+    message: str
+    code: int
+
+
 class Chatbot:
     """
     Chatbot class for ChatGPT
@@ -150,14 +158,10 @@ class Chatbot:
                     "parent_id": self.parent_id,
                 }
                 if gen_title and new_conv:
-                    try:
-                        title = self.__gen_title(
-                            self.conversation_id,
-                            self.parent_id,
-                        )["title"]
-                    except Exception as exc:
-                        split = prompt.split(" ")
-                        title = " ".join(split[:3]) + ("..." if len(split) > 3 else "")
+                    title = self.__gen_title(
+                        self.conversation_id,
+                        self.parent_id,
+                    )["title"]
                     res["title"] = title
                 return res
             else:
@@ -166,7 +170,11 @@ class Chatbot:
     def __check_response(self, response):
         if response.status_code != 200:
             print(response.text)
-            raise Exception("Response code error: ", response.status_code)
+            error = Error()
+            error.source = "OpenAI"
+            error.code = response.status_code
+            error.message = response.text
+            raise error
 
     def get_conversations(self, offset=0, limit=20):
         """
@@ -180,22 +188,22 @@ class Chatbot:
         data = json.loads(response.text)
         return data["items"]
 
-    def get_msg_history(self, id):
+    def get_msg_history(self, convo_id):
         """
         Get message history
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"backend-api/conversation/{id}"
+        url = BASE_URL + f"backend-api/conversation/{convo_id}"
         response = self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
         return data
 
-    def __gen_title(self, id, message_id):
+    def __gen_title(self, convo_id, message_id):
         """
         Generate title for conversation
         """
-        url = BASE_URL + f"backend-api/conversation/gen_title/{id}"
+        url = BASE_URL + f"backend-api/conversation/gen_title/{convo_id}"
         response = self.session.post(
             url,
             data=json.dumps(
@@ -206,22 +214,22 @@ class Chatbot:
         data = json.loads(response.text)
         return data
 
-    def change_title(self, id, title):
+    def change_title(self, convo_id, title):
         """
         Change title of conversation
         :param id: UUID of conversation
         :param title: String
         """
-        url = BASE_URL + f"backend-api/conversation/{id}"
+        url = BASE_URL + f"backend-api/conversation/{convo_id}"
         response = self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
-    def delete_conversation(self, id):
+    def delete_conversation(self, convo_id):
         """
         Delete conversation
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"backend-api/conversation/{id}"
+        url = BASE_URL + f"backend-api/conversation/{convo_id}"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -254,12 +262,15 @@ class Chatbot:
         :param num: The number of messages to rollback
         :return: None
         """
-        for i in range(num):
+        for _ in range(num):
             self.conversation_id = self.conversation_id_prev_queue.pop()
             self.parent_id = self.parent_id_prev_queue.pop()
 
 
 def get_input(prompt):
+    """
+    Multiline input function.
+    """
     # Display the prompt
     print(prompt, end="")
 
@@ -302,7 +313,7 @@ def configure():
     return config
 
 
-def chatGPT_main(config):
+def main(config):
     """
     Main function for the chatGPT program.
     """
@@ -347,21 +358,16 @@ def chatGPT_main(config):
                 continue
             elif prompt == "!exit":
                 break
-        try:
-            print("Chatbot: ")
-            message = chatbot.ask(
-                prompt,
-                conversation_id=chatbot.config.get("conversation"),
-                parent_id=chatbot.config.get("parent_id"),
-            )
-            print(message["message"])
-        except Exception as exc:
-            print("Something went wrong!")
-            print(exc)
-            continue
+        print("Chatbot: ")
+        message = chatbot.ask(
+            prompt,
+            conversation_id=chatbot.config.get("conversation"),
+            parent_id=chatbot.config.get("parent_id"),
+        )
+        print(message["message"])
 
 
-def main():
+if __name__ == "__main__":
     print(
         """
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
@@ -370,8 +376,4 @@ def main():
     )
     print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
-    chatGPT_main(configure())
-
-
-if __name__ == "__main__":
-    main()
+    main(configure())
