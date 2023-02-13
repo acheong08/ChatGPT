@@ -161,9 +161,7 @@ class Chatbot:
                     raise Exception("Too many requests")
                 elif response.status_code == 503:
                     print("error: " + "OpenAI error!")
-                    print("Logging in again")
-                    self.login(self.email, self.password, self.proxy, self.insecure)
-                    return
+                    raise Exception("OpenAI error!")
                 elif response.status_code != 200:
                     print("error: " + "Unknown error")
                     print(response.text)
@@ -212,6 +210,9 @@ class Chatbot:
 
 
 def get_input(prompt):
+    """
+    Multi-line input
+    """
     # Display the prompt
     print(prompt, end="")
 
