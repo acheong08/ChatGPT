@@ -26,6 +26,9 @@ Using cloudflare bypass server (no browser on server either). Check out the serv
 > - Rate limits: 180 requests per minute (IP based)
 > - I am running the server right now
 
+> ## IMPORTANT
+> You must either define `--paid` in command line or `paid=True` in code if you have a plus subscription. 
+
 ## Usage
 
 `pip3 install --upgrade revChatGPT`
