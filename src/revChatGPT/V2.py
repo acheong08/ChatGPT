@@ -127,6 +127,7 @@ class Chatbot:
         self.proxy = proxy
         self.email: str = email
         self.password: str = password
+        self.session_token = session_token
         self.insecure: bool = insecure
         self.api_key: str
         self.paid: bool = paid
@@ -208,8 +209,12 @@ class Chatbot:
                 auth.session_token = session_token
                 auth.__get_access_token()
                 self.api_key = auth.access_token
+                if self.api_key is None:
+                    self.session_token = None
+                    self.login(email, password, proxy, insecure, None)
                 return
             auth.begin()
+            self.session_token = auth.session_token
             self.api_key = auth.access_token
         else:
             auth_request = requests.post(
