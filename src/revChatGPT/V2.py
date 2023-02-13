@@ -162,6 +162,7 @@ class Chatbot:
                     print("error: " + "OpenAI error!")
                     print("Logging in again")
                     self.login(self.email, self.password, self.proxy, self.insecure)
+                    return
                 elif response.status_code != 200:
                     print("error: " + "Unknown error")
                     print(response.text)
