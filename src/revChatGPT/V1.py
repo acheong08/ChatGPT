@@ -115,7 +115,7 @@ class Chatbot:
         response = self.session.post(
             url=BASE_URL + "backend-api/conversation",
             data=json.dumps(data),
-            timeout_seconds=180,
+            timeout=360,
         )
         if response.status_code != 200:
             self.__login()
