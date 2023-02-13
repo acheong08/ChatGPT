@@ -122,6 +122,7 @@ class Chatbot:
         paid: bool = False,
         proxy=None,
         insecure: bool = False,
+        session_token: str = None,
     ) -> None:
         self.proxy = proxy
         self.email: str = email
@@ -130,7 +131,7 @@ class Chatbot:
         self.api_key: str
         self.paid: bool = paid
         self.conversations = Conversations()
-        self.login(email, password, proxy, insecure)
+        self.login(email, password, proxy, insecure, session_token)
 
     async def ask(self, prompt: str, conversation_id: str = None) -> dict:
         """
@@ -197,12 +198,17 @@ class Chatbot:
             "stream": True,
         }
 
-    def login(self, email, password, proxy, insecure) -> None:
+    def login(self, email, password, proxy, insecure, session_token) -> None:
         """
         Login to the API
         """
         if not insecure:
             auth = OpenAIAuth(email_address=email, password=password, proxy=proxy)
+            if session_token:
+                auth.session_token = session_token
+                auth.__get_access_token()
+                self.api_key = auth.access_token
+                return
             auth.begin()
             self.api_key = auth.access_token
         else:
@@ -280,10 +286,22 @@ async def main():
         help="Use an insecure authentication method to bypass OpenAI's geo-blocking",
         action="store_true",
     )
+    parser.add_argument(
+        "--session_token",
+        help="Alternative to email and password authentication. Use this if you have Google/Microsoft account.",
+        required=False,
+    )
     args = parser.parse_args()
 
     print("Logging in...")
-    chatbot = Chatbot(args.email, args.password, paid=args.paid, proxy=args.proxy)
+    chatbot = Chatbot(
+        args.email,
+        args.password,
+        paid=args.paid,
+        proxy=args.proxy,
+        insecure=args.insecure_auth,
+        session_token=args.session_token,
+    )
     print("Logged in\n")
 
     print("Type '!help' to show a full list of commands")
