@@ -14,7 +14,7 @@ You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay 
 
 Discord community: https://discord.gg/WMNtbDUjUv
 
-# V2 Browserless ChatGPT
+# V2 Fast ChatGPT API
 
 Using cloudflare bypass server (no browser on server either). Check out the server source code: https://github.com/acheong08/ChatGPT-Proxy-V2
 
@@ -69,47 +69,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-<details>
-
-<summary>
-
-# Outdated V1 versions
-</summary>
-
-# V1.1 Proxy API
-
-> ## Update 2023/02/11 - I am getting DDOSed. I might not be able to keep hosting it. Use V1 or host a bypass server yourself
-
-The proxy is identical to V1 but uses a proxy to bypass the browser automation. This is the recommended version. You can read up on the documentation below
-
-## Differences:
-- Automatic session refresh on client side
-- Browserless
-
-```python
-from revChatGPT.Proxied import Chatbot
-```
-
-## Notes
-Proxy server is open source at https://github.com/acheong08/ChatGPT-Proxy
-
-## Usage
-- Save your email and password to `$HOME/.config/revChatGPT/config.json`
-```json
-{"email": "<your username>", "password": "<your password>"}
-```
-
-`python3 -m revChatGPT.Proxied`
-
-
-<details>
-<summary>
-
-# V1 Browser automation
-
-Browser is required on startup to fetch cookies. Breaks terms of service.
-
-</summary>
+# V1 Standard ChatGPT
 
 ## Installation
 `pip3 install revChatGPT`
@@ -145,7 +105,7 @@ Optional configuration:
 
 ### Command line
 
-`python3 -m revChatGPT.Unofficial`
+`python3 -m revChatGPT.V1`
 
 ```
 !help - Show this message
@@ -158,62 +118,27 @@ Optional configuration:
 
 ### Developer
 
+Basic example:
 ```python
-from revChatGPT.Unofficial import Chatbot
+from revChatGPT.V1 import Chatbot
 
-chatbot = Chatbot({
+chatbot = Chatbot(config={
   "email": "<your email>",
   "password": "your password"
-}, conversation_id=None, parent_id=None) # You can start a custom conversation
+})
 
-response = chatbot.ask("Prompt", conversation_id=None, parent_id=None) # You can specify custom conversation and parent ids. Otherwise it uses the saved conversation (yes. conversations are automatically saved)
-
-print(response)
-# {
-#   "message": message,
-#   "conversation_id": self.conversation_id,
-#   "parent_id": self.parent_id,
-# }
+for data in chatbot.ask(
+  prompt,
+  conversation_id=chatbot.config.get("conversation"),
+  parent_id=chatbot.config.get("parent_id"),
+):
+  print(data["message"], end="")
+  sys.stdout.flush()
+print()
 ```
 
-Refer to [wiki](https://github.com/acheong08/ChatGPT/wiki/V1---Outdated-version) for advanced developer usage
+Refer to [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced developer usage
 
-<details>
-
-<summary>
-
-### API
-`python3 -m revChatGPT.GPTserver`
-
-</summary>
-
-HTTP POST request:
-
-```json
-{
-  "session_token": "eyJhbGciOiJkaXIiL...",
-  "prompt": "Your prompt here"
-}
-```
-
-Optional:
-
-```json
-{
-  "session_token": "eyJhbGciOiJkaXIiL...",
-  "prompt": "Your prompt here",
-  "conversation_id": "UUID...",
-  "parent_id": "UUID..."
-}
-```
-
-- Rate limiting is enabled by default to prevent simultaneous requests
-
-</details>
-
-</details>
-
-</details>
 
 # Awesome ChatGPT
 

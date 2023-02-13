@@ -3,11 +3,12 @@ Standard ChatGPT
 """
 import json
 import logging
+import sys
 import uuid
 from os import environ
 from os import getenv
 from os.path import exists
-import sys
+
 import requests
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
@@ -101,16 +102,16 @@ class Chatbot:
         :param parent_id: UUID
         :param gen_title: Boolean
         """
-        # if conversation_id is not None and parent_id is None:
-        #     self.__map_conversations()
+        if conversation_id is not None and parent_id is None:
+            self.__map_conversations()
         if conversation_id is None:
             conversation_id = self.conversation_id
-        # if parent_id is None:
-        #     parent_id = (
-        #         self.parent_id
-        #         if conversation_id == self.conversation_id
-        #         else self.conversation_mapping[conversation_id]
-        # )
+        if parent_id is None:
+            parent_id = (
+                self.parent_id
+                if conversation_id == self.conversation_id
+                else self.conversation_mapping[conversation_id]
+            )
         # new_conv = conversation_id is None
         data = {
             "action": "next",
@@ -123,7 +124,9 @@ class Chatbot:
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id or str(uuid.uuid4()),
-            "model": "text-davinci-002-render",
+            "model": "text-davinci-002-render"
+            if not self.config.get("paid")
+            else "text-davinci-002-render-paid",
         }
         # new_conv = data["conversation_id"] is None
         self.conversation_id_prev_queue.append(
@@ -211,18 +214,18 @@ class Chatbot:
         data = json.loads(response.text)
         return data
 
-    def __gen_title(self, convo_id, message_id):
-        """
-        Generate title for conversation
-        """
-        url = BASE_URL + f"backend-api/conversation/gen_title/{convo_id}"
-        response = self.session.post(
-            url,
-            data=json.dumps(
-                {"message_id": message_id, "model": "text-davinci-002-render"},
-            ),
-        )
-        self.__check_response(response)
+    # def __gen_title(self, convo_id, message_id):
+    #     """
+    #     Generate title for conversation
+    #     """
+    #     url = BASE_URL + f"backend-api/conversation/gen_title/{convo_id}"
+    #     response = self.session.post(
+    #         url,
+    #         data=json.dumps(
+    #             {"message_id": message_id, "model": "text-davinci-002-render"},
+    #         ),
+    #     )
+    #     self.__check_response(response)
 
     def change_title(self, convo_id, title):
         """
