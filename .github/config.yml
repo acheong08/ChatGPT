@@ -3,4 +3,4 @@ blank_issues_enabled: false
 contact_links:
   - name: Discussions, questions, and niche issues
     url: https://github.com/acheong08/ChatGPT/discussions/new/choose
-    about: For anything that is not an issue
+    about: For anything that is not an explicit bug
