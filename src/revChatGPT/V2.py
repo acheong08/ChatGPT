@@ -297,6 +297,9 @@ async def main():
     )
     args = parser.parse_args()
 
+    if (args.email is None or args.password is None) and args.session_token is None:
+        print("error: " + "Please provide your email and password")
+        return
     print("Logging in...")
     chatbot = Chatbot(
         args.email,
