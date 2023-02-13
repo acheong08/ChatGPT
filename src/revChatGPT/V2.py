@@ -155,10 +155,17 @@ class Chatbot:
         ) as response:
             full_result = ""
             async for line in response.aiter_lines():
-                if response.status_code != 200:
+                if response.status_code == 429:
+                    print("error: " + "Too many requests")
+                    raise Exception("Too many requests")
+                elif response.status_code == 503:
+                    print("error: " + "OpenAI error!")
+                    print("Logging in again")
                     self.login(self.email, self.password, self.proxy, self.insecure)
-                    yield "Error... Logging in again"
-                    break
+                elif response.status_code != 200:
+                    print("error: " + "Unknown error")
+                    print(response.text)
+                    raise Exception("Unknown error")
                 line = line.strip()
                 if line == "\n" or line == "":
                     continue
@@ -170,6 +177,8 @@ class Chatbot:
                     if data is None:
                         continue
                     full_result += data["choices"][0]["text"].replace("<|im_end|>", "")
+                    if "choices" not in data:
+                        continue
                     yield data
                 except json.JSONDecodeError:
                     continue
