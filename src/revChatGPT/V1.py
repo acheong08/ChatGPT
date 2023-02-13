@@ -3,7 +3,7 @@ import logging
 import uuid
 from os import environ
 
-import tls_client
+import requests
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
 # Disable all logging
@@ -20,11 +20,9 @@ class Chatbot:
         parent_id=None,
     ) -> None:
         self.config = config
-        self.session = tls_client.Session(
-            client_identifier="chrome_108",
-        )
+        self.session = requests.Session()
         if "proxy" in config:
-            if type(config["proxy"]) != str:
+            if isinstance(config["proxy"], str) is False:
                 raise Exception("Proxy must be a string!")
             proxies = {
                 "http": config["proxy"],
@@ -115,7 +113,7 @@ class Chatbot:
         )  # for rollback
         self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
-            url=BASE_URL + "api/conversation",
+            url=BASE_URL + "backend-api/conversation",
             data=json.dumps(data),
             timeout_seconds=180,
         )
@@ -167,7 +165,7 @@ class Chatbot:
         :param offset: Integer
         :param limit: Integer
         """
-        url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
+        url = BASE_URL + f"backend-api/conversations?offset={offset}&limit={limit}"
         response = self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
@@ -178,7 +176,7 @@ class Chatbot:
         Get message history
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"api/conversation/{id}"
+        url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
@@ -188,7 +186,7 @@ class Chatbot:
         """
         Generate title for conversation
         """
-        url = BASE_URL + f"api/conversation/gen_title/{id}"
+        url = BASE_URL + f"backend-api/conversation/gen_title/{id}"
         response = self.session.post(
             url,
             data=json.dumps(
@@ -205,7 +203,7 @@ class Chatbot:
         :param id: UUID of conversation
         :param title: String
         """
-        url = BASE_URL + f"api/conversation/{id}"
+        url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
@@ -214,7 +212,7 @@ class Chatbot:
         Delete conversation
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"api/conversation/{id}"
+        url = BASE_URL + f"backend-api/conversation/{id}"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -222,7 +220,7 @@ class Chatbot:
         """
         Delete all conversations
         """
-        url = BASE_URL + "api/conversations"
+        url = BASE_URL + "backend-api/conversations"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 

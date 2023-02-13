@@ -10,7 +10,7 @@ setup(
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    py_modules=["Unofficial", "V2", "Proxied"],
+    py_modules=["Unofficial", "V2", "V1"],
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "asyncio",
