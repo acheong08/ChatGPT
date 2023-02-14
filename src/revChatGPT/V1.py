@@ -3,7 +3,6 @@ Standard ChatGPT
 """
 import json
 import logging
-import sys
 import uuid
 from os import environ
 from os import getenv
@@ -15,7 +14,7 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://apps.openai.com/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.duti.tech/"
 
 
 class Error(Exception):
@@ -140,9 +139,6 @@ class Chatbot:
             stream=True,
         )
         self.__check_response(response)
-
-        compounded_resp = ""
-
         for line in response.iter_lines():
             line = str(line)[2:-1]
             if line == "" or line is None:
@@ -151,15 +147,20 @@ class Chatbot:
                 line = line[6:]
             if line == "[DONE]":
                 break
+
+            # Replace accidentally escaped double quotes
+            line = line.replace('\\"', '"')
+            line = line.replace("\\'", "'")
+            line = line.replace("\\\\", "\\")
             # Try parse JSON
             try:
                 line = json.loads(line)
             except json.decoder.JSONDecodeError:
                 continue
             if not self.__check_fields(line):
+                print("Field missing")
                 continue
-            message = line["message"]["content"]["parts"][0][len(compounded_resp) :]
-            compounded_resp += message
+            message = line["message"]["content"]["parts"][0]
             conversation_id = line["conversation_id"]
             parent_id = line["message"]["id"]
             yield {
@@ -167,11 +168,10 @@ class Chatbot:
                 "conversation_id": conversation_id,
                 "parent_id": parent_id,
             }
-        # if gen_title and new_conv:
-        #     self.__gen_title(
-        #         self.conversation_id,
-        #         parent_id,
-        #     )
+        if parent_id is not None:
+            self.parent_id = parent_id
+        if conversation_id is not None:
+            self.conversation_id = conversation_id
 
     def __check_fields(self, data: dict) -> bool:
         try:
@@ -372,13 +372,15 @@ def main(config):
             elif prompt == "!exit":
                 break
         print("Chatbot: ")
+        prev_text = ""
         for data in chatbot.ask(
             prompt,
             conversation_id=chatbot.config.get("conversation"),
             parent_id=chatbot.config.get("parent_id"),
         ):
-            print(data["message"], end="")
-            sys.stdout.flush()
+            message = data["message"][len(prev_text) :]
+            print(message, end="", flush=True)
+            prev_text = data["message"]
         print()
         # print(message["message"])
 
