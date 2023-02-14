@@ -15,7 +15,7 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://apps.openai.com/"
 
 
 class Error(Exception):
@@ -134,7 +134,7 @@ class Chatbot:
         )  # for rollback
         self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
-            url=BASE_URL + "backend-api/conversation",
+            url=BASE_URL + "api/conversation",
             data=json.dumps(data),
             timeout=360,
             stream=True,
@@ -197,7 +197,7 @@ class Chatbot:
         :param offset: Integer
         :param limit: Integer
         """
-        url = BASE_URL + f"backend-api/conversations?offset={offset}&limit={limit}"
+        url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
         response = self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
@@ -208,7 +208,7 @@ class Chatbot:
         Get message history
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"backend-api/conversation/{convo_id}"
+        url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
@@ -218,7 +218,7 @@ class Chatbot:
     #     """
     #     Generate title for conversation
     #     """
-    #     url = BASE_URL + f"backend-api/conversation/gen_title/{convo_id}"
+    #     url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
     #     response = self.session.post(
     #         url,
     #         data=json.dumps(
@@ -233,7 +233,7 @@ class Chatbot:
         :param id: UUID of conversation
         :param title: String
         """
-        url = BASE_URL + f"backend-api/conversation/{convo_id}"
+        url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
@@ -242,7 +242,7 @@ class Chatbot:
         Delete conversation
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"backend-api/conversation/{convo_id}"
+        url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -250,7 +250,7 @@ class Chatbot:
         """
         Delete all conversations
         """
-        url = BASE_URL + "backend-api/conversations"
+        url = BASE_URL + "api/conversations"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
