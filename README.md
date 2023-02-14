@@ -56,7 +56,6 @@ Optional configuration:
 ```
 !help - Show this message
 !reset - Forget the current conversation
-!refresh - Refresh the session authentication
 !config - Show the current configuration
 !rollback x - Rollback the conversation (x being the number of messages to rollback)
 !exit - Exit this program
