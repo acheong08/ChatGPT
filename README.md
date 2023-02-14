@@ -50,7 +50,7 @@ options:
                         Your OpenAI password
   --paid                Use the paid API
   --proxy PROXY         Use a proxy
-  --insecure-auth       Use an insecure authentication method to bypass OpenAI's geo-blocking
+  --insecure-auth       (Deprecated)
   --session_token SESSION_TOKEN Alternative to email and password authentication. Use this if you have Google/Microsoft account.
 ```
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 ```
 
 # V1 Standard ChatGPT
-> ## Under maintenance. May be unavailable
+> ## Under maintenance. Unavailable 
 
 ## Installation
 `pip3 install revChatGPT`
