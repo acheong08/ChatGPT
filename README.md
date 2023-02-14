@@ -26,7 +26,7 @@ Required configuration:
 ```json
 {
   "email": "<your email>",
-  "password": "your password",
+  "password": "your password"
 }
 ```
 
