@@ -123,7 +123,7 @@ class Chatbot:
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id or str(uuid.uuid4()),
-            "model": "text-davinci-002-render"
+            "model": "text-davinci-002-render-sha"
             if not self.config.get("paid")
             else "text-davinci-002-render-paid",
         }
