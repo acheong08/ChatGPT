@@ -44,7 +44,7 @@ body:
     id: version
     attributes:
       label: Version where the problem happens
-      description: `python3 -m pip show revChatGPT`
+      description: python3 -m pip show revChatGPT
     validations:
       required: true
   - type: input
