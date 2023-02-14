@@ -159,6 +159,7 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 print("Field missing")
+                print(line)
                 continue
             message = line["message"]["content"]["parts"][0]
             conversation_id = line["conversation_id"]
