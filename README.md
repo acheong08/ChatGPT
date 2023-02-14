@@ -11,7 +11,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 Discord community: https://discord.gg/WMNtbDUjUv
 
 # V1 Standard ChatGPT
-> ## Currently available
+> ## Currently functional
 
 ## Installation
 `pip3 install revChatGPT`
