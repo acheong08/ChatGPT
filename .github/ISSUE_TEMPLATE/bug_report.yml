@@ -40,13 +40,18 @@ body:
       description: Tell what you think the normal behavior should be
     validations:
       required: true
-  - type: input
-    id: commit
+  - type: textarea
+    id: version
     attributes:
-      label: Commit where the problem happens
-      description: Which commit are you running ? (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or from the cmd/terminal if you can't launch it.)
+      label: Version where the problem happens
+      description: `python3 -m pip show revChatGPT`
     validations:
       required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: What Python version are you running this with?
+      description: `python3 -V`
   - type: dropdown
     id: platforms
     attributes:
