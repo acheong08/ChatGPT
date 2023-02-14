@@ -5,12 +5,8 @@
 
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
-Connect with me on [Linkedin](https://www.linkedin.com/in/acheong08/) to support this project. (Not open for commercial opportunities yet. Too busy)
-<br><br>
-You can also follow me on [Twitter](https://twitter.com/GodlyIgnorance) to stay up to date.
-
-> ## [BingGPT](https://github.com/acheong08/BingGPT) is out! It's just like ChatGPT but with live internet access. Reverse engineered from the pre-release by Microsoft.
-> You need to be waitlisted by Microsoft/Bing
+> ## Support my work
+> You can support me by providing access to a Microsoft account with access to the New Bing. I reverse engineered it but account was suspended as a result. Check out my work: https://github.com/acheong08/EdgeGPT - (Do not use for now while I ensure it is safe.) You can slide into my Discord DMs at Churchless#2499
 
 Discord community: https://discord.gg/WMNtbDUjUv
 
