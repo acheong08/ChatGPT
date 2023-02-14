@@ -44,14 +44,14 @@ body:
     id: version
     attributes:
       label: Version where the problem happens
-      description: python3 -m pip show revChatGPT
+      description: "`python3 -m pip show revChatGPT`"
     validations:
       required: true
   - type: input
     id: python-version
     attributes:
       label: What Python version are you running this with?
-      description: `python3 -V`
+      description: "`python3 -V`"
   - type: dropdown
     id: platforms
     attributes:
