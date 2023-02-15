@@ -21,7 +21,7 @@ Discord community: https://discord.gg/WMNtbDUjUv
 1. Create account on [OpenAI's ChatGPT](https://chat.openai.com/)
 2. Save your email and password
 
-Required configuration:
+#### Required configuration:
 
 ```json
 {
@@ -29,7 +29,7 @@ Required configuration:
 }
 ```
 
-Authentication method:
+#### Authentication method:
 ```json
 "session_token": "..."
 ```
@@ -38,7 +38,7 @@ or
 "password": "your password"
 ```
 
-Optional configuration:
+#### Optional configuration:
 
 ```json
 {
