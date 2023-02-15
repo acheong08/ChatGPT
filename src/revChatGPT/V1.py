@@ -14,7 +14,7 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.duti.tech/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt-proxy.fly.dev/"
 
 
 class Error(Exception):
