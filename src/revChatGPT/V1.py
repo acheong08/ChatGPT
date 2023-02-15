@@ -7,7 +7,6 @@ import uuid
 from os import environ
 from os import getenv
 from os.path import exists
-from random import choice
 
 import requests
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
@@ -15,9 +14,7 @@ from OpenAIAuth.OpenAIAuth import OpenAIAuth
 # Disable all logging
 logging.basicConfig(level=logging.ERROR)
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or choice(
-    ["https://chatgpt-proxy.fly.dev/", "https://chatgpt-proxy2.fly.dev/"]
-)
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.duti.tech/"
 
 
 class Error(Exception):
