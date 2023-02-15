@@ -88,7 +88,7 @@ class Chatbot:
     def __login(self):
         if (
             "email" not in self.config or "password" not in self.config
-        ) and "session_token" in self.config:
+        ) and "session_token" not in self.config:
             raise Exception("No login details provided!")
         auth = OpenAIAuth(
             email_address=self.config.get("email"),
