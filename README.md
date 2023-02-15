@@ -84,12 +84,14 @@ chatbot = Chatbot(config={
   "password": "your password"
 })
 
+print("Chatbot: ")
+prev_text = ""
 for data in chatbot.ask(
-  prompt,
-  conversation_id=chatbot.config.get("conversation"),
-  parent_id=chatbot.config.get("parent_id"),
+    "Hello world",
 ):
-  print(data["message"], end="", flush = True)
+    message = data["message"][len(prev_text) :]
+    print(message, end="", flush=True)
+    prev_text = data["message"]
 print()
 ```
 
