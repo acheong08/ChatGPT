@@ -108,15 +108,13 @@ chatbot = Chatbot(config={
 
 prompt = "how many beaches does portugal have?"
 response = ""
-prev_text = "" 
 
 for data in chatbot.ask(
   prompt,
   conversation_id=chatbot.config.get("conversation"),
   parent_id=chatbot.config.get("parent_id"),
 ):
-    response += data["message"][len(prev_text) :]
-    prev_text = data["message"] 
+    response = data["message"]
 
 print(response) 
 ```
