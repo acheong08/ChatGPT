@@ -6,7 +6,7 @@
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ## Support my work
-> You can support me by providing access to a Microsoft account with access to the New Bing. I reverse engineered it but account was suspended as a result. Check out my work: https://github.com/acheong08/EdgeGPT - (Do not use for now while I ensure it is safe.) You can slide into my Discord DMs at Churchless#2499
+> Make a pull request and fix my bad code.
 
 Discord community: https://discord.gg/WMNtbDUjUv
 
