@@ -26,8 +26,16 @@ Required configuration:
 ```json
 {
   "email": "<your email>",
-  "password": "your password"
 }
+```
+
+Authentication method:
+```json
+"session_token": "..."
+```
+or
+```json
+"password": "your password"
 ```
 
 Optional configuration:
