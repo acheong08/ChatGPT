@@ -346,12 +346,16 @@ def configure():
     return config
 
 
-def main(config):
+def main(config: dict):
     """
     Main function for the chatGPT program.
     """
     print("Logging in...")
-    chatbot = Chatbot(config)
+    chatbot = Chatbot(
+        config,
+        conversation_id=config.get("conversation_id"),
+        parent_id=config.get("parent_id"),
+    )
 
     def handle_commands(command: str) -> bool:
         if command == "!help":
@@ -399,8 +403,6 @@ def main(config):
         prev_text = ""
         for data in chatbot.ask(
             prompt,
-            conversation_id=chatbot.config.get("conversation"),
-            parent_id=chatbot.config.get("parent_id"),
         ):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)
