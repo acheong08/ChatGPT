@@ -101,17 +101,27 @@ class Chatbot:
         :param parent_id: UUID
         :param gen_title: Boolean
         """
-        if conversation_id is not None and parent_id is None:
-            self.__map_conversations()
-        if conversation_id is None:
-            conversation_id = self.conversation_id
-        if parent_id is None:
-            parent_id = (
-                self.parent_id
-                if conversation_id == self.conversation_id
-                else self.conversation_mapping[conversation_id]
-            )
-        # new_conv = conversation_id is None
+        if parent_id is not None:
+            if conversation_id is None:
+                error = Error()
+                error.source = "User"
+                error.message = "conversation_id must be set once parent_id is set"
+                error.code = -1
+                raise error
+            # user-specified covid and parid, check skipped to avoid rate limit
+        else:
+            if conversation_id is None: # new conversation
+                parent_id = str(uuid.uuid4())
+            else: # old conversation, parent_id should be retrieved by conversation_id
+                if conversation_id == self.conversation_id: # conversation not changed
+                    parent_id = self.parent_id
+                else: # conversation changed
+                    # assume no one else can access the current conversation
+                    # hence no need to invoke __map_conversations() 
+                    # if conversation_id exists in conversation_mapping
+                    if conversation_id not in self.conversation_mapping:
+                        self.__map_conversations()
+                    parent_id = self.conversation_mapping[conversation_id]
         data = {
             "action": "next",
             "messages": [
@@ -122,7 +132,7 @@ class Chatbot:
                 },
             ],
             "conversation_id": conversation_id,
-            "parent_message_id": parent_id or str(uuid.uuid4()),
+            "parent_message_id": parent_id,
             "model": "text-davinci-002-render-sha"
             if not self.config.get("paid")
             else "text-davinci-002-render-paid",
