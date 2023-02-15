@@ -57,11 +57,16 @@ class Chatbot:
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
-        if "email" not in config:
-            raise Exception("Email not found in config!")
-        if "password" not in config:
-            raise Exception("Password not found in config!")
-        self.__login()
+        if "email" in config and "password" in config:
+            pass
+        elif "session_token" in config:
+            pass
+        elif "access_token" in config:
+            self.__refresh_headers(config["access_token"])
+        else:
+            raise Exception("No login details provided!")
+        if "access_token" not in config:
+            self.__login()
 
     def __refresh_headers(self, access_token):
         self.session.headers.clear()
@@ -78,14 +83,28 @@ class Chatbot:
         )
 
     def __login(self):
+        if (
+            "email" not in self.config or "password" not in self.config
+        ) and "session_token" not in self.config:
+            raise Exception("No login details provided!")
         auth = OpenAIAuth(
             email_address=self.config.get("email"),
             password=self.config.get("password"),
             proxy=self.config.get("proxy"),
         )
-        auth.begin()
-        access_token = auth.get_access_token()
-        self.__refresh_headers(access_token)
+        if self.config.get("session_token"):
+            auth.session_token = self.config["session_token"]
+            auth.get_access_token()
+            if auth.access_token is None:
+                del self.config["session_token"]
+                self.__login()
+                return
+        else:
+            auth.begin()
+            self.config["session_token"] = auth.session_token
+            auth.get_access_token()
+
+        self.__refresh_headers(auth.access_token)
 
     def ask(
         self,
@@ -225,18 +244,18 @@ class Chatbot:
         data = json.loads(response.text)
         return data
 
-    # def __gen_title(self, convo_id, message_id):
-    #     """
-    #     Generate title for conversation
-    #     """
-    #     url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
-    #     response = self.session.post(
-    #         url,
-    #         data=json.dumps(
-    #             {"message_id": message_id, "model": "text-davinci-002-render"},
-    #         ),
-    #     )
-    #     self.__check_response(response)
+    def gen_title(self, convo_id, message_id):
+        """
+        Generate title for conversation
+        """
+        url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
+        response = self.session.post(
+            url,
+            data=json.dumps(
+                {"message_id": message_id, "model": "text-davinci-002-render"},
+            ),
+        )
+        self.__check_response(response)
 
     def change_title(self, convo_id, title):
         """
@@ -337,57 +356,63 @@ def configure():
     return config
 
 
-def main(config):
+def main(config: dict):
     """
     Main function for the chatGPT program.
     """
     print("Logging in...")
-    chatbot = Chatbot(config)
+    chatbot = Chatbot(
+        config,
+        conversation_id=config.get("conversation_id"),
+        parent_id=config.get("parent_id"),
+    )
+
+    def handle_commands(command: str) -> bool:
+        if command == "!help":
+            print(
+                """
+            !help - Show this message
+            !reset - Forget the current conversation
+            !config - Show the current configuration
+            !rollback x - Rollback the conversation (x being the number of messages to rollback)
+            !exit - Exit this program
+            """,
+            )
+        elif command == "!reset":
+            chatbot.reset_chat()
+            print("Chat session successfully reset.")
+        elif command == "!config":
+            print(json.dumps(chatbot.config, indent=4))
+        elif command.startswith("!rollback"):
+            # Default to 1 rollback if no number is specified
+            try:
+                rollback = int(command.split(" ")[1])
+            except IndexError:
+                rollback = 1
+            chatbot.rollback_conversation(rollback)
+            print(f"Rolled back {rollback} messages.")
+        elif command.startswith("!setconversation"):
+            try:
+                chatbot.config["conversation"] = command.split(" ")[1]
+                print("Conversation has been changed")
+            except IndexError:
+                print("Please include conversation UUID in command")
+        elif command == "!exit":
+            exit(0)
+        else:
+            return False
+        return True
+
     while True:
         prompt = get_input("\nYou:\n")
         if prompt.startswith("!"):
-            if prompt == "!help":
-                print(
-                    """
-                !help - Show this message
-                !reset - Forget the current conversation
-                !config - Show the current configuration
-                !rollback x - Rollback the conversation (x being the number of messages to rollback)
-                !exit - Exit this program
-                """,
-                )
+            if handle_commands(prompt):
                 continue
-            elif prompt == "!reset":
-                chatbot.reset_chat()
-                print("Chat session successfully reset.")
-                continue
-            elif prompt == "!config":
-                print(json.dumps(chatbot.config, indent=4))
-                continue
-            elif prompt.startswith("!rollback"):
-                # Default to 1 rollback if no number is specified
-                try:
-                    rollback = int(prompt.split(" ")[1])
-                except IndexError:
-                    rollback = 1
-                chatbot.rollback_conversation(rollback)
-                print(f"Rolled back {rollback} messages.")
-                continue
-            elif prompt.startswith("!setconversation"):
-                try:
-                    chatbot.config["conversation"] = prompt.split(" ")[1]
-                    print("Conversation has been changed")
-                except IndexError:
-                    print("Please include conversation UUID in command")
-                continue
-            elif prompt == "!exit":
-                break
+
         print("Chatbot: ")
         prev_text = ""
         for data in chatbot.ask(
             prompt,
-            conversation_id=chatbot.config.get("conversation"),
-            parent_id=chatbot.config.get("parent_id"),
         ):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)

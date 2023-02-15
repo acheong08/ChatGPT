@@ -6,7 +6,7 @@
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ## Support my work
-> You can support me by providing access to a Microsoft account with access to the New Bing. I reverse engineered it but account was suspended as a result. Check out my work: https://github.com/acheong08/EdgeGPT - (Do not use for now while I ensure it is safe.) You can slide into my Discord DMs at Churchless#2499
+> Make a pull request and fix my bad code.
 
 Discord community: https://discord.gg/WMNtbDUjUv
 
@@ -21,16 +21,32 @@ Discord community: https://discord.gg/WMNtbDUjUv
 1. Create account on [OpenAI's ChatGPT](https://chat.openai.com/)
 2. Save your email and password
 
-Required configuration:
+### Authentication method: (Choose 1)
+#### Email/Password
+Not supported for Google/Microsoft accounts
+```json
+{
+  "email": "email",
+  "password": "your password"
+}
+```
+#### Session token
+Comes from cookies on chat.openai.com as "__Secure-next-auth.session-token"
 
 ```json
 {
-  "email": "<your email>",
-  "password": "your password",
+  "session_token": "..."
+}
+```
+#### Access token
+https://chat.openai.com/api/auth/session
+```json
+{
+  "access_token": "<access_token>"
 }
 ```
 
-Optional configuration:
+#### Optional configuration:
 
 ```json
 {
@@ -68,12 +84,14 @@ chatbot = Chatbot(config={
   "password": "your password"
 })
 
+print("Chatbot: ")
+prev_text = ""
 for data in chatbot.ask(
-  prompt,
-  conversation_id=chatbot.config.get("conversation"),
-  parent_id=chatbot.config.get("parent_id"),
+    "Hello world",
 ):
-  print(data["message"], end="", flush = True)
+    message = data["message"][len(prev_text) :]
+    print(message, end="", flush=True)
+    prev_text = data["message"]
 print()
 ```
 
