@@ -21,23 +21,29 @@ Discord community: https://discord.gg/WMNtbDUjUv
 1. Create account on [OpenAI's ChatGPT](https://chat.openai.com/)
 2. Save your email and password
 
-#### Required configuration:
+### Authentication method: (Choose 1)
+#### Email/Password
+Not supported for Google/Microsoft accounts
+```json
+{
+  "email": "email",
+  "password": "your password"
+}
+```
+#### Session token
+Comes from cookies on chat.openai.com as "__Secure-next-auth.session-token"
 
 ```json
 {
-  "email": "<your email>",
+  "session_token": "..."
 }
 ```
-
-#### Authentication method:
-Session token should be used with Microsoft and Google accounts
+#### Access token
+https://chat.openai.com/api/auth/session
 ```json
-"session_token": "..."
-```
-or
-Passwords is recommended for normal OpenAI accounts
-```json
-"password": "your password"
+{
+  "access_token": "<access_token>"
+}
 ```
 
 #### Optional configuration:
