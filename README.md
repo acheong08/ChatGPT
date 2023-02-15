@@ -30,10 +30,12 @@ Discord community: https://discord.gg/WMNtbDUjUv
 ```
 
 #### Authentication method:
+Session token should be used with Microsoft and Google accounts
 ```json
 "session_token": "..."
 ```
 or
+Passwords is recommended for normal OpenAI accounts
 ```json
 "password": "your password"
 ```
