@@ -57,11 +57,16 @@ class Chatbot:
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
-        if "email" not in config:
-            raise Exception("Email not found in config!")
-        if "password" not in config and "session_token" not in config:
-            raise Exception("Credentials not found in config!")
-        self.__login()
+        if "email" in config and "password" in config:
+            pass
+        elif "session_token" in config:
+            pass
+        elif "access_token" in config:
+            self.__refresh_headers(config["access_token"])
+        else:
+            raise Exception("No login details provided!")
+        if "access_token" not in config:
+            self.__login()
 
     def __refresh_headers(self, access_token):
         self.session.headers.clear()
@@ -78,6 +83,10 @@ class Chatbot:
         )
 
     def __login(self):
+        if (
+            "email" not in self.config or "password" not in self.config
+        ) and "session_token" in self.config:
+            raise Exception("No login details provided!")
         auth = OpenAIAuth(
             email_address=self.config.get("email"),
             password=self.config.get("password"),
@@ -87,12 +96,12 @@ class Chatbot:
             auth.session_token = self.config["session_token"]
             auth.get_access_token()
             if auth.access_token is None:
-                del self.config['session_token']
+                del self.config["session_token"]
                 self.__login()
                 return
         else:
             auth.begin()
-            self.config['session_token'] = auth.session_token
+            self.config["session_token"] = auth.session_token
             auth.get_access_token()
 
         self.__refresh_headers(auth.access_token)
