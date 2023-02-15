@@ -144,7 +144,7 @@ class Chatbot:
             "parent_message_id": parent_id or str(uuid.uuid4()),
             "model": "text-davinci-002-render-sha"
             if not self.config.get("paid")
-            else "text-davinci-002-render-paid",
+            else "text-davinci-002-render-sha",
         }
         # new_conv = data["conversation_id"] is None
         self.conversation_id_prev_queue.append(
