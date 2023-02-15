@@ -352,45 +352,49 @@ def main(config):
     """
     print("Logging in...")
     chatbot = Chatbot(config)
+
+    def handle_commands(command: str) -> bool:
+        if command == "!help":
+            print(
+                """
+            !help - Show this message
+            !reset - Forget the current conversation
+            !config - Show the current configuration
+            !rollback x - Rollback the conversation (x being the number of messages to rollback)
+            !exit - Exit this program
+            """,
+            )
+        elif command == "!reset":
+            chatbot.reset_chat()
+            print("Chat session successfully reset.")
+        elif command == "!config":
+            print(json.dumps(chatbot.config, indent=4))
+        elif command.startswith("!rollback"):
+            # Default to 1 rollback if no number is specified
+            try:
+                rollback = int(command.split(" ")[1])
+            except IndexError:
+                rollback = 1
+            chatbot.rollback_conversation(rollback)
+            print(f"Rolled back {rollback} messages.")
+        elif command.startswith("!setconversation"):
+            try:
+                chatbot.config["conversation"] = command.split(" ")[1]
+                print("Conversation has been changed")
+            except IndexError:
+                print("Please include conversation UUID in command")
+        elif command == "!exit":
+            exit(0)
+        else:
+            return False
+        return True
+
     while True:
         prompt = get_input("\nYou:\n")
         if prompt.startswith("!"):
-            if prompt == "!help":
-                print(
-                    """
-                !help - Show this message
-                !reset - Forget the current conversation
-                !config - Show the current configuration
-                !rollback x - Rollback the conversation (x being the number of messages to rollback)
-                !exit - Exit this program
-                """,
-                )
+            if handle_commands(prompt):
                 continue
-            elif prompt == "!reset":
-                chatbot.reset_chat()
-                print("Chat session successfully reset.")
-                continue
-            elif prompt == "!config":
-                print(json.dumps(chatbot.config, indent=4))
-                continue
-            elif prompt.startswith("!rollback"):
-                # Default to 1 rollback if no number is specified
-                try:
-                    rollback = int(prompt.split(" ")[1])
-                except IndexError:
-                    rollback = 1
-                chatbot.rollback_conversation(rollback)
-                print(f"Rolled back {rollback} messages.")
-                continue
-            elif prompt.startswith("!setconversation"):
-                try:
-                    chatbot.config["conversation"] = prompt.split(" ")[1]
-                    print("Conversation has been changed")
-                except IndexError:
-                    print("Please include conversation UUID in command")
-                continue
-            elif prompt == "!exit":
-                break
+
         print("Chatbot: ")
         prev_text = ""
         for data in chatbot.ask(
