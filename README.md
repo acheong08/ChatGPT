@@ -58,6 +58,7 @@ https://chat.openai.com/api/auth/session
 ```
 
 3. Save this as `$HOME/.config/revChatGPT/config.json`
+4. If you are using Windows, you will need to create an environment variable named ```HOME``` and set it to your home profile for the script to be able to locate the config.json file.
 
 ## Usage
 
@@ -73,15 +74,15 @@ https://chat.openai.com/api/auth/session
 !exit - Exit this program
 ```
 
-### Developer
+### Developer API
 
-Basic example:
+#### Basic example (streamed):
 ```python
 from revChatGPT.V1 import Chatbot
 
 chatbot = Chatbot(config={
   "email": "<your email>",
-  "password": "your password"
+  "password": "<your password>"
 })
 
 print("Chatbot: ")
@@ -95,7 +96,32 @@ for data in chatbot.ask(
 print()
 ```
 
-Refer to [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced developer usage
+#### Basic example (single result):
+
+```python
+from revChatGPT.V1 import Chatbot
+
+chatbot = Chatbot(config={
+  "email": "<your email>",
+  "password": "<your password>"
+})
+
+prompt = "how many beaches does portugal have?"
+response = ""
+prev_text = "" 
+
+for data in chatbot.ask(
+  prompt,
+  conversation_id=chatbot.config.get("conversation"),
+  parent_id=chatbot.config.get("parent_id"),
+):
+    response += data["message"][len(prev_text) :]
+    prev_text = data["message"] 
+
+print(response) 
+```
+#### All API methods
+Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced developer usage.
 
 
 # V2 Fast ChatGPT API
