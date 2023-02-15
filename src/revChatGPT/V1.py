@@ -234,18 +234,18 @@ class Chatbot:
         data = json.loads(response.text)
         return data
 
-    # def __gen_title(self, convo_id, message_id):
-    #     """
-    #     Generate title for conversation
-    #     """
-    #     url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
-    #     response = self.session.post(
-    #         url,
-    #         data=json.dumps(
-    #             {"message_id": message_id, "model": "text-davinci-002-render"},
-    #         ),
-    #     )
-    #     self.__check_response(response)
+    def gen_title(self, convo_id, message_id):
+        """
+        Generate title for conversation
+        """
+        url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
+        response = self.session.post(
+            url,
+            data=json.dumps(
+                {"message_id": message_id, "model": "text-davinci-002-render"},
+            ),
+        )
+        self.__check_response(response)
 
     def change_title(self, convo_id, title):
         """
