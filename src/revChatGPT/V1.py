@@ -59,8 +59,8 @@ class Chatbot:
         self.parent_id_prev_queue = []
         if "email" not in config:
             raise Exception("Email not found in config!")
-        if "password" not in config:
-            raise Exception("Password not found in config!")
+        if "password" not in config and "session_token" not in config:
+            raise Exception("Credentials not found in config!")
         self.__login()
 
     def __refresh_headers(self, access_token):
@@ -83,9 +83,19 @@ class Chatbot:
             password=self.config.get("password"),
             proxy=self.config.get("proxy"),
         )
-        auth.begin()
-        access_token = auth.get_access_token()
-        self.__refresh_headers(access_token)
+        if self.config.get("session_token"):
+            auth.session_token = self.config["session_token"]
+            auth.get_access_token()
+            if auth.access_token is None:
+                del self.config['session_token']
+                self.__login()
+                return
+        else:
+            auth.begin()
+            self.config['session_token'] = auth.session_token
+            auth.get_access_token()
+
+        self.__refresh_headers(auth.access_token)
 
     def ask(
         self,
