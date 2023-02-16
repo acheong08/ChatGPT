@@ -62,7 +62,13 @@ class Chatbot:
         else:
             raise Exception("No login details provided!")
         if "access_token" not in config:
-            self.__login()
+            try:
+                self.__login()
+            except Exception:
+                print("Wrong username and password")
+                import sys
+                sys.exit()
+
 
     def __refresh_headers(self, access_token):
         self.session.headers.clear()
