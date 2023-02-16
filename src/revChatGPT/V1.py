@@ -10,7 +10,7 @@ from os.path import exists
 import requests
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.duti.tech/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
 class Error(Exception):
