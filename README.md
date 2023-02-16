@@ -114,7 +114,7 @@ for data in chatbot.ask(
 ):
     response = data["message"]
 
-print(response) 
+print(response)
 ```
 #### All API methods
 Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced developer usage.
