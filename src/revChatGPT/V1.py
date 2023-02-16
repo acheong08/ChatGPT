@@ -116,27 +116,22 @@ class Chatbot:
         :param parent_id: UUID
         :param gen_title: Boolean
         """
-        if parent_id is not None:
-            if conversation_id is None:
-                error = Error()
-                error.source = "User"
-                error.message = "conversation_id must be set once parent_id is set"
-                error.code = -1
-                raise error
+        if parent_id is not None and conversation_id is None:
+            error = Error()
+            error.source = "User"
+            error.message = "conversation_id must be set once parent_id is set"
+            error.code = -1
+            raise error
             # user-specified covid and parid, check skipped to avoid rate limit
-        else:
-            if conversation_id is None: # new conversation
-                parent_id = str(uuid.uuid4())
-            else: # old conversation, parent_id should be retrieved by conversation_id
-                if conversation_id == self.conversation_id: # conversation not changed
-                    parent_id = self.parent_id
-                else: # conversation changed
-                    # assume no one else can access the current conversation
-                    # hence no need to invoke __map_conversations() 
-                    # if conversation_id exists in conversation_mapping
-                    if conversation_id not in self.conversation_mapping:
-                        self.__map_conversations()
-                    parent_id = self.conversation_mapping[conversation_id]
+        conversation_id = conversation_id or self.conversation_id
+        parent_id = parent_id or self.parent_id
+        if conversation_id is None and parent_id is None:  # new conversation
+            parent_id = str(uuid.uuid4())
+
+        if conversation_id is not None and parent_id is None:
+            if conversation_id not in self.conversation_mapping:
+                self.__map_conversations()
+            parent_id = self.conversation_mapping[conversation_id]
         data = {
             "action": "next",
             "messages": [
