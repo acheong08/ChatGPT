@@ -2,7 +2,6 @@
 Standard ChatGPT
 """
 import json
-import logging
 import uuid
 from os import environ
 from os import getenv
@@ -10,9 +9,6 @@ from os.path import exists
 
 import requests
 from OpenAIAuth.OpenAIAuth import OpenAIAuth
-
-# Disable all logging
-logging.basicConfig(level=logging.ERROR)
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.duti.tech/"
 
