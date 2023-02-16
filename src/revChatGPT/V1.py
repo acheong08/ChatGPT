@@ -59,10 +59,10 @@ class Chatbot:
         self.parent_id_prev_queue = []
         if "email" in config and "password" in config:
             pass
-        elif "session_token" in config:
-            pass
         elif "access_token" in config:
             self.__refresh_headers(config["access_token"])
+        elif "session_token" in config:
+            pass
         else:
             raise Exception("No login details provided!")
         if "access_token" not in config:
