@@ -129,6 +129,10 @@ class Chatbot:
             error.code = -1
             raise error
             # user-specified covid and parid, check skipped to avoid rate limit
+
+        if conversation_id is not None and conversation_id != self.conversation_id:  # Update to new conversations
+            self.parent_id = None  # Resetting parent_id
+
         conversation_id = conversation_id or self.conversation_id
         parent_id = parent_id or self.parent_id
         if conversation_id is None and parent_id is None:  # new conversation
