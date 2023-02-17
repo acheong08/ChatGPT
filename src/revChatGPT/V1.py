@@ -43,7 +43,7 @@ class Chatbot:
             }
             self.session.proxies.update(proxies)
         if "verbose" in config:
-            if type(config["verbose"]) != bool:
+            if not isinstance(config["verbose"], bool):
                 raise Exception("Verbose must be a boolean!")
             self.verbose = config["verbose"]
         else:
@@ -67,8 +67,8 @@ class Chatbot:
             except Exception:
                 print("Wrong username and password")
                 import sys
-                sys.exit()
 
+                sys.exit()
 
     def __refresh_headers(self, access_token):
         self.session.headers.clear()
@@ -130,7 +130,9 @@ class Chatbot:
             raise error
             # user-specified covid and parid, check skipped to avoid rate limit
 
-        if conversation_id is not None and conversation_id != self.conversation_id:  # Update to new conversations
+        if (
+            conversation_id is not None and conversation_id != self.conversation_id
+        ):  # Update to new conversations
             self.parent_id = None  # Resetting parent_id
 
         conversation_id = conversation_id or self.conversation_id
