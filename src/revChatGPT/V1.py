@@ -144,6 +144,7 @@ class Chatbot:
             if conversation_id not in self.conversation_mapping:
                 self.__map_conversations()
             parent_id = self.conversation_mapping[conversation_id]
+        is_paid = bool(self.config.get("paid"))
         data = {
             "action": "next",
             "messages": [
@@ -156,7 +157,7 @@ class Chatbot:
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
             "model": "text-davinci-002-render-sha"
-            if not self.config.get("paid")
+            if is_paid
             else "text-davinci-002-render-paid",
         }
         # new_conv = data["conversation_id"] is None
