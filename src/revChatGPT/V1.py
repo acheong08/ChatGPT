@@ -8,7 +8,7 @@ from os import getenv
 from os.path import exists
 
 import requests
-from OpenAIAuth.OpenAIAuth import OpenAIAuth
+from OpenAIAuth import Authenticator, Error as AuthError
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
@@ -64,11 +64,8 @@ class Chatbot:
         if "access_token" not in config:
             try:
                 self.__login()
-            except Exception:
-                print("Wrong username and password")
-                import sys
-
-                sys.exit()
+            except AuthError as error:
+                raise error
 
     def __refresh_headers(self, access_token):
         self.session.headers.clear()
@@ -89,7 +86,7 @@ class Chatbot:
             "email" not in self.config or "password" not in self.config
         ) and "session_token" not in self.config:
             raise Exception("No login details provided!")
-        auth = OpenAIAuth(
+        auth = Authenticator(
             email_address=self.config.get("email"),
             password=self.config.get("password"),
             proxy=self.config.get("proxy"),

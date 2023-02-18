@@ -13,10 +13,7 @@ setup(
     py_modules=["Unofficial", "V2", "V1"],
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
-        "asyncio",
-        "httpx[socks]",
-        "OpenAIAuth==0.2.0",
-        "tiktoken",
+        "OpenAIAuth==0.3.0",
         "requests",
     ],
     extras_require={
