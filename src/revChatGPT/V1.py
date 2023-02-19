@@ -110,6 +110,7 @@ class Chatbot:
         prompt,
         conversation_id=None,
         parent_id=None,
+        timeout=360,
         # gen_title=True,
     ):
         """
@@ -164,7 +165,7 @@ class Chatbot:
         response = self.session.post(
             url=BASE_URL + "api/conversation",
             data=json.dumps(data),
-            timeout=360,
+            timeout=timeout,
             stream=True,
         )
         self.__check_response(response)
