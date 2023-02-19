@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="2.3.2",
+    version="2.3.3",
     license="GNU General Public License v2.0",
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
@@ -13,7 +13,7 @@ setup(
     py_modules=["Unofficial", "V2", "V1"],
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
-        "OpenAIAuth==0.3.1",
+        "OpenAIAuth==0.3.2",
         "requests",
     ],
     extras_require={
