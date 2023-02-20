@@ -243,6 +243,8 @@ class Chatbot:
         response = self.session.get(url)
         if encoding != None:
           response.encoding = encoding
+        else:
+          response.encoding = response.apparent_encoding
         self.__check_response(response)
         data = json.loads(response.text)
         return data
