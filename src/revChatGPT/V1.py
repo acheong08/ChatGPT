@@ -234,7 +234,7 @@ class Chatbot:
         data = json.loads(response.text)
         return data["items"]
 
-    def get_msg_history(self, convo_id, encoding = None):
+    def get_msg_history(self, convo_id, encoding = "utf-8"):
         """
         Get message history
         :param id: UUID of conversation
