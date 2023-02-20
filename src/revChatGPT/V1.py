@@ -234,13 +234,15 @@ class Chatbot:
         data = json.loads(response.text)
         return data["items"]
 
-    def get_msg_history(self, convo_id):
+    def get_msg_history(self, convo_id, encoding = "utf-8"):
         """
         Get message history
         :param id: UUID of conversation
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.get(url)
+        if encoding != None:
+          response.encoding = encoding
         self.__check_response(response)
         data = json.loads(response.text)
         return data
