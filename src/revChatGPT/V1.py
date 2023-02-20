@@ -378,6 +378,7 @@ def main(config: dict):
             !config - Show the current configuration
             !rollback x - Rollback the conversation (x being the number of messages to rollback)
             !exit - Exit this program
+            !setconversation - Changes the conversation
             """,
             )
         elif command == "!reset":
@@ -395,7 +396,7 @@ def main(config: dict):
             print(f"Rolled back {rollback} messages.")
         elif command.startswith("!setconversation"):
             try:
-                chatbot.config["conversation"] = command.split(" ")[1]
+                chatbot.conversation_id = chatbot.config["conversation_id"] = command.split(" ")[1]
                 print("Conversation has been changed")
             except IndexError:
                 print("Please include conversation UUID in command")
