@@ -8,7 +8,8 @@ from os import getenv
 from os.path import exists
 
 import requests
-from OpenAIAuth import Authenticator, Error as AuthError
+from OpenAIAuth import Authenticator
+from OpenAIAuth import Error as AuthError
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
