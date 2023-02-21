@@ -175,6 +175,9 @@ class Chatbot:
                 continue
             if "data: " in line:
                 line = line[6:]
+                
+            if "Internal Server Error" in line:
+                raise Exception("Error: " + str(line))
             if line == "[DONE]":
                 break
 
