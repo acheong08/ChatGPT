@@ -169,10 +169,10 @@ class Chatbot:
             stream=True,
         )
         self.__check_response(response)
-        if response.text == 'Internal Server Error':
-            raise Exception("Error: " + str(line))
         for line in response.iter_lines():
             line = str(line)[2:-1]
+            if line == "Internal Server Error":
+                raise Exception("Error: " + str(line))
             if line == "" or line is None:
                 continue
             if "data: " in line:
@@ -191,7 +191,7 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 raise Exception("Field missing. Details: " + str(line))
-                
+
             message = line["message"]["content"]["parts"][0]
             conversation_id = line["conversation_id"]
             parent_id = line["message"]["id"]
@@ -236,7 +236,7 @@ class Chatbot:
         data = json.loads(response.text)
         return data["items"]
 
-    def get_msg_history(self, convo_id, encoding = "utf-8"):
+    def get_msg_history(self, convo_id, encoding="utf-8"):
         """
         Get message history
         :param id: UUID of conversation
@@ -244,9 +244,9 @@ class Chatbot:
         url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.get(url)
         if encoding != None:
-          response.encoding = encoding
+            response.encoding = encoding
         else:
-          response.encoding = response.apparent_encoding
+            response.encoding = response.apparent_encoding
         self.__check_response(response)
         data = json.loads(response.text)
         return data
@@ -401,7 +401,9 @@ def main(config: dict):
             print(f"Rolled back {rollback} messages.")
         elif command.startswith("!setconversation"):
             try:
-                chatbot.conversation_id = chatbot.config["conversation_id"] = command.split(" ")[1]
+                chatbot.conversation_id = chatbot.config[
+                    "conversation_id"
+                ] = command.split(" ")[1]
                 print("Conversation has been changed")
             except IndexError:
                 print("Please include conversation UUID in command")
