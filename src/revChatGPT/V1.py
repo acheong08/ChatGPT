@@ -169,6 +169,8 @@ class Chatbot:
             stream=True,
         )
         self.__check_response(response)
+        if response.text == 'Internal Server Error':
+            raise Exception("Error: " + str(line))
         for line in response.iter_lines():
             line = str(line)[2:-1]
             if line == "" or line is None:
