@@ -258,6 +258,7 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __check_response(self, response):
+        response.encoding = response.apparent_encoding
         if response.status_code != 200:
             print(response.text)
             error = Error()
@@ -280,18 +281,17 @@ class Chatbot:
         return data["items"]
 
     @logger(is_timed=True)
-    def get_msg_history(self, convo_id, encoding="utf-8"):
+    def get_msg_history(self, convo_id, encoding=None):
         """
         Get message history
         :param id: UUID of conversation
+        :param encoding: String
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.get(url)
+        self.__check_response(response)
         if encoding != None:
             response.encoding = encoding
-        else:
-            response.encoding = response.apparent_encoding
-        self.__check_response(response)
         data = json.loads(response.text)
         return data
 
@@ -317,7 +317,7 @@ class Chatbot:
         :param title: String
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
-        response = self.session.patch(url, data=f'{{"title": "{title}"}}')
+        response = self.session.patch(url, data=json.dumps({"title": title}))
         self.__check_response(response)
 
     @logger(is_timed=True)
