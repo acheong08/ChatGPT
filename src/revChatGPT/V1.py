@@ -285,14 +285,13 @@ class Chatbot:
         """
         Get message history
         :param id: UUID of conversation
+        :param encoding: String
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.get(url)
+        self.__check_response(response)
         if encoding != None:
             response.encoding = encoding
-        else:
-            response.encoding = response.apparent_encoding
-        self.__check_response(response)
         data = json.loads(response.text)
         return data
 
