@@ -6,6 +6,8 @@ import uuid
 from os import environ
 from os import getenv
 from os.path import exists
+import aiohttp
+import asyncio
 
 import requests
 from OpenAIAuth import Authenticator, Error as AuthError
@@ -33,7 +35,7 @@ class Chatbot:
         parent_id=None,
     ) -> None:
         self.config = config
-        self.session = requests.Session()
+        self.session = aiohttp.ClientSession()
         if "proxy" in config:
             if isinstance(config["proxy"], str) is False:
                 raise Exception("Proxy must be a string!")
@@ -105,7 +107,7 @@ class Chatbot:
 
         self.__refresh_headers(auth.access_token)
 
-    def ask(
+    async def ask(
         self,
         prompt,
         conversation_id=None,
@@ -162,42 +164,49 @@ class Chatbot:
             data["conversation_id"],
         )  # for rollback
         self.parent_id_prev_queue.append(data["parent_message_id"])
-        response = self.session.post(
+        response = await self.session.post(
             url=BASE_URL + "api/conversation",
             data=json.dumps(data),
             timeout=timeout,
-            stream=True,
         )
-        self.__check_response(response)
-        for line in response.iter_lines():
-            line = str(line)[2:-1]
-            if line == "" or line is None:
-                continue
-            if "data: " in line:
-                line = line[6:]
-            if line == "[DONE]":
+        await self.__check_response(response)
+        buffer = b""
+        async for chunk in response.content.iter_chunked(1024):
+            buffer += chunk
+            if b"[DONE]" in buffer:
                 break
 
-            # Replace accidentally escaped double quotes
-            line = line.replace('\\"', '"')
-            line = line.replace("\\'", "'")
-            line = line.replace("\\\\", "\\")
-            # Try parse JSON
-            try:
-                line = json.loads(line)
-            except json.decoder.JSONDecodeError:
-                continue
-            if not self.__check_fields(line):
-                raise Exception("Field missing. Details: " + str(line))
-                
-            message = line["message"]["content"]["parts"][0]
-            conversation_id = line["conversation_id"]
-            parent_id = line["message"]["id"]
-            yield {
-                "message": message,
-                "conversation_id": conversation_id,
-                "parent_id": parent_id,
-            }
+            # Parse out any complete JSON objects and yield them
+            while b"\n" in buffer:
+                idx = buffer.index(b"\n")
+                line = buffer[:idx].decode("utf-8")
+                buffer = buffer[idx + 1 :]
+
+                if line == "" or line is None:
+                    continue
+                if "data: " in line:
+                    line = line[6:]
+
+                # Replace accidentally escaped double quotes
+                line = (
+                    line.replace('\\"', '"').replace("\\'", "'").replace("\\\\", "\\")
+                )
+                # Try parse JSON
+                try:
+                    line = json.loads(line)
+                except json.decoder.JSONDecodeError:
+                    continue
+                if not self.__check_fields(line):
+                    raise Exception("Field missing. Details: " + str(line))
+
+                message = line["message"]["content"]["parts"][0]
+                conversation_id = line["conversation_id"]
+                parent_id = line["message"]["id"]
+                yield {
+                    "message": message,
+                    "conversation_id": conversation_id,
+                    "parent_id": parent_id,
+                }
         self.conversation_mapping[conversation_id] = parent_id
         if parent_id is not None:
             self.parent_id = parent_id
@@ -213,85 +222,83 @@ class Chatbot:
             return False
         return True
 
-    def __check_response(self, response):
-        if response.status_code != 200:
-            print(response.text)
+    async def __check_response(self, response):
+        if response.status != 200:
+            print(await response.text())
             error = Error()
             error.source = "OpenAI"
-            error.code = response.status_code
-            error.message = response.text
+            error.code = response.status
+            error.message = await response.text()
             raise error
 
-    def get_conversations(self, offset=0, limit=20):
+    async def get_conversations(self, offset=0, limit=20):
         """
         Get conversations
         :param offset: Integer
         :param limit: Integer
         """
         url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
-        response = self.session.get(url)
-        self.__check_response(response)
-        data = json.loads(response.text)
+        response = await self.session.get(url)
+        await self.__check_response(response)
+        data = json.loads(await response.text())
         return data["items"]
 
-    def get_msg_history(self, convo_id, encoding = "utf-8"):
+    async def get_msg_history(self, convo_id, encoding="utf-8"):
         """
         Get message history
         :param id: UUID of conversation
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
-        response = self.session.get(url)
-        if encoding != None:
-          response.encoding = encoding
-        else:
-          response.encoding = response.apparent_encoding
-        self.__check_response(response)
-        data = json.loads(response.text)
-        return data
+        response = await self.session.get(url)
+        if encoding is not None:
+            response.encoding = encoding
+            await self.__check_response(response)
+            data = json.loads(await response.text())
+            return data
 
-    def gen_title(self, convo_id, message_id):
+    async def gen_title(self, convo_id, message_id):
         """
         Generate title for conversation
         """
         url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
-        response = self.session.post(
+        response = await self.session.post(
             url,
             data=json.dumps(
                 {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
         )
-        self.__check_response(response)
+        await self.__check_response(response)
 
-    def change_title(self, convo_id, title):
+    async def change_title(self, convo_id, title):
         """
         Change title of conversation
-        :param id: UUID of conversation
+        :param convo_id: UUID of conversation
         :param title: String
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
-        response = self.session.patch(url, data=f'{{"title": "{title}"}}')
+        response = await self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
-    def delete_conversation(self, convo_id):
+    async def delete_conversation(self, convo_id):
         """
         Delete conversation
-        :param id: UUID of conversation
+        :param convo_id: UUID of conversation
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
-        response = self.session.patch(url, data='{"is_visible": false}')
+        response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
-    def clear_conversations(self):
+    async def clear_conversations(self):
         """
         Delete all conversations
         """
         url = BASE_URL + "api/conversations"
-        response = self.session.patch(url, data='{"is_visible": false}')
+        response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
-    def __map_conversations(self):
-        conversations = self.get_conversations()
-        histories = [self.get_msg_history(x["id"]) for x in conversations]
+    async def __map_conversations(self):
+        conversations = await self.get_conversations()
+        histories = [await self.get_msg_history(x["id"]) for x in conversations]
         for x, y in zip(conversations, histories):
             self.conversation_mapping[x["id"]] = y["current_node"]
 
@@ -361,7 +368,7 @@ def configure():
     return config
 
 
-def main(config: dict):
+async def main(config: dict):
     """
     Main function for the chatGPT program.
     """
@@ -399,7 +406,9 @@ def main(config: dict):
             print(f"Rolled back {rollback} messages.")
         elif command.startswith("!setconversation"):
             try:
-                chatbot.conversation_id = chatbot.config["conversation_id"] = command.split(" ")[1]
+                chatbot.conversation_id = chatbot.config[
+                    "conversation_id"
+                ] = command.split(" ")[1]
                 print("Conversation has been changed")
             except IndexError:
                 print("Please include conversation UUID in command")
@@ -417,14 +426,12 @@ def main(config: dict):
 
         print("Chatbot: ")
         prev_text = ""
-        for data in chatbot.ask(
-            prompt,
-        ):
+        prev_text = ""
+        async for data in chatbot.ask(prompt):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)
             prev_text = data["message"]
         print()
-        # print(message["message"])
 
 
 if __name__ == "__main__":
@@ -436,4 +443,4 @@ if __name__ == "__main__":
     )
     print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
-    main(configure())
+    asyncio.run(main(configure()))
