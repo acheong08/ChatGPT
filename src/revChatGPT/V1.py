@@ -280,7 +280,7 @@ class Chatbot:
         return data["items"]
 
     @logger(is_timed=True)
-    def get_msg_history(self, convo_id, encoding="utf-8"):
+    def get_msg_history(self, convo_id, encoding=None):
         """
         Get message history
         :param id: UUID of conversation
