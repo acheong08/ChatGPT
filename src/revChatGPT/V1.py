@@ -2,26 +2,39 @@
 Standard ChatGPT
 """
 import logging
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s")
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s"
+)
+
+
 def logger(is_timed):
     def decorator(func):
         from functools import wraps
         import time
+
         wraps(func)
+
         def wrapper(*args, **kwargs):
             log = logging.getLogger(func.__name__)
-            log.info(f'Entering {func.__name__} with args {args} and kwargs {kwargs}')
+            log.info(f"Entering {func.__name__} with args {args} and kwargs {kwargs}")
             start = time.time()
             out = func(*args, **kwargs)
             end = time.time()
             if is_timed:
-                log.info(f"Exiting {func.__name__} with return value {out}. Took {end - start} seconds.")
+                log.info(
+                    f"Exiting {func.__name__} with return value {out}. Took {end - start} seconds."
+                )
             else:
                 log.info(f"Exiting {func.__name__} with return value {out}")
             # Return the return value
             return out
+
         return wrapper
+
     return decorator
+
+
 log = logging.getLogger(__name__)
 import json
 import uuid
@@ -415,6 +428,7 @@ def configure():
         raise Exception("No config file found.")
     return config
 
+
 @logger(is_timed=False)
 def main(config: dict):
     """
@@ -449,7 +463,9 @@ def main(config: dict):
             try:
                 rollback = int(command.split(" ")[1])
             except IndexError:
-                logging.exception("No number specified, rolling back 1 message", stack_info=True)
+                logging.exception(
+                    "No number specified, rolling back 1 message", stack_info=True
+                )
                 rollback = 1
             chatbot.rollback_conversation(rollback)
             print(f"Rolled back {rollback} messages.")
@@ -460,7 +476,9 @@ def main(config: dict):
                 ] = command.split(" ")[1]
                 print("Conversation has been changed")
             except IndexError:
-                log.exception("Please include conversation UUID in command", stack_info=True)
+                log.exception(
+                    "Please include conversation UUID in command", stack_info=True
+                )
                 print("Please include conversation UUID in command")
         elif command == "!exit":
             exit(0)
