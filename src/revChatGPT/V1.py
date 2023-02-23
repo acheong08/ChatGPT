@@ -265,7 +265,7 @@ class Chatbot:
             try:
                 line = json.loads(line)
             except json.decoder.JSONDecodeError:
-                log.warning("Error parsing JSON")
+                log.info("Error parsing JSON")
                 continue
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
