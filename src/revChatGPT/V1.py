@@ -1,32 +1,54 @@
 """
 Standard ChatGPT
 """
+import json
 import logging
+import time
+import uuid
+from functools import wraps
+from os import environ
+from os import getenv
+from os.path import exists
+
+import requests
+from OpenAIAuth import Authenticator
+from OpenAIAuth import Error as AuthError
 
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s"
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
 )
+
+log = logging.getLogger(__name__)
 
 
 def logger(is_timed):
-    def decorator(func):
-        from functools import wraps
-        import time
+    """
+    Logger decorator
+    """
 
+    def decorator(func):
         wraps(func)
 
         def wrapper(*args, **kwargs):
-            log = logging.getLogger(func.__name__)
-            log.info(f"Entering {func.__name__} with args {args} and kwargs {kwargs}")
+            # Use lazy % formatting in logging functionspylint(logging-fstring-interpolation)
+            log.info(
+                "Entering %s with args %s and kwargs %s",
+                func.__name__,
+                args,
+                kwargs,
+            )
             start = time.time()
             out = func(*args, **kwargs)
             end = time.time()
             if is_timed:
                 log.info(
-                    f"Exiting {func.__name__} with return value {out}. Took {end - start} seconds."
+                    "Exiting %s with return value %s. Took %s seconds.",
+                    func.__name__,
+                    out,
+                    end - start,
                 )
             else:
-                log.info(f"Exiting {func.__name__} with return value {out}")
+                log.info("Exiting %s with return value %s", func.__name__, out)
             # Return the return value
             return out
 
@@ -34,16 +56,6 @@ def logger(is_timed):
 
     return decorator
 
-
-log = logging.getLogger(__name__)
-import json
-import uuid
-from os import environ
-from os import getenv
-from os.path import exists
-
-import requests
-from OpenAIAuth import Authenticator, Error as AuthError
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
@@ -175,16 +187,22 @@ class Chatbot:
         parent_id = parent_id or self.parent_id
         if conversation_id is None and parent_id is None:  # new conversation
             parent_id = str(uuid.uuid4())
-            log.debug(f"New conversation, setting parent_id to new UUID4: {parent_id}")
+            log.debug("New conversation, setting parent_id to new UUID4: %s", parent_id)
 
         if conversation_id is not None and parent_id is None:
             if conversation_id not in self.conversation_mapping:
+                # Use lazy % formatting in logging functionspylint(logging-fstring-interpolation)
+
                 log.debug(
-                    f"Conversation ID {conversation_id} not found in conversation mapping, mapping conversations",
+                    "Conversation ID %s not found in conversation mapping, mapping conversations",
+                    conversation_id,
                 )
+
                 self.__map_conversations()
             log.debug(
-                f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
+                "Conversation ID %s found in conversation mapping, setting parent_id to %s",
+                conversation_id,
+                self.conversation_mapping[conversation_id],
             )
             parent_id = self.conversation_mapping[conversation_id]
         data = {
@@ -202,7 +220,7 @@ class Chatbot:
             if not self.config.get("paid")
             else "text-davinci-002-render-paid",
         }
-        log.debug(f"Sending the payload:")
+        log.debug("Sending the payload")
         log.debug(json.dumps(data, indent=2))
         # new_conv = data["conversation_id"] is None
         self.conversation_id_prev_queue.append(
@@ -219,7 +237,7 @@ class Chatbot:
         for line in response.iter_lines():
             line = str(line)[2:-1]
             if line == "Internal Server Error":
-                log.error(f"Internal Server Error: {line}")
+                log.error("Internal Server Error: %s", line)
                 raise Exception("Error: " + str(line))
             if line == "" or line is None:
                 continue
@@ -245,9 +263,9 @@ class Chatbot:
             message = line["message"]["content"]["parts"][0]
             conversation_id = line["conversation_id"]
             parent_id = line["message"]["id"]
-            log.debug(f"Received message: {message}")
-            log.debug(f"Received conversation_id: {conversation_id}")
-            log.debug(f"Received parent_id: {parent_id}")
+            log.debug("Received message: %s", message)
+            log.debug("Received conversation_id: %s", conversation_id)
+            log.debug("Received parent_id: %s", parent_id)
             yield {
                 "message": message,
                 "conversation_id": conversation_id,
@@ -303,7 +321,7 @@ class Chatbot:
         url = BASE_URL + f"api/conversation/{convo_id}"
         response = self.session.get(url)
         self.__check_response(response)
-        if encoding != None:
+        if encoding is not None:
             response.encoding = encoding
         data = json.loads(response.text)
         return data
@@ -464,7 +482,8 @@ def main(config: dict):
                 rollback = int(command.split(" ")[1])
             except IndexError:
                 logging.exception(
-                    "No number specified, rolling back 1 message", stack_info=True
+                    "No number specified, rolling back 1 message",
+                    stack_info=True,
                 )
                 rollback = 1
             chatbot.rollback_conversation(rollback)
@@ -477,7 +496,8 @@ def main(config: dict):
                 print("Conversation has been changed")
             except IndexError:
                 log.exception(
-                    "Please include conversation UUID in command", stack_info=True
+                    "Please include conversation UUID in command",
+                    stack_info=True,
                 )
                 print("Please include conversation UUID in command")
         elif command == "!exit":
