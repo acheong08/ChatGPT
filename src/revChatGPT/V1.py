@@ -30,7 +30,6 @@ def logger(is_timed):
         wraps(func)
 
         def wrapper(*args, **kwargs):
-            # Use lazy % formatting in logging functionspylint(logging-fstring-interpolation)
             log.info(
                 "Entering %s with args %s and kwargs %s",
                 func.__name__,
