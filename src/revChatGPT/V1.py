@@ -60,11 +60,23 @@ BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
 class Error(Exception):
-    """Base class for exceptions in this module."""
+    """Base class for exceptions in this module.
+    # Error codes:
+    # -1: User error
+    # 0: Unknown error
+    # 1: Server error
+    # 2: Rate limit error
+    # 3: Invalid request error
+    """
 
     source: str
     message: str
     code: int
+
+    def __init__(self, source: str = None, message: str = None, code: int = 0):
+        self.source = source
+        self.message = message
+        self.code = code
 
 
 class Chatbot:
@@ -257,7 +269,13 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
-                raise Exception("Field missing. Details: " + str(line))
+                if (
+                    line.get("details")
+                    == "Too many requests in 1 hour. Try again later."
+                ):
+                    log.error("Rate limit exceeded")
+                    raise Error(source="ask", message=line.get("details"), code=2)
+                raise Error(source="ask", message="Field missing", code=1)
 
             message = line["message"]["content"]["parts"][0]
             conversation_id = line["conversation_id"]
