@@ -1,0 +1,8 @@
+httpx==0.23.3
+OpenAIAuth==0.3.2
+requests==2.28.2
+selenium==4.8.2
+setuptools==60.2.0
+tiktoken==0.2.0
+tls_client==0.1.8
+undetected_chromedriver==3.4.6
