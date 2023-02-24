@@ -50,7 +50,7 @@ def logger(is_timed):
                 )
             else:
                 log.info("Exiting %s with return value %s", func.__name__, out)
-            # Return the return value
+
             return out
 
         return wrapper
@@ -62,14 +62,7 @@ BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
 class Error(Exception):
-    """Base class for exceptions in this module.
-    # Error codes:
-    # -1: User error
-    # 0: Unknown error
-    # 1: Server error
-    # 2: Rate limit error
-    # 3: Invalid request error
-    """
+    """Base class for exceptions in this module."""
 
     source: str
     message: str
@@ -178,7 +171,6 @@ class Chatbot:
         conversation_id=None,
         parent_id=None,
         timeout=360,
-        # gen_title=True,
     ):
         """
         Ask a question to the chatbot
@@ -194,23 +186,19 @@ class Chatbot:
             error.message = "conversation_id must be set once parent_id is set"
             error.code = -1
             raise error
-            # user-specified covid and parid, check skipped to avoid rate limit
 
-        if (
-            conversation_id is not None and conversation_id != self.conversation_id
-        ):  # Update to new conversations
+        if conversation_id is not None and conversation_id != self.conversation_id:
             log.debug("Updating to new conversation by setting parent_id to None")
-            self.parent_id = None  # Resetting parent_id
+            self.parent_id = None
 
         conversation_id = conversation_id or self.conversation_id
         parent_id = parent_id or self.parent_id
-        if conversation_id is None and parent_id is None:  # new conversation
+        if conversation_id is None and parent_id is None:
             parent_id = str(uuid.uuid4())
             log.debug("New conversation, setting parent_id to new UUID4: %s", parent_id)
 
         if conversation_id is not None and parent_id is None:
             if conversation_id not in self.conversation_mapping:
-                # Use lazy % formatting in logging functionspylint(logging-fstring-interpolation)
 
                 log.debug(
                     "Conversation ID %s not found in conversation mapping, mapping conversations",
@@ -241,10 +229,10 @@ class Chatbot:
         }
         log.debug("Sending the payload")
         log.debug(json.dumps(data, indent=2))
-        # new_conv = data["conversation_id"] is None
+
         self.conversation_id_prev_queue.append(
             data["conversation_id"],
-        )  # for rollback
+        )
         self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
             url=BASE_URL + "api/conversation",
@@ -265,11 +253,10 @@ class Chatbot:
             if line == "[DONE]":
                 break
 
-            # Replace accidentally escaped double quotes
             line = line.replace('\\"', '"')
             line = line.replace("\\'", "'")
             line = line.replace("\\\\", "\\")
-            # Try parse JSON
+
             try:
                 line = json.loads(line)
             except json.decoder.JSONDecodeError:
@@ -314,7 +301,7 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __check_response(self, response):
-        # response.encoding = response.apparent_encoding
+
         if response.status_code != 200:
             print(response.text)
             error = Error()
@@ -442,30 +429,29 @@ class AsyncChatbot(Chatbot):
             session_client=AsyncClient,
         )
 
-    async def ask_async(
+    async def ask(
         self,
         prompt,
         conversation_id=None,
         parent_id=None,
         timeout=360,
-        # gen_title=True,
     ):
+        """
+        Ask a question to the chatbot
+        """
         if parent_id is not None and conversation_id is None:
             error = Error()
             error.source = "User"
             error.message = "conversation_id must be set once parent_id is set"
             error.code = -1
             raise error
-            # user-specified covid and parid, check skipped to avoid rate limit
 
-        if (
-            conversation_id is not None and conversation_id != self.conversation_id
-        ):  # Update to new conversations
-            self.parent_id = None  # Resetting parent_id
+        if conversation_id is not None and conversation_id != self.conversation_id:
+            self.parent_id = None
 
         conversation_id = conversation_id or self.conversation_id
         parent_id = parent_id or self.parent_id
-        if conversation_id is None and parent_id is None:  # new conversation
+        if conversation_id is None and parent_id is None:
             parent_id = str(uuid.uuid4())
 
         if conversation_id is not None and parent_id is None:
@@ -487,10 +473,10 @@ class AsyncChatbot(Chatbot):
             if not self.config.get("paid")
             else "text-davinci-002-render-paid",
         }
-        # new_conv = data["conversation_id"] is None
+
         self.conversation_id_prev_queue.append(
             data["conversation_id"],
-        )  # for rollback
+        )
         self.parent_id_prev_queue.append(data["parent_message_id"])
 
         async with self.session.stream(
@@ -515,13 +501,12 @@ class AsyncChatbot(Chatbot):
                     if "[DONE]" in line:
                         break
 
-                    # Replace accidentally escaped double quotes
                     line = (
                         line.replace('\\"', '"')
                         .replace("\\'", "'")
                         .replace("\\\\", "\\")
                     )
-                    # Try parse JSON
+
                     try:
                         line = json.loads(line)
                     except json.decoder.JSONDecodeError:
@@ -626,23 +611,19 @@ def get_input(prompt):
     """
     Multiline input function.
     """
-    # Display the prompt
+
     print(prompt, end="")
 
-    # Initialize an empty list to store the input lines
     lines = []
 
-    # Read lines of input until the user enters an empty line
     while True:
         line = input()
         if line == "":
             break
         lines.append(line)
 
-    # Join the lines, separated by newlines, and store the result
     user_input = "\n".join(lines)
 
-    # Return the input
     return user_input
 
 
@@ -699,7 +680,7 @@ async def main(config: dict):
         elif command == "!config":
             print(json.dumps(chatbot.config, indent=4))
         elif command.startswith("!rollback"):
-            # Default to 1 rollback if no number is specified
+
             try:
                 rollback = int(command.split(" ")[1])
             except IndexError:
@@ -736,14 +717,13 @@ async def main(config: dict):
 
         print("Chatbot: ")
         prev_text = ""
-        async for data in chatbot.ask_async(
+        async for data in chatbot.ask(
             prompt,
         ):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)
             prev_text = data["message"]
         print()
-        # print(message["message"])
 
 
 if __name__ == "__main__":
