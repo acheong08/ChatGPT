@@ -1,5 +1,11 @@
 {
-  "python.linting.pylintEnabled": true,
+  "python.linting.pylintEnabled": false,
   "python.linting.enabled": true,
-  "cSpell.words": ["acreate", "Browserless", "endoftext"]
+  "cSpell.words": [
+    "acreate",
+    "Browserless",
+    "endoftext"
+  ],
+  "python.formatting.provider": "black",
+  "python.linting.mypyEnabled": true
 }
