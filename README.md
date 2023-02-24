@@ -126,7 +126,10 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
 
 # Awesome ChatGPT
 
-[My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
+- [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
+- [Awesome-LLM](https://github.com/Hannibal046/Awesome-LLM)
+
+
 
 If you have a cool project you want added to the list, open an issue.
 
