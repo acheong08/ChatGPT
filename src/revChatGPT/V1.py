@@ -9,8 +9,6 @@ from functools import wraps
 from os import environ
 from os import getenv
 from os.path import exists
-import aiohttp
-import asyncio
 
 import requests
 from OpenAIAuth import Authenticator
@@ -94,7 +92,7 @@ class Chatbot:
         parent_id=None,
     ) -> None:
         self.config = config
-        self.session = aiohttp.ClientSession()
+        self.session = requests.Session()
         if "proxy" in config:
             if isinstance(config["proxy"], str) is False:
                 raise Exception("Proxy must be a string!")
@@ -164,7 +162,6 @@ class Chatbot:
             auth.get_access_token()
 
         self.__refresh_headers(auth.access_token)
-
 
     @logger(is_timed=True)
     def ask(
@@ -241,10 +238,11 @@ class Chatbot:
             data["conversation_id"],
         )  # for rollback
         self.parent_id_prev_queue.append(data["parent_message_id"])
-        response = await self.session.post(
+        response = self.session.post(
             url=BASE_URL + "api/conversation",
             data=json.dumps(data),
             timeout=timeout,
+            stream=True,
         )
         self.__check_response(response)
         for line in response.iter_lines():
@@ -306,7 +304,6 @@ class Chatbot:
             return False
         return True
 
-
     @logger(is_timed=False)
     def __check_response(self, response):
         response.encoding = response.apparent_encoding
@@ -314,10 +311,9 @@ class Chatbot:
             print(response.text)
             error = Error()
             error.source = "OpenAI"
-            error.code = response.status
-            error.message = await response.text()
+            error.code = response.status_code
+            error.message = response.text
             raise error
-
 
     @logger(is_timed=True)
     def get_conversations(self, offset=0, limit=20):
@@ -327,11 +323,10 @@ class Chatbot:
         :param limit: Integer
         """
         url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
-        response = await self.session.get(url)
-        await self.__check_response(response)
-        data = json.loads(await response.text())
+        response = self.session.get(url)
+        self.__check_response(response)
+        data = json.loads(response.text)
         return data["items"]
-
 
     @logger(is_timed=True)
     def get_msg_history(self, convo_id, encoding=None):
@@ -354,19 +349,19 @@ class Chatbot:
         Generate title for conversation
         """
         url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
-        response = await self.session.post(
+        response = self.session.post(
             url,
             data=json.dumps(
                 {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
         )
-        await self.__check_response(response)
+        self.__check_response(response)
 
     @logger(is_timed=True)
     def change_title(self, convo_id, title):
         """
         Change title of conversation
-        :param convo_id: UUID of conversation
+        :param id: UUID of conversation
         :param title: String
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
@@ -377,10 +372,10 @@ class Chatbot:
     def delete_conversation(self, convo_id):
         """
         Delete conversation
-        :param convo_id: UUID of conversation
+        :param id: UUID of conversation
         """
         url = BASE_URL + f"api/conversation/{convo_id}"
-        response = await self.session.patch(url, data='{"is_visible": false}')
+        response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
     @logger(is_timed=True)
@@ -389,7 +384,7 @@ class Chatbot:
         Delete all conversations
         """
         url = BASE_URL + "api/conversations"
-        response = await self.session.patch(url, data='{"is_visible": false}')
+        response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
     @logger(is_timed=False)
@@ -536,12 +531,14 @@ def main(config: dict):
 
         print("Chatbot: ")
         prev_text = ""
-        prev_text = ""
-        async for data in chatbot.ask(prompt):
+        for data in chatbot.ask(
+            prompt,
+        ):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)
             prev_text = data["message"]
         print()
+        # print(message["message"])
 
 
 if __name__ == "__main__":
@@ -553,4 +550,4 @@ if __name__ == "__main__":
     )
     print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
-    asyncio.run(main(configure()))
+    main(configure())
