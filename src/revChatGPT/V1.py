@@ -615,7 +615,7 @@ class AsyncChatbot(Chatbot):
             self.conversation_mapping[x["id"]] = y["current_node"]
 
     def __check_fields(self, data: dict) -> bool:
-        return self._Chatbot__check_fields(data)
+        return self.__check_fields(data)
 
     def __check_response(self, response):
         response.raise_for_status()
