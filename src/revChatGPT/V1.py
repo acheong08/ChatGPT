@@ -12,9 +12,9 @@ from os import getenv
 from os.path import exists
 
 import requests
+from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
-from httpx import AsyncClient
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
@@ -81,7 +81,11 @@ class Chatbot:
 
     @logger(is_timed=True)
     def __init__(
-        self, config, conversation_id=None, parent_id=None, session_client=None
+        self,
+        config,
+        conversation_id=None,
+        parent_id=None,
+        session_client=None,
     ) -> None:
         self.config = config
         self.session = session_client() if session_client else requests.Session()
