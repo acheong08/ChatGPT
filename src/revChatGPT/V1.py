@@ -652,12 +652,12 @@ def configure():
 
 
 @logger(is_timed=False)
-async def main(config: dict):
+def main(config: dict):
     """
     Main function for the chatGPT program.
     """
     print("Logging in...")
-    chatbot = AsyncChatbot(
+    chatbot = Chatbot(
         config,
         conversation_id=config.get("conversation_id"),
         parent_id=config.get("parent_id"),
@@ -718,7 +718,7 @@ async def main(config: dict):
 
         print("Chatbot: ")
         prev_text = ""
-        async for data in chatbot.ask(
+        for data in chatbot.ask(
             prompt,
         ):
             message = data["message"][len(prev_text) :]
@@ -736,4 +736,4 @@ if __name__ == "__main__":
     )
     print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
-    asyncio.run(main(configure()))
+    main(configure())
