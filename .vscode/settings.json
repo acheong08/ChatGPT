@@ -1,5 +1,5 @@
 {
-  "python.linting.pylintEnabled": false,
+  "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
   "cSpell.words": [
     "acreate",
@@ -7,5 +7,5 @@
     "endoftext"
   ],
   "python.formatting.provider": "black",
-  "python.linting.mypyEnabled": true
+  "python.linting.mypyEnabled": false
 }
