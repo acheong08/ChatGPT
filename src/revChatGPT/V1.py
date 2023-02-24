@@ -486,42 +486,33 @@ class AsyncChatbot(Chatbot):
             timeout=timeout,
         ) as response:
             self.__check_response(response)
-            buffer = b""
-            async for chunk in response.aiter_bytes():
-                buffer += chunk
-                while b"\n" in buffer:
-                    idx = buffer.index(b"\n")
-                    line = buffer[:idx].decode("utf-8")
-                    buffer = buffer[idx + 1 :]
+            async for line in response.aiter_lines():
+                if line == "" or line is None:
+                    continue
+                if "data: " in line:
+                    line = line[6:]
+                if "[DONE]" in line:
+                    break
 
-                    if line == "" or line is None:
-                        continue
-                    if "data: " in line:
-                        line = line[6:]
-                    if "[DONE]" in line:
-                        break
+                line = (
+                    line.replace('\\"', '"').replace("\\'", "'").replace("\\\\", "\\")
+                )
 
-                    line = (
-                        line.replace('\\"', '"')
-                        .replace("\\'", "'")
-                        .replace("\\\\", "\\")
-                    )
+                try:
+                    line = json.loads(line)
+                except json.decoder.JSONDecodeError:
+                    continue
+                if not self.__check_fields(line):
+                    raise Exception("Field missing. Details: " + str(line))
 
-                    try:
-                        line = json.loads(line)
-                    except json.decoder.JSONDecodeError:
-                        continue
-                    if not self.__check_fields(line):
-                        raise Exception("Field missing. Details: " + str(line))
-
-                    message = line["message"]["content"]["parts"][0]
-                    conversation_id = line["conversation_id"]
-                    parent_id = line["message"]["id"]
-                    yield {
-                        "message": message,
-                        "conversation_id": conversation_id,
-                        "parent_id": parent_id,
-                    }
+                message = line["message"]["content"]["parts"][0]
+                conversation_id = line["conversation_id"]
+                parent_id = line["message"]["id"]
+                yield {
+                    "message": message,
+                    "conversation_id": conversation_id,
+                    "parent_id": parent_id,
+                }
             self.conversation_mapping[conversation_id] = parent_id
             if parent_id is not None:
                 self.parent_id = parent_id
@@ -600,7 +591,13 @@ class AsyncChatbot(Chatbot):
             self.conversation_mapping[x["id"]] = y["current_node"]
 
     def __check_fields(self, data: dict) -> bool:
-        return self.__check_fields(data)
+        try:
+            data["message"]["content"]
+        except TypeError:
+            return False
+        except KeyError:
+            return False
+        return True
 
     def __check_response(self, response):
         response.raise_for_status()

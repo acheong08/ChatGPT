@@ -9,7 +9,7 @@ import sys
 import httpx
 import requests
 import tiktoken
-from OpenAIAuth.OpenAIAuth import OpenAIAuth
+from OpenAIAuth import Authenticator as OpenAIAuth
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
