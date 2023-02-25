@@ -284,6 +284,7 @@ class Chatbot:
                 continue
             conversation_id = line["conversation_id"]
             parent_id = line["message"]["id"]
+            model = line["message"]["metadata"]["model_slug"]
             log.debug("Received message: %s", message)
             log.debug("Received conversation_id: %s", conversation_id)
             log.debug("Received parent_id: %s", parent_id)
@@ -291,6 +292,7 @@ class Chatbot:
                 "message": message,
                 "conversation_id": conversation_id,
                 "parent_id": parent_id,
+                "model": model,
             }
         self.conversation_mapping[conversation_id] = parent_id
         if parent_id is not None:
@@ -507,10 +509,12 @@ class AsyncChatbot(Chatbot):
                 message = line["message"]["content"]["parts"][0]
                 conversation_id = line["conversation_id"]
                 parent_id = line["message"]["id"]
+                model = line["message"]["metadata"]["model_slug"]
                 yield {
                     "message": message,
                     "conversation_id": conversation_id,
                     "parent_id": parent_id,
+                    "model": model,
                 }
             self.conversation_mapping[conversation_id] = parent_id
             if parent_id is not None:
