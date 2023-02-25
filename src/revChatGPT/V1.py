@@ -7,14 +7,13 @@ import logging
 import time
 import uuid
 from functools import wraps
-from os import environ
-from os import getenv
+from os import environ, getenv
 from os.path import exists
 
 import requests
 from httpx import AsyncClient
-from OpenAIAuth import Authenticator
-from OpenAIAuth import Error as AuthError
+from lib_openaiauth.src.OpenAIAuth import Authenticator
+from lib_openaiauth.src.OpenAIAuth import Error as AuthError
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
@@ -106,6 +105,7 @@ class Chatbot:
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
+        self.auth = None
 
         self.__check_credentials()
 
@@ -166,6 +166,7 @@ class Chatbot:
             self.config["session_token"] = auth.session_token
             auth.get_access_token()
 
+        self.auth = auth
         self.__refresh_headers(auth.access_token)
 
     @logger(is_timed=True)
