@@ -143,6 +143,6 @@ This is not an official OpenAI product. This is a personal project and is not af
 <br>
 <br>
 
-> ### Dunno why you scrolled down so far. Here's something if you're really that bored: https://www.buymeacoffee.com/acheong08
+> ### Dunno why you scrolled down so far. Here's something if you're really that bored: <a href="https://www.buymeacoffee.com/acheong08"><img src="https://img.buymeacoffee.com/button-api/?text=Waste money&emoji=💸&slug=acheong08&button_colour=000000&font_colour=ffffff&font_family=Cookie&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
 > (Not recommended. No benefits since I make everything open source.)
 > * I mean if you do have some money to waste, why not haha
