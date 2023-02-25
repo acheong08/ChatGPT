@@ -25,8 +25,13 @@ log = logging.getLogger(__name__)
 
 
 def logger(is_timed: bool):
-    """
-    Logger decorator
+    """Logger decorator
+
+    Args:
+        is_timed (bool): Whether to include function running time in exit log
+
+    Returns:
+        _type_: _description_
     """
 
     def decorator(func):
@@ -88,6 +93,26 @@ class Chatbot:
         parent_id: str | None = None,
         session_client=None,
     ) -> None:
+        """Initialize a chatbot
+
+        Args:
+            config (dict[str, str]): Login and proxy info. Example:
+                {
+                    "email": "OpenAI account email",
+                    "password": "OpenAI account password",
+                    "session_token": "<session_token>"
+                    "access_token": "<access_token>"
+                    "proxy": "<proxy_url_string>",
+                    "paid": True/False, # whether this is a plus account
+                }
+                More details on these are available at https://github.com/acheong08/ChatGPT#configuration
+            conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
+            parent_id (str | None, optional): Id of the previous response message to continue on. Defaults to None.
+            session_client (_type_, optional): _description_. Defaults to None.
+
+        Raises:
+            Exception: _description_
+        """
         self.config = config
         self.session = session_client() if session_client else requests.Session()
 
@@ -112,6 +137,17 @@ class Chatbot:
 
     @logger(is_timed=True)
     def __check_credentials(self):
+        """Check login info combination and perform login
+        Supported combination are:
+            - access_token
+            - session_token
+            - email + password
+        and these methods will be tried in the order listed.
+
+        Raises:
+            Exception: _description_
+            AuthError: _description_
+        """
         if "access_token" in self.config:
             self.__refresh_headers(self.config["access_token"])
         elif "session_token" in self.config:
@@ -119,7 +155,7 @@ class Chatbot:
         elif "email" in self.config and "password" in self.config:
             pass
         else:
-            raise Exception("Insufficient login details provided!")
+            raise Exception("Insufficient login info provided!")
         if "access_token" not in self.config:
             try:
                 self.__login()
