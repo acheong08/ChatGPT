@@ -8,8 +8,6 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > ## Support my work
 > Make a pull request and fix my bad code.
 
-Discord community: https://discord.gg/WMNtbDUjUv
-
 # V1 Standard ChatGPT
 > ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
 
