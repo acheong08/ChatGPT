@@ -1,7 +1,8 @@
 """
 Standard ChatGPT
 """
-import asyncio
+from __future__ import annotations
+
 import json
 import logging
 import time
@@ -23,7 +24,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
-def logger(is_timed):
+def logger(is_timed: bool):
     """
     Logger decorator
     """
@@ -82,16 +83,16 @@ class Chatbot:
     @logger(is_timed=True)
     def __init__(
         self,
-        config,
-        conversation_id=None,
-        parent_id=None,
+        config: dict[str, str],
+        conversation_id: str | None = None,
+        parent_id: str | None = None,
         session_client=None,
     ) -> None:
         self.config = config
         self.session = session_client() if session_client else requests.Session()
 
         if "proxy" in config:
-            if isinstance(config["proxy"], str) is False:
+            if not isinstance(config["proxy"], str):
                 raise Exception("Proxy must be a string!")
             proxies = {
                 "http": config["proxy"],
@@ -118,7 +119,7 @@ class Chatbot:
         elif "session_token" in self.config:
             pass
         else:
-            raise Exception("No login details provided!")
+            raise Exception("Insufficient login details provided!")
         if "access_token" not in self.config:
             try:
                 self.__login()
@@ -126,7 +127,7 @@ class Chatbot:
                 raise error
 
     @logger(is_timed=False)
-    def __refresh_headers(self, access_token):
+    def __refresh_headers(self, access_token: str):
         self.session.headers.clear()
         self.session.headers.update(
             {
@@ -145,8 +146,8 @@ class Chatbot:
         if (
             "email" not in self.config or "password" not in self.config
         ) and "session_token" not in self.config:
-            log.error("No login details provided!")
-            raise Exception("No login details provided!")
+            log.error("Insufficient login details provided!")
+            raise Exception("Insufficient login details provided!")
         auth = Authenticator(
             email_address=self.config.get("email"),
             password=self.config.get("password"),
@@ -171,25 +172,21 @@ class Chatbot:
     @logger(is_timed=True)
     def ask(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,
+        prompt: str,
+        conversation_id: str | None = None,
+        parent_id: str | None = None,
+        timeout: float = 360,
     ):
         """
         Ask a question to the chatbot
         :param prompt: String
         :param conversation_id: UUID
         :param parent_id: UUID
-        :param gen_title: Boolean
+        :param timeout: Float. Unit is second
         """
         if parent_id is not None and conversation_id is None:
             log.error("conversation_id must be set once parent_id is set")
-            error = Error()
-            error.source = "User"
-            error.message = "conversation_id must be set once parent_id is set"
-            error.code = -1
-            raise error
+            raise Error("User", "conversation_id must be set once parent_id is set", -1)
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             log.debug("Updating to new conversation by setting parent_id to None")
@@ -203,7 +200,6 @@ class Chatbot:
 
         if conversation_id is not None and parent_id is None:
             if conversation_id not in self.conversation_mapping:
-
                 log.debug(
                     "Conversation ID %s not found in conversation mapping, mapping conversations",
                     conversation_id,
@@ -305,17 +301,12 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __check_response(self, response):
-
         if response.status_code != 200:
             print(response.text)
-            error = Error()
-            error.source = "OpenAI"
-            error.code = response.status_code
-            error.message = response.text
-            raise error
+            raise Error("OpenAI", response.status_code, response.text)
 
     @logger(is_timed=True)
-    def get_conversations(self, offset=0, limit=20):
+    def get_conversations(self, offset: int = 0, limit: int = 20):
         """
         Get conversations
         :param offset: Integer
@@ -328,7 +319,7 @@ class Chatbot:
         return data["items"]
 
     @logger(is_timed=True)
-    def get_msg_history(self, convo_id, encoding=None):
+    def get_msg_history(self, convo_id: str, encoding: str | None = None):
         """
         Get message history
         :param id: UUID of conversation
@@ -343,13 +334,12 @@ class Chatbot:
         return data
 
     @logger(is_timed=True)
-    def gen_title(self, convo_id, message_id):
+    def gen_title(self, convo_id: str, message_id: str):
         """
         Generate title for conversation
         """
-        url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
         response = self.session.post(
-            url,
+            BASE_URL + f"api/conversation/gen_title/{convo_id}",
             data=json.dumps(
                 {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
@@ -357,7 +347,7 @@ class Chatbot:
         self.__check_response(response)
 
     @logger(is_timed=True)
-    def change_title(self, convo_id, title):
+    def change_title(self, convo_id: str, title: str):
         """
         Change title of conversation
         :param id: UUID of conversation
@@ -368,7 +358,7 @@ class Chatbot:
         self.__check_response(response)
 
     @logger(is_timed=True)
-    def delete_conversation(self, convo_id):
+    def delete_conversation(self, convo_id: str):
         """
         Delete conversation
         :param id: UUID of conversation
@@ -403,11 +393,11 @@ class Chatbot:
         self.conversation_id = None
         self.parent_id = str(uuid.uuid4())
 
-    @logger
-    def rollback_conversation(self, num=1) -> None:
+    @logger(is_timed=False)
+    def rollback_conversation(self, num: int = 1) -> None:
         """
         Rollback the conversation.
-        :param num: The number of messages to rollback
+        :param num: Integer. The number of messages to rollback
         :return: None
         """
         for _ in range(num):
@@ -681,7 +671,6 @@ def main(config: dict):
         elif command == "!config":
             print(json.dumps(chatbot.config, indent=4))
         elif command.startswith("!rollback"):
-
             try:
                 rollback = int(command.split(" ")[1])
             except IndexError:
