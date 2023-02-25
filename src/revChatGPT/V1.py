@@ -1,7 +1,6 @@
 """
 Standard ChatGPT
 """
-import asyncio
 import json
 import logging
 import time
@@ -111,11 +110,11 @@ class Chatbot:
 
     @logger(is_timed=True)
     def __check_credentials(self):
-        if "email" in self.config and "password" in self.config:
-            pass
-        elif "access_token" in self.config:
+        if "access_token" in self.config:
             self.__refresh_headers(self.config["access_token"])
         elif "session_token" in self.config:
+            pass
+        elif "email" in self.config and "password" in self.config:
             pass
         else:
             raise Exception("No login details provided!")
@@ -139,6 +138,7 @@ class Chatbot:
                 "Referer": "https://chat.openai.com/chat",
             },
         )
+        self.config['access_token'] = access_token
 
     @logger(is_timed=True)
     def __login(self):
@@ -161,7 +161,7 @@ class Chatbot:
                 self.__login()
                 return
         else:
-            log.debug("Using authentiator to get access token")
+            log.debug("Using authenticator to get access token")
             auth.begin()
             self.config["session_token"] = auth.session_token
             auth.get_access_token()
@@ -274,6 +274,13 @@ class Chatbot:
                 ):
                     log.error("Rate limit exceeded")
                     raise Error(source="ask", message=line.get("detail"), code=2)
+                if (
+                    line.get("detail", {}).get("code")
+                    == "invalid_api_key"
+                ):
+                    log.error("Invalid access token")
+                    raise Error(source="ask", message=line.get("detail", {}).get("message"), code=3)
+                
                 raise Error(source="ask", message="Field missing", code=1)
 
             message = line["message"]["content"]["parts"][0]
