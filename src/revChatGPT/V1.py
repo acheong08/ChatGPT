@@ -32,7 +32,7 @@ def logger(is_timed):
         wraps(func)
 
         def wrapper(*args, **kwargs):
-            log.info(
+            log.debug(
                 "Entering %s with args %s and kwargs %s",
                 func.__name__,
                 args,
@@ -42,14 +42,14 @@ def logger(is_timed):
             out = func(*args, **kwargs)
             end = time.time()
             if is_timed:
-                log.info(
+                log.debug(
                     "Exiting %s with return value %s. Took %s seconds.",
                     func.__name__,
                     out,
                     end - start,
                 )
             else:
-                log.info("Exiting %s with return value %s", func.__name__, out)
+                log.debug("Exiting %s with return value %s", func.__name__, out)
 
             return out
 
@@ -264,7 +264,7 @@ class Chatbot:
             try:
                 line = json.loads(line)
             except json.decoder.JSONDecodeError:
-                log.info("Error parsing JSON")
+                log.error("Error parsing JSON")
                 continue
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
