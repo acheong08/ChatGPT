@@ -10,7 +10,8 @@ import uuid
 from functools import wraps
 from os import environ
 from os import getenv
-from os.path import exists
+import os
+import os.path as osp
 
 import requests
 from httpx import AsyncClient
@@ -69,7 +70,7 @@ class Error(Exception):
     message: str
     code: int
 
-    def __init__(self, source: str = None, message: str = None, code: int = 0):
+    def __init__(self, source: str, message: str, code: int = 0):
         self.source = source
         self.message = message
         self.code = code
@@ -88,8 +89,19 @@ class Chatbot:
         parent_id: str | None = None,
         session_client=None,
     ) -> None:
+        user_home = getenv("HOME")
+        if user_home is None:
+            self.cache_path = ".chatgpt_cache.json"
+        else:
+            self.cache_path = osp.join(user_home, ".chatgpt_cache.json")
+
         self.config = config
         self.session = session_client() if session_client else requests.Session()
+        cached_access_token = self.__get_cached_access_token(
+            self.config.get("email", None)
+        )
+        if cached_access_token is not None:
+            self.config["access_token"] = cached_access_token
 
         if "proxy" in config:
             if not isinstance(config["proxy"], str):
@@ -141,6 +153,43 @@ class Chatbot:
             },
         )
         self.config["access_token"] = access_token
+
+        email = self.config.get("email", None)
+        if email is not None:
+            self.__cache_access_token(email, access_token)
+
+    @logger(is_timed=False)
+    def __get_cached_access_token(self, email: str | None) -> str | None:
+        if email is None:
+            return None
+        cache = self.__read_cache()
+        access_token = cache.get("access_tokens", {}).get(email, None)
+
+        # TODO: check if the access_token is still valid
+        return access_token
+
+    @logger(is_timed=False)
+    def __cache_access_token(self, email: str, access_token: str) -> None:
+        if email is None:
+            return
+        cache = self.__read_cache()
+        if "access_tokens" not in cache:
+            cache["access_tokens"] = {}
+        cache["access_tokens"][email] = access_token
+        self.__write_cache(cache)
+
+    @logger(is_timed=False)
+    def __write_cache(self, info: dict):
+        os.makedirs(osp.dirname(self.cache_path), exist_ok=True)
+        json.dump(info, open(self.cache_path, "w", encoding="utf-8"), indent=4)
+
+    @logger(is_timed=False)
+    def __read_cache(self):
+        try:
+            cached = json.load(open(self.cache_path, encoding="utf-8"))
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            cached = {}
+        return cached
 
     @logger(is_timed=True)
     def __login(self):
@@ -443,11 +492,7 @@ class AsyncChatbot(Chatbot):
         Ask a question to the chatbot
         """
         if parent_id is not None and conversation_id is None:
-            error = Error()
-            error.source = "User"
-            error.message = "conversation_id must be set once parent_id is set"
-            error.code = -1
-            raise error
+            raise Error("User", "conversation_id must be set once parent_id is set", 1)
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             self.parent_id = None
@@ -636,7 +681,7 @@ def configure():
     if user_home:
         config_files.append(f"{user_home}/.config/revChatGPT/config.json")
 
-    config_file = next((f for f in config_files if exists(f)), None)
+    config_file = next((f for f in config_files if osp.exists(f)), None)
     if config_file:
         with open(config_file, encoding="utf-8") as f:
             config = json.load(f)
@@ -712,9 +757,7 @@ def main(config: dict):
 
         print("Chatbot: ")
         prev_text = ""
-        for data in chatbot.ask(
-            prompt,
-        ):
+        for data in chatbot.ask(prompt):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)
             prev_text = data["message"]
@@ -729,5 +772,5 @@ if __name__ == "__main__":
         """,
     )
     print("Type '!help' to show a full list of commands")
-    print("Press enter twice to submit your question.\n")
+    print("Press enter TWICE to submit your question.\n")
     main(configure())

@@ -2,8 +2,10 @@
   "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
   "cSpell.words": [
+    "acheong",
     "acreate",
     "Browserless",
+    "CHATGPT",
     "endoftext"
   ],
   "python.formatting.provider": "black",
