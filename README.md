@@ -138,3 +138,9 @@ This is not an official OpenAI product. This is a personal project and is not af
 
 - [virtualharby](https://twitter.com/virtualharby) - Memes for emotional support
 - [All contributors](https://github.com/acheong08/ChatGPT/graphs/contributors) - Pull requests
+
+<br>
+<br>
+<br>
+
+Dunno why you scrolled down so far. Here's something if you're really that bored: https://www.buymeacoffee.com/acheong08
