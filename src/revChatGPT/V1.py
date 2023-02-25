@@ -269,11 +269,11 @@ class Chatbot:
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
                 if (
-                    line.get("details")
+                    line.get("detail")
                     == "Too many requests in 1 hour. Try again later."
                 ):
                     log.error("Rate limit exceeded")
-                    raise Error(source="ask", message=line.get("details"), code=2)
+                    raise Error(source="ask", message=line.get("detail"), code=2)
                 raise Error(source="ask", message="Field missing", code=1)
 
             message = line["message"]["content"]["parts"][0]
