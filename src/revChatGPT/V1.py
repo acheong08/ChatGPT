@@ -495,10 +495,6 @@ class AsyncChatbot(Chatbot):
                 if "[DONE]" in line:
                     break
 
-                line = (
-                    line.replace('\\"', '"').replace("\\'", "'").replace("\\\\", "\\")
-                )
-
                 try:
                     line = json.loads(line)
                 except json.decoder.JSONDecodeError:
