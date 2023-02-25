@@ -89,18 +89,25 @@ class Chatbot:
         session_client=None,
     ) -> None:
         self.config = config
-        self.session = session_client() if session_client else requests.Session()
+        self.session = (
+            session_client(trust_env=False) if session_client else requests.Session()
+        )
 
         if "proxy" in config:
             if not isinstance(config["proxy"], str):
                 raise Exception("Proxy must be a string!")
-            proxies = {
-                "http": config["proxy"],
-                "https": config["proxy"],
-            }
+
             if isinstance(self.session, AsyncClient):
+                proxies = {
+                    "http://": config["proxy"],
+                    "https://": config["proxy"],
+                }
                 self.session = AsyncClient(proxies=proxies)
             else:
+                proxies = {
+                    "http": config["proxy"],
+                    "https": config["proxy"],
+                }
                 self.session.proxies.update(proxies)
         self.conversation_id = conversation_id
         self.parent_id = parent_id
