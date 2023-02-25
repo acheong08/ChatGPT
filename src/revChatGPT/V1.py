@@ -140,7 +140,7 @@ class Chatbot:
                 "Referer": "https://chat.openai.com/chat",
             },
         )
-        self.config['access_token'] = access_token
+        self.config["access_token"] = access_token
 
     @logger(is_timed=True)
     def __login(self):
@@ -270,13 +270,14 @@ class Chatbot:
                 ):
                     log.error("Rate limit exceeded")
                     raise Error(source="ask", message=line.get("detail"), code=2)
-                if (
-                    line.get("detail", {}).get("code")
-                    == "invalid_api_key"
-                ):
+                if line.get("detail", {}).get("code") == "invalid_api_key":
                     log.error("Invalid access token")
-                    raise Error(source="ask", message=line.get("detail", {}).get("message"), code=3)
-                
+                    raise Error(
+                        source="ask",
+                        message=line.get("detail", {}).get("message"),
+                        code=3,
+                    )
+
                 raise Error(source="ask", message="Field missing", code=1)
 
             message = line["message"]["content"]["parts"][0]
