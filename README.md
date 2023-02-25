@@ -144,4 +144,5 @@ This is not an official OpenAI product. This is a personal project and is not af
 <br>
 
 > ### Dunno why you scrolled down so far. Here's something if you're really that bored: https://www.buymeacoffee.com/acheong08
-> (Not recommended. No benefits since I make everything open source)
+> (Not recommended. No benefits since I make everything open source.)
+> * I mean if you do have some money to waste, why not haha
