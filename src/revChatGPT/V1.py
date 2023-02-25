@@ -279,8 +279,9 @@ class Chatbot:
                     )
 
                 raise Error(source="ask", message="Field missing", code=1)
-
             message = line["message"]["content"]["parts"][0]
+            if message == prompt:
+                continue
             conversation_id = line["conversation_id"]
             parent_id = line["message"]["id"]
             log.debug("Received message: %s", message)
