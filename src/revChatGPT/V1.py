@@ -308,7 +308,9 @@ class Chatbot:
                     )
                     try:
                         history = self.get_msg_history(conversation_id)
-                        self.conversation_mapping[conversation_id] = history["current_node"]
+                        self.conversation_mapping[conversation_id] = history[
+                            "current_node"
+                        ]
                     except Exception as error:
                         pass
                 else:
@@ -326,7 +328,7 @@ class Chatbot:
                     self.conversation_mapping[conversation_id],
                 )
                 parent_id = self.conversation_mapping[conversation_id]
-            else: # invalid conversation_id provided, treat as a new conversation
+            else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
         data = {
@@ -631,7 +633,11 @@ class AsyncChatbot(Chatbot):
                 message = line["message"]["content"]["parts"][0]
                 conversation_id = line["conversation_id"]
                 parent_id = line["message"]["id"]
-                model = line["message"]["metadata"]["model_slug"] if "model_slug" in line["message"]["metadata"] else None
+                model = (
+                    line["message"]["metadata"]["model_slug"]
+                    if "model_slug" in line["message"]["metadata"]
+                    else None
+                )
                 yield {
                     "message": message,
                     "conversation_id": conversation_id,
