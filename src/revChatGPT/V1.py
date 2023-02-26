@@ -109,9 +109,14 @@ class Chatbot:
 
         self.config = config
         self.session = session_client() if session_client else requests.Session()
-        cached_access_token = self.__get_cached_access_token(
-            self.config.get("email", None)
-        )
+        try:
+            cached_access_token = self.__get_cached_access_token(
+                self.config.get("email", None)
+            )
+        except Error as error:
+            if error.code == 5:
+                raise error
+            cached_access_token = None
         if cached_access_token is not None:
             self.config["access_token"] = cached_access_token
 
