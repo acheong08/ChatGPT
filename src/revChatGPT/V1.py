@@ -628,7 +628,7 @@ class AsyncChatbot(Chatbot):
                 message = line["message"]["content"]["parts"][0]
                 conversation_id = line["conversation_id"]
                 parent_id = line["message"]["id"]
-                model = line["message"]["metadata"]["model_slug"]
+                model = line["message"]["metadata"]["model_slug"] if "model_slug" in line["message"]["metadata"] else None
                 yield {
                     "message": message,
                     "conversation_id": conversation_id,
@@ -649,8 +649,8 @@ class AsyncChatbot(Chatbot):
         """
         url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
         response = await self.session.get(url)
-        await self.__check_response(response)
-        data = json.loads(await response.text())
+        self.__check_response(response)
+        data = json.loads(response.text)
         return data["items"]
 
     async def get_msg_history(self, convo_id, encoding="utf-8"):
@@ -662,8 +662,8 @@ class AsyncChatbot(Chatbot):
         response = await self.session.get(url)
         if encoding is not None:
             response.encoding = encoding
-            await self.__check_response(response)
-            data = json.loads(await response.text())
+            self.__check_response(response)
+            data = json.loads(response.text)
             return data
 
     async def gen_title(self, convo_id, message_id):
