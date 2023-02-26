@@ -12,6 +12,7 @@ from os import environ
 from os import getenv
 import os
 import os.path as osp
+import jwt
 
 import requests
 from httpx import AsyncClient
@@ -64,7 +65,17 @@ BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
 class Error(Exception):
-    """Base class for exceptions in this module."""
+    """
+    Base class for exceptions in this module.
+    Error codes:
+    -1: User error
+    0: Unknown error
+    1: Server error
+    2: Rate limit error
+    3: Invalid request error
+    4: Expired access token error
+    5: Invalid access token error
+    """
 
     source: str
     message: str
@@ -74,6 +85,7 @@ class Error(Exception):
         self.source = source
         self.message = message
         self.code = code
+        # Code
 
 
 class Chatbot:
@@ -164,7 +176,23 @@ class Chatbot:
         cache = self.__read_cache()
         access_token = cache.get("access_tokens", {}).get(email, None)
 
-        # TODO: check if the access_token is still valid
+        # Parse access_token as JWT
+        if access_token is not None:
+            try:
+                d_access_token = jwt.decode(access_token, verify=False)
+            except jwt.DecodeError as error:
+                raise Error(
+                    source="__get_cached_access_token", message="Invalid JWT", code=5
+                ) from error
+
+            exp = d_access_token.get("exp", None)
+            if exp is not None and exp < time.time():
+                raise Error(
+                    source="__get_cached_access_token",
+                    message="Access token expired",
+                    code=4,
+                )
+
         return access_token
 
     @logger(is_timed=False)
