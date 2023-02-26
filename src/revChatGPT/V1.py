@@ -100,7 +100,7 @@ class Chatbot:
         conversation_id: str | None = None,
         parent_id: str | None = None,
         session_client=None,
-        lazy_loading=False,
+        lazy_loading: bool = False,
     ) -> None:
         user_home = getenv("HOME")
         if user_home is None:
