@@ -310,6 +310,7 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __check_response(self, response):
+        response.encoding = response.apparent_encoding
         if response.status_code != 200:
             print(response.text)
             raise Error("OpenAI", response.status_code, response.text)
