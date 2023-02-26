@@ -397,7 +397,7 @@ class Chatbot:
             raise Error("OpenAI", response.status_code, response.text)
 
     @logger(is_timed=True)
-    def get_conversations(self, offset: int = 0, limit: int = 20):
+    def get_conversations(self, offset: int = 0, limit: int = 20, encoding: str | None = None):
         """
         Get conversations
         :param offset: Integer
@@ -406,6 +406,8 @@ class Chatbot:
         url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
         response = self.session.get(url)
         self.__check_response(response)
+        if encoding is not None:
+            response.encoding = encoding
         data = json.loads(response.text)
         return data["items"]
 
