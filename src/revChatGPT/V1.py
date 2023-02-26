@@ -160,8 +160,7 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __get_cached_access_token(self, email: str | None) -> str | None:
-        if email is None:
-            return None
+        email = email or "default"
         cache = self.__read_cache()
         access_token = cache.get("access_tokens", {}).get(email, None)
 
@@ -170,8 +169,7 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __cache_access_token(self, email: str, access_token: str) -> None:
-        if email is None:
-            return
+        email = email or "default"
         cache = self.__read_cache()
         if "access_tokens" not in cache:
             cache["access_tokens"] = {}
