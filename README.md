@@ -6,7 +6,9 @@
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ## Support my work
-> Make a pull request and fix my bad code.
+> Make a pull request and fix my bad code. <br>
+> or <br>
+> <a href="https://www.buymeacoffee.com/acheong08" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 # V1 Standard ChatGPT
 > ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
@@ -136,9 +138,3 @@ This is not an official OpenAI product. This is a personal project and is not af
 
 - [virtualharby](https://twitter.com/virtualharby) - Memes for emotional support
 - [All contributors](https://github.com/acheong08/ChatGPT/graphs/contributors) - Pull requests
-
-<br>
-<br>
-<br>
-
-<a href="https://www.buymeacoffee.com/acheong08"><img src="https://img.buymeacoffee.com/button-api/?text=Waste money&emoji=💸&slug=acheong08&button_colour=000000&font_colour=ffffff&font_family=Cookie&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
