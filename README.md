@@ -10,9 +10,10 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > or <br>
 > <a href="https://www.buymeacoffee.com/acheong08" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
-> ## Other notes
+> ## I need your help.
 > - There is a 60 requests per minute rate limit on the public proxy server which is costing me $5 per day to run
 > - I am using a total of 5 servers and a load balancer to handle around 500GB of traffic per day
+> - I appreciate any donations to help fund this project
 > - I will begin selling access to private servers without the rate limits in the coming days
 >   - All proceeds from this will be used to fund the public server.
 >   - After the first few purchases which will cover the cost of the existing servers, I will begin adding more servers to the public load balancer with the proceeds and start to lower the public rate limits
@@ -129,7 +130,7 @@ print(response)
 Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced developer usage.
 
 
-> ## V2 Fast ChatGPT API is dead (broken by OpenAI)
+> ## V2 Fast ChatGPT API is dead (patched by OpenAI)
 
 
 
@@ -141,7 +142,7 @@ If you have a cool project you want added to the list, open an issue.
 
 # Disclaimers
 
-This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
+This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me.
 
 # Credits
 
