@@ -3,16 +3,16 @@ Standard ChatGPT
 """
 from __future__ import annotations
 
+import base64
 import json
 import logging
+import os
+import os.path as osp
 import time
 import uuid
 from functools import wraps
 from os import environ
 from os import getenv
-import os
-import os.path as osp
-import base64
 
 import requests
 from httpx import AsyncClient
@@ -117,7 +117,7 @@ class Chatbot:
         self.session = session_client() if session_client else requests.Session()
         try:
             cached_access_token = self.__get_cached_access_token(
-                self.config.get("email", None)
+                self.config.get("email", None),
             )
         except Error as error:
             if error.code == 5:
@@ -437,7 +437,10 @@ class Chatbot:
 
     @logger(is_timed=True)
     def get_conversations(
-        self, offset: int = 0, limit: int = 20, encoding: str | None = None
+        self,
+        offset: int = 0,
+        limit: int = 20,
+        encoding: str | None = None,
     ):
         """
         Get conversations
