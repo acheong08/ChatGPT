@@ -189,7 +189,15 @@ class Chatbot:
         # Parse access_token as JWT
         if access_token is not None:
             try:
-                d_access_token = jwt.decode(access_token, verify=False)
+                # Split access_token into 3 parts
+                access_token = access_token.split(".")
+                # Add padding to the middle part
+                access_token[1] += "=" * ((4 - len(access_token[1]) % 4) % 4)
+                # Join the parts back together
+                access_token = ".".join(access_token)
+                d_access_token = jwt.decode(
+                    access_token, verify=False, algorithms=["RS256"]
+                )
             except jwt.DecodeError as error:
                 raise Error(
                     source="__get_cached_access_token", message="Invalid JWT", code=5
@@ -369,7 +377,11 @@ class Chatbot:
                 continue
             conversation_id = line["conversation_id"]
             parent_id = line["message"]["id"]
-            model = line["message"]["metadata"]["model_slug"]
+            try:
+                model = line["message"]["metadata"]["model_slug"]
+            except KeyError:
+                model = None
+                print(line.get("message"))
             log.debug("Received message: %s", message)
             log.debug("Received conversation_id: %s", conversation_id)
             log.debug("Received parent_id: %s", parent_id)
@@ -402,7 +414,9 @@ class Chatbot:
             raise Error("OpenAI", response.status_code, response.text)
 
     @logger(is_timed=True)
-    def get_conversations(self, offset: int = 0, limit: int = 20, encoding: str | None = None):
+    def get_conversations(
+        self, offset: int = 0, limit: int = 20, encoding: str | None = None
+    ):
         """
         Get conversations
         :param offset: Integer
