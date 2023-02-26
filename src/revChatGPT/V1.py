@@ -105,7 +105,12 @@ class Chatbot:
         if user_home is None:
             self.cache_path = ".chatgpt_cache.json"
         else:
-            self.cache_path = osp.join(user_home, ".chatgpt_cache.json")
+            # mkdir ~/.config/revChatGPT
+            if not osp.exists(osp.join(user_home, ".config")):
+                os.mkdir(osp.join(user_home, ".config"))
+            if not osp.exists(osp.join(user_home, ".config", "revChatGPT")):
+                os.mkdir(osp.join(user_home, ".config", "revChatGPT"))
+            self.cache_path = osp.join(user_home, ".config", "revChatGPT", "cache.json")
 
         self.config = config
         self.session = session_client() if session_client else requests.Session()
