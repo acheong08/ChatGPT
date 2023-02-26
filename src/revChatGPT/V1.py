@@ -585,7 +585,7 @@ class AsyncChatbot(Chatbot):
 
         if conversation_id is not None and parent_id is None:
             if conversation_id not in self.conversation_mapping:
-                self.__map_conversations()
+                await self.__map_conversations()
             parent_id = self.conversation_mapping[conversation_id]
         data = {
             "action": "next",
