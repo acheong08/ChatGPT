@@ -100,6 +100,7 @@ class Chatbot:
         conversation_id: str | None = None,
         parent_id: str | None = None,
         session_client=None,
+        lazy_loading=False,
     ) -> None:
         user_home = getenv("HOME")
         if user_home is None:
@@ -136,6 +137,7 @@ class Chatbot:
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
+        self.lazy_loading = lazy_loading
 
         self.__check_credentials()
 
@@ -281,18 +283,34 @@ class Chatbot:
 
         if conversation_id is not None and parent_id is None:
             if conversation_id not in self.conversation_mapping:
-                log.debug(
-                    "Conversation ID %s not found in conversation mapping, mapping conversations",
-                    conversation_id,
-                )
+                if self.lazy_loading:
+                    log.debug(
+                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
+                        conversation_id,
+                    )
+                    try:
+                        history = self.get_msg_history(conversation_id)
+                        self.conversation_mapping[conversation_id] = history["current_node"]
+                    except Exception as error:
+                        pass
+                else:
+                    log.debug(
+                        "Conversation ID %s not found in conversation mapping, mapping conversations",
+                        conversation_id,
+                    )
 
-                self.__map_conversations()
-            log.debug(
-                "Conversation ID %s found in conversation mapping, setting parent_id to %s",
-                conversation_id,
-                self.conversation_mapping[conversation_id],
-            )
-            parent_id = self.conversation_mapping[conversation_id]
+                    self.__map_conversations()
+
+            if conversation_id in self.conversation_mapping:
+                log.debug(
+                    "Conversation ID %s found in conversation mapping, setting parent_id to %s",
+                    conversation_id,
+                    self.conversation_mapping[conversation_id],
+                )
+                parent_id = self.conversation_mapping[conversation_id]
+            else: # invalid conversation_id provided, treat as a new conversation
+                conversation_id = None
+                parent_id = str(uuid.uuid4())
         data = {
             "action": "next",
             "messages": [
