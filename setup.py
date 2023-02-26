@@ -14,9 +14,9 @@ setup(
     url="https://github.com/acheong08/ChatGPT",
     install_requires=[
         "OpenAIAuth==0.3.2",
-        "requests",
+        "requests[socks]",
         "asyncio",
-        "httpx",
+        "httpx[socks]",
     ],
     extras_require={
         "unofficial": [
