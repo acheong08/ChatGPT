@@ -12,7 +12,7 @@ from os import environ
 from os import getenv
 import os
 import os.path as osp
-import jwt
+import base64
 
 import requests
 from httpx import AsyncClient
@@ -190,18 +190,23 @@ class Chatbot:
         if access_token is not None:
             try:
                 # Split access_token into 3 parts
-                access_token = access_token.split(".")
+                s_access_token = access_token.split(".")
                 # Add padding to the middle part
-                access_token[1] += "=" * ((4 - len(access_token[1]) % 4) % 4)
-                # Join the parts back together
-                access_token = ".".join(access_token)
-                d_access_token = jwt.decode(
-                    access_token, verify=False, algorithms=["RS256"]
-                )
-            except jwt.DecodeError as error:
+                s_access_token[1] += "=" * ((4 - len(s_access_token[1]) % 4) % 4)
+                d_access_token = base64.b64decode(s_access_token[1])
+                d_access_token = json.loads(d_access_token)
+            except base64.binascii.Error:
                 raise Error(
-                    source="__get_cached_access_token", message="Invalid JWT", code=5
-                ) from error
+                    source="__get_cached_access_token",
+                    message="Invalid access token",
+                    code=5,
+                ) from None
+            except json.JSONDecodeError:
+                raise Error(
+                    source="__get_cached_access_token",
+                    message="Invalid access token",
+                    code=5,
+                ) from None
 
             exp = d_access_token.get("exp", None)
             if exp is not None and exp < time.time():
@@ -381,7 +386,6 @@ class Chatbot:
                 model = line["message"]["metadata"]["model_slug"]
             except KeyError:
                 model = None
-                print(line.get("message"))
             log.debug("Received message: %s", message)
             log.debug("Received conversation_id: %s", conversation_id)
             log.debug("Received parent_id: %s", parent_id)
