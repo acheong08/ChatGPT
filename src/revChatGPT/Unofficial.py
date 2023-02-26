@@ -365,7 +365,6 @@ class Chatbot:
                 sleep(5)
             self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
-                puid_cookie=self.puid_cookie,
                 user_agent=self.user_agent,
             )
             # Wait for the login button to appear
@@ -498,7 +497,6 @@ class Chatbot:
                 sleep(5)
             self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
-                puid_cookie=self.puid_cookie,
                 user_agent=self.user_agent,
             )
             # Wait for the login button to appear
@@ -627,7 +625,6 @@ class Chatbot:
                 del driver
             self.__refresh_headers(
                 cf_clearance=self.cf_clearance,
-                puid_cookie=self.puid_cookie,
                 user_agent=self.user_agent,
             )
 
@@ -640,10 +637,10 @@ class Chatbot:
                         "cf_clearance=.*?;",
                         message["params"]["headers"]["set-cookie"],
                     )
-                    puid_cookie = re.search(
-                        "_puid=.*?;",
-                        message["params"]["headers"]["set-cookie"],
-                    )
+                    # puid_cookie = re.search(
+                    #     "_puid=.*?;",
+                    #     message["params"]["headers"]["set-cookie"],
+                    # )
                     session_cookie = re.search(
                         "__Secure-next-auth.session-token=.*?;",
                         message["params"]["headers"]["set-cookie"],
@@ -661,21 +658,21 @@ class Chatbot:
                                 + self.cf_clearance,
                             )
                         self.cf_cookie_found = True
-                    if puid_cookie and not self.puid_cookie_found:
-                        raw_puid_cookie = puid_cookie.group(0)
-                        self.puid_cookie = raw_puid_cookie.split("=")[1][:-1]
-                        self.session.cookies.set(
-                            "_puid",
-                            self.puid_cookie,
-                        )
-                        if self.verbose:
-                            print(
-                                self.GREEN
-                                + "puid Cookie: "
-                                + self.ENDCOLOR
-                                + self.puid_cookie,
-                            )
-                        self.puid_cookie_found = True
+                    # if puid_cookie and not self.puid_cookie_found:
+                    #     raw_puid_cookie = puid_cookie.group(0)
+                    #     self.puid_cookie = raw_puid_cookie.split("=")[1][:-1]
+                    #     self.session.cookies.set(
+                    #         "_puid",
+                    #         self.puid_cookie,
+                    #     )
+                    #     if self.verbose:
+                    #         print(
+                    #             self.GREEN
+                    #             + "puid Cookie: "
+                    #             + self.ENDCOLOR
+                    #             + self.puid_cookie,
+                    #         )
+                    #     self.puid_cookie_found = True
                     if session_cookie and not self.session_cookie_found:
                         print("Found Session Token!")
                         # remove the semicolon and '__Secure-next-auth.session-token=' from the string
@@ -704,16 +701,15 @@ class Chatbot:
                     self.agent_found = True
         self.__refresh_headers(
             cf_clearance=self.cf_clearance,
-            puid_cookie=self.puid_cookie,
             user_agent=self.user_agent,
         )
 
-    def __refresh_headers(self, cf_clearance, puid_cookie, user_agent):
+    def __refresh_headers(self, cf_clearance, user_agent):
         del self.session.cookies["cf_clearance"]
-        del self.session.cookies["_puid"]
+        # del self.session.cookies["_puid"]
         self.session.headers.clear()
         self.session.cookies.set("cf_clearance", cf_clearance)
-        self.session.cookies.set("_puid", puid_cookie)
+        # self.session.cookies.set("_puid", puid_cookie)
         self.session.headers.update(
             {
                 "Accept": "text/event-stream",
