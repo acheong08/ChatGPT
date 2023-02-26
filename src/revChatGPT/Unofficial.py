@@ -558,7 +558,7 @@ class Chatbot:
                     (By.XPATH, "//textarea"),
                 ),
             )
-            while not self.session_cookie_found or not self.puid_cookie_found:
+            while not self.session_cookie_found:
                 sleep(5)
             print(self.GREEN + "Login successful." + self.ENDCOLOR)
         finally:
