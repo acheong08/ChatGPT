@@ -27,8 +27,13 @@ log = logging.getLogger(__name__)
 
 
 def logger(is_timed: bool):
-    """
-    Logger decorator
+    """Logger decorator
+
+    Args:
+        is_timed (bool): Whether to include function running time in exit log
+
+    Returns:
+        _type_: decorated function
     """
 
     def decorator(func):
@@ -102,6 +107,26 @@ class Chatbot:
         session_client=None,
         lazy_loading: bool = False,
     ) -> None:
+        """Initialize a chatbot
+
+        Args:
+            config (dict[str, str]): Login and proxy info. Example:
+                {
+                    "email": "OpenAI account email",
+                    "password": "OpenAI account password",
+                    "session_token": "<session_token>"
+                    "access_token": "<access_token>"
+                    "proxy": "<proxy_url_string>",
+                    "paid": True/False, # whether this is a plus account
+                }
+                More details on these are available at https://github.com/acheong08/ChatGPT#configuration
+            conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
+            parent_id (str | None, optional): Id of the previous response message to continue on. Defaults to None.
+            session_client (_type_, optional): _description_. Defaults to None.
+
+        Raises:
+            Exception: _description_
+        """
         user_home = getenv("HOME")
         if user_home is None:
             self.cache_path = ".chatgpt_cache.json"
@@ -148,8 +173,19 @@ class Chatbot:
 
     @logger(is_timed=True)
     def __check_credentials(self):
+        """Check login info and perform login
+
+        Any one of the following is sufficient for login. Multiple login info can be provided at the same time and they will be used in the order listed below.
+            - access_token
+            - session_token
+            - email + password
+
+        Raises:
+            Exception: _description_
+            AuthError: _description_
+        """
         if "access_token" in self.config:
-            self.__refresh_headers(self.config["access_token"])
+            self.__set_access_token(self.config["access_token"])
         elif "session_token" in self.config:
             pass
         elif "email" in self.config and "password" in self.config:
@@ -163,7 +199,12 @@ class Chatbot:
                 raise error
 
     @logger(is_timed=False)
-    def __refresh_headers(self, access_token: str):
+    def __set_access_token(self, access_token: str):
+        """Set access token in request header and self.config, then cache it to file.
+
+        Args:
+            access_token (str): access_token
+        """
         self.session.headers.clear()
         self.session.headers.update(
             {
@@ -176,6 +217,7 @@ class Chatbot:
                 "Referer": "https://chat.openai.com/chat",
             },
         )
+
         self.config["access_token"] = access_token
 
         email = self.config.get("email", None)
@@ -184,6 +226,19 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __get_cached_access_token(self, email: str | None) -> str | None:
+        """Read access token from cache
+
+        Args:
+            email (str | None): email of the account to get access token
+
+        Raises:
+            Error: _description_
+            Error: _description_
+            Error: _description_
+
+        Returns:
+            str | None: access token string or None if not found
+        """
         email = email or "default"
         cache = self.__read_cache()
         access_token = cache.get("access_tokens", {}).get(email, None)
@@ -222,6 +277,12 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __cache_access_token(self, email: str, access_token: str) -> None:
+        """Write an access token to cache
+
+        Args:
+            email (str): account email
+            access_token (str): account access token
+        """
         email = email or "default"
         cache = self.__read_cache()
         if "access_tokens" not in cache:
@@ -231,6 +292,14 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __write_cache(self, info: dict):
+        """Write cache info to file
+
+        Args:
+            info (dict): cache info, current format
+            {
+                "access_tokens":{"someone@example.com": 'this account's access token', }
+            }
+        """
         os.makedirs(osp.dirname(self.cache_path), exist_ok=True)
         json.dump(info, open(self.cache_path, "w", encoding="utf-8"), indent=4)
 
@@ -268,7 +337,7 @@ class Chatbot:
             self.config["session_token"] = auth.session_token
             auth.get_access_token()
 
-        self.__refresh_headers(auth.access_token)
+        self.__set_access_token(auth.access_token)
 
     @logger(is_timed=True)
     def ask(
@@ -278,13 +347,24 @@ class Chatbot:
         parent_id: str | None = None,
         timeout: float = 360,
     ):
+        """Ask a question to the chatbot
+        Args:
+            prompt (str): The question
+            conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
+            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
+            timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
+
+        Raises:
+            Error: _description_
+            Exception: _description_
+            Error: _description_
+            Error: _description_
+            Error: _description_
+
+        Yields:
+            _type_: _description_
         """
-        Ask a question to the chatbot
-        :param prompt: String
-        :param conversation_id: UUID
-        :param parent_id: UUID
-        :param timeout: Float. Unit is second
-        """
+
         if parent_id is not None and conversation_id is None:
             log.error("conversation_id must be set once parent_id is set")
             raise Error("User", "conversation_id must be set once parent_id is set", -1)
@@ -433,6 +513,14 @@ class Chatbot:
 
     @logger(is_timed=False)
     def __check_response(self, response):
+        """Make sure response is success
+
+        Args:
+            response (_type_): _description_
+
+        Raises:
+            Error: _description_
+        """
         if response.status_code != 200:
             print(response.text)
             raise Error("OpenAI", response.status_code, response.text)
