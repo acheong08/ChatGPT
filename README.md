@@ -7,10 +7,8 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ## Support my work
 > Make a pull request and fix my bad code. <br>
-> or <br>
-> <a href="https://www.buymeacoffee.com/acheong08" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-> <br>
-> *Private server sale has reached limit. Will update in the future when I have time. Got to sleep now...*
+> Fundraising target reached. Thank you everyone. Public servers can keep running for quite a while and I will increase rate limit soon. <br>
+> Current rate limit: 120 requests per minute.
 
 # V1 Standard ChatGPT
 > ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
