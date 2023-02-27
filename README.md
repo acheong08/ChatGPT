@@ -7,7 +7,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ## Support my work
 > Make a pull request and fix my bad code. <br>
-> Fundraising target reached. Thank you everyone. Public servers can keep running for quite a while and I will decrease rate limit soon. <br>
+> Fundraising target reached. Thank you everyone. Public servers can keep running for quite a while and will improve rate limits soon <br>
 > Current rate limit: 120 requests per minute.
 
 # V1 Standard ChatGPT
