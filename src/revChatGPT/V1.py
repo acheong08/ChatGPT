@@ -300,7 +300,8 @@ class Chatbot:
                 "access_tokens":{"someone@example.com": 'this account's access token', }
             }
         """
-        os.makedirs(osp.dirname(self.cache_path), exist_ok=True)
+        dirname = osp.dirname(self.cache_path) or "."
+        os.makedirs(dirname, exist_ok=True)
         json.dump(info, open(self.cache_path, "w", encoding="utf-8"), indent=4)
 
     @logger(is_timed=False)
