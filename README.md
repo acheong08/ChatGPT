@@ -6,12 +6,12 @@
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ## Support my work
-> Make a pull request and fix my bad code. <br>
-> Fundraising target reached. Thank you everyone. Public servers can keep running for quite a while and will improve rate limits soon <br>
-> Current rate limit: 120 requests per minute.
+> Make a pull request and fix my bad code.
 
 # V1 Standard ChatGPT
 > ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
+
+> Rate limit: 120 requests per minute
 
 ## Installation
 `pip3 install revChatGPT`
