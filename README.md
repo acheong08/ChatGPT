@@ -9,15 +9,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > Make a pull request and fix my bad code. <br>
 > or <br>
 > <a href="https://www.buymeacoffee.com/acheong08" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
-> ## Other notes
-> - There is a 60 requests per minute rate limit on the public proxy server which is costing me $5 per day to run
-> - I am using a total of 5 servers and a load balancer to handle around 500GB of traffic per day
-> - I will begin selling access to private servers without the rate limits in the coming days
->   - All proceeds from this will be used to fund the public server.
->   - After the first few purchases which will cover the cost of the existing servers, I will begin adding more servers to the public load balancer with the proceeds and start to lower the public rate limits
->   - Leave a comment under this Twitter thread if you have any thoughts on this: https://twitter.com/GodlyIgnorance/status/1629839371682865152
-> - I have 18 days before I run out of credit to run the public servers
+> If you need a private proxy server, it is available for $15 per month. The proceeds will be used to fund the public proxy. The purchase is available in BMC linked above. Remember to cancel it after a month since the official API will be out soon.
 
 # V1 Standard ChatGPT
 > ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
