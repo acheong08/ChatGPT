@@ -9,7 +9,8 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > Make a pull request and fix my bad code. <br>
 > or <br>
 > <a href="https://www.buymeacoffee.com/acheong08" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-> If you need a private proxy server, it is available for $15 per month. The proceeds will be used to fund the public proxy. The purchase is available in BMC linked above. Remember to cancel it after a month since the official API will be out soon.
+> <br>
+> *Private server sale has reached limit. Will update in the future when I have time. Got to sleep now...*
 
 # V1 Standard ChatGPT
 > ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
