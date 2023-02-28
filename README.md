@@ -139,7 +139,7 @@ If you have a cool project you want added to the list, open an issue.
 
 # Disclaimers
 
-This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me
+This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me.
 
 # Credits
 
