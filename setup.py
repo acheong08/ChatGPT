@@ -17,6 +17,7 @@ setup(
         "requests[socks]",
         "asyncio",
         "httpx[socks]",
+        "prompt-toolkit",
     ],
     extras_require={
         "unofficial": [
