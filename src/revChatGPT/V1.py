@@ -370,7 +370,7 @@ class Chatbot:
 
         if parent_id is not None and conversation_id is None:
             log.error("conversation_id must be set once parent_id is set")
-            raise Error("User", "conversation_id must be set once parent_id is set", -1)
+            raise Error(source="User", message="conversation_id must be set once parent_id is set", code=-1)
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             log.debug("Updating to new conversation by setting parent_id to None")
@@ -533,7 +533,7 @@ class Chatbot:
         """
         if response.status_code != 200:
             print(response.text)
-            raise Error("OpenAI", response.status_code, response.text)
+            raise Error(source="OpenAI", message=response.text, code=response.status_code)
 
     @logger(is_timed=True)
     def get_conversations(
@@ -671,7 +671,7 @@ class AsyncChatbot(Chatbot):
         Ask a question to the chatbot
         """
         if parent_id is not None and conversation_id is None:
-            raise Error("User", "conversation_id must be set once parent_id is set", 1)
+            raise Error(source="User", message="conversation_id must be set once parent_id is set", code=1)
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             self.parent_id = None
