@@ -67,12 +67,19 @@ https://chat.openai.com/api/auth/session
 `python3 -m revChatGPT.V1`
 
 ```
-!help - Show this message
-!reset - Forget the current conversation
-!config - Show the current configuration
-!rollback x - Rollback the conversation (x being the number of messages to rollback)
-!exit - Exit this program
+        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        Repo: github.com/acheong08/ChatGPT
+
+Type '!help' to show a full list of commands
+
+Logging in...
+
+You:
+(Press Esc followed by Enter to finish)
 ```
+
+The command line interface supports multi-line inputs and allows navigation using arrow keys. Besides, you can also edit history inputs by arrow keys when the prompt is empty. It also completes your input if it finds matched previous prompts. To finish input, press `Esc` and then `Enter` as solely `Enter` itself is used for creating new line in multi-line mode.
+
 
 ### Developer API
 

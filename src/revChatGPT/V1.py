@@ -19,6 +19,8 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
+from .utils import get_input, create_session
+
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
 )
@@ -822,26 +824,7 @@ class AsyncChatbot(Chatbot):
     def __check_response(self, response):
         response.raise_for_status()
 
-
-@logger(is_timed=False)
-def get_input(prompt):
-    """
-    Multiline input function.
-    """
-
-    print(prompt, end="")
-
-    lines = []
-
-    while True:
-        line = input()
-        if line == "":
-            break
-        lines.append(line)
-
-    user_input = "\n".join(lines)
-
-    return user_input
+get_input = logger(is_timed=False)(get_input)
 
 
 @logger(is_timed=False)
@@ -925,8 +908,9 @@ def main(config: dict):
             return False
         return True
 
+    session = create_session()
     while True:
-        prompt = get_input("\nYou:\n")
+        prompt = get_input("\nYou:\n", session=session)
         if prompt.startswith("!"):
             if handle_commands(prompt):
                 continue
@@ -948,5 +932,4 @@ if __name__ == "__main__":
         """,
     )
     print("Type '!help' to show a full list of commands")
-    print("Press enter TWICE to submit your question.\n")
     main(configure())
