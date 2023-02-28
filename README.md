@@ -71,7 +71,6 @@ https://chat.openai.com/api/auth/session
         Repo: github.com/acheong08/ChatGPT
 
 Type '!help' to show a full list of commands
-Press enter TWICE to submit your question.
 
 Logging in...
 
