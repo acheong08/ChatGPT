@@ -157,8 +157,8 @@ class Chatbot:
             if not isinstance(config["proxy"], str):
                 raise Exception("Proxy must be a string!")
             proxies = {
-                "http": config["proxy"],
-                "https": config["proxy"],
+                "http://": config["proxy"],
+                "https://": config["proxy"],
             }
             if isinstance(self.session, AsyncClient):
                 self.session = AsyncClient(proxies=proxies)
