@@ -932,5 +932,4 @@ if __name__ == "__main__":
         """,
     )
     print("Type '!help' to show a full list of commands")
-    print("Press enter TWICE to submit your question.\n")
     main(configure())
