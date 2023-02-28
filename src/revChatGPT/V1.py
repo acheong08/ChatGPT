@@ -394,7 +394,7 @@ class Chatbot:
                         self.conversation_mapping[conversation_id] = history[
                             "current_node"
                         ]
-                    except Exception as error:
+                    except Exception:
                         pass
                 else:
                     log.debug(
@@ -824,6 +824,7 @@ class AsyncChatbot(Chatbot):
     def __check_response(self, response):
         response.raise_for_status()
 
+
 get_input = logger(is_timed=False)(get_input)
 
 
@@ -914,7 +915,7 @@ def main(config: dict):
         if prompt.startswith("!"):
             if handle_commands(prompt):
                 continue
-
+        print()
         print("Chatbot: ")
         prev_text = ""
         for data in chatbot.ask(prompt):
