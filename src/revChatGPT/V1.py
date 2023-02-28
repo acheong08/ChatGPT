@@ -131,7 +131,7 @@ class Chatbot:
         """
         user_home = getenv("HOME")
         if user_home is None:
-            self.cache_path = ".chatgpt_cache.json"
+            self.cache_path = osp.join(os.getcwd(),".chatgpt_cache.json")
         else:
             # mkdir ~/.config/revChatGPT
             if not osp.exists(osp.join(user_home, ".config")):
