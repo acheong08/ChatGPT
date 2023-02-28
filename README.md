@@ -11,7 +11,9 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 # V1 Standard ChatGPT
 > ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
 
-> Rate limit: 25 requests per 10 seconds
+> Proxy server Rate limit: 25 requests per 10 seconds (per IP)
+> OpenAI rate limit: 50 requests per hour on free accounts. You can get around it with multi-account cycling
+> Plus accounts has around 150 requests per hour rate limit
 
 ## Installation
 `pip3 install revChatGPT`
