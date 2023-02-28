@@ -478,6 +478,13 @@ class Chatbot:
                         message=line.get("detail", {}).get("message"),
                         code=3,
                     )
+                if line.get("detail", {}).get("code") == "invalid_token":
+                    log.error("Invalid access token")
+                    raise Error(
+                        source="ask",
+                        message=line.get("detail", {}).get("message"),
+                        code=5,
+                    )
 
                 raise Error(source="ask", message="Field missing", code=1)
             message = line["message"]["content"]["parts"][0]
