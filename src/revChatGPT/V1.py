@@ -92,7 +92,22 @@ class Error(Exception):
         self.source = source
         self.message = message
         self.code = code
-        # Code
+
+
+class bcolors:
+    """
+    Colors for printing
+    """
+
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 class Chatbot:
@@ -918,18 +933,19 @@ def main(config: dict):
 
     session = create_session()
     while True:
+        print(bcolors.OKCYAN, end="")
         prompt = get_input("\nYou:\n", session=session)
         if prompt.startswith("!"):
             if handle_commands(prompt):
                 continue
-        print()
-        print("Chatbot: ")
+        print(bcolors.ENDC)
+        print(bcolors.OKBLUE + "Chatbot: ")
         prev_text = ""
         for data in chatbot.ask(prompt):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)
             prev_text = data["message"]
-        print()
+        print(bcolors.ENDC)
 
 
 if __name__ == "__main__":
