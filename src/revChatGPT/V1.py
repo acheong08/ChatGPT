@@ -978,7 +978,7 @@ if __name__ == "__main__":
     print(
         bcolors.BOLD
         + bcolors.WARNING
-        + "Press Esc followed by Enter to finish and send a message"
+        + "Press Esc followed by Enter or Alt+Enter to send a message."
         + bcolors.ENDC
     )
     main(configure())
