@@ -968,5 +968,10 @@ if __name__ == "__main__":
         """,
     )
     print("Type '!help' to show a full list of commands")
-    print("Press Esc followed by Enter to finish and send a message")
+    print(
+        bcolors.BOLD
+        + bcolors.WARNING
+        + "Press Esc followed by Enter to finish and send a message"
+        + bcolors.ENDC
+    )
     main(configure())
