@@ -962,6 +962,9 @@ def main(config: dict):
     except KeyboardInterrupt:
         print("Exiting...")
         exit(0)
+    except EOFError:
+        print("Exiting...")
+        exit(0)
 
 
 if __name__ == "__main__":
