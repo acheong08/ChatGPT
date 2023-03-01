@@ -8,16 +8,14 @@ def create_session():
     return session
 
 
-def get_input(prompt_prefix, session=None):
+def get_input(session=None):
     """
     Multiline input function.
     """
-    prefix = prompt_prefix + "(Press Esc followed by Enter to finish)\n"
     if session:
         user_input = session.prompt(
-            prefix, multiline=True, auto_suggest=AutoSuggestFromHistory()
+            multiline=True, auto_suggest=AutoSuggestFromHistory()
         )
     else:
-        user_input = prompt(prefix, multiline=True)
-
+        user_input = prompt(multiline=True)
     return user_input

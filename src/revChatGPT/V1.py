@@ -146,7 +146,7 @@ class Chatbot:
         """
         user_home = getenv("HOME")
         if user_home is None:
-            self.cache_path = osp.join(os.getcwd(),".chatgpt_cache.json")
+            self.cache_path = osp.join(os.getcwd(), ".chatgpt_cache.json")
         else:
             # mkdir ~/.config/revChatGPT
             if not osp.exists(osp.join(user_home, ".config")):
@@ -385,7 +385,11 @@ class Chatbot:
 
         if parent_id is not None and conversation_id is None:
             log.error("conversation_id must be set once parent_id is set")
-            raise Error(source="User", message="conversation_id must be set once parent_id is set", code=-1)
+            raise Error(
+                source="User",
+                message="conversation_id must be set once parent_id is set",
+                code=-1,
+            )
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             log.debug("Updating to new conversation by setting parent_id to None")
@@ -548,7 +552,9 @@ class Chatbot:
         """
         if response.status_code != 200:
             print(response.text)
-            raise Error(source="OpenAI", message=response.text, code=response.status_code)
+            raise Error(
+                source="OpenAI", message=response.text, code=response.status_code
+            )
 
     @logger(is_timed=True)
     def get_conversations(
@@ -686,7 +692,11 @@ class AsyncChatbot(Chatbot):
         Ask a question to the chatbot
         """
         if parent_id is not None and conversation_id is None:
-            raise Error(source="User", message="conversation_id must be set once parent_id is set", code=1)
+            raise Error(
+                source="User",
+                message="conversation_id must be set once parent_id is set",
+                code=1,
+            )
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             self.parent_id = None
@@ -932,20 +942,22 @@ def main(config: dict):
         return True
 
     session = create_session()
+    print()
     while True:
-        print(bcolors.OKCYAN, end="")
-        prompt = get_input("\nYou:\n", session=session)
+        print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
+        prompt = get_input(session=session)
         if prompt.startswith("!"):
             if handle_commands(prompt):
                 continue
-        print(bcolors.ENDC)
-        print(bcolors.OKBLUE + "Chatbot: ")
+        print()
+        print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
         prev_text = ""
         for data in chatbot.ask(prompt):
             message = data["message"][len(prev_text) :]
             print(message, end="", flush=True)
             prev_text = data["message"]
         print(bcolors.ENDC)
+        print()
 
 
 if __name__ == "__main__":
@@ -956,4 +968,5 @@ if __name__ == "__main__":
         """,
     )
     print("Type '!help' to show a full list of commands")
+    print("Press Esc followed by Enter to finish and send a message")
     main(configure())
