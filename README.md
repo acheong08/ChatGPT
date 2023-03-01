@@ -84,6 +84,8 @@ You:
 
 The command line interface supports multi-line inputs and allows navigation using arrow keys. Besides, you can also edit history inputs by arrow keys when the prompt is empty. It also completes your input if it finds matched previous prompts. To finish input, press `Esc` and then `Enter` as solely `Enter` itself is used for creating new line in multi-line mode.
 
+Set the environment variable `NO_COLOR` to `true` to disable color output.
+
 
 ### Developer API
 

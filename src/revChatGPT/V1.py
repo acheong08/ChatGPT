@@ -94,7 +94,7 @@ class Error(Exception):
         self.code = code
 
 
-class bcolors:
+class colors:
     """
     Colors for printing
     """
@@ -108,6 +108,21 @@ class bcolors:
     ENDC = "\033[0m"
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
+
+    def __init__(self) -> None:
+        if getenv("NO_COLOR"):
+            self.HEADER = ""
+            self.OKBLUE = ""
+            self.OKCYAN = ""
+            self.OKGREEN = ""
+            self.WARNING = ""
+            self.FAIL = ""
+            self.ENDC = ""
+            self.BOLD = ""
+            self.UNDERLINE = ""
+
+
+bcolors = colors()
 
 
 class Chatbot:
