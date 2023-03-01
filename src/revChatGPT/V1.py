@@ -82,6 +82,7 @@ class Error(Exception):
     3: Invalid request error
     4: Expired access token error
     5: Invalid access token error
+    6: Prohibited concurrent query error
     """
 
     source: str
@@ -505,6 +506,12 @@ class Chatbot:
                 ):
                     log.error("Rate limit exceeded")
                     raise Error(source="ask", message=line.get("detail"), code=2)
+                if (
+                    line.get("detail").startswith(
+                    "Only one message at a time.")
+                ):
+                    log.error("Prohibited concurrent query")
+                    raise Error(source="ask", message=line.get("detail"), code=6)
                 if line.get("detail", {}).get("code") == "invalid_api_key":
                     log.error("Invalid access token")
                     raise Error(
