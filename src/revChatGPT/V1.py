@@ -943,21 +943,25 @@ def main(config: dict):
 
     session = create_session()
     print()
-    while True:
-        print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
-        prompt = get_input(session=session)
-        if prompt.startswith("!"):
-            if handle_commands(prompt):
-                continue
-        print()
-        print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
-        prev_text = ""
-        for data in chatbot.ask(prompt):
-            message = data["message"][len(prev_text) :]
-            print(message, end="", flush=True)
-            prev_text = data["message"]
-        print(bcolors.ENDC)
-        print()
+    try:
+        while True:
+            print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
+            prompt = get_input(session=session)
+            if prompt.startswith("!"):
+                if handle_commands(prompt):
+                    continue
+            print()
+            print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
+            prev_text = ""
+            for data in chatbot.ask(prompt):
+                message = data["message"][len(prev_text) :]
+                print(message, end="", flush=True)
+                prev_text = data["message"]
+            print(bcolors.ENDC)
+            print()
+    except KeyboardInterrupt:
+        print("Exiting...")
+        exit(0)
 
 
 if __name__ == "__main__":
