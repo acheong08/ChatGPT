@@ -46,11 +46,13 @@ class Chatbot:
         """
         Ask a question
         """
+        if kwargs.get("api_key"):
+            api_key = kwargs.get("api_key")
         self.__add_to_conversation(prompt, role)
         # Get response
         response = self.session.post(
             "https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": "Bearer " + self.api_key},
+            headers={"Authorization": "Bearer " + api_key or self.api_key},
             json={
                 "model": self.engine,
                 "messages": self.conversation,
