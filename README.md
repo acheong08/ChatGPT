@@ -160,8 +160,8 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
 
-Type '!help' to show a full list of commands
-Press enter twice to submit your question.
+    Type '!help' to show a full list of commands
+    Press enter twice to submit your question.
 
     !help - Display this message
     !rollback n - Rollback the conversation by n messages
