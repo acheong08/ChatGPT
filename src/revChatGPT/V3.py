@@ -48,8 +48,7 @@ class Chatbot:
         """
         Ask a question
         """
-        if kwargs.get("api_key"):
-            api_key = kwargs.get("api_key")
+        api_key = kwargs.get("api_key")
         self.__add_to_conversation(prompt, role)
         # Get response
         response = self.session.post(
