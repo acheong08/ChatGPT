@@ -5,30 +5,10 @@ import argparse
 import json
 import os
 import sys
-from datetime import date
 import requests
 
-import tiktoken
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
-
-ENCODER = tiktoken.get_encoding("gpt2")
-
-
-def get_max_tokens(prompt: str) -> int:
-    """
-    Get the max tokens for a prompt
-    """
-    return 4000 - len(ENCODER.encode(prompt))
-
-
-def remove_suffix(input_string, suffix):
-    """
-    Remove suffix from string (Support for Python 3.8)
-    """
-    if suffix and input_string.endswith(suffix):
-        return input_string[: -len(suffix)]
-    return input_string
 
 
 class Chatbot:
@@ -111,8 +91,28 @@ class Chatbot:
                 yield content
         self.__add_to_conversation(full_response, response_role)
 
+    def ask(self, prompt: str, role: str, **kwargs):
+        """
+        Non-streaming ask
+        """
+        response = self.ask_stream(prompt, role, **kwargs)
+        full_response: str = ""
+        for chunk in response:
+            full_response += chunk
+        return full_response
+
+    def rollback(self, n: int = 1):
+        """
+        Rollback the conversation
+        """
+        for _ in range(n):
+            self.conversation.pop()
+
 
 def main():
+    """
+    Main function
+    """
     print(
         """
     ChatGPT - Official ChatGPT API
@@ -176,6 +176,11 @@ def main():
         default=0.5,
         help="Temperature for response",
     )
+    parser.add_argument(
+        "--no_stream",
+        action="store_true",
+        help="Disable streaming",
+    )
     args = parser.parse_args()
     # Initialize chatbot
     chatbot = Chatbot(api_key=args.api_key)
@@ -190,8 +195,11 @@ def main():
             if chatbot_commands(prompt):
                 continue
         print("ChatGPT: ", flush=True)
-        for response in chatbot.ask_stream(prompt, temperature=args.temperature):
-            print(response, end="", flush=True)
+        if args.no_stream:
+            print(chatbot.ask(prompt, "user", temperature=args.temperature))
+        else:
+            for response in chatbot.ask_stream(prompt, temperature=args.temperature):
+                print(response, end="", flush=True)
         print()
 
 
