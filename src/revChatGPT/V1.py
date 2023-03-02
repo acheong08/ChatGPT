@@ -512,18 +512,18 @@ class Chatbot:
                 ):
                     log.error("Prohibited concurrent query")
                     raise Error(source="ask", message=line.get("detail"), code=6)
-                if line.get("detail", {}).get("code") == "invalid_api_key":
+                if line.get("detail", "") == "invalid_api_key":
                     log.error("Invalid access token")
                     raise Error(
                         source="ask",
-                        message=line.get("detail", {}).get("message"),
+                        message=line.get("detail", ""),
                         code=3,
                     )
-                if line.get("detail", {}).get("code") == "invalid_token":
+                if line.get("detail", "") == "invalid_token":
                     log.error("Invalid access token")
                     raise Error(
                         source="ask",
-                        message=line.get("detail", {}).get("message"),
+                        message=line.get("detail", ""),
                         code=5,
                     )
 

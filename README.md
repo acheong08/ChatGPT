@@ -151,7 +151,7 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
 > - Costs money
 
 </summary>
-  
+
 Get API key from https://platform.openai.com/account/api-keys
 
 ## Command line
