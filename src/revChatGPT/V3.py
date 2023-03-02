@@ -94,7 +94,7 @@ class Chatbot:
                 yield content
         self.__add_to_conversation(full_response, response_role)
 
-    def ask(self, prompt: str, role: str, **kwargs):
+    def ask(self, prompt: str, role: str = "user", **kwargs):
         """
         Non-streaming ask
         """
