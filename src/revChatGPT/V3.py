@@ -9,6 +9,9 @@ import sys
 import requests
 import tiktoken
 
+from .utils import create_session
+from .utils import get_input
+
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -140,30 +143,7 @@ def main():
     """,
     )
     print("Type '!help' to show a full list of commands")
-    print("Press enter twice to submit your question.\n")
-
-    def get_input(prompt):
-        """
-        Multi-line input function
-        """
-        # Display the prompt
-        print(prompt, end="")
-
-        # Initialize an empty list to store the input lines
-        lines = []
-
-        # Read lines of input until the user enters an empty line
-        while True:
-            line = input()
-            if line == "":
-                break
-            lines.append(line)
-
-        # Join the lines, separated by newlines, and store the result
-        user_input = "\n".join(lines)
-
-        # Return the input
-        return user_input
+    print("Press Esc followed by Enter or Alt+Enter to send a message.\n")
 
     def chatbot_commands(cmd: str) -> bool:
         """
@@ -218,16 +198,20 @@ def main():
     args = parser.parse_args()
     # Initialize chatbot
     chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt)
+    session = create_session()
     # Start chat
     while True:
+        print()
         try:
-            prompt = get_input("\nUser:\n")
+            print("User: ")
+            prompt = get_input(session=session)
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
         if prompt.startswith("!"):
             if chatbot_commands(prompt):
                 continue
+        print()
         print("ChatGPT: ", flush=True)
         if args.no_stream:
             print(chatbot.ask(prompt, "user", temperature=args.temperature))
