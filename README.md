@@ -73,8 +73,6 @@ https://chat.openai.com/api/auth/session
 
 ## Usage
 
-Get API key from https://platform.openai.com/account/api-keys
-
 ### Command line
 
 `python3 -m revChatGPT.V1`
@@ -153,6 +151,8 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
 > - Costs money
 
 </summary>
+  
+Get API key from https://platform.openai.com/account/api-keys
 
 ## Command line
 `python3 -m revChatGPT.V3 --api_key <api_key>`
