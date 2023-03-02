@@ -45,6 +45,10 @@ class Chatbot:
         ]
         self.max_tokens = max_tokens
 
+        initial_conversation = "\n".join([x["content"] for x in self.conversation])
+        if len(ENCODER.encode(initial_conversation)) > self.max_tokens:
+            raise Exception("System prompt is too long")
+
     def __add_to_conversation(self, message: str, role: str):
         """
         Add a message to the conversation
@@ -57,9 +61,12 @@ class Chatbot:
         """
         while True:
             full_conversation = "\n".join([x["content"] for x in self.conversation])
-            if len(ENCODER.encode(full_conversation)) > self.max_tokens:
+            if (
+                len(ENCODER.encode(full_conversation)) > self.max_tokens
+                and len(self.conversation) > 1
+            ):
                 # Don't remove the first message
-                self.conversation = self.conversation[1:]
+                self.conversation.pop(1)
             else:
                 break
 
