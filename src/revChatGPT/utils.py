@@ -1,5 +1,4 @@
-from prompt_toolkit import prompt
-from prompt_toolkit import PromptSession
+from prompt_toolkit import PromptSession, print_formatted_text
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import InMemoryHistory
 
@@ -11,13 +10,15 @@ def create_session():
 
 def get_input(session=None):
     """
-    Multiline input function.
+    A function that reads multiple lines of user input.
     """
     if session:
         user_input = session.prompt(
+            "Enter your input: \n",
             multiline=True,
             auto_suggest=AutoSuggestFromHistory(),
         )
     else:
-        user_input = prompt(multiline=True)
-    return user_input
+        user_input = input("Enter your input: \n")
+
+    return user_input.strip()
