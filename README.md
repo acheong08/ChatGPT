@@ -155,6 +155,19 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
 ## Command line
 `python3 -m revChatGPT.V3 --api_key <api_key>`
 
+```
+
+    ChatGPT - Official ChatGPT API
+    Repo: github.com/acheong08/ChatGPT
+
+Type '!help' to show a full list of commands
+Press enter twice to submit your question.
+
+    !help - Display this message
+    !rollback n - Rollback the conversation by n messages
+    !exit - Quit chat
+```
+
 ## Developer API
 
 ### Basic example
