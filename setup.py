@@ -18,6 +18,7 @@ setup(
         "asyncio",
         "httpx[socks]",
         "prompt-toolkit",
+        "tiktoken",
     ],
     extras_require={
         "unofficial": [

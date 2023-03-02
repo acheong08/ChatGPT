@@ -5,11 +5,20 @@ import argparse
 import json
 import os
 import sys
+import tiktoken
 
 import requests
 
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
+ENCODER = tiktoken.get_encoding("gpt2")
+
+
+def get_max_tokens(prompt: str) -> int:
+    """
+    Get the max tokens for a prompt
+    """
+    return 4000 - len(ENCODER.encode(prompt))
 
 
 class Chatbot:
@@ -22,6 +31,7 @@ class Chatbot:
         api_key: str,
         engine: str = None,
         proxy: str = None,
+        max_tokens: int = 3000,
         system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
     ) -> None:
         """
@@ -37,6 +47,7 @@ class Chatbot:
                 "content": system_prompt,
             },
         ]
+        self.max_tokens = max_tokens
 
     def __add_to_conversation(self, message: str, role: str):
         """
@@ -44,12 +55,25 @@ class Chatbot:
         """
         self.conversation.append({"role": role, "content": message})
 
+    def __truncate_conversation(self):
+        """
+        Truncate the conversation
+        """
+        while True:
+            full_conversation = "\n".join([x["content"] for x in self.conversation])
+            if len(ENCODER.encode(full_conversation)) > self.max_tokens:
+                # Don't remove the first message
+                self.conversation = self.conversation[1:]
+            else:
+                break
+
     def ask_stream(self, prompt: str, role: str = "user", **kwargs) -> str:
         """
         Ask a question
         """
         api_key = kwargs.get("api_key")
         self.__add_to_conversation(prompt, role)
+        self.__truncate_conversation()
         # Get response
         response = self.session.post(
             "https://api.openai.com/v1/chat/completions",
