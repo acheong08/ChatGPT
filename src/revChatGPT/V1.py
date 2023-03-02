@@ -19,7 +19,8 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from .utils import get_input, create_session
+from .utils import create_session
+from .utils import get_input
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
@@ -506,9 +507,8 @@ class Chatbot:
                 ):
                     log.error("Rate limit exceeded")
                     raise Error(source="ask", message=line.get("detail"), code=2)
-                if (
-                    line.get("detail").startswith(
-                    "Only one message at a time.")
+                if line.get("detail").startswith(
+                    "Only one message at a time.",
                 ):
                     log.error("Prohibited concurrent query")
                     raise Error(source="ask", message=line.get("detail"), code=6)
@@ -575,7 +575,9 @@ class Chatbot:
         if response.status_code != 200:
             print(response.text)
             raise Error(
-                source="OpenAI", message=response.text, code=response.status_code
+                source="OpenAI",
+                message=response.text,
+                code=response.status_code,
             )
 
     @logger(is_timed=True)
@@ -1001,6 +1003,6 @@ if __name__ == "__main__":
         bcolors.BOLD
         + bcolors.WARNING
         + "Press Esc followed by Enter or Alt+Enter to send a message."
-        + bcolors.ENDC
+        + bcolors.ENDC,
     )
     main(configure())

@@ -11,7 +11,8 @@ import requests
 import tiktoken
 from OpenAIAuth import Authenticator as OpenAIAuth
 
-from .utils import get_input, create_session
+from .utils import create_session
+from .utils import get_input
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -232,7 +233,6 @@ class Chatbot:
                 timeout=10,
             )
             self.api_key = auth_request.json()["accessToken"]
-
 
 
 async def main():

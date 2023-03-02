@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import sys
+
 import requests
 
 
@@ -33,7 +34,7 @@ class Chatbot:
             {
                 "role": "system",
                 "content": "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
-            }
+            },
         ]
 
     def __add_to_conversation(self, message: str, role: str):
@@ -67,7 +68,7 @@ class Chatbot:
         )
         if response.status_code != 200:
             raise Exception(
-                f"Error: {response.status_code} {response.reason} {response.text}"
+                f"Error: {response.status_code} {response.reason} {response.text}",
             )
         response_role: str = None
         full_response: str = ""
