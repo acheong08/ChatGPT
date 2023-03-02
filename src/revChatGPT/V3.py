@@ -5,9 +5,9 @@ import argparse
 import json
 import os
 import sys
-import tiktoken
 
 import requests
+import tiktoken
 
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
