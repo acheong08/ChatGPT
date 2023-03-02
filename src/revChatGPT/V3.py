@@ -193,9 +193,15 @@ def main():
         action="store_true",
         help="Disable streaming",
     )
+    parser.add_argument(
+        "--base_prompt",
+        type=str,
+        default="You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
+        help="Base prompt for chatbot",
+    )
     args = parser.parse_args()
     # Initialize chatbot
-    chatbot = Chatbot(api_key=args.api_key)
+    chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt)
     # Start chat
     while True:
         try:
