@@ -14,13 +14,6 @@ ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 ENCODER = tiktoken.get_encoding("gpt2")
 
 
-def get_max_tokens(prompt: str) -> int:
-    """
-    Get the max tokens for a prompt
-    """
-    return 4000 - len(ENCODER.encode(prompt))
-
-
 class Chatbot:
     """
     Official ChatGPT API
