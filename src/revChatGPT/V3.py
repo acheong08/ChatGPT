@@ -22,6 +22,7 @@ class Chatbot:
         api_key: str,
         engine: str = None,
         proxy: str = None,
+        system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
     ) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
@@ -33,7 +34,7 @@ class Chatbot:
         self.conversation: list = [
             {
                 "role": "system",
-                "content": "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
+                "content": system_prompt,
             },
         ]
 
