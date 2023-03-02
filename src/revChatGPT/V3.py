@@ -53,7 +53,7 @@ class Chatbot:
         # Get response
         response = self.session.post(
             "https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": "Bearer " + api_key or self.api_key},
+            headers={"Authorization": "Bearer " + (api_key or self.api_key)},
             json={
                 "model": self.engine,
                 "messages": self.conversation,
