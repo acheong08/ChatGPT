@@ -8,17 +8,24 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > ## Support my work
 > Make a pull request and fix my bad code.
 
+# Installation
+`pip3 install --upgrade revChatGPT`
+
+<details>
+
+<summary>
+
 # V1 Standard ChatGPT
-> ## Update 2023/02/14 9:00 PM GMT+8: It is working. Use this.
+> Uses `chat.openai.com`
+> - Free
+
+</summary>
 
 > Proxy server Rate limit: 25 requests per 10 seconds (per IP)
 >
 > OpenAI rate limit: 50 requests per hour on free accounts. You can get around it with multi-account cycling
 >
 > Plus accounts has around 150 requests per hour rate limit
-
-## Installation
-`pip3 install revChatGPT`
 
 ## Configuration
 
@@ -132,8 +139,40 @@ print(response)
 #### All API methods
 Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced developer usage.
 
+</details>
 
-> ## V2 Fast ChatGPT API is dead (broken by OpenAI)
+
+<details>
+
+<summary>
+
+# V3 Official Chat API
+> Recently released by OpenAI
+> - Costs money
+
+</summary>
+
+## Command line
+`python3 -m revChatGPT.V3 --api_key <api_key>`
+
+## Developer API
+
+### Basic example
+```python
+from revChatGPT.V3 import Chatbot
+chatbot = Chatbot(api_key="<api_key>")
+chatbot.ask("Hello world")
+```
+
+### Streaming example
+```python
+from revChatGPT.V3 import Chatbot
+chatbot = Chatbot(api_key="<api_key>")
+for data in chatbot.ask("Hello world"):
+    print(data, end="", flush=True)
+```
+
+</details>
 
 
 
