@@ -7,10 +7,6 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ## Support my work
 > Make a pull request and fix my bad code.
->
-> Ethereum: 0xF6B12003BfFdB9A9d18a81C70daaBC329Da6A34d
->
-> (I need around 0.00179132 ETH ($3 USD) for gas fees to transfer some USDT out of my account. I don't know where else to ask for a bit of help.)
 
 # Installation
 `pip3 install --upgrade revChatGPT`
