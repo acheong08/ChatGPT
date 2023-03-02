@@ -155,11 +155,19 @@ def main():
             print(
                 """
             !help - Display this message
+            !rollback n - Rollback the conversation by n messages
             !exit - Quit chat
             """,
             )
         elif cmd == "!exit":
             exit()
+        elif cmd.startswith("!rollback"):
+            try:
+                n = int(cmd.split(" ")[1])
+            except (IndexError, ValueError):
+                print("Invalid number of messages to rollback")
+            else:
+                chatbot.rollback(n)
         else:
             return False
         return True
