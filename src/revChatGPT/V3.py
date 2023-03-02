@@ -65,7 +65,7 @@ class Chatbot:
         Ask a question
         """
         api_key = kwargs.get("api_key")
-        self.__add_to_conversation(prompt, role)
+        self.__add_to_conversation(prompt, "user")
         self.__truncate_conversation()
         # Get response
         response = self.session.post(
@@ -79,7 +79,7 @@ class Chatbot:
                 "temperature": kwargs.get("temperature", 0.7),
                 "top_p": kwargs.get("top_p", 1),
                 "n": kwargs.get("n", 1),
-                "user": kwargs.get("user", "user"),
+                "user": role,
             },
             stream=True,
         )
