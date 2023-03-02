@@ -26,7 +26,6 @@ setup(
             "undetected_chromedriver",
             "selenium",
             "tls_client",
-            "requests",
         ],
         "official": [
             "openai",
