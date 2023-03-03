@@ -38,6 +38,12 @@ class Chatbot:
         self.session = requests.Session()
         self.api_key = api_key
         self.proxy = proxy
+        if self.proxy:
+            proxies = {
+                "http": self.proxy,
+                "https": self.proxy,
+            }
+            self.session.proxies = proxies
         self.conversation: list = [
             {
                 "role": "system",
@@ -244,9 +250,15 @@ def main():
         default="You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
         help="Base prompt for chatbot",
     )
+    parser.add_argument(
+        "--proxy",
+        type=str,
+        default=None,
+        help="Proxy address",
+    )
     args = parser.parse_args()
     # Initialize chatbot
-    chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt)
+    chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt, proxy=args.proxy)
     session = create_session()
     completer = create_completer(["!help", "!exit", "!reset", "!rollback"])
     # Start chat
