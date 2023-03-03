@@ -322,10 +322,7 @@ class Prompt:
             + "\nChatGPT:"
         )
         # Check if prompt over 4000*4 characters
-        if self.buffer is not None:
-            max_tokens = 4000 - self.buffer
-        else:
-            max_tokens = 3200
+        max_tokens = 4000 - self.buffer if self.buffer is not None else 3200
         if len(ENCODER.encode(prompt)) > max_tokens:
             # Remove oldest chat
             if len(self.chat_history) == 0:
@@ -483,9 +480,8 @@ def main():
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
-        if prompt.startswith("!"):
-            if chatbot_commands(prompt):
-                continue
+        if prompt.startswith("!") and chatbot_commands(prompt):
+            continue
         if not args.stream:
             response = chatbot.ask(prompt, temperature=args.temperature)
             print("ChatGPT: " + response["choices"][0]["text"])

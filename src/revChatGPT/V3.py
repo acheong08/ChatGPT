@@ -9,10 +9,7 @@ import sys
 import requests
 import tiktoken
 
-from .utils import create_session
-from .utils import create_completer
-from .utils import get_input
-
+from .utils import create_session, get_input, create_completer
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -134,9 +131,7 @@ class Chatbot:
         Non-streaming ask
         """
         response = self.ask_stream(prompt, role, **kwargs)
-        full_response: str = ""
-        for chunk in response:
-            full_response += chunk
+        full_response: str = "".join(response)
         return full_response
 
     def rollback(self, n: int = 1):
@@ -270,9 +265,8 @@ def main():
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
-        if prompt.startswith("!"):
-            if chatbot_commands(prompt):
-                continue
+        if prompt.startswith("!") and chatbot_commands(prompt):
+            continue
         print()
         print("ChatGPT: ", flush=True)
         if args.no_stream:

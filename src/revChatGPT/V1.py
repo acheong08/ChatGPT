@@ -11,8 +11,7 @@ import os.path as osp
 import time
 import uuid
 from functools import wraps
-from os import environ
-from os import getenv
+from os import environ, getenv
 
 import requests
 from httpx import AsyncClient
@@ -222,9 +221,7 @@ class Chatbot:
             self.__set_access_token(self.config["access_token"])
         elif "session_token" in self.config:
             pass
-        elif "email" in self.config and "password" in self.config:
-            pass
-        else:
+        elif "email" not in self.config or "password" not in self.config:
             raise Exception("Insufficient login details provided!")
         if "access_token" not in self.config:
             try:
@@ -556,9 +553,7 @@ class Chatbot:
     def __check_fields(self, data: dict) -> bool:
         try:
             data["message"]["content"]
-        except TypeError:
-            return False
-        except KeyError:
+        except (TypeError, KeyError):
             return False
         return True
 
@@ -592,7 +587,7 @@ class Chatbot:
         :param offset: Integer
         :param limit: Integer
         """
-        url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
+        url = f"{BASE_URL}api/conversations?offset={offset}&limit={limit}"
         response = self.session.get(url)
         self.__check_response(response)
         if encoding is not None:
@@ -607,13 +602,12 @@ class Chatbot:
         :param id: UUID of conversation
         :param encoding: String
         """
-        url = BASE_URL + f"api/conversation/{convo_id}"
+        url = f"{BASE_URL}api/conversation/{convo_id}"
         response = self.session.get(url)
         self.__check_response(response)
         if encoding is not None:
             response.encoding = encoding
-        data = json.loads(response.text)
-        return data
+        return json.loads(response.text)
 
     @logger(is_timed=True)
     def gen_title(self, convo_id: str, message_id: str):
@@ -621,7 +615,7 @@ class Chatbot:
         Generate title for conversation
         """
         response = self.session.post(
-            BASE_URL + f"api/conversation/gen_title/{convo_id}",
+            f"{BASE_URL}api/conversation/gen_title/{convo_id}",
             data=json.dumps(
                 {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
@@ -635,7 +629,7 @@ class Chatbot:
         :param id: UUID of conversation
         :param title: String
         """
-        url = BASE_URL + f"api/conversation/{convo_id}"
+        url = f"{BASE_URL}api/conversation/{convo_id}"
         response = self.session.patch(url, data=json.dumps({"title": title}))
         self.__check_response(response)
 
@@ -645,7 +639,7 @@ class Chatbot:
         Delete conversation
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"api/conversation/{convo_id}"
+        url = f"{BASE_URL}api/conversation/{convo_id}"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -654,7 +648,7 @@ class Chatbot:
         """
         Delete all conversations
         """
-        url = BASE_URL + "api/conversations"
+        url = f"{BASE_URL}api/conversations"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -745,9 +739,9 @@ class AsyncChatbot(Chatbot):
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": "text-davinci-002-render-sha"
-            if not self.config.get("paid")
-            else "text-davinci-002-render-paid",
+            "model": "text-davinci-002-render-paid"
+            if self.config.get("paid")
+            else "text-davinci-002-render-sha",
         }
 
         self.conversation_id_prev_queue.append(
@@ -757,7 +751,7 @@ class AsyncChatbot(Chatbot):
 
         async with self.session.stream(
             method="POST",
-            url=BASE_URL + "api/conversation",
+            url=f"{BASE_URL}api/conversation",
             data=json.dumps(data),
             timeout=timeout,
         ) as response:
@@ -775,7 +769,7 @@ class AsyncChatbot(Chatbot):
                 except json.decoder.JSONDecodeError:
                     continue
                 if not self.__check_fields(line):
-                    raise Exception("Field missing. Details: " + str(line))
+                    raise Exception(f"Field missing. Details: {str(line)}")
 
                 message = line["message"]["content"]["parts"][0]
                 conversation_id = line["conversation_id"]
@@ -803,7 +797,7 @@ class AsyncChatbot(Chatbot):
         :param offset: Integer
         :param limit: Integer
         """
-        url = BASE_URL + f"api/conversations?offset={offset}&limit={limit}"
+        url = f"{BASE_URL}api/conversations?offset={offset}&limit={limit}"
         response = await self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
@@ -814,19 +808,18 @@ class AsyncChatbot(Chatbot):
         Get message history
         :param id: UUID of conversation
         """
-        url = BASE_URL + f"api/conversation/{convo_id}"
+        url = f"{BASE_URL}api/conversation/{convo_id}"
         response = await self.session.get(url)
         if encoding is not None:
             response.encoding = encoding
             self.__check_response(response)
-            data = json.loads(response.text)
-            return data
+            return json.loads(response.text)
 
     async def gen_title(self, convo_id, message_id):
         """
         Generate title for conversation
         """
-        url = BASE_URL + f"api/conversation/gen_title/{convo_id}"
+        url = f"{BASE_URL}api/conversation/gen_title/{convo_id}"
         response = await self.session.post(
             url,
             data=json.dumps(
@@ -841,7 +834,7 @@ class AsyncChatbot(Chatbot):
         :param convo_id: UUID of conversation
         :param title: String
         """
-        url = BASE_URL + f"api/conversation/{convo_id}"
+        url = f"{BASE_URL}api/conversation/{convo_id}"
         response = await self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
@@ -850,7 +843,7 @@ class AsyncChatbot(Chatbot):
         Delete conversation
         :param convo_id: UUID of conversation
         """
-        url = BASE_URL + f"api/conversation/{convo_id}"
+        url = f"{BASE_URL}api/conversation/{convo_id}"
         response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -858,7 +851,7 @@ class AsyncChatbot(Chatbot):
         """
         Delete all conversations
         """
-        url = BASE_URL + "api/conversations"
+        url = f"{BASE_URL}api/conversations"
         response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -871,9 +864,7 @@ class AsyncChatbot(Chatbot):
     def __check_fields(self, data: dict) -> bool:
         try:
             data["message"]["content"]
-        except TypeError:
-            return False
-        except KeyError:
+        except (TypeError, KeyError):
             return False
         return True
 
@@ -971,10 +962,12 @@ def main(config: dict):
     try:
         while True:
             print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
+
             prompt = get_input(session=session, completer=completer)
             if prompt.startswith("!"):
                 if handle_commands(prompt):
                     continue
+
             print()
             print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
             prev_text = ""
@@ -984,10 +977,7 @@ def main(config: dict):
                 prev_text = data["message"]
             print(bcolors.ENDC)
             print()
-    except KeyboardInterrupt:
-        print("Exiting...")
-        exit(0)
-    except EOFError:
+    except (KeyboardInterrupt, EOFError):
         print("Exiting...")
         exit(0)
 
