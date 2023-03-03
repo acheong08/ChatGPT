@@ -510,34 +510,50 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
-                if (
-                        line.get("detail")
-                        == "Too many requests in 1 hour. Try again later."
-                ):
-                    log.error("Rate limit exceeded")
-                    raise Error(source="ask", message=line.get("detail"), code=ErrorType.RATE_LIMIT_ERROR)
-                if line.get("detail").startswith(
+                line_detail = line.get("detail")
+                if isinstance(line_detail, str):
+                    if line_detail == "Too many requests in 1 hour. Try again later.":
+                        log.error("Rate limit exceeded")
+                        raise Error(
+                            source="ask",
+                            message=line.get("detail"),
+                            code=ErrorType.RATE_LIMIT_ERROR,
+                        )
+                    if line_detail.startswith(
                         "Only one message at a time.",
-                ):
-                    log.error("Prohibited concurrent query")
-                    raise Error(source="ask", message=line.get("detail"),
-                                code=ErrorType.PROHIBITED_CONCURRENT_QUERY_ERROR)
-                if line.get("detail", "") == "invalid_api_key":
-                    log.error("Invalid access token")
-                    raise Error(
-                        source="ask",
-                        message=line.get("detail", ""),
-                        code=ErrorType.INVALID_REQUEST_ERROR,
-                    )
-                if line.get("detail", "") == "invalid_token":
-                    log.error("Invalid access token")
-                    raise Error(
-                        source="ask",
-                        message=line.get("detail", ""),
-                        code=ErrorType.INVALID_ACCESS_TOKEN_ERROR
-                    )
+                    ):
+                        log.error("Prohibited concurrent query")
+                        raise Error(
+                            source="ask",
+                            message=line_detail,
+                            code=ErrorType.PROHIBITED_CONCURRENT_QUERY_ERROR,
+                        )
+                    if line_detail == "invalid_api_key":
+                        log.error("Invalid access token")
+                        raise Error(
+                            source="ask",
+                            message=line_detail,
+                            code=ErrorType.INVALID_REQUEST_ERROR,
+                        )
+                    if line_detail == "invalid_token":
+                        log.error("Invalid access token")
+                        raise Error(
+                            source="ask",
+                            message=line_detail,
+                            code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
+                        )
+                elif isinstance(line_detail, dict):
+                    if line_detail.get("code") == "invalid_jwt":
+                        log.error("Invalid access token")
+                        raise Error(
+                            source="ask",
+                            message=line_detail.get("message", "invalid_jwt"),
+                            code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
+                        )
 
-                raise Error(source="ask", message="Field missing", code=ErrorType.SERVER_ERROR)
+                raise Error(
+                    source="ask", message="Field missing", code=ErrorType.SERVER_ERROR
+                )
             message = line["message"]["content"]["parts"][0]
             if message == prompt:
                 continue
@@ -970,7 +986,9 @@ def main(config: dict):
         return True
 
     session = create_session()
-    completer = create_completer(["!help", "!reset", "!config", "!rollback", "!exit", "!setconversation"])
+    completer = create_completer(
+        ["!help", "!reset", "!config", "!rollback", "!exit", "!setconversation"]
+    )
     print()
     try:
         while True:
@@ -985,7 +1003,7 @@ def main(config: dict):
             print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
             prev_text = ""
             for data in chatbot.ask(prompt):
-                message = data["message"][len(prev_text):]
+                message = data["message"][len(prev_text) :]
                 print(message, end="", flush=True)
                 prev_text = data["message"]
             print(bcolors.ENDC)
