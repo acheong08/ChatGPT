@@ -19,7 +19,7 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from .utils import create_session
+from .utils import create_completer, create_session
 from .utils import get_input
 
 logging.basicConfig(
@@ -966,11 +966,12 @@ def main(config: dict):
         return True
 
     session = create_session()
+    completer = create_completer(["!help", "!reset", "!config", "!rollback", "!exit", "!setconversation"])
     print()
     try:
         while True:
             print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
-            prompt = get_input(session=session)
+            prompt = get_input(session=session, completer=completer)
             if prompt.startswith("!"):
                 if handle_commands(prompt):
                     continue

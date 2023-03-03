@@ -10,6 +10,7 @@ import requests
 import tiktoken
 
 from .utils import create_session
+from .utils import create_completer
 from .utils import get_input
 
 
@@ -247,12 +248,13 @@ def main():
     # Initialize chatbot
     chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt)
     session = create_session()
+    completer = create_completer(["!help", "!exit", "!reset", "!rollback"])
     # Start chat
     while True:
         print()
         try:
             print("User: ")
-            prompt = get_input(session=session)
+            prompt = get_input(session=session, completer=completer)
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
