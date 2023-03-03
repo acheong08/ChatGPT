@@ -43,6 +43,7 @@ class Chatbot:
                 "content": system_prompt,
             },
         ]
+        self.system_prompt = system_prompt
         self.max_tokens = max_tokens
 
         initial_conversation = "\n".join([x["content"] for x in self.conversation])
@@ -138,6 +139,14 @@ class Chatbot:
         for _ in range(n):
             self.conversation.pop()
 
+    def reset(self):
+        """
+        Reset the conversation
+        """
+        self.conversation = [
+            {"role": "system", "content": self.system_prompt},
+        ]
+
 
 def main():
     """
@@ -161,6 +170,7 @@ def main():
                 """
             !help - Display this message
             !rollback n - Rollback the conversation by n messages
+            !reset - Reset the conversation
             !exit - Quit chat
             """,
             )
@@ -173,6 +183,8 @@ def main():
                 print("Invalid number of messages to rollback")
             else:
                 chatbot.rollback(n)
+        elif cmd == "!reset":
+            chatbot.reset()
         else:
             return False
         return True
