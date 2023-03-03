@@ -147,6 +147,26 @@ class Chatbot:
             {"role": "system", "content": self.system_prompt},
         ]
 
+    def save(self, file: str):
+        """
+        Save the conversation to a JSON file
+        """
+        try:
+            with open(file, "w", encoding="utf-8") as f:
+                json.dump(self.conversation, f, indent=2)
+        except FileNotFoundError:
+            print(f"Error: {file} cannot be created")
+
+    def load(self, file: str):
+        """
+        Load the conversation from a JSON  file
+        """
+        try:
+            with open(file, "r", encoding="utf-8") as f:
+                self.conversation = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: {file} does not exist")
+
 
 def main():
     """
@@ -170,23 +190,32 @@ def main():
                 """
             !help - Display this message
             !rollback n - Rollback the conversation by n messages
+            !save filename - Save the conversation to a file
+            !load filename - Load the conversation from a file
             !reset - Reset the conversation
             !exit - Quit chat
             """,
             )
         elif cmd == "!exit":
             exit()
-        elif cmd.startswith("!rollback"):
-            try:
-                n = int(cmd.split(" ")[1])
-            except (IndexError, ValueError):
-                print("Invalid number of messages to rollback")
-            else:
-                chatbot.rollback(n)
         elif cmd == "!reset":
             chatbot.reset()
         else:
-            return False
+            _, *value = cmd.split(" ")
+            if len(value) < 1:
+                print("Invalid number of arguments")
+                return False
+            if cmd.startswith("!rollback"):
+                chatbot.rollback(int(value[0]))
+                print(f"\nRolled back by {value[0]} messages")
+            elif cmd.startswith("!save"):
+                chatbot.save(value[0])
+                print(f"\nConversation has been saved to {value[0]}")
+            elif cmd.startswith("!load"):
+                chatbot.load(value[0])
+                print(f"\n{len(chatbot.conversation)} messages loaded from {value[0]}")
+            else:
+                return False
         return True
 
     # Get API key from command line
