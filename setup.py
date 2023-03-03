@@ -18,7 +18,6 @@ setup(
         "asyncio",
         "httpx[socks]",
         "prompt-toolkit",
-        "tiktoken",
     ],
     extras_require={
         "unofficial": [
@@ -27,10 +26,9 @@ setup(
             "selenium",
             "tls_client",
         ],
-        "official": [
-            "openai",
-            "tiktoken",
-        ],
+        "V0": [ "openai", "tiktoken" ],
+        "V2": [ "tiktoken" ],
+        "V3": [ "tiktoken" ],
     },
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
