@@ -219,39 +219,38 @@ Config Commands:
         Handle chatbot commands
         """
         command, *value = input.split(" ")
-        match command:
-            case "!help":
-                self.print_help()
-            case "!exit":
-                exit()
-            case "!reset":
-                self.reset()
-                print("\nConversation has been reset")
-            case "!config":
-                self.print_config()
-            case "!rollback":
-                self.rollback(int(value[0]))
-                print(f"\nRolled back by {value[0]} messages")
-            case "!save":
-                self.save(value[0])
-                print(f"\nConversation has been saved to {value[0]}")
-            case "!load":
-                self.load(value[0])
-                print(f"\n{len(self.conversation)} messages loaded from {value[0]}")
-            case "!temperature":
-                self.temperature = float(value[0])
-                print(f"\nTemperature set to {value[0]}")
-            case "!top_p":
-                self.top_p = float(value[0])
-                print(f"\nTop_p set to {value[0]}")
-            case "!reply_count":
-                self.reply_count = int(value[0])
-                print(f"\nReply count set to {value[0]}")
-            case "!engine":
-                self.engine = value[0]
-                print(f"\nEngine set to {value[0]}")
-            case _:
-                return False
+        if command == "!help":
+            self.print_help()
+        elif command == "!exit":
+            exit()
+        elif command == "!reset":
+            self.reset()
+            print("\nConversation has been reset")
+        elif command == "!config":
+            self.print_config()
+        elif command == "!rollback":
+            self.rollback(int(value[0]))
+            print(f"\nRolled back by {value[0]} messages")
+        elif command == "!save":
+            self.save(value[0])
+            print(f"\nConversation has been saved to {value[0]}")
+        elif command == "!load":
+            self.load(value[0])
+            print(f"\n{len(self.conversation)} messages loaded from {value[0]}")
+        elif command == "!temperature":
+            self.temperature = float(value[0])
+            print(f"\nTemperature set to {value[0]}")
+        elif command == "!top_p":
+            self.top_p = float(value[0])
+            print(f"\nTop_p set to {value[0]}")
+        elif command == "!reply_count":
+            self.reply_count = int(value[0])
+            print(f"\nReply count set to {value[0]}")
+        elif command == "!engine":
+            self.engine = value[0]
+            print(f"\nEngine set to {value[0]}")
+        else:
+            return False
 
         return True
 
