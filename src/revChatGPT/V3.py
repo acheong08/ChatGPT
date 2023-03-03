@@ -151,15 +151,21 @@ class Chatbot:
         """
         Save the conversation to a JSON file
         """
-        with open(file, "w", encoding="utf-8") as f:
-            json.dump(self.conversation, f, indent=2)
+        try:
+            with open(file, "w", encoding="utf-8") as f:
+                json.dump(self.conversation, f, indent=2)
+        except FileNotFoundError:
+            print(f"Error: {file} cannot be created")
 
     def load(self, file: str):
         """
         Load the conversation from a JSON  file
         """
-        with open(file, "r", encoding="utf-8") as f:
-            self.conversation = json.load(f)
+        try:
+            with open(file, "r", encoding="utf-8") as f:
+                self.conversation = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: {file} does not exist")
 
 
 def main():
@@ -201,10 +207,13 @@ def main():
                 return False
             if cmd.startswith("!rollback"):
                 chatbot.rollback(int(value[0]))
+                print(f"\nRolled back by {value[0]} messages")
             elif cmd.startswith("!save"):
                 chatbot.save(value[0])
+                print(f"\nConversation has been saved to {value[0]}")
             elif cmd.startswith("!load"):
                 chatbot.load(value[0])
+                print(f"\n{len(chatbot.conversation)} messages loaded from {value[0]}")
             else:
                 return False
         return True
