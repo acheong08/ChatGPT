@@ -11,7 +11,7 @@ import requests
 import tiktoken
 from OpenAIAuth import Authenticator as OpenAIAuth
 
-from .utils import create_session
+from .utils import create_completer, create_session
 from .utils import get_input
 
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -332,8 +332,9 @@ async def main():
 
     try:
         session = create_session()
+        completer = create_completer(["!help", "!reset", "!rollback", "!exit"])
         while True:
-            prompt = get_input("\nYou:\n", session=session)
+            prompt = get_input(session=session, completer=completer)
             if prompt.startswith("!"):
                 if commands(prompt):
                     continue
