@@ -71,6 +71,18 @@ def logger(is_timed: bool):
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
+class ErrorType:
+    # define consts for the error codes
+    USER_ERROR = -1
+    UNKNOWN_ERROR = 0
+    SERVER_ERROR = 1
+    RATE_LIMIT_ERROR = 2
+    INVALID_REQUEST_ERROR = 3
+    EXPIRED_ACCESS_TOKEN_ERROR = 4
+    INVALID_ACCESS_TOKEN_ERROR = 5
+    PROHIBITED_CONCURRENT_QUERY_ERROR = 6
+
+
 class Error(Exception):
     """
     Base class for exceptions in this module.
@@ -287,13 +299,13 @@ class Chatbot:
                 raise Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
-                    code=5,
+                    code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
                 ) from None
             except json.JSONDecodeError:
                 raise Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
-                    code=5,
+                    code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
                 ) from None
 
             exp = d_access_token.get("exp", None)
@@ -301,7 +313,7 @@ class Chatbot:
                 raise Error(
                     source="__get_cached_access_token",
                     message="Access token expired",
-                    code=4,
+                    code=ErrorType.EXPIRED_ACCESS_TOKEN_ERROR,
                 )
 
         return access_token
@@ -402,7 +414,7 @@ class Chatbot:
             raise Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
-                code=-1,
+                code=ErrorType.USER_ERROR,
             )
 
         if conversation_id is not None and conversation_id != self.conversation_id:
@@ -499,32 +511,33 @@ class Chatbot:
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
                 if (
-                    line.get("detail")
-                    == "Too many requests in 1 hour. Try again later."
+                        line.get("detail")
+                        == "Too many requests in 1 hour. Try again later."
                 ):
                     log.error("Rate limit exceeded")
-                    raise Error(source="ask", message=line.get("detail"), code=2)
+                    raise Error(source="ask", message=line.get("detail"), code=ErrorType.RATE_LIMIT_ERROR)
                 if line.get("detail").startswith(
-                    "Only one message at a time.",
+                        "Only one message at a time.",
                 ):
                     log.error("Prohibited concurrent query")
-                    raise Error(source="ask", message=line.get("detail"), code=6)
+                    raise Error(source="ask", message=line.get("detail"),
+                                code=ErrorType.PROHIBITED_CONCURRENT_QUERY_ERROR)
                 if line.get("detail", "") == "invalid_api_key":
                     log.error("Invalid access token")
                     raise Error(
                         source="ask",
                         message=line.get("detail", ""),
-                        code=3,
+                        code=ErrorType.INVALID_REQUEST_ERROR,
                     )
                 if line.get("detail", "") == "invalid_token":
                     log.error("Invalid access token")
                     raise Error(
                         source="ask",
                         message=line.get("detail", ""),
-                        code=5,
+                        code=ErrorType.INVALID_ACCESS_TOKEN_ERROR
                     )
 
-                raise Error(source="ask", message="Field missing", code=1)
+                raise Error(source="ask", message="Field missing", code=ErrorType.SERVER_ERROR)
             message = line["message"]["content"]["parts"][0]
             if message == prompt:
                 continue
@@ -713,7 +726,7 @@ class AsyncChatbot(Chatbot):
             raise Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
-                code=1,
+                code=ErrorType.SERVER_ERROR,
             )
 
         if conversation_id is not None and conversation_id != self.conversation_id:
@@ -972,7 +985,7 @@ def main(config: dict):
             print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
             prev_text = ""
             for data in chatbot.ask(prompt):
-                message = data["message"][len(prev_text) :]
+                message = data["message"][len(prev_text):]
                 print(message, end="", flush=True)
                 prev_text = data["message"]
             print(bcolors.ENDC)
