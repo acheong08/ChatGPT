@@ -9,7 +9,7 @@ import sys
 import requests
 import tiktoken
 
-from .utils import create_session, get_input
+from .utils import create_session, get_input, create_completer
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -35,6 +35,12 @@ class Chatbot:
         self.session = requests.Session()
         self.api_key = api_key
         self.proxy = proxy
+        if self.proxy:
+            proxies = {
+                "http": self.proxy,
+                "https": self.proxy,
+            }
+            self.session.proxies = proxies
         self.conversation: list = [
             {
                 "role": "system",
@@ -143,6 +149,26 @@ class Chatbot:
             {"role": "system", "content": self.system_prompt},
         ]
 
+    def save(self, file: str):
+        """
+        Save the conversation to a JSON file
+        """
+        try:
+            with open(file, "w", encoding="utf-8") as f:
+                json.dump(self.conversation, f, indent=2)
+        except FileNotFoundError:
+            print(f"Error: {file} cannot be created")
+
+    def load(self, file: str):
+        """
+        Load the conversation from a JSON  file
+        """
+        try:
+            with open(file, "r", encoding="utf-8") as f:
+                self.conversation = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: {file} does not exist")
+
 
 def main():
     """
@@ -166,23 +192,32 @@ def main():
                 """
             !help - Display this message
             !rollback n - Rollback the conversation by n messages
+            !save filename - Save the conversation to a file
+            !load filename - Load the conversation from a file
             !reset - Reset the conversation
             !exit - Quit chat
             """,
             )
         elif cmd == "!exit":
             exit()
-        elif cmd.startswith("!rollback"):
-            try:
-                n = int(cmd.split(" ")[1])
-            except (IndexError, ValueError):
-                print("Invalid number of messages to rollback")
-            else:
-                chatbot.rollback(n)
         elif cmd == "!reset":
             chatbot.reset()
         else:
-            return False
+            _, *value = cmd.split(" ")
+            if len(value) < 1:
+                print("Invalid number of arguments")
+                return False
+            if cmd.startswith("!rollback"):
+                chatbot.rollback(int(value[0]))
+                print(f"\nRolled back by {value[0]} messages")
+            elif cmd.startswith("!save"):
+                chatbot.save(value[0])
+                print(f"\nConversation has been saved to {value[0]}")
+            elif cmd.startswith("!load"):
+                chatbot.load(value[0])
+                print(f"\n{len(chatbot.conversation)} messages loaded from {value[0]}")
+            else:
+                return False
         return True
 
     # Get API key from command line
@@ -210,16 +245,23 @@ def main():
         default="You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
         help="Base prompt for chatbot",
     )
+    parser.add_argument(
+        "--proxy",
+        type=str,
+        default=None,
+        help="Proxy address",
+    )
     args = parser.parse_args()
     # Initialize chatbot
-    chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt)
+    chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt, proxy=args.proxy)
     session = create_session()
+    completer = create_completer(["!help", "!exit", "!reset", "!rollback"])
     # Start chat
     while True:
         print()
         try:
             print("User: ")
-            prompt = get_input(session=session)
+            prompt = get_input(session=session, completer=completer)
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()

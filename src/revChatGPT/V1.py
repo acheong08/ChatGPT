@@ -18,7 +18,8 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from .utils import create_session, get_input
+from .utils import create_completer, create_session
+from .utils import get_input
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
@@ -956,13 +957,17 @@ def main(config: dict):
         return True
 
     session = create_session()
+    completer = create_completer(["!help", "!reset", "!config", "!rollback", "!exit", "!setconversation"])
     print()
     try:
         while True:
             print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
-            prompt = get_input(session=session)
-            if prompt.startswith("!") and handle_commands(prompt):
-                continue
+
+            prompt = get_input(session=session, completer=completer)
+            if prompt.startswith("!"):
+                if handle_commands(prompt):
+                    continue
+
             print()
             print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
             prev_text = ""
