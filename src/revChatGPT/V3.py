@@ -9,7 +9,9 @@ import sys
 import requests
 import tiktoken
 
-from .utils import create_session, get_input, create_completer
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -169,7 +171,7 @@ class Chatbot:
         Load the conversation from a JSON  file
         """
         try:
-            with open(file, "r", encoding="utf-8") as f:
+            with open(file, encoding="utf-8") as f:
                 self.conversation = json.load(f)
         except FileNotFoundError:
             print(f"Error: {file} does not exist")
@@ -186,7 +188,7 @@ ChatGPT Configuration:
   Temperature:      {self.temperature}
   Top_p:            {self.top_p}
   Reply count:      {self.reply_count}
-            """
+            """,
         )
 
     def print_help(self):
@@ -209,7 +211,7 @@ Config Commands:
   !top_p n        Set the top_p to n
   !reply_count n  Set the reply_count to n
   !engine engine  Sets the chat model to engine
-  """
+  """,
         )
 
     def handle_commands(self, input: str) -> bool:
@@ -332,9 +334,9 @@ def main():
             "!temperture",
             "!top_p",
             "!reply_count",
-            "!save", 
-            "!load"
-        ]
+            "!save",
+            "!load",
+        ],
     )
     # Start chat
     while True:

@@ -11,14 +11,16 @@ import os.path as osp
 import time
 import uuid
 from functools import wraps
-from os import environ, getenv
+from os import environ
+from os import getenv
 
 import requests
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from .utils import create_completer, create_session
+from .utils import create_completer
+from .utils import create_session
 from .utils import get_input
 
 logging.basicConfig(
@@ -552,7 +554,9 @@ class Chatbot:
                         )
 
                 raise Error(
-                    source="ask", message="Field missing", code=ErrorType.SERVER_ERROR
+                    source="ask",
+                    message="Field missing",
+                    code=ErrorType.SERVER_ERROR,
                 )
             message = line["message"]["content"]["parts"][0]
             if message == prompt:
@@ -987,7 +991,7 @@ def main(config: dict):
 
     session = create_session()
     completer = create_completer(
-        ["!help", "!reset", "!config", "!rollback", "!exit", "!setconversation"]
+        ["!help", "!reset", "!config", "!rollback", "!exit", "!setconversation"],
     )
     print()
     try:

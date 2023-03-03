@@ -654,7 +654,7 @@ class Chatbot:
                 self.cf_clearance = raw_cf_cookie.split("=")[1][:-1]
                 if self.verbose:
                     print(
-                        f"{self.GREEN}Cloudflare Cookie: {self.ENDCOLOR}{self.cf_clearance}"
+                        f"{self.GREEN}Cloudflare Cookie: {self.ENDCOLOR}{self.cf_clearance}",
                     )
                 self.cf_cookie_found = True
                 # if puid_cookie and not self.puid_cookie_found:
@@ -683,7 +683,7 @@ class Chatbot:
                 )
                 if self.verbose:
                     print(
-                        f"{self.GREEN}Session Token: {self.ENDCOLOR}{self.session_token}"
+                        f"{self.GREEN}Session Token: {self.ENDCOLOR}{self.session_token}",
                     )
                 self.session_cookie_found = True
 
