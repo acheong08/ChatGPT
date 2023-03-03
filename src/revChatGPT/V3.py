@@ -332,6 +332,8 @@ def main():
             "!temperture",
             "!top_p",
             "!reply_count",
+            "!save", 
+            "!load"
         ]
     )
     # Start chat
