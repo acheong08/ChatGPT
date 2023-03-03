@@ -255,7 +255,9 @@ def main():
     # Initialize chatbot
     chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt, proxy=args.proxy)
     session = create_session()
-    completer = create_completer(["!help", "!exit", "!reset", "!rollback"])
+    completer = create_completer(
+        ["!help", "!exit", "!reset", "!rollback", "!save", "!load"]
+    )
     # Start chat
     while True:
         print()
