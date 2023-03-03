@@ -26,6 +26,9 @@ class Chatbot:
         engine: str = None,
         proxy: str = None,
         max_tokens: int = 3000,
+        temperature: float = 0.5,
+        top_p: float = 1.0,
+        reply_count: int = 1,
         system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
     ) -> None:
         """
@@ -49,6 +52,9 @@ class Chatbot:
         ]
         self.system_prompt = system_prompt
         self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.top_p = top_p
+        self.reply_count = reply_count
 
         initial_conversation = "\n".join([x["content"] for x in self.conversation])
         if len(ENCODER.encode(initial_conversation)) > self.max_tokens:
@@ -79,21 +85,20 @@ class Chatbot:
         """
         Ask a question
         """
-        api_key = kwargs.get("api_key")
         self.__add_to_conversation(prompt, "user")
         self.__truncate_conversation()
         # Get response
         response = self.session.post(
             "https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": "Bearer " + (api_key or self.api_key)},
+            headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
             json={
                 "model": self.engine,
                 "messages": self.conversation,
                 "stream": True,
                 # kwargs
-                "temperature": kwargs.get("temperature", 0.7),
-                "top_p": kwargs.get("top_p", 1),
-                "n": kwargs.get("n", 1),
+                "temperature": kwargs.get("temperature", self.temperature),
+                "top_p": kwargs.get("top_p", self.top_p),
+                "n": kwargs.get("n", self.reply_count),
                 "user": role,
             },
             stream=True,
@@ -169,6 +174,85 @@ class Chatbot:
         except FileNotFoundError:
             print(f"Error: {file} does not exist")
 
+    def print_config(self):
+        """
+        Prints the current configuration
+        """
+        print(
+            f"""
+ChatGPT Configuration:
+  Messages:         {len(self.conversation)} / {self.max_tokens}
+  Engine:           {self.engine}
+  Temperature:      {self.temperature}
+  Top_p:            {self.top_p}
+  Reply count:      {self.reply_count}
+            """
+        )
+
+    def print_help(self):
+        """
+        Prints the help message
+        """
+        print(
+            """
+Commands:
+  !help           Display this message
+  !rollback n     Rollback the conversation by n messages
+  !save filename  Save the conversation to a file
+  !load filename  Load the conversation from a file
+  !reset          Reset the conversation
+  !exit           Quit chat
+
+Config Commands:
+  !config         Display the current config
+  !temperature n  Set the temperature to n
+  !top_p n        Set the top_p to n
+  !reply_count n  Set the reply_count to n
+  !engine engine  Sets the chat model to engine
+  """
+        )
+
+    def handle_commands(self, input: str) -> bool:
+        """
+        Handle chatbot commands
+        """
+        command, *value = input.split(" ")
+        match command:
+            case "!help":
+                self.print_help()
+            case "!exit":
+                exit()
+            case "!reset":
+                self.reset()
+                print("\nConversation has been reset")
+            case "!config":
+                self.print_config()
+            case "!rollback":
+                self.rollback(int(value[0]))
+                print(f"\nRolled back by {value[0]} messages")
+            case "!save":
+                self.save(value[0])
+                print(f"\nConversation has been saved to {value[0]}")
+            case "!load":
+                self.load(value[0])
+                print(f"\n{len(self.conversation)} messages loaded from {value[0]}")
+            case "!temperature":
+                self.temperature = float(value[0])
+                print(f"\nTemperature set to {value[0]}")
+            case "!top_p":
+                self.top_p = float(value[0])
+                print(f"\nTop_p set to {value[0]}")
+            case "!reply_count":
+                self.reply_count = int(value[0])
+                print(f"\nReply count set to {value[0]}")
+            case "!engine":
+                self.engine = value[0]
+                print(f"\nEngine set to {value[0]}")
+            case _:
+                return False
+
+        return True
+
 
 def main():
     """
@@ -182,43 +266,6 @@ def main():
     )
     print("Type '!help' to show a full list of commands")
     print("Press Esc followed by Enter or Alt+Enter to send a message.\n")
-
-    def chatbot_commands(cmd: str) -> bool:
-        """
-        Handle chatbot commands
-        """
-        if cmd == "!help":
-            print(
-                """
-            !help - Display this message
-            !rollback n - Rollback the conversation by n messages
-            !save filename - Save the conversation to a file
-            !load filename - Load the conversation from a file
-            !reset - Reset the conversation
-            !exit - Quit chat
-            """,
-            )
-        elif cmd == "!exit":
-            exit()
-        elif cmd == "!reset":
-            chatbot.reset()
-        else:
-            _, *value = cmd.split(" ")
-            if len(value) < 1:
-                print("Invalid number of arguments")
-                return False
-            if cmd.startswith("!rollback"):
-                chatbot.rollback(int(value[0]))
-                print(f"\nRolled back by {value[0]} messages")
-            elif cmd.startswith("!save"):
-                chatbot.save(value[0])
-                print(f"\nConversation has been saved to {value[0]}")
-            elif cmd.startswith("!load"):
-                chatbot.load(value[0])
-                print(f"\n{len(chatbot.conversation)} messages loaded from {value[0]}")
-            else:
-                return False
-        return True
 
     # Get API key from command line
     parser = argparse.ArgumentParser()
@@ -251,12 +298,43 @@ def main():
         default=None,
         help="Proxy address",
     )
+    parser.add_argument(
+        "--top_p",
+        type=float,
+        default=1,
+        help="Top p for response",
+    )
+    parser.add_argument(
+        "--reply_count",
+        type=int,
+        default=1,
+        help="Number of replies for each prompt",
+    )
     args = parser.parse_args()
     # Initialize chatbot
-    chatbot = Chatbot(api_key=args.api_key, system_prompt=args.base_prompt, proxy=args.proxy)
+    chatbot = Chatbot(
+        api_key=args.api_key,
+        system_prompt=args.base_prompt,
+        proxy=args.proxy,
+        temperature=args.temperature,
+        top_p=args.top_p,
+        reply_count=args.reply_count,
+    )
     session = create_session()
     completer = create_completer(
-        ["!help", "!exit", "!reset", "!rollback", "!save", "!load"]
+        [
+            "!help",
+            "!exit",
+            "!reset",
+            "!rollback",
+            "!config",
+            "!engine",
+            "!temperture",
+            "!top_p",
+            "!reply_count",
+            "!save", 
+            "!load"
+        ]
     )
     # Start chat
     while True:
@@ -267,14 +345,14 @@ def main():
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
-        if prompt.startswith("!") and chatbot_commands(prompt):
+        if prompt.startswith("!") and chatbot.handle_commands(prompt):
             continue
         print()
         print("ChatGPT: ", flush=True)
         if args.no_stream:
-            print(chatbot.ask(prompt, "user", temperature=args.temperature))
+            print(chatbot.ask(prompt, "user"))
         else:
-            for response in chatbot.ask_stream(prompt, temperature=args.temperature):
+            for response in chatbot.ask_stream(prompt):
                 print(response, end="", flush=True)
         print()
 
