@@ -174,25 +174,43 @@ class Chatbot:
             {"role": "system", "content": system_prompt or self.system_prompt},
         ]
 
-    def save(self, file: str):
+    def save(self, file: str, *convo_ids: str):
         """
         Save the conversation to a JSON file
         """
         try:
             with open(file, "w", encoding="utf-8") as f:
-                json.dump(self.conversation, f, indent=2)
-        except FileNotFoundError:
-            print(f"Error: {file} cannot be created")
+                if convo_ids:
+                    json.dump({k: self.conversation[k] for k in convo_ids}, f, indent=2)
+                else:
+                    json.dump(self.conversation, f, indent=2)
+        except (FileNotFoundError, KeyError):
+            return False
+        return True
+        # print(f"Error: {file} could not be created")
 
-    def load(self, file: str):
+    def load(self, file: str, *convo_ids: str):
         """
         Load the conversation from a JSON  file
         """
         try:
             with open(file, encoding="utf-8") as f:
-                self.conversation = json.load(f)
-        except FileNotFoundError:
-            print(f"Error: {file} does not exist")
+                if convo_ids:
+                    convos = json.load(f)
+                    self.conversation.update({k: convos[k] for k in convo_ids})
+                else:
+                    self.conversation = json.load(f)
+        except (FileNotFoundError, KeyError, json.decoder.JSONDecodeError):
+            return False
+        return True
+
+    def get_message_count(self, *convo_ids: str):
+        """
+        Returns the number of messages in the specified conversation/s
+        """
+        return sum(
+            [len(self.conversation[x]) for x in convo_ids or self.conversation.keys()]
+        )
 
     def print_config(self, convo_id: str = "default"):
         """
@@ -216,19 +234,19 @@ ChatGPT Configuration:
         print(
             """
 Commands:
-  !help           Display this message
-  !rollback n     Rollback the conversation by n messages
-  !save filename  Save the conversation to a file
-  !load filename  Load the conversation from a file
-  !reset          Reset the conversation
-  !exit           Quit chat
+  !help            Display this message
+  !rollback n      Rollback the conversation by n messages
+  !save file [ids] Save all or specificied conversation/s to a JSON file
+  !load file [ids] Load all or specificied conversation/s from a JSON file
+  !reset           Reset the conversation
+  !exit            Quit chat
 
 Config Commands:
-  !config         Display the current config
-  !temperature n  Set the temperature to n
-  !top_p n        Set the top_p to n
-  !reply_count n  Set the reply_count to n
-  !engine engine  Sets the chat model to engine
+  !config          Display the current config
+  !temperature n   Set the temperature to n
+  !top_p n         Set the top_p to n
+  !reply_count n   Set the reply_count to n
+  !engine engine   Sets the chat model to engine
   """,
         )
 
@@ -250,13 +268,34 @@ Config Commands:
             self.rollback(int(value[0]), convo_id=convo_id)
             print(f"\nRolled back by {value[0]} messages")
         elif command == "!save":
-            self.save(value[0])
-            print(f"\nConversation has been saved to {value[0]}")
+            is_saved = self.save(*value)
+            if is_saved:
+                convo_ids = value[1:] or self.conversation.keys()
+                print(
+                    f"""
+Saved: 
+  Conversation{len(convo_ids) > 1 and 's'}:    {', '.join(convo_ids)} 
+  Message Count:    {self.get_message_count(*value[1:])} 
+  Destination:      {value[0]}
+                    """
+                )
+            else:
+                print(f"Error: {value[0]} could not be created")
+
         elif command == "!load":
-            self.load(value[0])
-            print(
-                f"\n{len(self.conversation[convo_id])} messages loaded from {value[0]}",
-            )
+            is_loaded = self.load(*value)
+            if is_loaded:
+                convo_ids = value[1:] or self.conversation.keys()
+                print(
+                    f"""
+Loaded:
+  Conversation{len(convo_ids) > 1 and 's'}:  {', '.join(convo_ids)} 
+  Message Count:  {self.get_message_count(*value[1:])} 
+  Source:         {value[0]}
+                    """
+                )
+            else:
+                print(f"Error: {value[0]} could not be loaded")
         elif command == "!temperature":
             self.temperature = float(value[0])
             print(f"\nTemperature set to {value[0]}")
