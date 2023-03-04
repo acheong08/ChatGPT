@@ -334,7 +334,7 @@ def main():
     parser.add_argument(
         "--enable-internet",
         action="store_true",
-        help="Enable internet access",
+        help="Allow ChatGPT to search the internet",
     )
     args = parser.parse_args()
     # Initialize chatbot
