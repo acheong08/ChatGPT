@@ -274,7 +274,7 @@ Config Commands:
                 print(
                     f"""
 Saved: 
-  Conversation{len(convo_ids) > 1 and 's'}:    {', '.join(convo_ids)} 
+  Conversation{'s' if len(convo_ids) > 1 else ''}:    {', '.join(convo_ids)} 
   Message Count:    {self.get_message_count(*value[1:])} 
   Destination:      {value[0]}
                     """
@@ -289,7 +289,7 @@ Saved:
                 print(
                     f"""
 Loaded:
-  Conversation{len(convo_ids) > 1 and 's'}:  {', '.join(convo_ids)} 
+  Conversation{'s' if len(convo_ids) > 1 else ''}:  {', '.join(convo_ids)} 
   Message Count:  {self.get_message_count(*value[1:])} 
   Source:         {value[0]}
                     """
