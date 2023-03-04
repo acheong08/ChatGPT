@@ -108,6 +108,12 @@ class Error(Exception):
         self.message = message
         self.code = code
 
+    def __str__(self):
+        return f"{self.source}: {self.message} (code: {self.code})"
+
+    def __repr__(self):
+        return f"{self.source}: {self.message} (code: {self.code})"
+
 
 class colors:
     """
