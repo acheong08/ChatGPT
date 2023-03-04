@@ -204,14 +204,6 @@ class Chatbot:
             return False
         return True
 
-    def get_message_count(self, *convo_ids: str):
-        """
-        Returns the number of messages in the specified conversation/s
-        """
-        return sum(
-            [len(self.conversation[x]) for x in convo_ids or self.conversation.keys()]
-        )
-
     def print_config(self, convo_id: str = "default"):
         """
         Prints the current configuration
@@ -272,12 +264,7 @@ Config Commands:
             if is_saved:
                 convo_ids = value[1:] or self.conversation.keys()
                 print(
-                    f"""
-Saved: 
-  Conversation{'s' if len(convo_ids) > 1 else ''}:    {', '.join(convo_ids)} 
-  Message Count:    {self.get_message_count(*value[1:])} 
-  Destination:      {value[0]}
-                    """
+                    f"Saved conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} to {value[0]}"
                 )
             else:
                 print(f"Error: {value[0]} could not be created")
@@ -287,12 +274,7 @@ Saved:
             if is_loaded:
                 convo_ids = value[1:] or self.conversation.keys()
                 print(
-                    f"""
-Loaded:
-  Conversation{'s' if len(convo_ids) > 1 else ''}:  {', '.join(convo_ids)} 
-  Message Count:  {self.get_message_count(*value[1:])} 
-  Source:         {value[0]}
-                    """
+                    f"Loaded conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} from {value[0]}"
                 )
             else:
                 print(f"Error: {value[0]} could not be loaded")
