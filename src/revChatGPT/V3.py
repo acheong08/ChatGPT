@@ -89,6 +89,13 @@ class Chatbot:
             else:
                 break
 
+    def send_message(self, message: str, role: str = "user", convo_id: str = "default"):
+        """
+        Adds a message to the conversation without sending a request
+        Allowed roles: user, system, assistant
+        """
+        self.__add_to_conversation(message, role, convo_id)
+
     def ask_stream(
         self,
         prompt: str,
