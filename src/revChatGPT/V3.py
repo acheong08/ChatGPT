@@ -5,10 +5,10 @@ import argparse
 import json
 import os
 import sys
+import urllib
 
 import requests
 import tiktoken
-import urllib
 
 from .utils import create_completer
 from .utils import create_session
@@ -357,10 +357,14 @@ def main():
             system_prompt='For given prompts, summarize it to fit the style of a search query to a search engine. If the prompt cannot be answered by an internet search, is a standalone statement, is a creative task, is directed at a person, or does not make sense, type "none". DO NOT TRY TO RESPOND CONVERSATIONALLY. DO NOT TALK ABOUT YOURSELF. IF THE PROMPT IS DIRECTED AT YOU, TYPE "none".',
         )
         chatbot.add_to_conversation(
-            message="What is the capital of France?", role="user", convo_id="search"
+            message="What is the capital of France?",
+            role="user",
+            convo_id="search",
         )
         chatbot.add_to_conversation(
-            message="Capital of France", role="assistant", convo_id="search"
+            message="Capital of France",
+            role="assistant",
+            convo_id="search",
         )
         chatbot.add_to_conversation(
             message="Who are you?",
@@ -455,7 +459,9 @@ def main():
                 ).text
             print(json.dumps(json.loads(search_results), indent=4))
             chatbot.add_to_conversation(
-                "Search results:" + search_results, "system", convo_id="default"
+                "Search results:" + search_results,
+                "system",
+                convo_id="default",
             )
             if args.no_stream:
                 print(chatbot.ask(prompt, "user", convo_id="default"))

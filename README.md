@@ -158,16 +158,30 @@ Get API key from https://platform.openai.com/account/api-keys
 `python3 -m revChatGPT.V3 --api_key <api_key>`
 
 ```
+ $ python3 -m revChatGPT.V3 -h
 
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
 
-    Type '!help' to show a full list of commands
-    Press enter twice to submit your question.
+Type '!help' to show a full list of commands
+Press Esc followed by Enter or Alt+Enter to send a message.
 
-    !help - Display this message
-    !rollback n - Rollback the conversation by n messages
-    !exit - Quit chat
+usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream] [--base_prompt BASE_PROMPT]
+             [--proxy PROXY] [--top_p TOP_P] [--reply_count REPLY_COUNT] [--enable-internet]
+
+options:
+  -h, --help            show this help message and exit
+  --api_key API_KEY     OpenAI API key
+  --temperature TEMPERATURE
+                        Temperature for response
+  --no_stream           Disable streaming
+  --base_prompt BASE_PROMPT
+                        Base prompt for chatbot
+  --proxy PROXY         Proxy address
+  --top_p TOP_P         Top p for response
+  --reply_count REPLY_COUNT
+                        Number of replies for each prompt
+  --enable-internet     Enable internet access
 ```
 
 ## Developer API
