@@ -497,10 +497,15 @@ class Chatbot:
         )
         self.__check_response(response)
         for line in response.iter_lines():
-            line = str(line)[2:-1]
-            if line == "Internal Server Error":
+            # remove b' and ' at the beginning and end and ignore case
+            line = str(line)[2:-1].lower()
+            if line == "internal server error":
                 log.error("Internal Server Error: %s", line)
-                raise Exception("Error: " + str(line))
+                raise Error(
+                    source="ask",
+                    message="Internal Server Error",
+                    code=ErrorType.SERVER_ERROR,
+                )
             if line == "" or line is None:
                 continue
             if "data: " in line:
@@ -518,9 +523,9 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
-                line_detail = line.get("detail")
+                line_detail = line.get("detail").lower()
                 if isinstance(line_detail, str):
-                    if line_detail == "Too many requests in 1 hour. Try again later.":
+                    if line_detail == "too many requests in 1 hour. try again later.":
                         log.error("Rate limit exceeded")
                         raise Error(
                             source="ask",
@@ -528,7 +533,7 @@ class Chatbot:
                             code=ErrorType.RATE_LIMIT_ERROR,
                         )
                     if line_detail.startswith(
-                        "Only one message at a time.",
+                        "only one message at a time.",
                     ):
                         log.error("Prohibited concurrent query")
                         raise Error(
