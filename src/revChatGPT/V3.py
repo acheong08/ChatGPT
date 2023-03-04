@@ -8,6 +8,7 @@ import sys
 
 import requests
 import tiktoken
+import urllib
 
 from .utils import create_completer
 from .utils import create_session
@@ -106,8 +107,8 @@ class Chatbot:
         """
         Ask a question
         """
-        self.__add_to_conversation(prompt, "user")
-        self.__truncate_conversation()
+        self.__add_to_conversation(prompt, "user", convo_id=convo_id)
+        self.__truncate_conversation(convo_id=convo_id)
         # Get response
         response = self.session.post(
             "https://api.openai.com/v1/chat/completions",
@@ -159,7 +160,8 @@ class Chatbot:
         response = self.ask_stream(
             prompt=prompt,
             role=role,
-            convo_id=convo_id**kwargs,
+            convo_id=convo_id,
+            **kwargs,
         )
         full_response: str = "".join(response)
         return full_response
@@ -171,12 +173,12 @@ class Chatbot:
         for _ in range(n):
             self.conversation[convo_id].pop()
 
-    def reset(self, convo_id: str = "default"):
+    def reset(self, convo_id: str = "default", system_prompt: str = None):
         """
         Reset the conversation
         """
         self.conversation[convo_id] = [
-            {"role": "system", "content": self.system_prompt},
+            {"role": "system", "content": system_prompt or self.system_prompt},
         ]
 
     def save(self, file: str):
@@ -336,6 +338,11 @@ def main():
         default=1,
         help="Number of replies for each prompt",
     )
+    parser.add_argument(
+        "--enable-internet",
+        action="store_true",
+        help="Enable internet access",
+    )
     args = parser.parse_args()
     # Initialize chatbot
     chatbot = Chatbot(
@@ -346,6 +353,15 @@ def main():
         top_p=args.top_p,
         reply_count=args.reply_count,
     )
+    # Check if internet is enabled
+    if args.enable_internet:
+        chatbot.system_prompt = """
+        You are Olives, an AI assistant that can access the internet. Internet search results will be sent from the system in JSON format.
+        Respond conversationally and cite your sources.
+        Example request: What is the capital of France?
+        Example system info: [{"title":"Paris - Wikipedia","link":"https://en.wikipedia.org/wiki/Paris","snippet":"Paris ( French pronunciation: [paʁi] ( listen)) is the capital and most populous city of France, with an estimated population of 2,165,423 residents in 2019 in an area of more than 105 km² (41 sq mi), [5] making it the fourth-most populated city in the European Union and the 30th most densely populated city in the world in 2022. [6]"},{"title":"Paris | Definition, Map, Population, Facts, \u0026 History | Britannica","link":"https://www.britannica.com/place/Paris","snippet":"Paris, city and capital of France, situated in the north-central part of the country. People were living on the site of the present-day city, located along the Seine River some 233 miles (375 km) upstream from the river's mouth on the English Channel (La Manche), by about 7600 bce."}]
+        Example assistant response: References: 1. [Paris - Wikipedia](https://en.wikipedia.org/wiki/Paris) \n 2. [Paris | Definition, Map, Population, Facts, & History | Britannica](https://www.britannica.com/place/Paris) \n\n Paris is the capital and most populous city of France ^[1]^...
+        """
     session = create_session()
     completer = create_completer(
         [
@@ -375,11 +391,38 @@ def main():
             continue
         print()
         print("ChatGPT: ", flush=True)
-        if args.no_stream:
-            print(chatbot.ask(prompt, "user"))
+        if args.enable_internet:
+            chatbot.reset(
+                convo_id="search",
+            )
+            query = chatbot.ask(
+                f'Based on this prompt: "{prompt}", summarize it to fit the style of a search query to Google. Do not say anything else other than the search query. Do not add quotes around the search query.',
+                "user",
+                convo_id="search",
+                temperature=0.0,
+            )
+            print("Searching for: ", query, "")
+            # Get search results
+            search_results = requests.post(
+                url="https://ddg-api.herokuapp.com/search",
+                json={"query": query, "limit": 2},
+                timeout=10,
+            ).text
+            print(json.dumps(json.loads(search_results), indent=4))
+            chatbot.send_message(
+                "Search results:" + search_results, "system", convo_id="default"
+            )
+            if args.no_stream:
+                print(chatbot.ask(prompt, "user", convo_id="default"))
+            else:
+                for query in chatbot.ask_stream(prompt):
+                    print(query, end="", flush=True)
         else:
-            for response in chatbot.ask_stream(prompt):
-                print(response, end="", flush=True)
+            if args.no_stream:
+                print(chatbot.ask(prompt, "user"))
+            else:
+                for query in chatbot.ask_stream(prompt):
+                    print(query, end="", flush=True)
         print()
 
 
