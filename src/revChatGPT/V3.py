@@ -46,44 +46,56 @@ class Chatbot:
                 "https": self.proxy,
             }
             self.session.proxies = proxies
-        self.conversation: list = [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-        ]
+        self.conversation: dict = {
+            "default": [
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+            ],
+        }
         self.system_prompt = system_prompt
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.top_p = top_p
         self.reply_count = reply_count
 
-        initial_conversation = "\n".join([x["content"] for x in self.conversation])
+        initial_conversation = "\n".join(
+            [x["content"] for x in self.conversation["default"]],
+        )
         if len(ENCODER.encode(initial_conversation)) > self.max_tokens:
             raise Exception("System prompt is too long")
 
-    def __add_to_conversation(self, message: str, role: str):
+    def __add_to_conversation(self, message: str, role: str, convo_id: str = "default"):
         """
         Add a message to the conversation
         """
-        self.conversation.append({"role": role, "content": message})
+        self.conversation[convo_id].append({"role": role, "content": message})
 
-    def __truncate_conversation(self):
+    def __truncate_conversation(self, convo_id: str = "default"):
         """
         Truncate the conversation
         """
         while True:
-            full_conversation = "\n".join([x["content"] for x in self.conversation])
+            full_conversation = "\n".join(
+                [x["content"] for x in self.conversation[convo_id]],
+            )
             if (
                 len(ENCODER.encode(full_conversation)) > self.max_tokens
-                and len(self.conversation) > 1
+                and len(self.conversation[convo_id]) > 1
             ):
                 # Don't remove the first message
-                self.conversation.pop(1)
+                self.conversation[convo_id].pop(1)
             else:
                 break
 
-    def ask_stream(self, prompt: str, role: str = "user", **kwargs) -> str:
+    def ask_stream(
+        self,
+        prompt: str,
+        role: str = "user",
+        convo_id: str = "default",
+        **kwargs,
+    ) -> str:
         """
         Ask a question
         """
@@ -95,7 +107,7 @@ class Chatbot:
             headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
             json={
                 "model": self.engine,
-                "messages": self.conversation,
+                "messages": self.conversation[convo_id],
                 "stream": True,
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
@@ -131,28 +143,32 @@ class Chatbot:
                 content = delta["content"]
                 full_response += content
                 yield content
-        self.__add_to_conversation(full_response, response_role)
+        self.__add_to_conversation(full_response, response_role, convo_id=convo_id)
 
-    def ask(self, prompt: str, role: str = "user", **kwargs):
+    def ask(self, prompt: str, role: str = "user", convo_id: str = "default", **kwargs):
         """
         Non-streaming ask
         """
-        response = self.ask_stream(prompt, role, **kwargs)
+        response = self.ask_stream(
+            prompt=prompt,
+            role=role,
+            convo_id=convo_id**kwargs,
+        )
         full_response: str = "".join(response)
         return full_response
 
-    def rollback(self, n: int = 1):
+    def rollback(self, n: int = 1, convo_id: str = "default"):
         """
         Rollback the conversation
         """
         for _ in range(n):
-            self.conversation.pop()
+            self.conversation[convo_id].pop()
 
-    def reset(self):
+    def reset(self, convo_id: str = "default"):
         """
         Reset the conversation
         """
-        self.conversation = [
+        self.conversation[convo_id] = [
             {"role": "system", "content": self.system_prompt},
         ]
 
@@ -176,14 +192,14 @@ class Chatbot:
         except FileNotFoundError:
             print(f"Error: {file} does not exist")
 
-    def print_config(self):
+    def print_config(self, convo_id: str = "default"):
         """
         Prints the current configuration
         """
         print(
             f"""
 ChatGPT Configuration:
-  Messages:         {len(self.conversation)} / {self.max_tokens}
+  Messages:         {len(self.conversation[convo_id])} / {self.max_tokens}
   Engine:           {self.engine}
   Temperature:      {self.temperature}
   Top_p:            {self.top_p}
@@ -214,7 +230,7 @@ Config Commands:
   """,
         )
 
-    def handle_commands(self, input: str) -> bool:
+    def handle_commands(self, input: str, convo_id: str = "default") -> bool:
         """
         Handle chatbot commands
         """
@@ -224,19 +240,21 @@ Config Commands:
         elif command == "!exit":
             exit()
         elif command == "!reset":
-            self.reset()
+            self.reset(convo_id=convo_id)
             print("\nConversation has been reset")
         elif command == "!config":
-            self.print_config()
+            self.print_config(convo_id=convo_id)
         elif command == "!rollback":
-            self.rollback(int(value[0]))
+            self.rollback(int(value[0]), convo_id=convo_id)
             print(f"\nRolled back by {value[0]} messages")
         elif command == "!save":
             self.save(value[0])
             print(f"\nConversation has been saved to {value[0]}")
         elif command == "!load":
             self.load(value[0])
-            print(f"\n{len(self.conversation)} messages loaded from {value[0]}")
+            print(
+                f"\n{len(self.conversation[convo_id])} messages loaded from {value[0]}",
+            )
         elif command == "!temperature":
             self.temperature = float(value[0])
             print(f"\nTemperature set to {value[0]}")
