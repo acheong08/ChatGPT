@@ -67,7 +67,7 @@ class Chatbot:
         if len(ENCODER.encode(initial_conversation)) > self.max_tokens:
             raise Exception("System prompt is too long")
 
-    def __add_to_conversation(self, message: str, role: str, convo_id: str = "default"):
+    def add_to_conversation(self, message: str, role: str, convo_id: str = "default"):
         """
         Add a message to the conversation
         """
@@ -90,13 +90,6 @@ class Chatbot:
             else:
                 break
 
-    def send_message(self, message: str, role: str = "user", convo_id: str = "default"):
-        """
-        Adds a message to the conversation without sending a request
-        Allowed roles: user, system, assistant
-        """
-        self.__add_to_conversation(message, role, convo_id)
-
     def ask_stream(
         self,
         prompt: str,
@@ -107,7 +100,7 @@ class Chatbot:
         """
         Ask a question
         """
-        self.__add_to_conversation(prompt, "user", convo_id=convo_id)
+        self.add_to_conversation(prompt, "user", convo_id=convo_id)
         self.__truncate_conversation(convo_id=convo_id)
         # Get response
         response = self.session.post(
@@ -151,7 +144,7 @@ class Chatbot:
                 content = delta["content"]
                 full_response += content
                 yield content
-        self.__add_to_conversation(full_response, response_role, convo_id=convo_id)
+        self.add_to_conversation(full_response, response_role, convo_id=convo_id)
 
     def ask(self, prompt: str, role: str = "user", convo_id: str = "default", **kwargs):
         """
@@ -356,12 +349,65 @@ def main():
     # Check if internet is enabled
     if args.enable_internet:
         chatbot.system_prompt = """
-        You are Olives, an AI assistant that can access the internet. Internet search results will be sent from the system in JSON format.
-        Respond conversationally and cite your sources.
-        Example request: What is the capital of France?
-        Example system info: [{"title":"Paris - Wikipedia","link":"https://en.wikipedia.org/wiki/Paris","snippet":"Paris ( French pronunciation: [paʁi] ( listen)) is the capital and most populous city of France, with an estimated population of 2,165,423 residents in 2019 in an area of more than 105 km² (41 sq mi), [5] making it the fourth-most populated city in the European Union and the 30th most densely populated city in the world in 2022. [6]"},{"title":"Paris | Definition, Map, Population, Facts, \u0026 History | Britannica","link":"https://www.britannica.com/place/Paris","snippet":"Paris, city and capital of France, situated in the north-central part of the country. People were living on the site of the present-day city, located along the Seine River some 233 miles (375 km) upstream from the river's mouth on the English Channel (La Manche), by about 7600 bce."}]
-        Example assistant response: References: 1. [Paris - Wikipedia](https://en.wikipedia.org/wiki/Paris) \n 2. [Paris | Definition, Map, Population, Facts, & History | Britannica](https://www.britannica.com/place/Paris) \n\n Paris is the capital and most populous city of France ^[1]^...
+        You are ChatGPT, an AI assistant that can access the internet. Internet search results will be sent from the system in JSON format.
+        Respond conversationally and cite your sources via a URL at the end of your message.
         """
+        chatbot.reset(
+            convo_id="search",
+            system_prompt='For given prompts, summarize it to fit the style of a search query to a search engine. If the prompt cannot be answered by an internet search, is a standalone statement, is a creative task, is directed at a person, or does not make sense, type "none". DO NOT TRY TO RESPOND CONVERSATIONALLY. DO NOT TALK ABOUT YOURSELF. IF THE PROMPT IS DIRECTED AT YOU, TYPE "none".',
+        )
+        chatbot.add_to_conversation(
+            message="What is the capital of France?", role="user", convo_id="search"
+        )
+        chatbot.add_to_conversation(
+            message="Capital of France", role="assistant", convo_id="search"
+        )
+        chatbot.add_to_conversation(
+            message="Who are you?",
+            role="user",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(message="none", role="assistant", convo_id="search")
+        chatbot.add_to_conversation(
+            message="Write an essay about the history of the United States",
+            role="user",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(
+            message="none",
+            role="assistant",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(
+            message="What is the best way to cook a steak?",
+            role="user",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(
+            message="How to cook a steak",
+            role="assistant",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(
+            message="Hello world",
+            role="user",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(
+            message="none",
+            role="assistant",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(
+            message="Who is the current president of the United States?",
+            role="user",
+            convo_id="search",
+        )
+        chatbot.add_to_conversation(
+            message="United States president",
+            role="assistant",
+            convo_id="search",
+        )
     session = create_session()
     completer = create_completer(
         [
@@ -392,24 +438,23 @@ def main():
         print()
         print("ChatGPT: ", flush=True)
         if args.enable_internet:
-            chatbot.reset(
-                convo_id="search",
-            )
             query = chatbot.ask(
-                f'Based on this prompt: "{prompt}", summarize it to fit the style of a search query to Google. Do not say anything else other than the search query. Do not add quotes around the search query.',
-                "user",
+                f'This is a prompt from a user to a chatbot: "{prompt}". Respond with "none" if it is directed at the chatbot or cannot be answered by an internet search. Otherwise, respond with a possible search query to a search engine. Do not write any additional text. Make it as minimal as possible',
                 convo_id="search",
                 temperature=0.0,
-            )
+            ).strip()
             print("Searching for: ", query, "")
             # Get search results
-            search_results = requests.post(
-                url="https://ddg-api.herokuapp.com/search",
-                json={"query": query, "limit": 2},
-                timeout=10,
-            ).text
+            if query == "none":
+                search_results = '{"results": "No search results"}'
+            else:
+                search_results = requests.post(
+                    url="https://ddg-api.herokuapp.com/search",
+                    json={"query": query, "limit": 3},
+                    timeout=10,
+                ).text
             print(json.dumps(json.loads(search_results), indent=4))
-            chatbot.send_message(
+            chatbot.add_to_conversation(
                 "Search results:" + search_results, "system", convo_id="default"
             )
             if args.no_stream:
