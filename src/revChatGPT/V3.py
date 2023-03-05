@@ -77,9 +77,10 @@ class Chatbot:
         Truncate the conversation
         """
         while True:
-            full_conversation = "\n".join(
-                [x["content"] for x in self.conversation[convo_id]],
-            )
+            # Convert conversation to string
+            full_conversation = ""
+            for message in self.conversation[convo_id]:
+                full_conversation += message["role"] + ": " + message["content"] + "\n"
             if (
                 len(ENCODER.encode(full_conversation)) > self.max_tokens
                 and len(self.conversation[convo_id]) > 1
@@ -88,6 +89,15 @@ class Chatbot:
                 self.conversation[convo_id].pop(1)
             else:
                 break
+
+    def get_max_tokens(self, convo_id: str) -> int:
+        """
+        Get max tokens
+        """
+        full_conversation = ""
+        for message in self.conversation[convo_id]:
+            full_conversation += message["role"] + ": " + message["content"] + "\n"
+        return 4000 - len(ENCODER.encode(full_conversation))
 
     def ask_stream(
         self,
@@ -117,6 +127,7 @@ class Chatbot:
                 "top_p": kwargs.get("top_p", self.top_p),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
+                # "max_tokens": self.get_max_tokens(convo_id=convo_id),
             },
             stream=True,
         )
