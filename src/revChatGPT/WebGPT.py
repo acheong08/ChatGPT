@@ -230,8 +230,7 @@ def main(config: dict):
 if __name__ == "__main__":
     print(
         """
-        WebGPT module. Copies functionality from WebChatGPT browser extension
-        Btw, the secret of the ddg-webapp-aagd.vercel.app is just duckduckgo_search.ddg() -Nymda
+        WebGPT module. Copies functionality from WebChatGPT browser extension. Made by Nymda (github.com/NymdaFromSalad)
         Repo: github.com/acheong08/ChatGPT
         """,
     )
