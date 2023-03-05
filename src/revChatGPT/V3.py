@@ -5,7 +5,6 @@ import argparse
 import json
 import os
 import sys
-import urllib
 
 import requests
 import tiktoken

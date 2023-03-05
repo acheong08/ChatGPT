@@ -23,9 +23,10 @@ from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
-)
+if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
+    )
 
 log = logging.getLogger(__name__)
 
