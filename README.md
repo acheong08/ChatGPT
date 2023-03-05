@@ -181,7 +181,7 @@ options:
   --top_p TOP_P         Top p for response
   --reply_count REPLY_COUNT
                         Number of replies for each prompt
-  --enable-internet     Allow ChatGPT to access the internet (beta)
+  --enable_internet     Allow ChatGPT to access the internet (beta)
 ```
 
 ## Developer API

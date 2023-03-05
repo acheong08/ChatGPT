@@ -4,28 +4,29 @@ Standard ChatGPT
 from __future__ import annotations
 
 import base64
+import contextlib
 import json
 import logging
 import os
 import os.path as osp
+import sys
 import time
 import uuid
 from functools import wraps
-from os import environ
-from os import getenv
+from os import environ, getenv
+from typing import NoReturn
 
 import requests
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from .utils import create_completer
-from .utils import create_session
-from .utils import get_input
+from .utils import create_completer, create_session, get_input
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
-)
+if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
+    )
 
 log = logging.getLogger(__name__)
 
@@ -103,10 +104,16 @@ class Error(Exception):
     message: str
     code: int
 
-    def __init__(self, source: str, message: str, code: int = 0):
+    def __init__(self, source: str, message: str, code: int = 0) -> None:
         self.source = source
         self.message = message
         self.code = code
+
+    def __str__(self) -> str:
+        return f"{self.source}: {self.message} (code: {self.code})"
+
+    def __repr__(self) -> str:
+        return f"{self.source}: {self.message} (code: {self.code})"
 
 
 class colors:
@@ -219,7 +226,7 @@ class Chatbot:
         self.__check_credentials()
 
     @logger(is_timed=True)
-    def __check_credentials(self):
+    def __check_credentials(self) -> None:
         """Check login info and perform login
 
         Any one of the following is sufficient for login. Multiple login info can be provided at the same time and they will be used in the order listed below.
@@ -244,7 +251,7 @@ class Chatbot:
                 raise error
 
     @logger(is_timed=False)
-    def __set_access_token(self, access_token: str):
+    def __set_access_token(self, access_token: str) -> None:
         """Set access token in request header and self.config, then cache it to file.
 
         Args:
@@ -336,7 +343,7 @@ class Chatbot:
         self.__write_cache(cache)
 
     @logger(is_timed=False)
-    def __write_cache(self, info: dict):
+    def __write_cache(self, info: dict) -> None:
         """Write cache info to file
 
         Args:
@@ -358,7 +365,7 @@ class Chatbot:
         return cached
 
     @logger(is_timed=True)
-    def __login(self):
+    def __login(self) -> None:
         if (
             "email" not in self.config or "password" not in self.config
         ) and "session_token" not in self.config:
@@ -436,13 +443,11 @@ class Chatbot:
                         "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
                         conversation_id,
                     )
-                    try:
+                    with contextlib.suppress(Exception):
                         history = self.get_msg_history(conversation_id)
                         self.conversation_mapping[conversation_id] = history[
                             "current_node"
                         ]
-                    except Exception:
-                        pass
                 else:
                     log.debug(
                         "Conversation ID %s not found in conversation mapping, mapping conversations",
@@ -472,9 +477,9 @@ class Chatbot:
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": "text-davinci-002-render-sha"
-            if not self.config.get("paid")
-            else "text-davinci-002-render-paid",
+            "model": "text-davinci-002-render-paid"
+            if self.config.get("paid")
+            else "text-davinci-002-render-sha",
         }
         log.debug("Sending the payload")
         log.debug(json.dumps(data, indent=2))
@@ -484,17 +489,22 @@ class Chatbot:
         )
         self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
-            url=BASE_URL + "api/conversation",
+            url=f"{BASE_URL}api/conversation",
             data=json.dumps(data),
             timeout=timeout,
             stream=True,
         )
         self.__check_response(response)
         for line in response.iter_lines():
-            line = str(line)[2:-1]
-            if line == "Internal Server Error":
+            # remove b' and ' at the beginning and end and ignore case
+            line = str(line)[2:-1].lower()
+            if line == "internal server error":
                 log.error("Internal Server Error: %s", line)
-                raise Exception("Error: " + str(line))
+                raise Error(
+                    source="ask",
+                    message="Internal Server Error",
+                    code=ErrorType.SERVER_ERROR,
+                )
             if line == "" or line is None:
                 continue
             if "data: " in line:
@@ -512,9 +522,9 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
-                line_detail = line.get("detail")
+                line_detail = line.get("detail").lower()
                 if isinstance(line_detail, str):
-                    if line_detail == "Too many requests in 1 hour. Try again later.":
+                    if line_detail == "too many requests in 1 hour. try again later.":
                         log.error("Rate limit exceeded")
                         raise Error(
                             source="ask",
@@ -522,7 +532,7 @@ class Chatbot:
                             code=ErrorType.RATE_LIMIT_ERROR,
                         )
                     if line_detail.startswith(
-                        "Only one message at a time.",
+                        "only one message at a time.",
                     ):
                         log.error("Prohibited concurrent query")
                         raise Error(
@@ -591,7 +601,7 @@ class Chatbot:
         return True
 
     @logger(is_timed=False)
-    def __check_response(self, response):
+    def __check_response(self, response: requests.Response) -> None:
         """Make sure response is success
 
         Args:
@@ -643,7 +653,7 @@ class Chatbot:
         return json.loads(response.text)
 
     @logger(is_timed=True)
-    def gen_title(self, convo_id: str, message_id: str):
+    def gen_title(self, convo_id: str, message_id: str) -> None:
         """
         Generate title for conversation
         """
@@ -656,7 +666,7 @@ class Chatbot:
         self.__check_response(response)
 
     @logger(is_timed=True)
-    def change_title(self, convo_id: str, title: str):
+    def change_title(self, convo_id: str, title: str) -> None:
         """
         Change title of conversation
         :param id: UUID of conversation
@@ -667,7 +677,7 @@ class Chatbot:
         self.__check_response(response)
 
     @logger(is_timed=True)
-    def delete_conversation(self, convo_id: str):
+    def delete_conversation(self, convo_id: str) -> None:
         """
         Delete conversation
         :param id: UUID of conversation
@@ -677,7 +687,7 @@ class Chatbot:
         self.__check_response(response)
 
     @logger(is_timed=True)
-    def clear_conversations(self):
+    def clear_conversations(self) -> None:
         """
         Delete all conversations
         """
@@ -686,7 +696,7 @@ class Chatbot:
         self.__check_response(response)
 
     @logger(is_timed=False)
-    def __map_conversations(self):
+    def __map_conversations(self) -> None:
         conversations = self.get_conversations()
         histories = [self.get_msg_history(x["id"]) for x in conversations]
         for x, y in zip(conversations, histories):
@@ -848,7 +858,7 @@ class AsyncChatbot(Chatbot):
             self.__check_response(response)
             return json.loads(response.text)
 
-    async def gen_title(self, convo_id, message_id):
+    async def gen_title(self, convo_id: str, message_id: str) -> None:
         """
         Generate title for conversation
         """
@@ -861,7 +871,7 @@ class AsyncChatbot(Chatbot):
         )
         await self.__check_response(response)
 
-    async def change_title(self, convo_id, title):
+    async def change_title(self, convo_id: str, title: str) -> None:
         """
         Change title of conversation
         :param convo_id: UUID of conversation
@@ -871,7 +881,7 @@ class AsyncChatbot(Chatbot):
         response = await self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
-    async def delete_conversation(self, convo_id):
+    async def delete_conversation(self, convo_id: str) -> None:
         """
         Delete conversation
         :param convo_id: UUID of conversation
@@ -880,7 +890,7 @@ class AsyncChatbot(Chatbot):
         response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
-    async def clear_conversations(self):
+    async def clear_conversations(self) -> None:
         """
         Delete all conversations
         """
@@ -888,7 +898,7 @@ class AsyncChatbot(Chatbot):
         response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
-    async def __map_conversations(self):
+    async def __map_conversations(self) -> None:
         conversations = await self.get_conversations()
         histories = [await self.get_msg_history(x["id"]) for x in conversations]
         for x, y in zip(conversations, histories):
@@ -901,7 +911,7 @@ class AsyncChatbot(Chatbot):
             return False
         return True
 
-    def __check_response(self, response):
+    def __check_response(self, response) -> None:
         response.raise_for_status()
 
 
@@ -914,15 +924,12 @@ def configure():
     Looks for a config file in the following locations:
     """
     config_files = ["config.json"]
-    xdg_config_home = getenv("XDG_CONFIG_HOME")
-    if xdg_config_home:
+    if xdg_config_home := getenv("XDG_CONFIG_HOME"):
         config_files.append(f"{xdg_config_home}/revChatGPT/config.json")
-    user_home = getenv("HOME")
-    if user_home:
+    if user_home := getenv("HOME"):
         config_files.append(f"{user_home}/.config/revChatGPT/config.json")
 
-    config_file = next((f for f in config_files if osp.exists(f)), None)
-    if config_file:
+    if config_file := next((f for f in config_files if osp.exists(f)), None):
         with open(config_file, encoding="utf-8") as f:
             config = json.load(f)
     else:
@@ -932,7 +939,7 @@ def configure():
 
 
 @logger(is_timed=False)
-def main(config: dict):
+def main(config: dict) -> NoReturn:
     """
     Main function for the chatGPT program.
     """
@@ -984,7 +991,7 @@ def main(config: dict):
                 )
                 print("Please include conversation UUID in command")
         elif command == "!exit":
-            exit(0)
+            sys.exit(0)
         else:
             return False
         return True
@@ -996,15 +1003,14 @@ def main(config: dict):
     print()
     try:
         while True:
-            print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
+            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}", end="")
 
             prompt = get_input(session=session, completer=completer)
-            if prompt.startswith("!"):
-                if handle_commands(prompt):
-                    continue
+            if prompt.startswith("!") and handle_commands(prompt):
+                continue
 
             print()
-            print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
+            print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}", end="")
             prev_text = ""
             for data in chatbot.ask(prompt):
                 message = data["message"][len(prev_text) :]
@@ -1014,7 +1020,7 @@ def main(config: dict):
             print()
     except (KeyboardInterrupt, EOFError):
         print("Exiting...")
-        exit(0)
+        sys.exit(0)
 
 
 if __name__ == "__main__":
@@ -1026,9 +1032,6 @@ if __name__ == "__main__":
     )
     print("Type '!help' to show a full list of commands")
     print(
-        bcolors.BOLD
-        + bcolors.WARNING
-        + "Press Esc followed by Enter or Alt+Enter to send a message."
-        + bcolors.ENDC,
+        f"{bcolors.BOLD}{bcolors.WARNING}Press Esc followed by Enter or Alt+Enter to send a message.{bcolors.ENDC}",
     )
     main(configure())

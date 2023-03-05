@@ -1,8 +1,8 @@
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
+
 setup(
     name="revChatGPT",
-    version="3.1.0",
+    version="3.1.1",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
@@ -16,7 +16,6 @@ setup(
     install_requires=[
         "OpenAIAuth==0.3.2",
         "requests[socks]",
-        "asyncio",
         "httpx[socks]",
         "prompt-toolkit",
         "tiktoken",
