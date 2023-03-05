@@ -42,7 +42,7 @@ def webify(
     region: str = "",
     reply_in: str = "undefined",
 ):
-    searchResults = _apiSearch(query, numResults, timePeriod, region)
+    searchResults = ddg(query, numResults, timePeriod, region)
     return _compile_prompt(text, searchResults, reply_in), _headers(searchResults)
 
 
