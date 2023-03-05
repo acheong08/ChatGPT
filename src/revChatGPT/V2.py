@@ -11,9 +11,7 @@ import requests
 import tiktoken
 from OpenAIAuth import Authenticator as OpenAIAuth
 
-from .utils import create_completer
-from .utils import create_session
-from .utils import get_input
+from .utils import create_completer, create_session, get_input
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -78,7 +76,7 @@ class Conversations:
             return self.get(conversation_id)
         return conversation
 
-    def purge_history(self, conversation_id: str, num: int = 1):
+    def purge_history(self, conversation_id: str, num: int = 1) -> None:
         """
         Remove oldest messages from a conversation
         """
@@ -88,7 +86,7 @@ class Conversations:
             conversation_id
         ].messages[num:]
 
-    def rollback(self, conversation_id: str, num: int = 1):
+    def rollback(self, conversation_id: str, num: int = 1) -> None:
         """
         Remove latest messages from a conversation
         """
@@ -153,9 +151,9 @@ class Chatbot:
         body = self.__get_config()
         body["prompt"] = BASE_PROMPT + conversation + "ChatGPT: "
         body["max_tokens"] = get_max_tokens(conversation)
-        async with httpx.AsyncClient(proxies=self.proxy if self.proxy else None).stream(
+        async with httpx.AsyncClient(proxies=self.proxy or None).stream(
             method="POST",
-            url=PROXY_URL + "/completions",
+            url=f"{PROXY_URL}/completions",
             data=json.dumps(body),
             headers={"Authorization": f"Bearer {self.api_key}"},
             timeout=1080,
@@ -165,7 +163,7 @@ class Chatbot:
                 if response.status_code == 429:
                     print("error: " + "Too many requests")
                     raise Exception("Too many requests")
-                elif response.status_code == 523:
+                if response.status_code == 523:
                     print(
                         "error: "
                         + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
@@ -173,14 +171,14 @@ class Chatbot:
                     raise Exception(
                         "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
                     )
-                elif response.status_code == 503:
+                if response.status_code == 503:
                     print("error: " + "OpenAI error!")
                     raise Exception("OpenAI error!")
-                elif response.status_code != 200:
+                if response.status_code != 200:
                     print("error: " + "Unknown error")
                     raise Exception("Unknown error")
                 line = line.strip()
-                if line == "\n" or line == "":
+                if line in ["\n", ""]:
                     continue
                 if line == "data: [DONE]":
                     break
@@ -236,7 +234,7 @@ class Chatbot:
             self.api_key = auth_request.json()["accessToken"]
 
 
-async def main():
+async def main() -> None:
     """
     Testing main function
     """
@@ -336,9 +334,8 @@ async def main():
         completer = create_completer(["!help", "!reset", "!rollback", "!exit"])
         while True:
             prompt = get_input(session=session, completer=completer)
-            if prompt.startswith("!"):
-                if commands(prompt):
-                    continue
+            if prompt.startswith("!") and commands(prompt):
+                continue
 
             print("ChatGPT:")
             async for line in chatbot.ask(prompt=prompt):
