@@ -2,7 +2,7 @@
 
 # revChatGPT.WebGPT
 
-A wrapper for V1 chatbots (both default and async), implementing (almost verbatim) WebChatGPT browser extension (https://github.com/qunash/chatgpt-advanced/) for revChatGPT
+A wrapper for V1 chatbots (both default and async), implementing WebChatGPT browser extension (https://github.com/qunash/chatgpt-advanced/) for revChatGPT
 
 For V3 implementation, see V3 api wiki page
 
