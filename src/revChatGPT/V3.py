@@ -266,7 +266,7 @@ Config Commands:
             if is_saved:
                 convo_ids = value[1:] or self.conversation.keys()
                 print(
-                    f"Saved conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} to {value[0]}"
+                    f"Saved conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} to {value[0]}",
                 )
             else:
                 print(f"Error: {value[0]} could not be created")
@@ -276,7 +276,7 @@ Config Commands:
             if is_loaded:
                 convo_ids = value[1:] or self.conversation.keys()
                 print(
-                    f"Loaded conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} from {value[0]}"
+                    f"Loaded conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} from {value[0]}",
                 )
             else:
                 print(f"Error: {value[0]} could not be loaded")
@@ -372,6 +372,7 @@ def main():
     # Check if internet is enabled
     if args.enable_internet:
         from importlib.resources import path
+
         config = path("revChatGPT", "config")
         chatbot.load(os.path.join(config, "enable_internet.json"))
 
