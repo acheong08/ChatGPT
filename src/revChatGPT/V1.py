@@ -1008,7 +1008,7 @@ def main(config: dict):
     print()
     try:
         while True:
-            print(bcolors.OKBLUE + bcolors.BOLD + "You:" + bcolors.ENDC)
+            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}", end="")
 
             prompt = get_input(session=session, completer=completer)
             if prompt.startswith("!"):
@@ -1016,7 +1016,7 @@ def main(config: dict):
                     continue
 
             print()
-            print(bcolors.OKGREEN + bcolors.BOLD + "Chatbot: ")
+            print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}", end="")
             prev_text = ""
             for data in chatbot.ask(prompt):
                 message = data["message"][len(prev_text) :]
@@ -1038,9 +1038,6 @@ if __name__ == "__main__":
     )
     print("Type '!help' to show a full list of commands")
     print(
-        bcolors.BOLD
-        + bcolors.WARNING
-        + "Press Esc followed by Enter or Alt+Enter to send a message."
-        + bcolors.ENDC,
+        f"{bcolors.BOLD}{bcolors.WARNING}Press Esc followed by Enter or Alt+Enter to send a message.{bcolors.ENDC}"
     )
     main(configure())
