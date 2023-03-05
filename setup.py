@@ -2,7 +2,7 @@ from setuptools import find_packages
 from setuptools import setup
 setup(
     name="revChatGPT",
-    version="3.1.1",
+    version="3.1.0",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
