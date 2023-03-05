@@ -1038,6 +1038,6 @@ if __name__ == "__main__":
     )
     print("Type '!help' to show a full list of commands")
     print(
-        f"{bcolors.BOLD}{bcolors.WARNING}Press Esc followed by Enter or Alt+Enter to send a message.{bcolors.ENDC}"
+        f"{bcolors.BOLD}{bcolors.WARNING}Press Esc followed by Enter or Alt+Enter to send a message.{bcolors.ENDC}",
     )
     main(configure())
