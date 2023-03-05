@@ -88,7 +88,7 @@ class Chatbot:
         """
         Get token count
         """
-        if self.engine != "gpt-3.5-turbo" and self.engine != "gpt-3.5-turbo-0301":
+        if self.engine not in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
             raise NotImplementedError("Unsupported engine {self.engine}")
 
         encoding = tiktoken.encoding_for_model(self.engine)
