@@ -5,13 +5,12 @@ import argparse
 import json
 import os
 import sys
+from typing import NoReturn
 
 import requests
 import tiktoken
 
-from .utils import create_completer
-from .utils import create_session
-from .utils import get_input
+from .utils import create_completer, create_session, get_input
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 ENCODER = tiktoken.get_encoding("gpt2")
@@ -66,21 +65,23 @@ class Chatbot:
         if len(ENCODER.encode(initial_conversation)) > self.max_tokens:
             raise Exception("System prompt is too long")
 
-    def add_to_conversation(self, message: str, role: str, convo_id: str = "default"):
+    def add_to_conversation(
+        self, message: str, role: str, convo_id: str = "default"
+    ) -> None:
         """
         Add a message to the conversation
         """
         self.conversation[convo_id].append({"role": role, "content": message})
 
-    def __truncate_conversation(self, convo_id: str = "default"):
+    def __truncate_conversation(self, convo_id: str = "default") -> None:
         """
         Truncate the conversation
         """
         while True:
-            # Convert conversation to string
-            full_conversation = ""
-            for message in self.conversation[convo_id]:
-                full_conversation += message["role"] + ": " + message["content"] + "\n"
+            full_conversation = "".join(
+                message["role"] + ": " + message["content"] + "\n"
+                for message in self.conversation[convo_id]
+            )
             if (
                 len(ENCODER.encode(full_conversation)) > self.max_tokens
                 and len(self.conversation[convo_id]) > 1
@@ -94,9 +95,10 @@ class Chatbot:
         """
         Get max tokens
         """
-        full_conversation = ""
-        for message in self.conversation[convo_id]:
-            full_conversation += message["role"] + ": " + message["content"] + "\n"
+        full_conversation = "".join(
+            message["role"] + ": " + message["content"] + "\n"
+            for message in self.conversation[convo_id]
+        )
         return 4000 - len(ENCODER.encode(full_conversation))
 
     def ask_stream(
@@ -159,7 +161,9 @@ class Chatbot:
                 yield content
         self.add_to_conversation(full_response, response_role, convo_id=convo_id)
 
-    def ask(self, prompt: str, role: str = "user", convo_id: str = "default", **kwargs):
+    def ask(
+        self, prompt: str, role: str = "user", convo_id: str = "default", **kwargs
+    ) -> str:
         """
         Non-streaming ask
         """
@@ -172,14 +176,14 @@ class Chatbot:
         full_response: str = "".join(response)
         return full_response
 
-    def rollback(self, n: int = 1, convo_id: str = "default"):
+    def rollback(self, n: int = 1, convo_id: str = "default") -> None:
         """
         Rollback the conversation
         """
         for _ in range(n):
             self.conversation[convo_id].pop()
 
-    def reset(self, convo_id: str = "default", system_prompt: str = None):
+    def reset(self, convo_id: str = "default", system_prompt: str = None) -> None:
         """
         Reset the conversation
         """
@@ -187,7 +191,7 @@ class Chatbot:
             {"role": "system", "content": system_prompt or self.system_prompt},
         ]
 
-    def save(self, file: str, *convo_ids: str):
+    def save(self, file: str, *convo_ids: str) -> bool:
         """
         Save the conversation to a JSON file
         """
@@ -202,7 +206,7 @@ class Chatbot:
         return True
         # print(f"Error: {file} could not be created")
 
-    def load(self, file: str, *convo_ids: str):
+    def load(self, file: str, *convo_ids: str) -> bool:
         """
         Load the conversation from a JSON  file
         """
@@ -217,7 +221,7 @@ class Chatbot:
             return False
         return True
 
-    def print_config(self, convo_id: str = "default"):
+    def print_config(self, convo_id: str = "default") -> None:
         """
         Prints the current configuration
         """
@@ -232,7 +236,7 @@ ChatGPT Configuration:
             """,
         )
 
-    def print_help(self):
+    def print_help(self) -> None:
         """
         Prints the help message
         """
@@ -263,7 +267,7 @@ Config Commands:
         if command == "!help":
             self.print_help()
         elif command == "!exit":
-            exit()
+            sys.exit()
         elif command == "!reset":
             self.reset(convo_id=convo_id)
             print("\nConversation has been reset")
@@ -273,8 +277,7 @@ Config Commands:
             self.rollback(int(value[0]), convo_id=convo_id)
             print(f"\nRolled back by {value[0]} messages")
         elif command == "!save":
-            is_saved = self.save(*value)
-            if is_saved:
+            if is_saved := self.save(*value):
                 convo_ids = value[1:] or self.conversation.keys()
                 print(
                     f"Saved conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} to {value[0]}",
@@ -283,8 +286,7 @@ Config Commands:
                 print(f"Error: {value[0]} could not be created")
 
         elif command == "!load":
-            is_loaded = self.load(*value)
-            if is_loaded:
+            if is_loaded := self.load(*value):
                 convo_ids = value[1:] or self.conversation.keys()
                 print(
                     f"Loaded conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} from {value[0]}",
@@ -309,7 +311,7 @@ Config Commands:
         return True
 
 
-def main():
+def main() -> NoReturn:
     """
     Main function
     """
@@ -484,17 +486,18 @@ def main():
             ).strip()
             print("Searching for: ", query, "")
             # Get search results
-            if query == "none":
-                search_results = '{"results": "No search results"}'
-            else:
-                search_results = requests.post(
+            search_results = (
+                '{"results": "No search results"}'
+                if query == "none"
+                else requests.post(
                     url="https://ddg-api.herokuapp.com/search",
                     json={"query": query, "limit": 3},
                     timeout=10,
                 ).text
+            )
             print(json.dumps(json.loads(search_results), indent=4))
             chatbot.add_to_conversation(
-                "Search results:" + search_results,
+                f"Search results:{search_results}",
                 "system",
                 convo_id="default",
             )
@@ -503,12 +506,11 @@ def main():
             else:
                 for query in chatbot.ask_stream(prompt):
                     print(query, end="", flush=True)
+        elif args.no_stream:
+            print(chatbot.ask(prompt, "user"))
         else:
-            if args.no_stream:
-                print(chatbot.ask(prompt, "user"))
-            else:
-                for query in chatbot.ask_stream(prompt):
-                    print(query, end="", flush=True)
+            for query in chatbot.ask_stream(prompt):
+                print(query, end="", flush=True)
         print()
 
 
