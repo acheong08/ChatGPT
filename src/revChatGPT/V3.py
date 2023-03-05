@@ -84,7 +84,7 @@ class Chatbot:
                 break
 
     # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
-    def get_token_count(self, convo_id: str) -> int:
+    def get_token_count(self, convo_id: str = "default") -> int:
         """
         Get token count
         """
