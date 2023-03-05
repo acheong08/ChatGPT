@@ -108,7 +108,7 @@ class WebAsyncChatbot(V1.AsyncChatbot):
         """
         query = query or prompt
         webPrompt, headers = webify(text = prompt, query = query, numResults = numResults, timePeriod = timePeriod, region = region, reply_in = reply_in)
-        for data in self.ask(prompt, conversation_id, parent_id, timeout):
+        async for data in self.ask(prompt, conversation_id, parent_id, timeout):
             yield data, headers
 
     async def webAskPlaintext(
@@ -121,7 +121,7 @@ class WebAsyncChatbot(V1.AsyncChatbot):
         """
         query = query or prompt
         webPrompt, headers = webify(text = prompt, query = query, numResults = numResults, timePeriod = timePeriod, region = region, reply_in = reply_in)
-        for data in self.ask(prompt, conversation_id, parent_id, timeout):
+        async for data in self.ask(prompt, conversation_id, parent_id, timeout):
             data["message"] = beatifyPlaintext(data["message"], headers)
             yield data
 
@@ -135,7 +135,7 @@ class WebAsyncChatbot(V1.AsyncChatbot):
         """
         query = query or prompt
         webPrompt, headers = webify(text = prompt, query = query, numResults = numResults, timePeriod = timePeriod, region = region, reply_in = reply_in)
-        for data in self.ask(prompt, conversation_id, parent_id, timeout):
+        async for data in self.ask(prompt, conversation_id, parent_id, timeout):
             data["message"] = beatifyMarkdown(data["message"], headers)
             yield data
     
