@@ -12,10 +12,6 @@ import revChatGPT.V1 as V1
 # V3 has own implementation
 
 
-def _apiSearch(query: str, numResults: int, timePeriod: str = "", region: str = ""):
-    return ddg(query, region=region, time=timePeriod, max_results=numResults)
-
-
 def _prepare_results(results: list) -> str:
     return "".join(
         f'[{i}] "{result["body"]}"\nURL: {result["href"]}\n\n'
