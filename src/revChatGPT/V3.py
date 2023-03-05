@@ -384,70 +384,10 @@ def main() -> NoReturn:
     )
     # Check if internet is enabled
     if args.enable_internet:
-        chatbot.system_prompt = """
-        You are ChatGPT, an AI assistant that can access the internet. Internet search results will be sent from the system in JSON format.
-        Respond conversationally and cite your sources via a URL at the end of your message.
-        """
-        chatbot.reset(
-            convo_id="search",
-            system_prompt='For given prompts, summarize it to fit the style of a search query to a search engine. If the prompt cannot be answered by an internet search, is a standalone statement, is a creative task, is directed at a person, or does not make sense, type "none". DO NOT TRY TO RESPOND CONVERSATIONALLY. DO NOT TALK ABOUT YOURSELF. IF THE PROMPT IS DIRECTED AT YOU, TYPE "none".',
-        )
-        chatbot.add_to_conversation(
-            message="What is the capital of France?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Capital of France",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Who are you?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(message="none", role="assistant", convo_id="search")
-        chatbot.add_to_conversation(
-            message="Write an essay about the history of the United States",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="none",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="What is the best way to cook a steak?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="How to cook a steak",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Hello world",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="none",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Who is the current president of the United States?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="United States president",
-            role="assistant",
-            convo_id="search",
-        )
+       from importlib.resources import path
+
+       config = path("revChatGPT", "config").__str__()
+       chatbot.load(os.path.join(config, "enable_internet.json"))
 
     session = create_session()
     completer = create_completer(
