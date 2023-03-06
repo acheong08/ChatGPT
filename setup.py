@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
 setup(
     name="revChatGPT",
@@ -10,9 +10,10 @@ setup(
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
     license="GNU General Public License v2.0",
-    packages=find_packages("src"),
+    packages=find_namespace_packages("src"),
     package_dir={"": "src"},
     py_modules=["Unofficial", "V2", "V1", "V0", "V3"],
+    package_data={"": ["*.json"]},
     install_requires=[
         "OpenAIAuth==0.3.2",
         "requests[socks]",

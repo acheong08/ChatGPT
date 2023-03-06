@@ -13,7 +13,6 @@ import tiktoken
 from .utils import create_completer, create_session, get_input
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
-ENCODER = tiktoken.get_encoding("gpt2")
 
 
 class Chatbot:
@@ -59,10 +58,7 @@ class Chatbot:
         self.top_p = top_p
         self.reply_count = reply_count
 
-        initial_conversation = "\n".join(
-            [x["content"] for x in self.conversation["default"]],
-        )
-        if len(ENCODER.encode(initial_conversation)) > self.max_tokens:
+        if self.get_token_count("default") > self.max_tokens:
             raise Exception("System prompt is too long")
 
     def add_to_conversation(
@@ -78,12 +74,8 @@ class Chatbot:
         Truncate the conversation
         """
         while True:
-            full_conversation = "".join(
-                message["role"] + ": " + message["content"] + "\n"
-                for message in self.conversation[convo_id]
-            )
             if (
-                len(ENCODER.encode(full_conversation)) > self.max_tokens
+                self.get_token_count(convo_id) > self.max_tokens
                 and len(self.conversation[convo_id]) > 1
             ):
                 # Don't remove the first message
@@ -91,15 +83,32 @@ class Chatbot:
             else:
                 break
 
+    # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+    def get_token_count(self, convo_id: str = "default") -> int:
+        """
+        Get token count
+        """
+        if self.engine not in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
+            raise NotImplementedError("Unsupported engine {self.engine}")
+
+        encoding = tiktoken.encoding_for_model(self.engine)
+
+        num_tokens = 0
+        for message in self.conversation[convo_id]:
+            # every message follows <im_start>{role/name}\n{content}<im_end>\n
+            num_tokens += 4
+            for key, value in message.items():
+                num_tokens += len(encoding.encode(value))
+                if key == "name":  # if there's a name, the role is omitted
+                    num_tokens += -1  # role is always required and always 1 token
+        num_tokens += 2  # every reply is primed with <im_start>assistant
+        return num_tokens
+
     def get_max_tokens(self, convo_id: str) -> int:
         """
         Get max tokens
         """
-        full_conversation = "".join(
-            message["role"] + ": " + message["content"] + "\n"
-            for message in self.conversation[convo_id]
-        )
-        return 4000 - len(ENCODER.encode(full_conversation))
+        return 4000 - self.get_token_count(convo_id)
 
     def ask_stream(
         self,
@@ -221,6 +230,9 @@ class Chatbot:
             return False
         return True
 
+
+class ChatbotCLI(Chatbot):
+
     def print_config(self, convo_id: str = "default") -> None:
         """
         Prints the current configuration
@@ -228,7 +240,10 @@ class Chatbot:
         print(
             f"""
 ChatGPT Configuration:
-  Messages:         {len(self.conversation[convo_id])} / {self.max_tokens}
+  Conversation ID:  {convo_id}
+  Messages:         {len(self.conversation[convo_id])}
+  Tokens used:      {( num_tokens := self.get_token_count(convo_id) )} / {self.max_tokens}
+  Cost:             {"${:.5f}".format(( num_tokens / 1000 ) * 0.002)}
   Engine:           {self.engine}
   Temperature:      {self.temperature}
   Top_p:            {self.top_p}
@@ -374,7 +389,7 @@ def main() -> NoReturn:
     )
     args = parser.parse_args()
     # Initialize chatbot
-    chatbot = Chatbot(
+    chatbot = ChatbotCLI(
         api_key=args.api_key,
         system_prompt=args.base_prompt,
         proxy=args.proxy,
@@ -384,70 +399,10 @@ def main() -> NoReturn:
     )
     # Check if internet is enabled
     if args.enable_internet:
-        chatbot.system_prompt = """
-        You are ChatGPT, an AI assistant that can access the internet. Internet search results will be sent from the system in JSON format.
-        Respond conversationally and cite your sources via a URL at the end of your message.
-        """
-        chatbot.reset(
-            convo_id="search",
-            system_prompt='For given prompts, summarize it to fit the style of a search query to a search engine. If the prompt cannot be answered by an internet search, is a standalone statement, is a creative task, is directed at a person, or does not make sense, type "none". DO NOT TRY TO RESPOND CONVERSATIONALLY. DO NOT TALK ABOUT YOURSELF. IF THE PROMPT IS DIRECTED AT YOU, TYPE "none".',
-        )
-        chatbot.add_to_conversation(
-            message="What is the capital of France?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Capital of France",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Who are you?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(message="none", role="assistant", convo_id="search")
-        chatbot.add_to_conversation(
-            message="Write an essay about the history of the United States",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="none",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="What is the best way to cook a steak?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="How to cook a steak",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Hello world",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="none",
-            role="assistant",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="Who is the current president of the United States?",
-            role="user",
-            convo_id="search",
-        )
-        chatbot.add_to_conversation(
-            message="United States president",
-            role="assistant",
-            convo_id="search",
-        )
+       from importlib.resources import path
+
+       config = path("revChatGPT", "config").__str__()
+       chatbot.load(os.path.join(config, "enable_internet.json"))
 
     session = create_session()
     completer = create_completer(
