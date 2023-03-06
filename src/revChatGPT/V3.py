@@ -13,7 +13,6 @@ import tiktoken
 from .utils import create_completer, create_session, get_input
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
-ENCODER = tiktoken.get_encoding("gpt2")
 
 
 class Chatbot:
@@ -59,10 +58,7 @@ class Chatbot:
         self.top_p = top_p
         self.reply_count = reply_count
 
-        initial_conversation = "\n".join(
-            [x["content"] for x in self.conversation["default"]],
-        )
-        if len(ENCODER.encode(initial_conversation)) > self.max_tokens:
+        if self.get_token_count("default") > self.max_tokens:
             raise Exception("System prompt is too long")
 
     def add_to_conversation(
@@ -78,12 +74,8 @@ class Chatbot:
         Truncate the conversation
         """
         while True:
-            full_conversation = "".join(
-                message["role"] + ": " + message["content"] + "\n"
-                for message in self.conversation[convo_id]
-            )
             if (
-                len(ENCODER.encode(full_conversation)) > self.max_tokens
+                self.get_token_count(convo_id) > self.max_tokens
                 and len(self.conversation[convo_id]) > 1
             ):
                 # Don't remove the first message
@@ -91,15 +83,32 @@ class Chatbot:
             else:
                 break
 
+    # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+    def get_token_count(self, convo_id: str = "default") -> int:
+        """
+        Get token count
+        """
+        if self.engine not in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
+            raise NotImplementedError("Unsupported engine {self.engine}")
+
+        encoding = tiktoken.encoding_for_model(self.engine)
+
+        num_tokens = 0
+        for message in self.conversation[convo_id]:
+            # every message follows <im_start>{role/name}\n{content}<im_end>\n
+            num_tokens += 4
+            for key, value in message.items():
+                num_tokens += len(encoding.encode(value))
+                if key == "name":  # if there's a name, the role is omitted
+                    num_tokens += -1  # role is always required and always 1 token
+        num_tokens += 2  # every reply is primed with <im_start>assistant
+        return num_tokens
+
     def get_max_tokens(self, convo_id: str) -> int:
         """
         Get max tokens
         """
-        full_conversation = "".join(
-            message["role"] + ": " + message["content"] + "\n"
-            for message in self.conversation[convo_id]
-        )
-        return 4000 - len(ENCODER.encode(full_conversation))
+        return 4000 - self.get_token_count(convo_id)
 
     def ask_stream(
         self,
@@ -228,7 +237,10 @@ class Chatbot:
         print(
             f"""
 ChatGPT Configuration:
-  Messages:         {len(self.conversation[convo_id])} / {self.max_tokens}
+  Conversation ID:  {convo_id}
+  Messages:         {len(self.conversation[convo_id])}
+  Tokens used:      {( num_tokens := self.get_token_count(convo_id) )} / {self.max_tokens}
+  Cost:             {"${:.5f}".format(( num_tokens / 1000 ) * 0.002)}
   Engine:           {self.engine}
   Temperature:      {self.temperature}
   Top_p:            {self.top_p}
