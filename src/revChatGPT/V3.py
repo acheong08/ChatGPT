@@ -230,6 +230,9 @@ class Chatbot:
             return False
         return True
 
+
+class ChatbotCLI(Chatbot):
+
     def print_config(self, convo_id: str = "default") -> None:
         """
         Prints the current configuration
@@ -386,7 +389,7 @@ def main() -> NoReturn:
     )
     args = parser.parse_args()
     # Initialize chatbot
-    chatbot = Chatbot(
+    chatbot = ChatbotCLI(
         api_key=args.api_key,
         system_prompt=args.base_prompt,
         proxy=args.proxy,
