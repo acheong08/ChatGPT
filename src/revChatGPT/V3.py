@@ -91,7 +91,7 @@ class Chatbot:
         if self.engine not in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
             raise NotImplementedError("Unsupported engine {self.engine}")
 
-        encoding = tiktoken.encoding_for_model(self.engine)
+        encoding = tiktoken.get_encoding(self.engine)
 
         num_tokens = 0
         for message in self.conversation[convo_id]:
@@ -232,7 +232,6 @@ class Chatbot:
 
 
 class ChatbotCLI(Chatbot):
-
     def print_config(self, convo_id: str = "default") -> None:
         """
         Prints the current configuration
@@ -399,10 +398,10 @@ def main() -> NoReturn:
     )
     # Check if internet is enabled
     if args.enable_internet:
-       from importlib.resources import path
+        from importlib.resources import path
 
-       config = path("revChatGPT", "config").__str__()
-       chatbot.load(os.path.join(config, "enable_internet.json"))
+        config = path("revChatGPT", "config").__str__()
+        chatbot.load(os.path.join(config, "enable_internet.json"))
 
     session = create_session()
     completer = create_completer(
