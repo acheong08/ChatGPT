@@ -6,7 +6,8 @@ import json
 import os
 import sys
 from datetime import date
-from typing import LiteralString, NoReturn
+from typing import LiteralString
+from typing import NoReturn
 
 import openai
 import tiktoken

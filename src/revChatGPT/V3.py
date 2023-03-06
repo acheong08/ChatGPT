@@ -10,7 +10,9 @@ from typing import NoReturn
 import requests
 import tiktoken
 
-from .utils import create_completer, create_session, get_input
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 
@@ -62,7 +64,10 @@ class Chatbot:
             raise Exception("System prompt is too long")
 
     def add_to_conversation(
-        self, message: str, role: str, convo_id: str = "default"
+        self,
+        message: str,
+        role: str,
+        convo_id: str = "default",
     ) -> None:
         """
         Add a message to the conversation
@@ -171,7 +176,11 @@ class Chatbot:
         self.add_to_conversation(full_response, response_role, convo_id=convo_id)
 
     def ask(
-        self, prompt: str, role: str = "user", convo_id: str = "default", **kwargs
+        self,
+        prompt: str,
+        role: str = "user",
+        convo_id: str = "default",
+        **kwargs,
     ) -> str:
         """
         Non-streaming ask

@@ -11,7 +11,9 @@ import requests
 import tiktoken
 from OpenAIAuth import Authenticator as OpenAIAuth
 
-from .utils import create_completer, create_session, get_input
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input
 
 ENCODER = tiktoken.get_encoding("gpt2")
 

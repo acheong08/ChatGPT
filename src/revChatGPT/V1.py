@@ -13,7 +13,8 @@ import sys
 import time
 import uuid
 from functools import wraps
-from os import environ, getenv
+from os import environ
+from os import getenv
 from typing import NoReturn
 
 import requests
@@ -21,7 +22,9 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from .utils import create_completer, create_session, get_input
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input
 
 if __name__ == "__main__":
     logging.basicConfig(
