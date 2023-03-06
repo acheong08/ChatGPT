@@ -272,6 +272,11 @@ class Chatbot:
                 "Referer": "https://chat.openai.com/chat",
             },
         )
+        self.session.cookies.update(
+            {
+                "library": "revChatGPT",
+            },
+        )
 
         self.config["access_token"] = access_token
 
