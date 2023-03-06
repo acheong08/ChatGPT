@@ -96,7 +96,7 @@ class Chatbot:
         if self.engine not in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
             raise NotImplementedError("Unsupported engine {self.engine}")
 
-        encoding = tiktoken.get_encoding(self.engine)
+        encoding = tiktoken.encoding_for_model(self.engine)
 
         num_tokens = 0
         for message in self.conversation[convo_id]:
