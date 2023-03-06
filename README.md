@@ -148,7 +148,7 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
 
 # V3 Official Chat API
 > Recently released by OpenAI
-> - Apparently free if you don't touch the OpenAI playground. (Bug?)
+> - Apparently free for most people (Bug?)
 
 </summary>
 
