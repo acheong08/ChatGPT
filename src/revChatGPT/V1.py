@@ -1003,14 +1003,14 @@ def main(config: dict) -> NoReturn:
     print()
     try:
         while True:
-            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}", end="")
+            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}")
 
             prompt = get_input(session=session, completer=completer)
             if prompt.startswith("!") and handle_commands(prompt):
                 continue
 
             print()
-            print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}", end="")
+            print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}")
             prev_text = ""
             for data in chatbot.ask(prompt):
                 message = data["message"][len(prev_text) :]
