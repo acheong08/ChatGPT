@@ -12,7 +12,7 @@ setup(
     license="GNU General Public License v2.0",
     packages=find_namespace_packages("src"),
     package_dir={"": "src"},
-    py_modules=["Unofficial", "V2", "V1", "V0", "V3"],
+    py_modules=["V2", "V1", "V0", "V3"],
     package_data={"": ["*.json"]},
     install_requires=[
         "OpenAIAuth==0.3.2",
@@ -22,15 +22,6 @@ setup(
         "tiktoken",
     ],
     extras_require={
-        "unofficial": [
-            "requests",
-            "undetected_chromedriver",
-            "selenium",
-            "tls_client",
-        ],
-        "official": [
-            "openai",
-            "tiktoken",
-        ],
+        "WebGPT": ["duckduckgo_search"],
     },
 )
