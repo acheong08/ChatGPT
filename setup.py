@@ -19,7 +19,7 @@ setup(
         "requests[socks]",
         "httpx[socks]",
         "prompt-toolkit",
-        "tiktoken",
+        "tiktoken>=0.3.0",
     ],
     extras_require={
         "WebGPT": ["duckduckgo_search"],
