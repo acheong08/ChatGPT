@@ -1,15 +1,18 @@
 import json
+import logging
 import sys
 import time
 from typing import NoReturn
 
+import revChatGPT.V1 as V1
 from duckduckgo_search import ddg
 
 # V1 and Unofficial are unnecessary, imo
-import revChatGPT.V1 as V1
 
 # V2 is reportedly "killed by openai"
 # V3 has own implementation
+
+log = logging.getLogger(__name__)
 
 
 def _prepare_results(results: list) -> str:
@@ -339,6 +342,6 @@ if __name__ == "__main__":
     )
     print("Type '!help' to show a full list of commands")
     print(
-        f"{V1.bcolors.BOLD} {V1.bcolors.WARNING} Press Esc followed by Enter or Alt+Enter to send a message. {V1.bcolors.ENDC}"
+        f"{V1.bcolors.BOLD} {V1.bcolors.WARNING} Press Esc followed by Enter or Alt+Enter to send a message. {V1.bcolors.ENDC}",
     )
-    main(configure())
+    main(V1.configure())

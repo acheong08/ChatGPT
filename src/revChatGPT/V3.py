@@ -10,7 +10,9 @@ from typing import NoReturn
 import requests
 import tiktoken
 
-from .utils import create_completer, create_session, get_input
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input
 
 ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
 
@@ -62,7 +64,10 @@ class Chatbot:
             raise Exception("System prompt is too long")
 
     def add_to_conversation(
-        self, message: str, role: str, convo_id: str = "default"
+        self,
+        message: str,
+        role: str,
+        convo_id: str = "default",
     ) -> None:
         """
         Add a message to the conversation
@@ -171,7 +176,11 @@ class Chatbot:
         self.add_to_conversation(full_response, response_role, convo_id=convo_id)
 
     def ask(
-        self, prompt: str, role: str = "user", convo_id: str = "default", **kwargs
+        self,
+        prompt: str,
+        role: str = "user",
+        convo_id: str = "default",
+        **kwargs,
     ) -> str:
         """
         Non-streaming ask
@@ -232,7 +241,6 @@ class Chatbot:
 
 
 class ChatbotCLI(Chatbot):
-
     def print_config(self, convo_id: str = "default") -> None:
         """
         Prints the current configuration
@@ -399,10 +407,10 @@ def main() -> NoReturn:
     )
     # Check if internet is enabled
     if args.enable_internet:
-       from importlib.resources import path
+        from importlib.resources import path
 
-       config = path("revChatGPT", "config").__str__()
-       chatbot.load(os.path.join(config, "enable_internet.json"))
+        config = path("revChatGPT", "config").__str__()
+        chatbot.load(os.path.join(config, "enable_internet.json"))
 
     session = create_session()
     completer = create_completer(

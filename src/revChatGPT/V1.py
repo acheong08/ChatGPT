@@ -13,7 +13,8 @@ import sys
 import time
 import uuid
 from functools import wraps
-from os import environ, getenv
+from os import environ
+from os import getenv
 from typing import NoReturn
 
 import requests
@@ -21,7 +22,9 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from .utils import create_completer, create_session, get_input
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -269,6 +272,11 @@ class Chatbot:
                 "Referer": "https://chat.openai.com/chat",
             },
         )
+        self.session.cookies.update(
+            {
+                "library": "revChatGPT",
+            },
+        )
 
         self.config["access_token"] = access_token
 
@@ -497,8 +505,8 @@ class Chatbot:
         self.__check_response(response)
         for line in response.iter_lines():
             # remove b' and ' at the beginning and end and ignore case
-            line = str(line)[2:-1].lower()
-            if line == "internal server error":
+            line = str(line)[2:-1]
+            if line.lower() == "internal server error":
                 log.error("Internal Server Error: %s", line)
                 raise Error(
                     source="ask",
@@ -1003,14 +1011,14 @@ def main(config: dict) -> NoReturn:
     print()
     try:
         while True:
-            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}", end="")
+            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}")
 
             prompt = get_input(session=session, completer=completer)
             if prompt.startswith("!") and handle_commands(prompt):
                 continue
 
             print()
-            print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}", end="")
+            print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}")
             prev_text = ""
             for data in chatbot.ask(prompt):
                 message = data["message"][len(prev_text) :]
