@@ -497,8 +497,8 @@ class Chatbot:
         self.__check_response(response)
         for line in response.iter_lines():
             # remove b' and ' at the beginning and end and ignore case
-            line = str(line)[2:-1].lower()
-            if line == "internal server error":
+            line = str(line)[2:-1]
+            if line.lower() == "internal server error":
                 log.error("Internal Server Error: %s", line)
                 raise Error(
                     source="ask",
