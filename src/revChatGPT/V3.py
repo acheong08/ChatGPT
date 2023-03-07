@@ -32,7 +32,6 @@ class Chatbot:
         frequency_penalty: float = 0.0,
         reply_count: int = 1,
         system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
-        config: dict[str : str] = None,
     ) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
@@ -49,31 +48,6 @@ class Chatbot:
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
         self.reply_count = reply_count
-
-        if config is not None:
-            if config.get("api_key") is not None:
-                api_key = config.get("api_key")
-            elif api_key is None:
-                # equivalent to config.get("api_key") is None and api_key is None
-                raise Exception("No api key")
-            if config.get("engine") is not None:
-                engine = config.get("engine")
-            if config.get("proxy") is not None:
-                proxy = config.get("proxy")
-            if config.get("max_tokens") is not None:
-                max_tokens = config.get("max_tokens")
-            if config.get("temperature") is not None:
-                temperature = config.get("temperature")
-            if config.get("top_p") is not None:
-                top_p = config.get("top_p")
-            if config.get("presence_penalty") is not None:
-                presence_penalty = config.get("presence_penalty")
-            if config.get("frequency_penalty") is not None:
-                frequency_penalty = config.get("frequency_penalty")
-            if config.get("reply_count") is not None:
-                reply_count = config.get("reply_count")
-            if config.get("system_prompt") is not None:
-                system_prompt = config.get("system_prompt")```
 
         if self.proxy:
             proxies = {
@@ -273,6 +247,45 @@ class Chatbot:
             return False
         return True
 
+    def load_config(self, file: str) -> bool:
+        """
+        Load the configuration from a JSON file
+        """
+        try:
+            with open(file, encoding="utf-8") as f:
+                config = json.load(f)
+                if config is not None:
+                    if config.get("api_key") is not None:
+                        self.api_key = config.get("api_key")
+                    if config.get("engine") is not None:
+                        self.engine = config.get("engine")
+                    if config.get("temperature") is not None:
+                        self.temperature = config.get("temperature")
+                    if config.get("top_p") is not None:
+                        self.top_p = config.get("top_p")
+                    if config.get("presence_penalty") is not None:
+                        self.presence_penalty = config.get("presence_penalty")
+                    if config.get("frequency_penalty") is not None:
+                        self.frequency_penalty = config.get("frequency_penalty")
+                    if config.get("reply_count") is not None:
+                        self.reply_count = config.get("reply_count")
+                    if config.get("max_tokens") is not None:
+                        self.max_tokens = config.get("max_tokens")
+                    if config.get("system_prompt") is not None:
+                        self.system_prompt = config.get("system_prompt")
+                        self.reset(system_prompt=self.system_prompt)
+                    if config.get("proxy") is not None:
+                        self.proxy = config.get("proxy")
+                        proxies = {
+                            "http": self.proxy,
+                            "https": self.proxy,
+                        }
+                        self.session.proxies = proxies
+        except (FileNotFoundError, KeyError, json.decoder.JSONDecodeError):
+            return False
+        return True
+
+
 
 class ChatbotCLI(Chatbot):
     def print_config(self, convo_id: str = "default") -> None:
@@ -441,20 +454,14 @@ def main() -> NoReturn:
     )
     args = parser.parse_args()
     # Load config
-    if args.config is None:
+    if args.config is not None:
         # Initialize chatbot
-        if args.api_key is None:
+        if args.api_key is None and args.config.get("api_key") is None:
             print("Add a config.v3.json file using --config or add an api_key using --api_key")
             # raising at top level is messy and can confuse some people
             return
-        chatbot = ChatbotCLI(
-            api_key=args.api_key,
-            system_prompt=args.base_prompt,
-            proxy=args.proxy,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            reply_count=args.reply_count,
-        )
+        chatbot = ChatbotCLI()
+        chatbot.load(args.config)
     else:
         if args.api_key is None and args.config.get("api_key") is None:
             print("Add an api key to your config.v3.json file or add an api_key using --api_key")
@@ -468,7 +475,6 @@ def main() -> NoReturn:
             temperature=args.temperature,
             top_p=args.top_p,
             reply_count=args.reply_count,
-            config=args.config
         )
 
 
