@@ -184,6 +184,9 @@ options:
   --reply_count REPLY_COUNT
                         Number of replies for each prompt
   --enable_internet     Allow ChatGPT to access the internet (beta)
+  --submit_key SUBMIT_KEY
+                        Custom submit key for chatbot. For more information on keys, see:
+                        https://python-prompt-toolkit.readthedocs.io/en/stable/pages/advanced_topics/key_bindings.html#list-of-special-keys
 ```
 
 ## Developer API
