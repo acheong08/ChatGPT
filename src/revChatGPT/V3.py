@@ -147,12 +147,8 @@ class Chatbot:
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
                 "top_p": kwargs.get("top_p", self.top_p),
-                "presence_penalty": kwargs.get(
-                    "presence_penalty", self.presence_penalty
-                ),
-                "frequency_penalty": kwargs.get(
-                    "frequency_penalty", self.frequency_penalty
-                ),
+                "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),
+                "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
                 "max_tokens": self.get_max_tokens(convo_id=convo_id),
@@ -325,6 +321,7 @@ Commands:
 
 Config Commands:
   !config          Display the current config
+  !load_config fileLoad the config from a JSON file
   !temperature n   Set the temperature to n
   !top_p n         Set the top_p to n
   !reply_count n   Set the reply_count to n
@@ -387,13 +384,6 @@ Config Commands:
             return False
 
         return True
-
-
-def config_dict(string):
-    if not os.path.isfile(string):
-        raise FileNotFoundError(string)
-    with open(string, encoding="utf-8") as f:
-        return json.load(f)
 
 
 def main() -> NoReturn:
