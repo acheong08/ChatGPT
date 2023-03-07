@@ -14,8 +14,6 @@ from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
 
-ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
-
 
 class Chatbot:
     """
@@ -25,18 +23,20 @@ class Chatbot:
     def __init__(
         self,
         api_key: str,
-        engine: str = None,
+        engine: str = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo",
         proxy: str = None,
         max_tokens: int = 3000,
         temperature: float = 0.5,
         top_p: float = 1.0,
+        presence_penalty: float = 0.0,
+        frequency_penalty: float = 0.0,
         reply_count: int = 1,
         system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
     ) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
-        self.engine = engine or ENGINE
+        self.engine = engine
         self.session = requests.Session()
         self.api_key = api_key
         self.proxy = proxy
@@ -55,9 +55,13 @@ class Chatbot:
             ],
         }
         self.system_prompt = system_prompt
+        if max_tokens > 4000:
+            raise Exception("Max tokens cannot be greater than 4000")
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.top_p = top_p
+        self.presence_penalty = presence_penalty
+        self.frequency_penalty = frequency_penalty
         self.reply_count = reply_count
 
         if self.get_token_count("default") > self.max_tokens:
@@ -113,7 +117,7 @@ class Chatbot:
         """
         Get max tokens
         """
-        return 4000 - self.get_token_count(convo_id)
+        return self.max_tokens - self.get_token_count(convo_id)
 
     def ask_stream(
         self,
@@ -141,9 +145,11 @@ class Chatbot:
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
                 "top_p": kwargs.get("top_p", self.top_p),
+                "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),
+                "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
-                # "max_tokens": self.get_max_tokens(convo_id=convo_id),
+                "max_tokens": self.get_max_tokens(convo_id=convo_id),
             },
             stream=True,
         )

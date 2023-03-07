@@ -19,9 +19,11 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > Uses `chat.openai.com`
 > - Free
 
+> - Sunset in a few weeks due to high costs
+
 </summary>
 
-> Proxy server Rate limit: 15 requests per 10 seconds (per IP)
+> Proxy server Rate limit: 10 requests per 10 seconds (per IP) - This is due to high abuse. I'm trying to keep it at a sustainable level so I don't run out of funds too quickly.
 >
 > OpenAI rate limit: 50 requests per hour on free accounts. You can get around it with multi-account cycling
 >
@@ -148,7 +150,7 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
 
 # V3 Official Chat API
 > Recently released by OpenAI
-> - Apparently free for most people (Bug?)
+> - Paid
 
 </summary>
 
