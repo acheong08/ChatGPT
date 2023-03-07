@@ -50,30 +50,30 @@ class Chatbot:
         self.frequency_penalty = frequency_penalty
         self.reply_count = reply_count
 
-        if not config is None:
-            if not config.get("api_key") is None:
+        if config is not None:
+            if config.get("api_key") is not None:
                 api_key = config.get("api_key")
             elif api_key is None:
                 # equivalent to config.get("api_key") is None and api_key is None
                 raise Exception("No api key")
-            if not config.get("engine") is None:
+            if config.get("engine") is not None:
                 engine = config.get("engine")
-            if not config.get("proxy") is None:
+            if config.get("proxy") is not None:
                 proxy = config.get("proxy")
-            if not config.get("max_tokens") is None:
+            if config.get("max_tokens") is not None:
                 max_tokens = config.get("max_tokens")
-            if not config.get("temperature") is None:
+            if config.get("temperature") is not None:
                 temperature = config.get("temperature")
-            if not config.get("top_p") is None:
+            if config.get("top_p") is not None:
                 top_p = config.get("top_p")
-            if not config.get("presence_penalty") is None:
+            if config.get("presence_penalty") is not None:
                 presence_penalty = config.get("presence_penalty")
-            if not config.get("frequency_penalty") is None:
+            if config.get("frequency_penalty") is not None:
                 frequency_penalty = config.get("frequency_penalty")
-            if not config.get("reply_count") is None:
+            if config.get("reply_count") is not None:
                 reply_count = config.get("reply_count")
-            if not config.get("system_prompt") is None:
-                system_prompt = config.get("system_prompt")
+            if config.get("system_prompt") is not None:
+                system_prompt = config.get("system_prompt")```
 
         if self.proxy:
             proxies = {
