@@ -39,6 +39,19 @@ class Chatbot:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
+        self.engine = engine or ENGINE
+        self.session = requests.Session()
+        self.api_key = api_key
+        self.proxy = proxy
+
+        self.system_prompt = system_prompt
+        self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.top_p = top_p
+        self.presence_penalty = presence_penalty
+        self.frequency_penalty = frequency_penalty
+        self.reply_count = reply_count
+
         if not config is None:
             if not config.get("api_key") is None:
                 api_key = config.get("api_key")
@@ -64,10 +77,6 @@ class Chatbot:
             if not config.get("system_prompt") is None:
                 system_prompt = config.get("system_prompt")
 
-        self.engine = engine or ENGINE
-        self.session = requests.Session()
-        self.api_key = api_key
-        self.proxy = proxy
         if self.proxy:
             proxies = {
                 "http": self.proxy,
@@ -82,13 +91,6 @@ class Chatbot:
                 },
             ],
         }
-        self.system_prompt = system_prompt
-        self.max_tokens = max_tokens
-        self.temperature = temperature
-        self.top_p = top_p
-        self.presence_penalty = presence_penalty
-        self.frequency_penalty = frequency_penalty
-        self.reply_count = reply_count
 
         if self.get_token_count("default") > self.max_tokens:
             raise Exception("System prompt is too long")
