@@ -406,8 +406,7 @@ def main() -> NoReturn:
         type=str,
         default=None,
         help="""
-        Custom submit key for chatbot. For possible keys, see: 
-        https://python-prompt-toolkit.readthedocs.io/en/stable/pages/advanced_topics/key_bindings.html#list-of-special-keys
+        Custom submit key for chatbot. For more information on keys, see README
         """,
     )
 
