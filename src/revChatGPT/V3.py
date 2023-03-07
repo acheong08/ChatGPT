@@ -147,8 +147,12 @@ class Chatbot:
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
                 "top_p": kwargs.get("top_p", self.top_p),
-                "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),
-                "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
+                "presence_penalty": kwargs.get(
+                    "presence_penalty", self.presence_penalty
+                ),
+                "frequency_penalty": kwargs.get(
+                    "frequency_penalty", self.frequency_penalty
+                ),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
                 "max_tokens": self.get_max_tokens(convo_id=convo_id),
@@ -247,7 +251,7 @@ class Chatbot:
             return False
         return True
 
-    def load_config(self, file: str) -> bool:
+    def load_config(self, file: str, **kwargs) -> bool:
         """
         Load the configuration from a JSON file
         """
@@ -284,7 +288,6 @@ class Chatbot:
         except (FileNotFoundError, KeyError, json.decoder.JSONDecodeError):
             return False
         return True
-
 
 
 class ChatbotCLI(Chatbot):
@@ -363,6 +366,11 @@ Config Commands:
                 )
             else:
                 print(f"Error: {value[0]} could not be loaded")
+        elif command == "!load_config":
+            if is_loaded := self.load_config(*value):
+                print(f"Loaded config from {value[0]}")
+            else:
+                print(f"Error: {value[0]} could not be loaded")
         elif command == "!temperature":
             self.temperature = float(value[0])
             print(f"\nTemperature set to {value[0]}")
@@ -379,6 +387,7 @@ Config Commands:
             return False
 
         return True
+
 
 def config_dict(string):
     if not os.path.isfile(string):
@@ -450,21 +459,25 @@ def main() -> NoReturn:
     parser.add_argument(
         "--config",
         type=config_dict,
-        help="Path to config.v3.json"
+        help="Path to config.v3.json",
     )
     args = parser.parse_args()
     # Load config
     if args.config is not None:
         # Initialize chatbot
         if args.api_key is None and args.config.get("api_key") is None:
-            print("Add a config.v3.json file using --config or add an api_key using --api_key")
+            print(
+                "Add a config.v3.json file using --config or add an api_key using --api_key"
+            )
             # raising at top level is messy and can confuse some people
             return
         chatbot = ChatbotCLI()
         chatbot.load(args.config)
     else:
         if args.api_key is None and args.config.get("api_key") is None:
-            print("Add an api key to your config.v3.json file or add an api_key using --api_key")
+            print(
+                "Add an api key to your config.v3.json file or add an api_key using --api_key"
+            )
             # raising at top level is messy and can confuse some people
             return
 
@@ -476,7 +489,6 @@ def main() -> NoReturn:
             top_p=args.top_p,
             reply_count=args.reply_count,
         )
-
 
     # Check if internet is enabled
     if args.enable_internet:
