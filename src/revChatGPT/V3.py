@@ -57,6 +57,8 @@ class Chatbot:
             ],
         }
         self.system_prompt = system_prompt
+        if max_tokens > 4096:
+            raise Exception("Max tokens cannot be greater than 4096")
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.top_p = top_p
@@ -117,7 +119,7 @@ class Chatbot:
         """
         Get max tokens
         """
-        return 4000 - self.get_token_count(convo_id)
+        return self.max_tokens - self.get_token_count(convo_id)
 
     def ask_stream(
         self,
@@ -149,7 +151,7 @@ class Chatbot:
                 "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
-                # "max_tokens": self.get_max_tokens(convo_id=convo_id),
+                "max_tokens": self.get_max_tokens(convo_id=convo_id),
             },
             stream=True,
         )
