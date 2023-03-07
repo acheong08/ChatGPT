@@ -368,11 +368,10 @@ Config Commands:
         return True
 
 def config_dict(string):
-    if os.path.isfile(string):
-        with open(string) as f:
-            return json.load(f)
-    else:
+    if not os.path.isfile(string):
         raise FileNotFoundError(string)
+    with open(string, encoding="utf-8") as f:
+        return json.load(f)
 
 
 def main() -> NoReturn:
