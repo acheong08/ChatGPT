@@ -10,7 +10,7 @@ from typing import NoReturn
 import requests
 import tiktoken
 
-from .utils import create_completer
+from .utils import create_completer, create_keybindings
 from .utils import create_session
 from .utils import get_input
 
@@ -401,6 +401,15 @@ def main() -> NoReturn:
         action="store_true",
         help="Allow ChatGPT to search the internet",
     )
+    parser.add_argument(
+        "--submit_key",
+        type=str,
+        default=None,
+        help="""
+        Custom submit key for chatbot. For more information on keys, see README
+        """,
+    )
+
     args = parser.parse_args()
     # Initialize chatbot
     chatbot = ChatbotCLI(
@@ -434,12 +443,14 @@ def main() -> NoReturn:
             "!load",
         ],
     )
+    if args.submit_key:
+        key_bindings = create_keybindings(args.submit_key)
     # Start chat
     while True:
         print()
         try:
             print("User: ")
-            prompt = get_input(session=session, completer=completer)
+            prompt = get_input(session=session, completer=completer, key_bindings=key_bindings)
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
