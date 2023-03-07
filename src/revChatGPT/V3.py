@@ -14,8 +14,6 @@ from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
 
-ENGINE = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo"
-
 
 class Chatbot:
     """
@@ -25,7 +23,7 @@ class Chatbot:
     def __init__(
         self,
         api_key: str,
-        engine: str = None,
+        engine: str = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo",
         proxy: str = None,
         max_tokens: int = 3000,
         temperature: float = 0.5,
@@ -38,7 +36,7 @@ class Chatbot:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
-        self.engine = engine or ENGINE
+        self.engine = engine
         self.session = requests.Session()
         self.api_key = api_key
         self.proxy = proxy
