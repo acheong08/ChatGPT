@@ -57,8 +57,8 @@ class Chatbot:
             ],
         }
         self.system_prompt = system_prompt
-        if max_tokens > 4096:
-            raise Exception("Max tokens cannot be greater than 4096")
+        if max_tokens > 4000:
+            raise Exception("Max tokens cannot be greater than 4000")
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.top_p = top_p
