@@ -18,8 +18,6 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 # V1 Standard ChatGPT
 > Uses `chat.openai.com`
 > - Free
->
-> - Notice: Please upgrade to the latest version or risk being blocked by the firewall. This is to prevent the current DDOS.
 
 </summary>
 
