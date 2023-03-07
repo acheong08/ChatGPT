@@ -30,6 +30,8 @@ class Chatbot:
         max_tokens: int = 3000,
         temperature: float = 0.5,
         top_p: float = 1.0,
+        presence_penalty: float = 0.0,
+        frequency_penalty: float = 0.0,
         reply_count: int = 1,
         system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
     ) -> None:
@@ -58,6 +60,8 @@ class Chatbot:
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.top_p = top_p
+        self.presence_penalty = presence_penalty
+        self.frequency_penalty = frequency_penalty
         self.reply_count = reply_count
 
         if self.get_token_count("default") > self.max_tokens:
@@ -141,6 +145,8 @@ class Chatbot:
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
                 "top_p": kwargs.get("top_p", self.top_p),
+                "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),
+                "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
                 # "max_tokens": self.get_max_tokens(convo_id=convo_id),
