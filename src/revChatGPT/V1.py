@@ -74,7 +74,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://apps.openai.com/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
 
 
 class ErrorType:
@@ -216,6 +216,10 @@ class Chatbot:
                 "https": config["proxy"],
             }
             if isinstance(self.session, AsyncClient):
+                proxies = {
+                    "http://": config["proxy"],
+                    "https://": config["proxy"],
+                }
                 self.session = AsyncClient(proxies=proxies)
             else:
                 self.session.proxies.update(proxies)
@@ -530,16 +534,16 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 log.error("Field missing", exc_info=True)
-                line_detail = line.get("detail").lower()
+                line_detail = line.get("detail")
                 if isinstance(line_detail, str):
-                    if line_detail == "too many requests in 1 hour. try again later.":
+                    if line_detail.lower() == "too many requests in 1 hour. try again later.":
                         log.error("Rate limit exceeded")
                         raise Error(
                             source="ask",
                             message=line.get("detail"),
                             code=ErrorType.RATE_LIMIT_ERROR,
                         )
-                    if line_detail.startswith(
+                    if line_detail.lower().startswith(
                         "only one message at a time.",
                     ):
                         log.error("Prohibited concurrent query")
@@ -548,14 +552,14 @@ class Chatbot:
                             message=line_detail,
                             code=ErrorType.PROHIBITED_CONCURRENT_QUERY_ERROR,
                         )
-                    if line_detail == "invalid_api_key":
+                    if line_detail.lower() == "invalid_api_key":
                         log.error("Invalid access token")
                         raise Error(
                             source="ask",
                             message=line_detail,
                             code=ErrorType.INVALID_REQUEST_ERROR,
                         )
-                    if line_detail == "invalid_token":
+                    if line_detail.lower() == "invalid_token":
                         log.error("Invalid access token")
                         raise Error(
                             source="ask",
