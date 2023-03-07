@@ -216,6 +216,10 @@ class Chatbot:
                 "https": config["proxy"],
             }
             if isinstance(self.session, AsyncClient):
+                proxies = {
+                    "http://": config["proxy"],
+                    "https://": config["proxy"],
+                }
                 self.session = AsyncClient(proxies=proxies)
             else:
                 self.session.proxies.update(proxies)
