@@ -24,7 +24,7 @@ class Chatbot:
 
     def __init__(
         self,
-        api_key: str,
+        api_key: str = None,
         engine: str = None,
         proxy: str = None,
         max_tokens: int = 3000,
@@ -34,10 +34,36 @@ class Chatbot:
         frequency_penalty: float = 0.0,
         reply_count: int = 1,
         system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
+        config: dict[str : str] = None,
     ) -> None:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
+        if not config is None:
+            if not config.get("api_key") is None:
+                api_key = config.get("api_key")
+            elif api_key is None:
+                # equivalent to config.get("api_key") is None and api_key is None
+                raise Exception("No api key")
+            if not config.get("engine") is None:
+                engine = config.get("engine")
+            if not config.get("proxy") is None:
+                proxy = config.get("proxy")
+            if not config.get("max_tokens") is None:
+                max_tokens = config.get("max_tokens")
+            if not config.get("temperature") is None:
+                temperature = config.get("temperature")
+            if not config.get("top_p") is None:
+                top_p = config.get("top_p")
+            if not config.get("presence_penalty") is None:
+                presence_penalty = config.get("presence_penalty")
+            if not config.get("frequency_penalty") is None:
+                frequency_penalty = config.get("frequency_penalty")
+            if not config.get("reply_count") is None:
+                reply_count = config.get("reply_count")
+            if not config.get("system_prompt") is None:
+                system_prompt = config.get("system_prompt")
+
         self.engine = engine or ENGINE
         self.session = requests.Session()
         self.api_key = api_key
@@ -339,6 +365,13 @@ Config Commands:
 
         return True
 
+def config_dict(string):
+    if os.path.isfile(string):
+        with open(string) as f:
+            return json.load(f)
+    else:
+        raise FileNotFoundError(string)
+
 
 def main() -> NoReturn:
     """
@@ -358,7 +391,6 @@ def main() -> NoReturn:
     parser.add_argument(
         "--api_key",
         type=str,
-        required=True,
         help="OpenAI API key",
     )
     parser.add_argument(
@@ -401,16 +433,44 @@ def main() -> NoReturn:
         action="store_true",
         help="Allow ChatGPT to search the internet",
     )
-    args = parser.parse_args()
-    # Initialize chatbot
-    chatbot = ChatbotCLI(
-        api_key=args.api_key,
-        system_prompt=args.base_prompt,
-        proxy=args.proxy,
-        temperature=args.temperature,
-        top_p=args.top_p,
-        reply_count=args.reply_count,
+    parser.add_argument(
+        "--config",
+        type=config_dict,
+        help="Path to config.v3.json"
     )
+    args = parser.parse_args()
+    # Load config
+    if args.config is None:
+        # Initialize chatbot
+        if args.api_key is None:
+            print("Add a config.v3.json file using --config or add an api_key using --api_key")
+            # raising at top level is messy and can confuse some people
+            return
+        chatbot = ChatbotCLI(
+            api_key=args.api_key,
+            system_prompt=args.base_prompt,
+            proxy=args.proxy,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            reply_count=args.reply_count,
+        )
+    else:
+        if args.api_key is None and args.config.get("api_key") is None:
+            print("Add an api key to your config.v3.json file or add an api_key using --api_key")
+            # raising at top level is messy and can confuse some people
+            return
+
+        chatbot = ChatbotCLI(
+            api_key=args.api_key,
+            system_prompt=args.base_prompt,
+            proxy=args.proxy,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            reply_count=args.reply_count,
+            config=args.config
+        )
+
+
     # Check if internet is enabled
     if args.enable_internet:
         from importlib.resources import path
