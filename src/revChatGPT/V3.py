@@ -10,7 +10,7 @@ from typing import NoReturn
 import requests
 import tiktoken
 
-from .utils import create_completer
+from .utils import create_completer, create_keybindings
 from .utils import create_session
 from .utils import get_input
 
@@ -454,6 +454,13 @@ def main() -> NoReturn:
         type=str,
         help="Path to config.v3.json",
     )
+        "--submit_key",
+        type=str,
+        default=None,
+        help="""
+        Custom submit key for chatbot. For more information on keys, see README
+        """,
+    )
     args = parser.parse_args()
     # Load config
     if args.config is not None:
@@ -504,12 +511,14 @@ def main() -> NoReturn:
             "!load_config",
         ],
     )
+    if args.submit_key:
+        key_bindings = create_keybindings(args.submit_key)
     # Start chat
     while True:
         print()
         try:
             print("User: ")
-            prompt = get_input(session=session, completer=completer)
+            prompt = get_input(session=session, completer=completer, key_bindings=key_bindings)
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
