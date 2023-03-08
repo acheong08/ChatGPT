@@ -74,7 +74,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chatgpt.duti.tech/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://gpt.pawan.krd/backend-api/"
 
 
 class ErrorType:
@@ -501,7 +501,7 @@ class Chatbot:
         )
         self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
-            url=f"{BASE_URL}api/conversation",
+            url=f"{BASE_URL}conversation",
             data=json.dumps(data),
             timeout=timeout,
             stream=True,

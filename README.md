@@ -16,18 +16,14 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 <summary>
 
 # V1 Standard ChatGPT
-> Uses `chat.openai.com`
+> Uses a proxy to `chat.openai.com` which bypasses cloudflare
 > - Free
-
-> - Sunset in a few weeks due to high costs
+>
+> > ## WARNING
+> > A third party API is used to access the chat. Be aware that it could be malicious and steal your access token. Use at your own risk. I am not responsible for any damages caused by this API.
+> > - I recently deprecated my own API due to excessive costs that I am unable to afford.
 
 </summary>
-
-> Proxy server Rate limit: 10 requests per 10 seconds (per IP) - This is due to high abuse. I'm trying to keep it at a sustainable level so I don't run out of funds too quickly.
->
-> OpenAI rate limit: 50 requests per hour on free accounts. You can get around it with multi-account cycling
->
-> Plus accounts has around 150 requests per hour rate limit
 
 ## Configuration
 
