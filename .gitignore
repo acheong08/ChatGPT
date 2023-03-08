@@ -1,5 +1,6 @@
 # Custom
 config.json
+config.v3.json
 .chatgpt_cache.json
 
 # Byte-compiled / optimized / DLL files
