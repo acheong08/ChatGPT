@@ -42,3 +42,20 @@ def get_input(session: PromptSession = None, completer: WordCompleter = None, ke
         if session
         else prompt(multiline=True)
     )
+
+
+async def get_input_async(
+    session: PromptSession = None, completer: WordCompleter = None
+) -> str:
+    """
+    Multiline input function.
+    """
+    return (
+        await session.prompt_async(
+            completer=completer,
+            multiline=True,
+            auto_suggest=AutoSuggestFromHistory(),
+        )
+        if session
+        else prompt(multiline=True)
+    )

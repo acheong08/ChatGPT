@@ -147,8 +147,12 @@ class Chatbot:
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
                 "top_p": kwargs.get("top_p", self.top_p),
-                "presence_penalty": kwargs.get("presence_penalty", self.presence_penalty),
-                "frequency_penalty": kwargs.get("frequency_penalty", self.frequency_penalty),
+                "presence_penalty": kwargs.get(
+                    "presence_penalty", self.presence_penalty
+                ),
+                "frequency_penalty": kwargs.get(
+                    "frequency_penalty", self.frequency_penalty
+                ),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
                 "max_tokens": self.get_max_tokens(convo_id=convo_id),
@@ -262,13 +266,19 @@ class Chatbot:
                     self.engine = config.get("engine") or self.engine
                     self.temperature = config.get("temperature") or self.temperature
                     self.top_p = config.get("top_p") or self.top_p
-                    self.presence_penalty = config.get("presence_penalty") or self.presence_penalty
-                    self.frequency_penalty = config.get("frequency_penalty") or self.frequency_penalty
+                    self.presence_penalty = (
+                        config.get("presence_penalty") or self.presence_penalty
+                    )
+                    self.frequency_penalty = (
+                        config.get("frequency_penalty") or self.frequency_penalty
+                    )
                     self.reply_count = config.get("reply_count") or self.reply_count
                     self.max_tokens = config.get("max_tokens") or self.max_tokens
 
                     if config.get("system_prompt") is not None:
-                        self.system_prompt = config.get("system_prompt") or self.system_prompt
+                        self.system_prompt = (
+                            config.get("system_prompt") or self.system_prompt
+                        )
                         self.reset(system_prompt=self.system_prompt)
 
                     if config.get("proxy") is not None:
@@ -512,7 +522,9 @@ def main() -> NoReturn:
         print()
         try:
             print("User: ")
-            prompt = get_input(session=session, completer=completer, key_bindings=key_bindings)
+            prompt = get_input(
+                session=session, completer=completer, key_bindings=key_bindings
+            )
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
