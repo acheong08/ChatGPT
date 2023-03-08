@@ -454,6 +454,7 @@ def main() -> NoReturn:
         type=str,
         help="Path to config.v3.json",
     )
+    parser.add_argument(
         "--submit_key",
         type=str,
         default=None,
