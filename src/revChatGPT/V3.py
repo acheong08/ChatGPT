@@ -22,7 +22,7 @@ class Chatbot:
 
     def __init__(
         self,
-        api_key: str = None,
+        api_key: str,
         engine: str = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo",
         proxy: str = None,
         max_tokens: int = 3000,
@@ -458,7 +458,7 @@ def main() -> NoReturn:
     # Load config
     if args.config is not None:
         # Initialize chatbot
-        chatbot = ChatbotCLI()
+        chatbot = ChatbotCLI("placeholder")
         no_api_key = False
         if args.api_key is None:
             no_api_key = True
