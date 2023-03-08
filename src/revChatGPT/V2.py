@@ -7,13 +7,9 @@ import os
 import sys
 
 import httpx
-import requests
 import tiktoken
-from OpenAIAuth import Authenticator as OpenAIAuth
 
-from .utils import create_completer
-from .utils import create_session
-from .utils import get_input
+from .utils import create_completer, create_session, get_input_async
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -111,7 +107,7 @@ BASE_PROMPT = (
     or """You are ChatGPT, a large language model by OpenAI. Respond conversationally\n\n\n"""
 )
 
-PROXY_URL = os.environ.get("PROXY_URL") or "https://chat.duti.tech"
+PROXY_URL = os.environ.get("PROXY_URL") or "https://gpt.pawan.krd/api"
 
 
 class Chatbot:
@@ -121,22 +117,13 @@ class Chatbot:
 
     def __init__(
         self,
-        email: str,
-        password: str,
-        paid: bool = False,
+        api_key: str,
         proxy=None,
-        insecure: bool = False,
-        session_token: str = None,
     ) -> None:
         self.proxy = proxy
-        self.email: str = email
-        self.password: str = password
-        self.session_token = session_token
-        self.insecure: bool = insecure
-        self.api_key: str
-        self.paid: bool = paid
+        self.api_key: str = api_key
         self.conversations = Conversations()
-        self.login(email, password, proxy, insecure, session_token)
+        self.login(api_key=api_key)
 
     async def ask(self, prompt: str, conversation_id: str = None) -> dict:
         """
@@ -156,7 +143,7 @@ class Chatbot:
         async with httpx.AsyncClient(proxies=self.proxy or None).stream(
             method="POST",
             url=f"{PROXY_URL}/completions",
-            data=json.dumps(body),
+            json=body,
             headers={"Authorization": f"Bearer {self.api_key}"},
             timeout=1080,
         ) as response:
@@ -177,8 +164,10 @@ class Chatbot:
                     print("error: " + "OpenAI error!")
                     raise Exception("OpenAI error!")
                 if response.status_code != 200:
-                    print("error: " + "Unknown error")
-                    raise Exception("Unknown error")
+                    print(response.status_code)
+                    print(line)
+                    # raise Exception("Unknown error")
+                    continue
                 line = line.strip()
                 if line in ["\n", ""]:
                     continue
@@ -202,38 +191,22 @@ class Chatbot:
 
     def __get_config(self) -> dict:
         return {
-            "temperature": float(os.environ.get("TEMPERATURE") or 0.5),
-            "top_p": float(os.environ.get("TOP_P") or 1),
-            "stop": ["<|im_end|>", "<|im_sep|>"],
-            "presence_penalty": float(os.environ.get("PRESENCE_PENALTY") or 1.0),
-            "paid": self.paid,
+            "prompt": "Who are you?",
+            "temperature": 0.7,
+            "max_tokens": 256,
+            "top_p": 0.9,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "model": "text-davinci-003",
+            "stop": "<|im_end|>",
             "stream": True,
         }
 
-    def login(self, email, password, proxy, insecure, session_token) -> None:
+    def login(self, api_key: str) -> None:
         """
         Login to the API
         """
-        if not insecure:
-            auth = OpenAIAuth(email_address=email, password=password, proxy=proxy)
-            if session_token:
-                auth.session_token = session_token
-                auth.get_access_token()
-                self.api_key = auth.access_token
-                if self.api_key is None:
-                    self.session_token = None
-                    self.login(email, password, proxy, insecure, None)
-                return
-            auth.begin()
-            self.session_token = auth.session_token
-            self.api_key = auth.access_token
-        else:
-            auth_request = requests.post(
-                f"{PROXY_URL}/auth",
-                json={"email": email, "password": password},
-                timeout=10,
-            )
-            self.api_key = auth_request.json()["accessToken"]
+        self.api_key = api_key
 
 
 async def main() -> None:
@@ -250,23 +223,6 @@ async def main() -> None:
     )
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-e",
-        "--email",
-        help="Your OpenAI email address",
-        required=False,
-    )
-    parser.add_argument(
-        "-p",
-        "--password",
-        help="Your OpenAI password",
-        required=False,
-    )
-    parser.add_argument(
-        "--paid",
-        help="Use the paid API",
-        action="store_true",
-    )
-    parser.add_argument(
         "--proxy",
         help="Use a proxy",
         required=False,
@@ -274,28 +230,15 @@ async def main() -> None:
         default=None,
     )
     parser.add_argument(
-        "--insecure-auth",
-        help="Use an insecure authentication method to bypass OpenAI's geo-blocking",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--session_token",
-        help="Alternative to email and password authentication. Use this if you have Google/Microsoft account.",
-        required=False,
+        "--api_key",
+        help="OpenAI API key",
+        required=True,
     )
     args = parser.parse_args()
-
-    if (args.email is None or args.password is None) and args.session_token is None:
-        print("error: " + "Please provide your email and password")
-        return
     print("Logging in...")
     chatbot = Chatbot(
-        args.email,
-        args.password,
-        paid=args.paid,
         proxy=args.proxy,
-        insecure=args.insecure_auth,
-        session_token=args.session_token,
+        api_key=args.api_key,
     )
     print("Logged in\n")
 
@@ -335,7 +278,11 @@ async def main() -> None:
         session = create_session()
         completer = create_completer(["!help", "!reset", "!rollback", "!exit"])
         while True:
-            prompt = get_input(session=session, completer=completer)
+            print()
+            print("You:")
+            prompt = await get_input_async(session=session, completer=completer)
+            print()
+
             if prompt.startswith("!") and commands(prompt):
                 continue
 
@@ -345,10 +292,12 @@ async def main() -> None:
                 print(result, end="")
                 sys.stdout.flush()
             print()
+            print()
     except KeyboardInterrupt:
         print("Exiting...")
         sys.exit(0)
 
 
 if __name__ == "__main__":
+    # RUn main
     asyncio.run(main())

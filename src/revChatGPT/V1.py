@@ -536,7 +536,10 @@ class Chatbot:
                 log.error("Field missing", exc_info=True)
                 line_detail = line.get("detail")
                 if isinstance(line_detail, str):
-                    if line_detail.lower() == "too many requests in 1 hour. try again later.":
+                    if (
+                        line_detail.lower()
+                        == "too many requests in 1 hour. try again later."
+                    ):
                         log.error("Rate limit exceeded")
                         raise Error(
                             source="ask",
