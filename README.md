@@ -219,4 +219,5 @@ This is not an official OpenAI product. This is a personal project and is not af
 # Credits
 
 - [virtualharby](https://twitter.com/virtualharby) - Memes for emotional support
+- [@PawanOsman](https://github.com/PawanOsman/) - V1 proxy (since 2023/03/08)
 - [All contributors](https://github.com/acheong08/ChatGPT/graphs/contributors) - Pull requests
