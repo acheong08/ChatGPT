@@ -247,7 +247,7 @@ class Chatbot:
             return False
         return True
 
-    def load_config(self, file: str, **kwargs) -> bool:
+    def load_config(self, file: str, no_api_key: bool = False) -> bool:
         """
         Load the configuration from a JSON file
         """
@@ -257,6 +257,9 @@ class Chatbot:
                 if config is not None:
                     if config.get("api_key") is not None:
                         self.api_key = config.get("api_key")
+                    elif no_api_key:
+                        # Make sure the API key is set
+                        raise Exception("Error: API key is not set")
                     if config.get("engine") is not None:
                         self.engine = config.get("engine")
                     if config.get("temperature") is not None:
@@ -448,25 +451,22 @@ def main() -> NoReturn:
     )
     parser.add_argument(
         "--config",
-        type=config_dict,
+        type=str,
         help="Path to config.v3.json",
     )
     args = parser.parse_args()
     # Load config
     if args.config is not None:
         # Initialize chatbot
-        if args.api_key is None and args.config.get("api_key") is None:
-            print(
-                "Add a config.v3.json file using --config or add an api_key using --api_key"
-            )
-            # raising at top level is messy and can confuse some people
-            return
         chatbot = ChatbotCLI()
-        chatbot.load(args.config)
+        no_api_key = False
+        if args.api_key is None:
+            no_api_key = True
+        chatbot.load_config(args.config, no_api_key=no_api_key)
     else:
-        if args.api_key is None and args.config.get("api_key") is None:
+        if args.api_key is None:
             print(
-                "Add an api key to your config.v3.json file or add an api_key using --api_key"
+                "Add a config.v3.json and add the path using --config or add an api_key using --api_key"
             )
             # raising at top level is messy and can confuse some people
             return
@@ -501,6 +501,7 @@ def main() -> NoReturn:
             "!reply_count",
             "!save",
             "!load",
+            "!load_config",
         ],
     )
     # Start chat
