@@ -461,9 +461,7 @@ def main() -> NoReturn:
     if args.config is not None:
         # Initialize chatbot
         chatbot = ChatbotCLI("placeholder")
-        no_api_key = False
-        if args.api_key is None:
-            no_api_key = True
+        no_api_key = args.api_key is None
         chatbot.load_config(args.config, no_api_key=no_api_key)
     else:
         if args.api_key is None:
