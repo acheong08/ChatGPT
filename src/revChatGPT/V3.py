@@ -255,28 +255,19 @@ class Chatbot:
             with open(file, encoding="utf-8") as f:
                 config = json.load(f)
                 if config is not None:
-                    if config.get("api_key") is not None:
-                        self.api_key = config.get("api_key")
-                    elif no_api_key:
+                    self.api_key = config.get("api_key") or self.api_key
+                    if self.api_key is None:
                         # Make sure the API key is set
                         raise Exception("Error: API key is not set")
-                    if config.get("engine") is not None:
-                        self.engine = config.get("engine")
-                    if config.get("temperature") is not None:
-                        self.temperature = config.get("temperature")
-                    if config.get("top_p") is not None:
-                        self.top_p = config.get("top_p")
-                    if config.get("presence_penalty") is not None:
-                        self.presence_penalty = config.get("presence_penalty")
-                    if config.get("frequency_penalty") is not None:
-                        self.frequency_penalty = config.get("frequency_penalty")
-                    if config.get("reply_count") is not None:
-                        self.reply_count = config.get("reply_count")
-                    if config.get("max_tokens") is not None:
-                        self.max_tokens = config.get("max_tokens")
-                    if config.get("system_prompt") is not None:
-                        self.system_prompt = config.get("system_prompt")
-                        self.reset(system_prompt=self.system_prompt)
+                    self.engine = config.get("engine") or self.engine
+                    self.temperature = config.get("temperature") or self.temperature
+                    self.top_p = config.get("top_p") or self.top_p
+                    self.presence_penalty = config.get("presence_penalty") or self.presence_penalty
+                    self.frequency_penalty = config.get("frequency_penalty") or self.frequency_penalty
+                    self.reply_count = config.get("reply_count") or self.reply_count
+                    self.max_tokens = config.get("max_tokens") or self.max_tokens
+                    self.system_prompt = config.get("system_prompt") or self.system_prompt
+                    self.reset(system_prompt=self.system_prompt)
                     if config.get("proxy") is not None:
                         self.proxy = config.get("proxy")
                         proxies = {
