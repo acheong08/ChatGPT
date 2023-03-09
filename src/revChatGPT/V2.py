@@ -9,7 +9,9 @@ import sys
 import httpx
 import tiktoken
 
-from .utils import create_completer, create_session, get_input_async
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input_async
 
 ENCODER = tiktoken.get_encoding("gpt2")
 

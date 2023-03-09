@@ -199,6 +199,45 @@ for data in chatbot.ask("Hello world"):
 
 </details>
 
+<details>
+
+<summary>
+
+# V2 Free GPT-3 Chatbot
+> Unofficial by third party
+</summary>
+
+## Command line
+```bash
+ $ python3 -m revChatGPT.V2 -h
+
+        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        Repo: github.com/acheong08/ChatGPT
+
+usage: V2.py [-h] [--proxy PROXY] --api_key API_KEY
+
+options:
+  -h, --help         show this help message and exit
+  --proxy PROXY      Use a proxy
+  --api_key API_KEY  Pawans API key (Optional. Do not set)
+```
+
+## Developer API
+
+```python
+from revChatGPT.V2 import Chatbot
+
+async def main():
+  async for line in chatbot.ask(prompt="Hello world"):
+    print(line["choices"][0]["text"], flush=True)
+
+import asyncio
+asyncio.run(main())
+```
+
+More details in wiki.
+
+</details>
 
 
 # Awesome ChatGPT
