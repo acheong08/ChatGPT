@@ -244,7 +244,7 @@ async def main() -> None:
     print("Logged in\n")
 
     print("Type '!help' to show a full list of commands")
-    print("Press enter twice to submit your question.\n")
+    print("Press Esc followed by Enter or Alt+Enter to send a message.\n")
 
     def commands(command: str) -> bool:
         if command == "!help":
