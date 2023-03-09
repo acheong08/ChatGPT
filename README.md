@@ -16,7 +16,10 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 <summary>
 
 # V1 Standard ChatGPT
-> Update 2023/03/09 9:50AM - No longer functional
+> Update 2023/03/09 7:35AM - Working again with missing features.
+>
+> Missing features:
+> - Everything to do with getting conversation history. (Context still works)
 
 </summary>
 
