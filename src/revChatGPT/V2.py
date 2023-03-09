@@ -219,7 +219,7 @@ async def main() -> None:
 
     print(
         """
-        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        FreeGPT: A way to use OpenAI's GPT-3 API for free
         Repo: github.com/acheong08/ChatGPT
         """,
     )
