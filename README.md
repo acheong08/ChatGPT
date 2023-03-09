@@ -20,8 +20,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > - Free
 >
 > > ## WARNING
-> > A third party API is used to access the chat. Be aware that it could be malicious and steal your access token. Use at your own risk. I am not responsible for any damages caused by this API. (Nothing malicious reported so far. Let me know if you face any security issues with it)
-> > - I recently deprecated my own API due to excessive costs that I am unable to afford.
+> > Migration in progress to third party API. I am unable to afford current levels of traffic.
 
 </summary>
 
