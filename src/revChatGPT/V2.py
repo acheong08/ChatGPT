@@ -109,7 +109,7 @@ BASE_PROMPT = (
     or """You are ChatGPT, a large language model by OpenAI. Respond conversationally\n\n\n"""
 )
 
-PROXY_URL = os.environ.get("PROXY_URL") or "https://gpt.pawan.krd/api"
+PROXY_URL = os.environ.get("PROXY_URL") or "https://pawan.duti.tech/api"
 
 
 class Chatbot:
