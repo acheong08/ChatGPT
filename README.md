@@ -219,7 +219,7 @@ usage: V2.py [-h] [--proxy PROXY] --api_key API_KEY
 options:
   -h, --help         show this help message and exit
   --proxy PROXY      Use a proxy
-  --api_key API_KEY  Pawans API key. Get it from https://discord.pawan.krd in #Bot and the /key command (required)
+  --api_key API_KEY  (Optional. Only put if you know what you're doing.)
 ```
 
 ## Developer API
@@ -253,5 +253,5 @@ This is not an official OpenAI product. This is a personal project and is not af
 # Credits
 
 - [virtualharby](https://twitter.com/virtualharby) - Memes for emotional support
-- [@PawanOsman](https://github.com/PawanOsman/) - V1 proxy (since 2023/03/08)
+- [@PawanOsman](https://github.com/PawanOsman/) - V2 proxy (since 2023/03/09)
 - [All contributors](https://github.com/acheong08/ChatGPT/graphs/contributors) - Pull requests
