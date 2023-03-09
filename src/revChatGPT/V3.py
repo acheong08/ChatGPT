@@ -10,7 +10,8 @@ from typing import NoReturn
 import requests
 import tiktoken
 
-from .utils import create_completer, create_keybindings
+from .utils import create_completer
+from .utils import create_keybindings
 from .utils import create_session
 from .utils import get_input
 
@@ -148,10 +149,12 @@ class Chatbot:
                 "temperature": kwargs.get("temperature", self.temperature),
                 "top_p": kwargs.get("top_p", self.top_p),
                 "presence_penalty": kwargs.get(
-                    "presence_penalty", self.presence_penalty
+                    "presence_penalty",
+                    self.presence_penalty,
                 ),
                 "frequency_penalty": kwargs.get(
-                    "frequency_penalty", self.frequency_penalty
+                    "frequency_penalty",
+                    self.frequency_penalty,
                 ),
                 "n": kwargs.get("n", self.reply_count),
                 "user": role,
@@ -476,7 +479,7 @@ def main() -> NoReturn:
     else:
         if args.api_key is None:
             print(
-                "Add a config.v3.json and add the path using --config or add an api_key using --api_key"
+                "Add a config.v3.json and add the path using --config or add an api_key using --api_key",
             )
             # raising at top level is messy and can confuse some people
             return
@@ -523,7 +526,9 @@ def main() -> NoReturn:
         try:
             print("User: ")
             prompt = get_input(
-                session=session, completer=completer, key_bindings=key_bindings
+                session=session,
+                completer=completer,
+                key_bindings=key_bindings,
             )
         except KeyboardInterrupt:
             print("\nExiting...")

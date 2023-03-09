@@ -9,7 +9,9 @@ import sys
 import httpx
 import tiktoken
 
-from .utils import create_completer, create_session, get_input_async
+from .utils import create_completer
+from .utils import create_session
+from .utils import get_input_async
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -107,7 +109,7 @@ BASE_PROMPT = (
     or """You are ChatGPT, a large language model by OpenAI. Respond conversationally\n\n\n"""
 )
 
-PROXY_URL = os.environ.get("PROXY_URL") or "https://gpt.pawan.krd/api"
+PROXY_URL = os.environ.get("PROXY_URL") or "https://pawan.duti.tech/api"
 
 
 class Chatbot:
@@ -217,7 +219,7 @@ async def main() -> None:
 
     print(
         """
-        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        FreeGPT: A way to use OpenAI's GPT-3 API for free
         Repo: github.com/acheong08/ChatGPT
         """,
     )
@@ -232,7 +234,8 @@ async def main() -> None:
     parser.add_argument(
         "--api_key",
         help="OpenAI API key",
-        required=True,
+        required=False,
+        default="pk-TNkDYMHpJKKuSfiAWJlUCKQSnKluoZxvLGKRPnPzxCDPdVxs",
     )
     args = parser.parse_args()
     print("Logging in...")
@@ -243,7 +246,7 @@ async def main() -> None:
     print("Logged in\n")
 
     print("Type '!help' to show a full list of commands")
-    print("Press enter twice to submit your question.\n")
+    print("Press Esc followed by Enter or Alt+Enter to send a message.\n")
 
     def commands(command: str) -> bool:
         if command == "!help":

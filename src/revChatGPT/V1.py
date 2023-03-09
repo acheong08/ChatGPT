@@ -74,7 +74,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.duti.tech/api/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://gpt.pawan.krd/backend-api/"
 
 
 class ErrorType:
@@ -958,7 +958,6 @@ def main(config: dict) -> NoReturn:
     """
     Main function for the chatGPT program.
     """
-    print("Logging in...")
     chatbot = Chatbot(
         config,
         conversation_id=config.get("conversation_id"),
