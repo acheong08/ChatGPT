@@ -16,11 +16,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 <summary>
 
 # V1 Standard ChatGPT
-> Uses a proxy to `chat.openai.com` which bypasses cloudflare
-> - Free
->
-> > ## WARNING
-> > Migration in progress to third party API. I am unable to afford current levels of traffic.
+> Update 2023/03/09 9:50AM - No longer functional
 
 </summary>
 
