@@ -227,6 +227,8 @@ options:
 ```python
 from revChatGPT.V2 import Chatbot
 
+chatbot = Chatbot()
+
 async def main():
   async for line in chatbot.ask(prompt="Hello world"):
     print(line["choices"][0]["text"], flush=True)
