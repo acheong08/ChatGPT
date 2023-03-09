@@ -74,7 +74,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.duti.tech/api/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.openai.com/backend-api/"
 
 
 class ErrorType:
@@ -159,6 +159,7 @@ class Chatbot:
     def __init__(
         self,
         config: dict[str, str],
+        puid: str,
         conversation_id: str | None = None,
         parent_id: str | None = None,
         session_client=None,
@@ -197,6 +198,7 @@ class Chatbot:
 
         self.config = config
         self.session = session_client() if session_client else requests.Session()
+        self.session.cookies.set("_puid", puid)
         try:
             cached_access_token = self.__get_cached_access_token(
                 self.config.get("email", None),
@@ -958,11 +960,20 @@ def main(config: dict) -> NoReturn:
     """
     Main function for the chatGPT program.
     """
-    print("Logging in...")
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--puid",
+        help="Plus User Token",
+        required=True,
+    )
+    args = parser.parse_args()
     chatbot = Chatbot(
         config,
         conversation_id=config.get("conversation_id"),
         parent_id=config.get("parent_id"),
+        puid=args.puid,
     )
 
     def handle_commands(command: str) -> bool:
