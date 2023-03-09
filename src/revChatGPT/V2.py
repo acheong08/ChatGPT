@@ -232,7 +232,8 @@ async def main() -> None:
     parser.add_argument(
         "--api_key",
         help="OpenAI API key",
-        required=True,
+        required=False,
+        default="pk-TNkDYMHpJKKuSfiAWJlUCKQSnKluoZxvLGKRPnPzxCDPdVxs",
     )
     args = parser.parse_args()
     print("Logging in...")
