@@ -219,7 +219,7 @@ usage: V2.py [-h] [--proxy PROXY] --api_key API_KEY
 options:
   -h, --help         show this help message and exit
   --proxy PROXY      Use a proxy
-  --api_key API_KEY  Pawans API key (Optional. Do not set)
+  --api_key API_KEY  Pawans API key. Get it from https://discord.pawan.krd in #Bot (required)
 ```
 
 ## Developer API
