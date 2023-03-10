@@ -6,7 +6,6 @@ import json
 import os
 import sys
 from datetime import date
-from typing import LiteralString
 from typing import NoReturn
 
 import openai
@@ -392,7 +391,7 @@ def main() -> NoReturn:
     print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
 
-    def get_input(prompt) -> LiteralString:
+    def get_input(prompt):
         """
         Multi-line input function
         """
