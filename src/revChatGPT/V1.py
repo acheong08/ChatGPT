@@ -74,7 +74,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://pawan.duti.tech/api/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.duti.tech/api/"
 
 
 class ErrorType:
