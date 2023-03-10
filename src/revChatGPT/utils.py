@@ -81,13 +81,11 @@ def get_filtered_keys_from_object(obj: object, *keys: str) -> set[str]:
 
     # Remove the passed keys from the class keys.
     if keys[0] == "not":
-        given_keys = keys[1:]
-        return {key for key in class_keys if key not in given_keys}
-    else:
-        # Check if all passed keys are valid
-        if invalid_keys := set(keys) - class_keys:
-            raise ValueError(
-                f"Invalid keys: {invalid_keys}",
-            )
-        # Only return specified keys that are in class_keys
-        return {key for key in keys if key in class_keys}
+        return {key for key in class_keys if key not in keys[1:]}
+    # Check if all passed keys are valid
+    if invalid_keys := set(keys) - class_keys:
+        raise ValueError(
+            f"Invalid keys: {invalid_keys}",
+        )
+    # Only return specified keys that are in class_keys
+    return {key for key in keys if key in class_keys}
