@@ -74,7 +74,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://gpt.pawan.krd/backend-api/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://pawan.duti.tech/backend-api/"
 
 
 class ErrorType:
@@ -508,6 +508,7 @@ class Chatbot:
         )
         self.__check_response(response)
         for line in response.iter_lines():
+            print(line)
             # remove b' and ' at the beginning and end and ignore case
             line = str(line)[2:-1]
             if line.lower() == "internal server error":
