@@ -47,8 +47,8 @@ class Chatbot:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
-        openai.api_key = api_key or os.environ.get("OPENAI_API_KEY")
-        openai.proxy = proxy or os.environ.get("OPENAI_API_PROXY")
+        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
+        self.proxy = proxy or os.environ.get("OPENAI_API_PROXY")
         self.conversations = Conversation()
         self.prompt = Prompt(buffer=buffer)
         self.engine = engine or ENGINE
@@ -62,6 +62,8 @@ class Chatbot:
         """
         Get the completion function
         """
+        openai.api_key = self.api_key
+        openai.proxy = self.proxy
         return openai.Completion.create(
             engine=self.engine,
             prompt=prompt,
@@ -211,6 +213,8 @@ class AsyncChatbot(Chatbot):
         """
         Get the completion function
         """
+        openai.api_key = self.api_key
+        openai.proxy = self.proxy
         return await openai.Completion.acreate(
             engine=self.engine,
             prompt=prompt,
