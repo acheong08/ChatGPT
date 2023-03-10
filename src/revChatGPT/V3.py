@@ -432,9 +432,8 @@ def main() -> NoReturn:
 
     args = parser.parse_args()
 
-    config = args.config or os.environ.get("GPT_CONFIG_PATH")
     # Initialize chatbot
-    if config:
+    if config := args.config or os.environ.get("GPT_CONFIG_PATH"):
         chatbot = ChatbotCLI(args.api_key)
         try:
             chatbot.load(config)
