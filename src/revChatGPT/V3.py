@@ -437,7 +437,7 @@ def main() -> NoReturn:
         chatbot = ChatbotCLI(args.api_key)
         try:
             chatbot.load(config)
-        except:
+        except Exception:
             print(f"Error: {args.config} could not be loaded")
             sys.exit()
     else:
