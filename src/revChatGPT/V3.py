@@ -545,15 +545,15 @@ def main() -> NoReturn:
             ).strip()
             print("Searching for: ", query, "")
             # Get search results
-            search_results = (
-                '{"results": "No search results"}'
-                if query == "none"
-                else requests.post(
+            search_results = '{"results": "No search results"}'
+            if query != "none":
+                resp = requests.post(
                     url="https://ddg-api.herokuapp.com/search",
                     json={"query": query, "limit": 3},
                     timeout=10,
-                ).text
-            )
+                )
+                resp.encoding = "utf-8" if resp.encoding is None else resp.encoding
+                search_results = resp.text
             print(json.dumps(json.loads(search_results), indent=4))
             chatbot.add_to_conversation(
                 f"Search results:{search_results}",
