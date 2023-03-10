@@ -322,22 +322,15 @@ Examples:
             self.rollback(int(value[0]), convo_id=convo_id)
             print(f"\nRolled back by {value[0]} messages")
         elif command == "!save":
-            try:
-                self.save(*value)
-                print(
-                    f"Saved {', '.join(value[1:]) if len(value) > 1 else 'all'} keys to {value[0]}"
-                )
-            except Exception as e:
-                print(f"Error, file could not be saved: {e}")
-
+            self.save(*value)
+            print(
+                f"Saved {', '.join(value[1:]) if len(value) > 1 else 'all'} keys to {value[0]}"
+            )
         elif command == "!load":
-            try:
-                self.load(*value)
-                print(
-                    f"Loaded {', '.join(value[1:]) if len(value) > 1 else 'all'} keys from {value[0]}"
-                )
-            except Exception as e:
-                print(f"Error, file could not be loaded: {e}")
+            self.load(*value)
+            print(
+                f"Loaded {', '.join(value[1:]) if len(value) > 1 else 'all'} keys from {value[0]}"
+            )
         elif command == "!temperature":
             self.temperature = float(value[0])
             print(f"\nTemperature set to {value[0]}")
@@ -488,7 +481,11 @@ def main() -> NoReturn:
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
-        if prompt.startswith("!") and chatbot.handle_commands(prompt):
+        if prompt.startswith("!"):
+            try:
+                chatbot.handle_commands(prompt)
+            except Exception as e:
+                print(f"Error: {e}")
             continue
         print()
         print("ChatGPT: ", flush=True)
