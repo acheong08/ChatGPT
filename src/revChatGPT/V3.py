@@ -139,7 +139,7 @@ class Chatbot:
         self.__truncate_conversation(convo_id=convo_id)
         # Get response
         response = self.session.post(
-            "https://api.openai.com/v1/chat/completions",
+            os.environ.get("API_URL") or "https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
             json={
                 "model": self.engine,
@@ -545,15 +545,15 @@ def main() -> NoReturn:
             ).strip()
             print("Searching for: ", query, "")
             # Get search results
-            search_results = (
-                '{"results": "No search results"}'
-                if query == "none"
-                else requests.post(
+            search_results = '{"results": "No search results"}'
+            if query != "none":
+                resp = requests.post(
                     url="https://ddg-api.herokuapp.com/search",
                     json={"query": query, "limit": 3},
                     timeout=10,
-                ).text
-            )
+                )
+                resp.encoding = "utf-8" if resp.encoding is None else resp.encoding
+                search_results = resp.text
             print(json.dumps(json.loads(search_results), indent=4))
             chatbot.add_to_conversation(
                 f"Search results:{search_results}",
