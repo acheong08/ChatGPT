@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="3.3.0",
+    version="3.3.1",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
