@@ -250,7 +250,7 @@ class Chatbot:
 
             if "session" in keys and loaded_config["session"]:
                 self.session.proxies = loaded_config["session"]
-                keys = keys - {"session"}
+            keys = keys - {"session"}
             self.__dict__.update({key: loaded_config[key] for key in keys})
 
 
