@@ -341,8 +341,9 @@ Examples:
             self.reply_count = int(value[0])
             print(f"\nReply count set to {value[0]}")
         elif command == "!engine":
-            self.engine = value[0]
-            print(f"\nEngine set to {value[0]}")
+            if len(value) > 0:
+                self.engine = value[0]
+            print(f"\nEngine set to {self.engine}")
         else:
             return False
 
