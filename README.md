@@ -160,8 +160,8 @@ Get API key from https://platform.openai.com/account/api-keys
 Type '!help' to show a full list of commands
 Press Esc followed by Enter or Alt+Enter to send a message.
 
-usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream] [--base_prompt BASE_PROMPT]
-             [--proxy PROXY] [--top_p TOP_P] [--reply_count REPLY_COUNT] [--enable-internet]
+usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream] [--base_prompt BASE_PROMPT] [--proxy PROXY] [--top_p TOP_P]
+             [--reply_count REPLY_COUNT] [--enable_internet] [--config CONFIG] [--submit_key SUBMIT_KEY]
 
 options:
   -h, --help            show this help message and exit
@@ -175,10 +175,10 @@ options:
   --top_p TOP_P         Top p for response
   --reply_count REPLY_COUNT
                         Number of replies for each prompt
-  --enable_internet     Allow ChatGPT to access the internet (beta)
+  --enable_internet     Allow ChatGPT to search the internet
+  --config CONFIG       Path to V3 config json file
   --submit_key SUBMIT_KEY
-                        Custom submit key for chatbot. For more information on keys, see:
-                        https://python-prompt-toolkit.readthedocs.io/en/stable/pages/advanced_topics/key_bindings.html#list-of-special-keys
+                        Custom submit key for chatbot. For more information on keys, see https://python-prompt-toolkit.readthedocs.io/en/stable/pages/advanced_topics/key_bindings.html#list-of-special-keys
 ```
 
 ## Developer API

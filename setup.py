@@ -3,11 +3,15 @@ from setuptools import setup
 
 setup(
     name="revChatGPT",
-    version="3.3.1",
+    version="3.3.2",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
-    long_description=open("README.md", encoding="utf-8").read(),
+    long_description=open("README.md", "rt", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/acheong08/ChatGPT",
+    project_urls={
+    "Bug Report": "https://github.com/acheong08/ChatGPT/issues/new?assignees=&labels=bug-report&template=bug_report.yml&title=%5BBug%5D%3A+",
+    "Feature request": "https://github.com/acheong08/ChatGPT/issues/new?assignees=&labels=enhancement&template=feature_request.yml&title=%5BFeature+Request%5D%3A+"
+    },
     author="Antonio Cheong",
     author_email="acheong@student.dalat.org",
     license="GNU General Public License v2.0",
@@ -21,6 +25,15 @@ setup(
         "httpx[socks]",
         "prompt-toolkit",
         "tiktoken>=0.3.0",
+    ],
+    classifiers=[
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     extras_require={
         "WebGPT": ["duckduckgo_search"],

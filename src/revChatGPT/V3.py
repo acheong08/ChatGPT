@@ -13,6 +13,7 @@ import tiktoken
 from .utils import create_completer
 from .utils import create_keybindings
 from .utils import create_session
+from .utils import get_filtered_keys_from_object
 from .utils import get_input
 
 
@@ -40,8 +41,6 @@ class Chatbot:
         self.engine = engine
         self.session = requests.Session()
         self.api_key = api_key
-        self.proxy = proxy
-
         self.system_prompt = system_prompt
         self.max_tokens = max_tokens
         self.temperature = temperature
@@ -50,12 +49,12 @@ class Chatbot:
         self.frequency_penalty = frequency_penalty
         self.reply_count = reply_count
 
-        if self.proxy:
-            proxies = {
-                "http": self.proxy,
-                "https": self.proxy,
+        if proxy:
+            self.session.proxies = {
+                "http": proxy,
+                "https": proxy,
             }
-            self.session.proxies = proxies
+
         self.conversation: dict = {
             "default": [
                 {
@@ -224,76 +223,35 @@ class Chatbot:
             {"role": "system", "content": system_prompt or self.system_prompt},
         ]
 
-    def save(self, file: str, *convo_ids: str) -> bool:
+    def save(self, file: str, *keys: str) -> None:
         """
-        Save the conversation to a JSON file
+        Save the Chatbot configuration to a JSON file
         """
-        try:
-            with open(file, "w", encoding="utf-8") as f:
-                if convo_ids:
-                    json.dump({k: self.conversation[k] for k in convo_ids}, f, indent=2)
-                else:
-                    json.dump(self.conversation, f, indent=2)
-        except (FileNotFoundError, KeyError):
-            return False
-        return True
-        # print(f"Error: {file} could not be created")
+        with open(file, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    key: self.__dict__[key]
+                    for key in get_filtered_keys_from_object(self, *keys)
+                },
+                f,
+                indent=2,
+                # saves session.proxies dict as session
+                default=lambda o: o.__dict__["proxies"],
+            )
 
-    def load(self, file: str, *convo_ids: str) -> bool:
+    def load(self, file: str, *keys: str) -> None:
         """
-        Load the conversation from a JSON  file
+        Load the Chatbot configuration from a JSON file
         """
-        try:
-            with open(file, encoding="utf-8") as f:
-                if convo_ids:
-                    convos = json.load(f)
-                    self.conversation.update({k: convos[k] for k in convo_ids})
-                else:
-                    self.conversation = json.load(f)
-        except (FileNotFoundError, KeyError, json.decoder.JSONDecodeError):
-            return False
-        return True
+        with open(file, encoding="utf-8") as f:
+            # load json, if session is in keys, load proxies
+            loaded_config = json.load(f)
+            keys = get_filtered_keys_from_object(self, *keys)
 
-    def load_config(self, file: str, no_api_key: bool = False) -> bool:
-        """
-        Load the configuration from a JSON file
-        """
-        try:
-            with open(file, encoding="utf-8") as f:
-                config = json.load(f)
-                if config is not None:
-                    self.api_key = config.get("api_key") or self.api_key
-                    if self.api_key is None:
-                        # Make sure the API key is set
-                        raise Exception("Error: API key is not set")
-                    self.engine = config.get("engine") or self.engine
-                    self.temperature = config.get("temperature") or self.temperature
-                    self.top_p = config.get("top_p") or self.top_p
-                    self.presence_penalty = (
-                        config.get("presence_penalty") or self.presence_penalty
-                    )
-                    self.frequency_penalty = (
-                        config.get("frequency_penalty") or self.frequency_penalty
-                    )
-                    self.reply_count = config.get("reply_count") or self.reply_count
-                    self.max_tokens = config.get("max_tokens") or self.max_tokens
-
-                    if config.get("system_prompt") is not None:
-                        self.system_prompt = (
-                            config.get("system_prompt") or self.system_prompt
-                        )
-                        self.reset(system_prompt=self.system_prompt)
-
-                    if config.get("proxy") is not None:
-                        self.proxy = config.get("proxy") or self.proxy
-                        proxies = {
-                            "http": self.proxy,
-                            "https": self.proxy,
-                        }
-                        self.session.proxies = proxies
-        except (FileNotFoundError, KeyError, json.decoder.JSONDecodeError):
-            return False
-        return True
+            if "session" in keys and loaded_config["session"]:
+                self.session.proxies = loaded_config["session"]
+            keys = keys - {"session"}
+            self.__dict__.update({key: loaded_config[key] for key in keys})
 
 
 class ChatbotCLI(Chatbot):
@@ -322,20 +280,27 @@ ChatGPT Configuration:
         print(
             """
 Commands:
-  !help            Display this message
-  !rollback n      Rollback the conversation by n messages
-  !save file [ids] Save all or specificied conversation/s to a JSON file
-  !load file [ids] Load all or specificied conversation/s from a JSON file
-  !reset           Reset the conversation
-  !exit            Quit chat
+  !help             Display this message
+  !rollback n       Rollback the conversation by n messages
+  !save file [keys] Save the Chatbot configuration to a JSON file
+  !load file [keys] Load the Chatbot configuration from a JSON file
+  !reset            Reset the conversation
+  !exit             Quit chat
 
 Config Commands:
-  !config          Display the current config
-  !load_config fileLoad the config from a JSON file
-  !temperature n   Set the temperature to n
-  !top_p n         Set the top_p to n
-  !reply_count n   Set the reply_count to n
-  !engine engine   Sets the chat model to engine
+  !config           Display the current config
+  !temperature n    Set the temperature to n
+  !top_p n          Set the top_p to n
+  !reply_count n    Set the reply_count to n
+  !engine engine    Sets the chat model to engine
+
+Examples:
+  !save c.json               Saves all ChatbotGPT class variables to c.json
+  !save c.json engine top_p  Saves only temperature and top_p to c.json
+  !load c.json not engine    Loads all but engine from c.json
+  !load c.json session       Loads session proxies from c.json
+
+
   """,
         )
 
@@ -357,27 +322,15 @@ Config Commands:
             self.rollback(int(value[0]), convo_id=convo_id)
             print(f"\nRolled back by {value[0]} messages")
         elif command == "!save":
-            if is_saved := self.save(*value):
-                convo_ids = value[1:] or self.conversation.keys()
-                print(
-                    f"Saved conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} to {value[0]}",
-                )
-            else:
-                print(f"Error: {value[0]} could not be created")
-
+            self.save(*value)
+            print(
+                f"Saved {', '.join(value[1:]) if len(value) > 1 else 'all'} keys to {value[0]}",
+            )
         elif command == "!load":
-            if is_loaded := self.load(*value):
-                convo_ids = value[1:] or self.conversation.keys()
-                print(
-                    f"Loaded conversation{'s' if len(convo_ids) > 1 else ''} {', '.join(convo_ids)} from {value[0]}",
-                )
-            else:
-                print(f"Error: {value[0]} could not be loaded")
-        elif command == "!load_config":
-            if is_loaded := self.load_config(*value):
-                print(f"Loaded config from {value[0]}")
-            else:
-                print(f"Error: {value[0]} could not be loaded")
+            self.load(*value)
+            print(
+                f"Loaded {', '.join(value[1:]) if len(value) > 1 else 'all'} keys from {value[0]}",
+            )
         elif command == "!temperature":
             self.temperature = float(value[0])
             print(f"\nTemperature set to {value[0]}")
@@ -388,8 +341,9 @@ Config Commands:
             self.reply_count = int(value[0])
             print(f"\nReply count set to {value[0]}")
         elif command == "!engine":
-            self.engine = value[0]
-            print(f"\nEngine set to {value[0]}")
+            if len(value) > 0:
+                self.engine = value[0]
+            print(f"\nEngine set to {self.engine}")
         else:
             return False
 
@@ -414,6 +368,7 @@ def main() -> NoReturn:
     parser.add_argument(
         "--api_key",
         type=str,
+        required="--config" not in sys.argv,
         help="OpenAI API key",
     )
     parser.add_argument(
@@ -459,31 +414,27 @@ def main() -> NoReturn:
     parser.add_argument(
         "--config",
         type=str,
-        help="Path to config.v3.json",
+        default=False,
+        help="Path to V3 config json file",
     )
     parser.add_argument(
         "--submit_key",
         type=str,
         default=None,
-        help="""
-        Custom submit key for chatbot. For more information on keys, see README
-        """,
+        help="Custom submit key for chatbot. For more information on keys, see README",
     )
-    args = parser.parse_args()
-    # Load config
-    if args.config is not None:
-        # Initialize chatbot
-        chatbot = ChatbotCLI("placeholder")
-        no_api_key = args.api_key is None
-        chatbot.load_config(args.config, no_api_key=no_api_key)
-    else:
-        if args.api_key is None:
-            print(
-                "Add a config.v3.json and add the path using --config or add an api_key using --api_key",
-            )
-            # raising at top level is messy and can confuse some people
-            return
 
+    args = parser.parse_args()
+
+    # Initialize chatbot
+    if config := args.config or os.environ.get("GPT_CONFIG_PATH"):
+        chatbot = ChatbotCLI(args.api_key)
+        try:
+            chatbot.load(config)
+        except Exception:
+            print(f"Error: {args.config} could not be loaded")
+            sys.exit()
+    else:
         chatbot = ChatbotCLI(
             api_key=args.api_key,
             system_prompt=args.base_prompt,
@@ -492,13 +443,12 @@ def main() -> NoReturn:
             top_p=args.top_p,
             reply_count=args.reply_count,
         )
-
     # Check if internet is enabled
     if args.enable_internet:
         from importlib.resources import path
 
         config = path("revChatGPT", "config").__str__()
-        chatbot.load(os.path.join(config, "enable_internet.json"))
+        chatbot.load(os.path.join(config, "enable_internet.json"), "conversation")
 
     session = create_session()
     completer = create_completer(
@@ -514,7 +464,6 @@ def main() -> NoReturn:
             "!reply_count",
             "!save",
             "!load",
-            "!load_config",
         ],
     )
     key_bindings = create_keybindings()
@@ -533,7 +482,11 @@ def main() -> NoReturn:
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
-        if prompt.startswith("!") and chatbot.handle_commands(prompt):
+        if prompt.startswith("!"):
+            try:
+                chatbot.handle_commands(prompt)
+            except Exception as e:
+                print(f"Error: {e}")
             continue
         print()
         print("ChatGPT: ", flush=True)
