@@ -10,10 +10,10 @@ from typing import NoReturn
 import requests
 import tiktoken
 
-from .utils import get_filtered_keys_from_object
 from .utils import create_completer
 from .utils import create_keybindings
 from .utils import create_session
+from .utils import get_filtered_keys_from_object
 from .utils import get_input
 
 
@@ -324,12 +324,12 @@ Examples:
         elif command == "!save":
             self.save(*value)
             print(
-                f"Saved {', '.join(value[1:]) if len(value) > 1 else 'all'} keys to {value[0]}"
+                f"Saved {', '.join(value[1:]) if len(value) > 1 else 'all'} keys to {value[0]}",
             )
         elif command == "!load":
             self.load(*value)
             print(
-                f"Loaded {', '.join(value[1:]) if len(value) > 1 else 'all'} keys from {value[0]}"
+                f"Loaded {', '.join(value[1:]) if len(value) > 1 else 'all'} keys from {value[0]}",
             )
         elif command == "!temperature":
             self.temperature = float(value[0])
