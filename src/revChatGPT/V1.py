@@ -580,7 +580,7 @@ class Chatbot:
 
                 raise Error(
                     source="ask",
-                    message="Field missing",
+                    message=line,
                     code=ErrorType.SERVER_ERROR,
                 )
             message = line["message"]["content"]["parts"][0]

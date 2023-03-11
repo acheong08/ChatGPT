@@ -1,4 +1,5 @@
 import re
+from typing import Set
 
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
@@ -69,7 +70,7 @@ async def get_input_async(
     )
 
 
-def get_filtered_keys_from_object(obj: object, *keys: str) -> set[str]:
+def get_filtered_keys_from_object(obj: object, *keys: str) -> Set[str]:
     """
     Get filtered list of object variable names.
     :param keys: List of keys to include. If the first key is "not", the remaining keys will be removed from the class keys.
