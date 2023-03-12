@@ -19,6 +19,8 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > Update 2023/03/10 11:00AM - Everything works
 > > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
 
+> ## IMPORTANT POLL: https://twitter.com/GodlyIgnorance/status/1634798818947657729
+
 </summary>
 
 ## Configuration
