@@ -253,7 +253,7 @@ class Chatbot:
             raise Exception("Insufficient login details provided!")
         if "access_token" not in self.config:
             try:
-                self.__login()
+                self.login()
             except AuthError as error:
                 raise error
 
@@ -377,7 +377,7 @@ class Chatbot:
         return cached
 
     @logger(is_timed=True)
-    def __login(self) -> None:
+    def login(self) -> None:
         if (
             "email" not in self.config or "password" not in self.config
         ) and "session_token" not in self.config:
@@ -394,7 +394,7 @@ class Chatbot:
             auth.get_access_token()
             if auth.access_token is None:
                 del self.config["session_token"]
-                self.__login()
+                self.login()
                 return
         else:
             log.debug("Using authenticator to get access token")
@@ -532,7 +532,7 @@ class Chatbot:
                 line = json.loads(line)
             except json.decoder.JSONDecodeError:
                 continue
-            if not self.__check_fields(line):
+            if not self.__check_fields(line) or response.status_code != 200:
                 log.error("Field missing", exc_info=True)
                 line_detail = line.get("detail")
                 if isinstance(line_detail, str):
