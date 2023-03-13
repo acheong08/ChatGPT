@@ -20,6 +20,11 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
 
 > ### [Privacy policy](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
+> <br>
+>
+> #### [Discussion regarding data collection](https://github.com/acheong08/ChatGPT/discussions/1147)
+
+> :warning: **Avoid untrusted servers**. It was discovered today that access tokens can also be used to call the paid API. If your token is logged, it could be easily abused and cost you money.
 
 </summary>
 
