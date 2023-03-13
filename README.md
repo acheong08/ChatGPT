@@ -20,6 +20,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
 
 > ### [Privacy policy](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
+> <br>
 >
 > #### [Discussion regarding data collection](https://github.com/acheong08/ChatGPT/discussions/1147)
 
