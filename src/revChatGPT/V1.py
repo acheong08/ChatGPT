@@ -87,6 +87,8 @@ class ErrorType:
     EXPIRED_ACCESS_TOKEN_ERROR = 4
     INVALID_ACCESS_TOKEN_ERROR = 5
     PROHIBITED_CONCURRENT_QUERY_ERROR = 6
+    AUTHENTICATION_ERROR = 7
+    CLOUDFLARE_ERROR = 8
 
 
 class Error(Exception):
@@ -253,7 +255,7 @@ class Chatbot:
             raise Exception("Insufficient login details provided!")
         if "access_token" not in self.config:
             try:
-                self.__login()
+                self.login()
             except AuthError as error:
                 raise error
 
@@ -377,7 +379,7 @@ class Chatbot:
         return cached
 
     @logger(is_timed=True)
-    def __login(self) -> None:
+    def login(self) -> None:
         if (
             "email" not in self.config or "password" not in self.config
         ) and "session_token" not in self.config:
@@ -394,7 +396,7 @@ class Chatbot:
             auth.get_access_token()
             if auth.access_token is None:
                 del self.config["session_token"]
-                self.__login()
+                self.login()
                 return
         else:
             log.debug("Using authenticator to get access token")
@@ -532,52 +534,27 @@ class Chatbot:
                 line = json.loads(line)
             except json.decoder.JSONDecodeError:
                 continue
-            if not self.__check_fields(line):
+            if not self.__check_fields(line) or response.status_code != 200:
                 log.error("Field missing", exc_info=True)
-                line_detail = line.get("detail")
-                if isinstance(line_detail, str):
-                    if (
-                        line_detail.lower()
-                        == "too many requests in 1 hour. try again later."
-                    ):
-                        log.error("Rate limit exceeded")
-                        raise Error(
-                            source="ask",
-                            message=line.get("detail"),
-                            code=ErrorType.RATE_LIMIT_ERROR,
-                        )
-                    if line_detail.lower().startswith(
-                        "only one message at a time.",
-                    ):
-                        log.error("Prohibited concurrent query")
-                        raise Error(
-                            source="ask",
-                            message=line_detail,
-                            code=ErrorType.PROHIBITED_CONCURRENT_QUERY_ERROR,
-                        )
-                    if line_detail.lower() == "invalid_api_key":
-                        log.error("Invalid access token")
-                        raise Error(
-                            source="ask",
-                            message=line_detail,
-                            code=ErrorType.INVALID_REQUEST_ERROR,
-                        )
-                    if line_detail.lower() == "invalid_token":
-                        log.error("Invalid access token")
-                        raise Error(
-                            source="ask",
-                            message=line_detail,
-                            code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
-                        )
-                elif isinstance(line_detail, dict):
-                    if line_detail.get("code") == "invalid_jwt":
-                        log.error("Invalid access token")
-                        raise Error(
-                            source="ask",
-                            message=line_detail.get("message", "invalid_jwt"),
-                            code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
-                        )
-
+                log.error(response.text)
+                if response.status_code == 401:
+                    raise Error(
+                        source="ask",
+                        message="Permission denied",
+                        code=ErrorType.AUTHENTICATION_ERROR,
+                    )
+                if response.status_code == 403:
+                    raise Error(
+                        source="ask",
+                        message="Cloudflare triggered a 403 error",
+                        code=ErrorType.CLOUDFLARE_ERROR,
+                    )
+                if response.status_code == 429:
+                    raise Error(
+                        source="ask",
+                        message="Rate limit exceeded",
+                        code=ErrorType.RATE_LIMIT_ERROR,
+                    )
                 raise Error(
                     source="ask",
                     message=line,
