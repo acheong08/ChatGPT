@@ -21,6 +21,8 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > ### [Privacy policy](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
 
+> :warning: **Avoid untrusted servers**. It was discovered today that access tokens can also be used to call the paid API. If your token is logged, it could be easily abused and cost you money.
+
 </summary>
 
 ## Configuration
