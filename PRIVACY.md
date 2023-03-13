@@ -16,4 +16,6 @@ My bypass server does not contain any code to log and store data.
 
 # Future changes
 
-Opt in data collection will be added as an option and can be enabled if desired. This is part of an attempt to create a dataset for fine tuning open source LLMs towards chat functionality. It will **not** be enabled by default.
+Opt in data collection will be added as an option and can be enabled if desired **by the end users**. This is part of an attempt to create a dataset for fine tuning open source LLMs towards chat functionality. It will **not** be enabled by default.
+
+The bypass server itself will **never** log or collect your access tokens or conversations.
