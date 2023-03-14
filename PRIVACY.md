@@ -14,8 +14,24 @@ Version 1 requires a cloudflare bypass to access `chat.openai.com`. Therefore, i
 
 My bypass server does not contain any code to log and store data.
 
-# Future changes
+# Analytics
 
-Opt in data collection will be added as an option and can be enabled if desired **by the end users**. This is part of an attempt to create a dataset for fine tuning open source LLMs towards chat functionality. It will **not** be enabled by default.
+This is disabled by default. Set `collect_analytics` to `true` to enable it on V1.
 
-The bypass server itself will **never** log or collect your access tokens or conversations.
+## What will be collected
+
+- Conversation ID -- Train for longer conversations
+- Hashed access token (MD5) -- Used to identify and filter out abuse
+- Prompt and response -- Used for training the model
+
+## Why?
+
+- To train an open source model based on LLaMA
+
+## Who will have access to the data?
+
+- The prompt and response will be publicly available on GitHub along with the hashed conversation ID.
+
+## How long will the data be stored?
+
+- Once published on GitHub, the data will be stored indefinitely.
