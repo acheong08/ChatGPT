@@ -591,8 +591,6 @@ class Chatbot:
                 "parent_id": parent_id,
                 "model": model,
             }
-        if not done:
-            pass
         self.conversation_mapping[conversation_id] = parent_id
         if parent_id is not None:
             self.parent_id = parent_id
