@@ -65,9 +65,11 @@ https://chat.openai.com/api/auth/session
   "conversation_id": "UUID...",
   "parent_id": "UUID...",
   "proxy": "...",
-  "paid": false
+  "paid": false,
+  "collect_analytics": true
 }
 ```
+Analytics is disabled by default. Set `collect_analytics` to `true` to enable it.
 
 3. Save this as `$HOME/.config/revChatGPT/config.json`
 4. If you are using Windows, you will need to create an environment variable named ```HOME``` and set it to your home profile for the script to be able to locate the config.json file.

@@ -974,7 +974,8 @@ def main(config: dict) -> NoReturn:
         config,
         conversation_id=config.get("conversation_id"),
         parent_id=config.get("parent_id"),
-        collect_data=config.get("collect_analytics", False),
+        collect_data=config.get("collect_analytics")
+        or input("Allow analytics? (y/n) ") == "y",
     )
 
     def handle_commands(command: str) -> bool:
