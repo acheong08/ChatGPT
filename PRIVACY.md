@@ -16,7 +16,7 @@ My bypass server does not contain any code to log and store data.
 
 # Analytics
 
-This is disabled by default. Set `collect_analytics` to `true` to enable it on V1. 
+This is disabled by default. Set `collect_analytics` to `true` to enable it on V1.
 
 ## What will be collected
 
@@ -26,7 +26,7 @@ This is disabled by default. Set `collect_analytics` to `true` to enable it on V
 
 ## Why?
 
-- To train an open source model based on LLaMA 
+- To train an open source model based on LLaMA
 
 ## Who will have access to the data?
 
