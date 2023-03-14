@@ -9,7 +9,6 @@ import json
 import logging
 import os
 import os.path as osp
-import sys
 import time
 import uuid
 from functools import wraps
@@ -24,6 +23,7 @@ from OpenAIAuth import Error as AuthError
 
 from .utils import create_completer
 from .utils import create_session
+from .utils import DataCollector
 from .utils import get_input
 
 if __name__ == "__main__":
@@ -165,6 +165,7 @@ class Chatbot:
         parent_id: str | None = None,
         session_client=None,
         lazy_loading: bool = False,
+        collect_data: bool = False,
     ) -> None:
         """Initialize a chatbot
 
@@ -186,6 +187,7 @@ class Chatbot:
         Raises:
             Exception: _description_
         """
+        self.collect_data = collect_data
         user_home = getenv("HOME")
         if user_home is None:
             self.cache_path = osp.join(os.getcwd(), ".chatgpt_cache.json")
@@ -231,6 +233,15 @@ class Chatbot:
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
         self.lazy_loading = lazy_loading
+
+        if self.collect_data:
+            from hashlib import md5
+
+            # Get MD5 of access token
+            self.access_token_md5 = md5(
+                self.config["access_token"].encode(),
+            ).hexdigest()
+            self.data_collector = DataCollector(user=self.access_token_md5)
 
         self.__check_credentials()
 
@@ -509,6 +520,7 @@ class Chatbot:
             stream=True,
         )
         self.__check_response(response)
+        done: bool = False
         for line in response.iter_lines():
             # remove b' and ' at the beginning and end and ignore case
             line = str(line)[2:-1]
@@ -524,6 +536,7 @@ class Chatbot:
             if "data: " in line:
                 line = line[6:]
             if line == "[DONE]":
+                done = True
                 break
 
             line = line.replace('\\"', '"')
@@ -560,7 +573,7 @@ class Chatbot:
                     message=line,
                     code=ErrorType.SERVER_ERROR,
                 )
-            message = line["message"]["content"]["parts"][0]
+            message: str = line["message"]["content"]["parts"][0]
             if message == prompt:
                 continue
             conversation_id = line["conversation_id"]
@@ -573,16 +586,28 @@ class Chatbot:
             log.debug("Received conversation_id: %s", conversation_id)
             log.debug("Received parent_id: %s", parent_id)
             yield {
-                "message": message,
+                "message": message.strip("\n"),
                 "conversation_id": conversation_id,
                 "parent_id": parent_id,
                 "model": model,
             }
+        if not done:
+            pass
         self.conversation_mapping[conversation_id] = parent_id
         if parent_id is not None:
             self.parent_id = parent_id
         if conversation_id is not None:
             self.conversation_id = conversation_id
+        if self.collect_data:
+            self.data_collector.collect(
+                prompt=prompt,
+                message={
+                    "message": message,
+                    "conversation_id": conversation_id,
+                    "parent_id": parent_id,
+                    "model": model,
+                },
+            )
 
     @logger(is_timed=False)
     def __check_fields(self, data: dict) -> bool:
@@ -930,6 +955,16 @@ def configure():
     return config
 
 
+def exit():
+    """
+    Exit the program
+    """
+    import sys
+
+    print("Exiting program...")
+    sys.exit(0)
+
+
 @logger(is_timed=False)
 def main(config: dict) -> NoReturn:
     """
@@ -939,6 +974,7 @@ def main(config: dict) -> NoReturn:
         config,
         conversation_id=config.get("conversation_id"),
         parent_id=config.get("parent_id"),
+        collect_data=config.get("collect_analytics", False),
     )
 
     def handle_commands(command: str) -> bool:
@@ -982,7 +1018,7 @@ def main(config: dict) -> NoReturn:
                 )
                 print("Please include conversation UUID in command")
         elif command == "!exit":
-            sys.exit(0)
+            exit()
         else:
             return False
         return True
@@ -1010,8 +1046,7 @@ def main(config: dict) -> NoReturn:
             print(bcolors.ENDC)
             print()
     except (KeyboardInterrupt, EOFError):
-        print("Exiting...")
-        sys.exit(0)
+        exit()
 
 
 if __name__ == "__main__":
