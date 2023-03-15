@@ -16,6 +16,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 <summary>
 
 # V1 Standard ChatGPT
+⚠️ Warning: As of 2023/03/15 - OpenAi has deactivated some accounts using [V1](https://github.com/acheong08/ChatGPT/issues/1158). We recommend using V3 to avoid getting banned. 
 > Update 2023/03/10 11:00AM - Everything works
 > > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
 
