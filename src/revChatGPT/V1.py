@@ -234,6 +234,7 @@ class Chatbot:
         self.parent_id_prev_queue = []
         self.lazy_loading = lazy_loading
 
+        self.__check_credentials()
         if self.collect_data:
             from hashlib import md5
 
@@ -242,8 +243,6 @@ class Chatbot:
                 self.config["access_token"].encode(),
             ).hexdigest()
             self.data_collector = DataCollector(user=self.access_token_md5)
-
-        self.__check_credentials()
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
