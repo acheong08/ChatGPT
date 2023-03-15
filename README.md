@@ -27,7 +27,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 > :warning: **Avoid untrusted servers**. It was discovered today that access tokens can also be used to call the paid API. If your token is logged, it could be easily abused and cost you money.
 
-> !!! ## Server is now open source at https://github.com/acheong08/ChatGPT-Proxy-V4 for personal use (requires ChatGPT plus)
+> ### !!! Server is now open source at https://github.com/acheong08/ChatGPT-Proxy-V4 for personal use (requires ChatGPT plus)
 
 </summary>
 
