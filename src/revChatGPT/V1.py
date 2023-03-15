@@ -673,7 +673,7 @@ class Chatbot:
         return json.loads(response.text)
 
     @logger(is_timed=True)
-    def gen_title(self, convo_id: str, message_id: str) -> None:
+    def gen_title(self, convo_id: str, message_id: str) -> str:
         """
         Generate title for conversation
         """
@@ -684,6 +684,7 @@ class Chatbot:
             ),
         )
         self.__check_response(response)
+        return response.json().get("title", "Error generating title")
 
     @logger(is_timed=True)
     def change_title(self, convo_id: str, title: str) -> None:
