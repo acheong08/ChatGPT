@@ -496,14 +496,18 @@ class Chatbot:
                 {
                     "id": str(uuid.uuid4()),
                     "role": "user",
+                    "author": {"role": "user"},
                     "content": {"content_type": "text", "parts": [prompt]},
                 },
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": self.config.get("model") or "text-davinci-002-render-paid"
-            if self.config.get("paid")
-            else "text-davinci-002-render-sha",
+            "model": self.config.get("model")
+            or (
+                "text-davinci-002-render-paid"
+                if self.config.get("paid")
+                else "text-davinci-002-render-sha"
+            ),
         }
         log.debug("Sending the payload")
         log.debug(json.dumps(data, indent=2))
