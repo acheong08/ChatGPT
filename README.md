@@ -66,7 +66,8 @@ https://chat.openai.com/api/auth/session
   "parent_id": "UUID...",
   "proxy": "...",
   "paid": false,
-  "collect_analytics": true
+  "collect_analytics": true,
+  "model": "gpt-4"
 }
 ```
 Analytics is disabled by default. Set `collect_analytics` to `true` to enable it.
