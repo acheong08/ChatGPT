@@ -803,9 +803,12 @@ class AsyncChatbot(Chatbot):
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": "text-davinci-002-render-paid"
-            if self.config.get("paid")
-            else "text-davinci-002-render-sha",
+            "model": self.config.get("model")
+            or (
+                "text-davinci-002-render-paid"
+                if self.config.get("paid")
+                else "text-davinci-002-render-sha"
+            ),
         }
 
         self.conversation_id_prev_queue.append(
