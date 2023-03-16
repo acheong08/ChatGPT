@@ -258,7 +258,7 @@ class Chatbot:
             AuthError: _description_
         """
         if "access_token" in self.config:
-            self.__set_access_token(self.config["access_token"])
+            self.set_access_token(self.config["access_token"])
         elif "session_token" in self.config:
             pass
         elif "email" not in self.config or "password" not in self.config:
@@ -270,7 +270,7 @@ class Chatbot:
                 raise error
 
     @logger(is_timed=False)
-    def __set_access_token(self, access_token: str) -> None:
+    def set_access_token(self, access_token: str) -> None:
         """Set access token in request header and self.config, then cache it to file.
 
         Args:
@@ -414,7 +414,7 @@ class Chatbot:
             self.config["session_token"] = auth.session_token
             auth.get_access_token()
 
-        self.__set_access_token(auth.access_token)
+        self.set_access_token(auth.access_token)
 
     @logger(is_timed=True)
     def ask(
