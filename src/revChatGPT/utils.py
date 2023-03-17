@@ -114,7 +114,7 @@ class DataCollector:
             },
         }
         # Send request to server
-        response = requests.post(
+        requests.post(
             url="https://chatgpt-analytics.herokuapp.com/analytics/message",
             json=request,
             timeout=6,

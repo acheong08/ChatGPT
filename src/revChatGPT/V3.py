@@ -99,8 +99,11 @@ class Chatbot:
         """
         Get token count
         """
-        if self.engine not in ["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]:
-            raise NotImplementedError(f"Unsupported engine {str(self.engine)}")
+        if self.engine not in ["gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314"]:
+            raise NotImplementedError("Unsupported engine {self.engine}")
+
+        tiktoken.model.MODEL_PREFIX_TO_ENCODING["gpt-4-"] = "cl100k_base"
+        tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
 
         encoding = tiktoken.encoding_for_model(self.engine)
 
@@ -423,6 +426,11 @@ def main() -> NoReturn:
         default=None,
         help="Custom submit key for chatbot. For more information on keys, see README",
     )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="gpt-3.5-turbo",
+    )
 
     args = parser.parse_args()
 
@@ -442,6 +450,7 @@ def main() -> NoReturn:
             temperature=args.temperature,
             top_p=args.top_p,
             reply_count=args.reply_count,
+            engine=args.model,
         )
     # Check if internet is enabled
     if args.enable_internet:
