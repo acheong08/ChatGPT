@@ -430,6 +430,7 @@ def main() -> NoReturn:
         "--model",
         type=str,
         default="gpt-3.5-turbo",
+        choices=["gpt-3.5-turbo", "gpt-4"],
     )
 
     args = parser.parse_args()
