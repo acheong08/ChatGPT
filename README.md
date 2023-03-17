@@ -169,12 +169,15 @@ Get API key from https://platform.openai.com/account/api-keys
 
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
-
+    
 Type '!help' to show a full list of commands
 Press Esc followed by Enter or Alt+Enter to send a message.
 
-usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream] [--base_prompt BASE_PROMPT] [--proxy PROXY] [--top_p TOP_P]
-             [--reply_count REPLY_COUNT] [--enable_internet] [--config CONFIG] [--submit_key SUBMIT_KEY]
+usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream]
+             [--base_prompt BASE_PROMPT] [--proxy PROXY] [--top_p TOP_P]
+             [--reply_count REPLY_COUNT] [--enable_internet] [--config CONFIG]
+             [--submit_key SUBMIT_KEY]
+             [--model {gpt-3.5-turbo,gpt-4,gpt-4-32k}]
 
 options:
   -h, --help            show this help message and exit
@@ -192,6 +195,7 @@ options:
   --config CONFIG       Path to V3 config json file
   --submit_key SUBMIT_KEY
                         Custom submit key for chatbot. For more information on keys, see https://python-prompt-toolkit.readthedocs.io/en/stable/pages/advanced_topics/key_bindings.html#list-of-special-keys
+  --model {gpt-3.5-turbo,gpt-4,gpt-4-32k}
 ```
 
 ## Developer API
