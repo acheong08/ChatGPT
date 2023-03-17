@@ -12,6 +12,7 @@ import tiktoken
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input_async
+from . import typing as t
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -153,18 +154,19 @@ class Chatbot:
             async for line in response.aiter_lines():
                 if response.status_code == 429:
                     print("error: " + "Too many requests")
-                    raise Exception("Too many requests")
+                    error = t.RequestError("Too many requests")
+                    raise error
                 if response.status_code == 523:
                     print(
                         "error: "
                         + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
                     )
-                    raise Exception(
-                        "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
-                    )
+                    error = t.AuthenticationError("Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
+                    raise error
                 if response.status_code == 503:
                     print("error: " + "OpenAI error!")
-                    raise Exception("OpenAI error!")
+                    error = t.OpenAIError("OpenAI error!")
+                    raise error
                 if response.status_code != 200:
                     print(response.status_code)
                     print(line)

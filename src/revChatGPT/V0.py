@@ -7,6 +7,7 @@ import os
 import sys
 from datetime import date
 from typing import NoReturn
+from . import typing as t
 
 import openai
 import tiktoken
@@ -81,11 +82,14 @@ class Chatbot:
         user: str = "User",
     ) -> dict:
         if completion.get("choices") is None:
-            raise Exception("ChatGPT API returned no choices")
+            error = t.ChatbotError("ChatGPT API returned no choices")
+            raise error
         if len(completion["choices"]) == 0:
-            raise Exception("ChatGPT API returned no choices")
+            error = t.ChatbotError("ChatGPT API returned no choices")
+            raise error
         if completion["choices"][0].get("text") is None:
-            raise Exception("ChatGPT API returned no text")
+            error = t.ChatbotError("ChatGPT API returned no text")
+            raise error
         completion["choices"][0]["text"] = remove_suffix(
             completion["choices"][0]["text"],
             "<|im_end|>",
@@ -110,13 +114,16 @@ class Chatbot:
         full_response = ""
         for response in completion:
             if response.get("choices") is None:
-                raise Exception("ChatGPT API returned no choices")
+                error = t.ChatbotError("ChatGPT API returned no choices")
+                raise error
             if len(response["choices"]) == 0:
-                raise Exception("ChatGPT API returned no choices")
+                error = t.ChatbotError("ChatGPT API returned no choices")
+                raise error
             if response["choices"][0].get("finish_details") is not None:
                 break
             if response["choices"][0].get("text") is None:
-                raise Exception("ChatGPT API returned no text")
+                error = t.ChatbotError("ChatGPT API returned no text")
+                raise error
             if response["choices"][0]["text"] == "<|im_end|>":
                 break
             yield response["choices"][0]["text"]
