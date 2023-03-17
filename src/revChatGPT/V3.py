@@ -63,8 +63,6 @@ class Chatbot:
                 },
             ],
         }
-        if self.max_tokens > 4000:
-            raise Exception("Max tokens cannot be greater than 4000")
 
         if self.get_token_count("default") > self.max_tokens:
             raise Exception("System prompt is too long")
