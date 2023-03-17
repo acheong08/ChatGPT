@@ -97,7 +97,14 @@ class Chatbot:
         """
         Get token count
         """
-        if self.engine not in ["gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314"]:
+        if self.engine not in [
+            "gpt-3.5-turbo",
+            "gpt-3.5-turbo-0301",
+            "gpt-4",
+            "gpt-4-0314",
+            "gpt-4-32k",
+            "gpt-4-32k-0314",
+        ]:
             raise NotImplementedError("Unsupported engine {self.engine}")
 
         tiktoken.model.MODEL_PREFIX_TO_ENCODING["gpt-4-"] = "cl100k_base"
@@ -428,7 +435,7 @@ def main() -> NoReturn:
         "--model",
         type=str,
         default="gpt-3.5-turbo",
-        choices=["gpt-3.5-turbo", "gpt-4"],
+        choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
     )
 
     args = parser.parse_args()
