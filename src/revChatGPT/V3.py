@@ -27,7 +27,7 @@ class Chatbot:
         api_key: str,
         engine: str = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo",
         proxy: str = None,
-        max_tokens: int = 3000,
+        max_tokens: int = None,
         temperature: float = 0.5,
         top_p: float = 1.0,
         presence_penalty: float = 0.0,
@@ -42,7 +42,7 @@ class Chatbot:
         self.session = requests.Session()
         self.api_key = api_key
         self.system_prompt = system_prompt
-        self.max_tokens = max_tokens
+        self.max_tokens = max_tokens or (7000 if engine == "gpt-4" else 3000)
         self.temperature = temperature
         self.top_p = top_p
         self.presence_penalty = presence_penalty
