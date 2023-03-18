@@ -173,9 +173,8 @@ class Chatbot:
             stream=True,
         )
         if response.status_code != 200:
-
             error = t.APIConnectionError(
-                f"Error: {response.status_code} {response.reason} {response.text}",
+                f"{response.status_code} {response.reason} {response.text}",
             )
             raise error
         response_role: str = None

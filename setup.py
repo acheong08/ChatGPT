@@ -5,7 +5,7 @@ setup(
     name="revChatGPT",
     version="4.0.4",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
-    long_description=open("README.md", encoding="utf-8").read(),
+    long_description=open("README.md", "rt", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/acheong08/ChatGPT",
     project_urls={
@@ -26,10 +26,16 @@ setup(
         "prompt-toolkit",
         "tiktoken>=0.3.0",
     ],
+    extras_require={
+        "API": ["openai"]
+    },
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Intended Audience :: Developers",
+        "Intended Audience :: End Users/Desktop",
+        "Natural Language :: English",
         "Topic :: Software Development :: Libraries :: Python Modules",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
