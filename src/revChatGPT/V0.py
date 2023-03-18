@@ -7,10 +7,11 @@ import os
 import sys
 from datetime import date
 from typing import NoReturn
-from . import typing as t
 
 import openai
 import tiktoken
+
+from . import typing as t
 
 ENGINE = os.environ.get("GPT_ENGINE") or "text-davinci-003"
 

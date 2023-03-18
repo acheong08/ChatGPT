@@ -871,7 +871,9 @@ class AsyncChatbot(Chatbot):
         return data["items"]
 
     async def get_msg_history(
-        self, convo_id: str, encoding: str | None = "utf-8"
+        self,
+        convo_id: str,
+        encoding: str | None = "utf-8",
     ) -> dict:
         """
         Get message history

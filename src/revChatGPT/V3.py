@@ -6,11 +6,11 @@ import json
 import os
 import sys
 from typing import NoReturn
-from . import typing as t
 
 import requests
 import tiktoken
 
+from . import typing as t
 from .utils import create_completer
 from .utils import create_keybindings
 from .utils import create_session

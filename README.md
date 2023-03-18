@@ -169,7 +169,7 @@ Get API key from https://platform.openai.com/account/api-keys
 
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
-    
+
 Type '!help' to show a full list of commands
 Press Esc followed by Enter or Alt+Enter to send a message.
 

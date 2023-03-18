@@ -9,10 +9,10 @@ import sys
 import httpx
 import tiktoken
 
+from . import typing as t
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input_async
-from . import typing as t
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -161,7 +161,9 @@ class Chatbot:
                         "error: "
                         + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
                     )
-                    error = t.AuthenticationError("Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
+                    error = t.AuthenticationError(
+                        "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model."
+                    )
                     raise error
                 elif response.status_code == 503:
                     print("error: " + "OpenAI error!")
@@ -169,11 +171,15 @@ class Chatbot:
                     raise error
                 elif response.status_code >= 400 and response.status_code < 500:
                     print(f"Unknown error")
-                    error = t.APIConnectionError(f"Unrecognized HTTP status code: {response.status_code}")
+                    error = t.APIConnectionError(
+                        f"Unrecognized HTTP status code: {response.status_code}"
+                    )
                     raise error
                 elif response.status_code >= 500:
                     print(f"Unknown error")
-                    error = t.OpenAIError(f"HTTP status codes are not recognized due to OpenAI: {response.status_code}")
+                    error = t.OpenAIError(
+                        f"HTTP status codes are not recognized due to OpenAI: {response.status_code}"
+                    )
                 elif response.status_code != 200:
                     print(response.status_code)
                     print(line)
