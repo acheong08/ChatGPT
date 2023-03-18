@@ -26,7 +26,7 @@ def _headers(results: list) -> list:
     return [(result["href"], result["title"]) for result in results]
 
 
-def _compile_prompt(prompt: str, results: list, reply_in="undefined") -> str:
+def _compile_prompt(prompt: str, results: list, reply_in: str = "undefined") -> str:
     return f"""Web search results:
 
 {_prepare_results(results)}
@@ -44,7 +44,10 @@ def webify(
     timePeriod: str = "",
     region: str = "",
     reply_in: str = "undefined",
-):
+) -> tuple[str, list]:
+    """
+    Returns a tuple of (prompt, headers)
+    """
     searchResults = ddg(query, numResults, timePeriod, region)
     return _compile_prompt(text, searchResults, reply_in), _headers(searchResults)
 
@@ -72,16 +75,16 @@ def beatifyPlaintext(response: str, headers: list) -> str:
 class WebChatbot(V1.Chatbot):
     def webAsk(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,  # default Ask parameters
-        query=None,
-        numResults=3,
+        prompt: str,
+        conversation_id: str = None,
+        parent_id: str = None,
+        timeout: int = 360,  # default Ask parameters
+        query: str = None,
+        numResults: int = 3,
         timePeriod: str = "",
         region: str = "",
         reply_in: str = "undefined",  # Webify parameters
-    ):
+    ) -> tuple[dict, list]:
         """
         Ask a question to the chatbot, but providing search results for query (if not specified, prompt is used)
         Keep in mind: this one, unlike all the other asks, returns tuple
@@ -100,16 +103,16 @@ class WebChatbot(V1.Chatbot):
 
     def webAskPlaintext(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,  # default Ask parameters
-        query=None,
-        numResults=3,
+        prompt: str,
+        conversation_id: str = None,
+        parent_id: str = None,
+        timeout: int = 360,  # default Ask parameters
+        query: str = None,
+        numResults: int = 3,
         timePeriod: str = "",
         region: str = "",
         reply_in: str = "undefined",  # Webify parameters
-    ):
+    ) -> tuple[dict, list]:
         """
         Ask a question to the chatbot, but providing search results for query (if not specified, prompt is used)
         Returns message adapted for plaintext
@@ -129,16 +132,16 @@ class WebChatbot(V1.Chatbot):
 
     def webAskMarkdown(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,  # default Ask parameters
-        query=None,
-        numResults=3,
+        prompt: str,
+        conversation_id: str = None,
+        parent_id: str = None,
+        timeout: int = 360,  # default Ask parameters
+        query: str = None,
+        numResults: int = 3,
         timePeriod: str = "",
         region: str = "",
         reply_in: str = "undefined",  # Webify parameters
-    ):
+    ) -> tuple[dict, list]:
         """
         Ask a question to the chatbot, but providing search results for query (if not specified, prompt is used)
         Returns message adapted for markdown
@@ -160,16 +163,16 @@ class WebChatbot(V1.Chatbot):
 class WebAsyncChatbot(V1.AsyncChatbot):
     async def webAsk(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,  # default Ask parameters
-        query=None,
-        numResults=3,
+        prompt: str,
+        conversation_id: str = None,
+        parent_id: str = None,
+        timeout: int = 360,  # default Ask parameters
+        query: str = None,
+        numResults: int = 3,
         timePeriod: str = "",
         region: str = "",
         reply_in: str = "undefined",  # Webify parameters
-    ):
+    ) -> tuple[dict, list]:
         """
         Ask a question to the chatbot, but providing search results for query (if not specified, prompt is used)
         Keep in mind: this one, unlike all the other asks, returns tuple
@@ -188,16 +191,16 @@ class WebAsyncChatbot(V1.AsyncChatbot):
 
     async def webAskPlaintext(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,  # default Ask parameters
-        query=None,
-        numResults=3,
+        prompt: str,
+        conversation_id: str = None,
+        parent_id: str = None,
+        timeout: int = 360,  # default Ask parameters
+        query: str = None,
+        numResults: int = 3,
         timePeriod: str = "",
         region: str = "",
         reply_in: str = "undefined",  # Webify parameters
-    ):
+    ) -> tuple[dict, list]:
         """
         Ask a question to the chatbot, but providing search results for query (if not specified, prompt is used)
         Returns message adapted for plaintext
@@ -217,16 +220,16 @@ class WebAsyncChatbot(V1.AsyncChatbot):
 
     async def webAskMarkdown(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,  # default Ask parameters
-        query=None,
-        numResults=3,
+        prompt: str,
+        conversation_id: str = None,
+        parent_id: str = None,
+        timeout: int = 360,  # default Ask parameters
+        query: str = None,
+        numResults: int = 3,
         timePeriod: str = "",
         region: str = "",
         reply_in: str = "undefined",  # Webify parameters
-    ):
+    ) -> tuple[dict, list]:
         """
         Ask a question to the chatbot, but providing search results for query (if not specified, prompt is used)
         Returns message adapted for markdown

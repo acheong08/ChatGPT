@@ -121,7 +121,7 @@ class Chatbot:
     def __init__(
         self,
         api_key: str,
-        proxy=None,
+        proxy: dict[str][str] = None,
     ) -> None:
         self.proxy = proxy
         self.api_key: str = api_key

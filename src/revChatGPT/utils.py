@@ -19,7 +19,7 @@ def create_keybindings(key: str = "c-@") -> KeyBindings:
     """
 
     @bindings.add(key)
-    def _(event):
+    def _(event: dict) -> None:
         event.app.exit(result=event.app.current_buffer.text)
 
     return bindings
@@ -36,7 +36,7 @@ def create_completer(commands: list, pattern_str: str = "$") -> WordCompleter:
 def get_input(
     session: PromptSession = None,
     completer: WordCompleter = None,
-    key_bindings=None,
+    key_bindings: KeyBindings = None,
 ) -> str:
     """
     Multiline input function.
@@ -71,7 +71,7 @@ async def get_input_async(
     )
 
 
-def get_filtered_keys_from_object(obj: object, *keys: str) -> Set[str]:
+def get_filtered_keys_from_object(obj: object, *keys: str) -> set[str]:
     """
     Get filtered list of object variable names.
     :param keys: List of keys to include. If the first key is "not", the remaining keys will be removed from the class keys.
@@ -101,7 +101,7 @@ class DataCollector:
     def __init__(self, user: str) -> None:
         self.user = user
 
-    def collect(self, prompt: str, message: dict):
+    def collect(self, prompt: str, message: dict) -> None:
         """
         Add message to conversation.
         """

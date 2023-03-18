@@ -423,7 +423,7 @@ class Chatbot:
         conversation_id: str | None = None,
         parent_id: str | None = None,
         timeout: float = 360,
-    ):
+    ) -> str:
         """Ask a question to the chatbot
         Args:
             prompt (str): The question
@@ -644,7 +644,7 @@ class Chatbot:
         offset: int = 0,
         limit: int = 20,
         encoding: str | None = None,
-    ):
+    ) -> list:
         """
         Get conversations
         :param offset: Integer
@@ -659,7 +659,7 @@ class Chatbot:
         return data["items"]
 
     @logger(is_timed=True)
-    def get_msg_history(self, convo_id: str, encoding: str | None = None):
+    def get_msg_history(self, convo_id: str, encoding: str | None = None) -> list:
         """
         Get message history
         :param id: UUID of conversation
@@ -752,9 +752,9 @@ class AsyncChatbot(Chatbot):
 
     def __init__(
         self,
-        config,
-        conversation_id=None,
-        parent_id=None,
+        config: dict,
+        conversation_id: str | None = None,
+        parent_id: str | None = None,
     ) -> None:
         super().__init__(
             config=config,
@@ -765,11 +765,11 @@ class AsyncChatbot(Chatbot):
 
     async def ask(
         self,
-        prompt,
-        conversation_id=None,
-        parent_id=None,
-        timeout=360,
-    ):
+        prompt: str,
+        conversation_id: str | None = None,
+        parent_id: str | None = None,
+        timeout: int = 360,
+    ) -> dict:
         """
         Ask a question to the chatbot
         """
@@ -858,7 +858,7 @@ class AsyncChatbot(Chatbot):
             if conversation_id is not None:
                 self.conversation_id = conversation_id
 
-    async def get_conversations(self, offset=0, limit=20):
+    async def get_conversations(self, offset: int = 0, limit: int = 20) -> list:
         """
         Get conversations
         :param offset: Integer
@@ -870,7 +870,9 @@ class AsyncChatbot(Chatbot):
         data = json.loads(response.text)
         return data["items"]
 
-    async def get_msg_history(self, convo_id, encoding="utf-8"):
+    async def get_msg_history(
+        self, convo_id: str, encoding: str | None = "utf-8"
+    ) -> dict:
         """
         Get message history
         :param id: UUID of conversation
@@ -881,6 +883,7 @@ class AsyncChatbot(Chatbot):
             response.encoding = encoding
             self.__check_response(response)
             return json.loads(response.text)
+        return None
 
     async def gen_title(self, convo_id: str, message_id: str) -> None:
         """
@@ -943,7 +946,7 @@ get_input = logger(is_timed=False)(get_input)
 
 
 @logger(is_timed=False)
-def configure():
+def configure() -> dict:
     """
     Looks for a config file in the following locations:
     """
@@ -962,7 +965,7 @@ def configure():
     return config
 
 
-def exit():
+def exit() -> NoReturn:
     """
     Exit the program
     """
