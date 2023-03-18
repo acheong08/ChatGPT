@@ -26,9 +26,6 @@ setup(
         "prompt-toolkit",
         "tiktoken>=0.3.0",
     ],
-    extras_require={
-        "API": ["openai"]
-    },
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Intended Audience :: Developers",
