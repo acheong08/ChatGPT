@@ -58,7 +58,7 @@ class Chatbot:
         prompt: str,
         temperature: float = 0.5,
         stream: bool = False,
-    ):
+    ) -> dict:
         """
         Get the completion function
         """
@@ -183,7 +183,7 @@ class Chatbot:
         """
         self.prompt.chat_history = []
 
-    def load_conversation(self, conversation_id) -> None:
+    def load_conversation(self, conversation_id: str) -> None:
         """
         Load a conversation from the conversation history
         """
@@ -192,7 +192,7 @@ class Chatbot:
             self.make_conversation(conversation_id)
         self.prompt.chat_history = self.conversations.get_conversation(conversation_id)
 
-    def save_conversation(self, conversation_id) -> None:
+    def save_conversation(self, conversation_id: str) -> None:
         """
         Save a conversation to the conversation history
         """
@@ -209,7 +209,7 @@ class AsyncChatbot(Chatbot):
         prompt: str,
         temperature: float = 0.5,
         stream: bool = False,
-    ):
+    ) -> dict:
         """
         Get the completion function
         """
@@ -334,8 +334,7 @@ class Prompt:
                 return prompt
             self.chat_history.pop(0)
             # Construct prompt again
-            prompt = self.construct_prompt(new_prompt, custom_history, user)
-        return prompt
+        return self.construct_prompt(new_prompt, custom_history, user)
 
 
 class Conversation:
@@ -395,7 +394,7 @@ def main() -> NoReturn:
     print("Type '!help' to show a full list of commands")
     print("Press enter twice to submit your question.\n")
 
-    def get_input(prompt):
+    def get_input(prompt: str) -> str:
         """
         Multi-line input function
         """
@@ -413,10 +412,7 @@ def main() -> NoReturn:
             lines.append(line)
 
         # Join the lines, separated by newlines, and store the result
-        user_input = "\n".join(lines)
-
-        # Return the input
-        return user_input
+        return "\n".join(lines)
 
     def chatbot_commands(cmd: str) -> bool:
         """
