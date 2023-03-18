@@ -21,6 +21,7 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
+from . import typing as t
 from .utils import create_completer
 from .utils import create_session
 from .utils import DataCollector
@@ -89,36 +90,6 @@ class ErrorType:
     PROHIBITED_CONCURRENT_QUERY_ERROR = 6
     AUTHENTICATION_ERROR = 7
     CLOUDFLARE_ERROR = 8
-
-
-class Error(Exception):
-    """
-    Base class for exceptions in this module.
-    Error codes:
-    -1: User error
-    0: Unknown error
-    1: Server error
-    2: Rate limit error
-    3: Invalid request error
-    4: Expired access token error
-    5: Invalid access token error
-    6: Prohibited concurrent query error
-    """
-
-    source: str
-    message: str
-    code: int
-
-    def __init__(self, source: str, message: str, code: int = 0) -> None:
-        self.source = source
-        self.message = message
-        self.code = code
-
-    def __str__(self) -> str:
-        return f"{self.source}: {self.message} (code: {self.code})"
-
-    def __repr__(self) -> str:
-        return f"{self.source}: {self.message} (code: {self.code})"
 
 
 class colors:
@@ -205,7 +176,7 @@ class Chatbot:
             cached_access_token = self.__get_cached_access_token(
                 self.config.get("email", None),
             )
-        except Error as error:
+        except t.Error as error:
             if error.code == 5:
                 raise error
             cached_access_token = None
@@ -214,7 +185,8 @@ class Chatbot:
 
         if "proxy" in config:
             if not isinstance(config["proxy"], str):
-                raise Exception("Proxy must be a string!")
+                error = TypeError("Proxy must be a string!")
+                raise error
             proxies = {
                 "http": config["proxy"],
                 "https": config["proxy"],
@@ -262,7 +234,8 @@ class Chatbot:
         elif "session_token" in self.config:
             pass
         elif "email" not in self.config or "password" not in self.config:
-            raise Exception("Insufficient login details provided!")
+            error = t.AuthenticationError("Insufficient login details provided!")
+            raise error
         if "access_token" not in self.config:
             try:
                 self.login()
@@ -329,25 +302,28 @@ class Chatbot:
                 d_access_token = base64.b64decode(s_access_token[1])
                 d_access_token = json.loads(d_access_token)
             except base64.binascii.Error:
-                raise Error(
+                error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
                     code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
-                ) from None
+                )
+                raise error from None
             except json.JSONDecodeError:
-                raise Error(
+                error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
                     code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
-                ) from None
+                )
+                raise error from None
 
             exp = d_access_token.get("exp", None)
             if exp is not None and exp < time.time():
-                raise Error(
+                error = t.Error(
                     source="__get_cached_access_token",
                     message="Access token expired",
                     code=ErrorType.EXPIRED_ACCESS_TOKEN_ERROR,
                 )
+                raise error
 
         return access_token
 
@@ -444,11 +420,12 @@ class Chatbot:
 
         if parent_id is not None and conversation_id is None:
             log.error("conversation_id must be set once parent_id is set")
-            raise Error(
+            error = t.Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
                 code=ErrorType.USER_ERROR,
             )
+            raise error
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             log.debug("Updating to new conversation by setting parent_id to None")
@@ -529,11 +506,12 @@ class Chatbot:
             line = str(line)[2:-1]
             if line.lower() == "internal server error":
                 log.error("Internal Server Error: %s", line)
-                raise Error(
+                error = t.Error(
                     source="ask",
                     message="Internal Server Error",
                     code=ErrorType.SERVER_ERROR,
                 )
+                raise error
             if line == "" or line is None:
                 continue
             if "data: " in line:
@@ -554,28 +532,33 @@ class Chatbot:
                 log.error("Field missing", exc_info=True)
                 log.error(response.text)
                 if response.status_code == 401:
-                    raise Error(
+                    error = t.Error(
                         source="ask",
                         message="Permission denied",
                         code=ErrorType.AUTHENTICATION_ERROR,
                     )
-                if response.status_code == 403:
-                    raise Error(
+                    raise error
+                elif response.status_code == 403:
+                    error = t.Error(
                         source="ask",
                         message="Cloudflare triggered a 403 error",
                         code=ErrorType.CLOUDFLARE_ERROR,
                     )
-                if response.status_code == 429:
-                    raise Error(
+                    raise error
+                elif response.status_code == 429:
+                   error = t.Error(
                         source="ask",
                         message="Rate limit exceeded",
                         code=ErrorType.RATE_LIMIT_ERROR,
                     )
-                raise Error(
-                    source="ask",
-                    message=line,
-                    code=ErrorType.SERVER_ERROR,
-                )
+                   raise error
+                else:
+                    error = t.Error(
+                        source="ask",
+                        message=line,
+                        code=ErrorType.SERVER_ERROR,
+                    )
+                    raise error
             message: str = line["message"]["content"]["parts"][0]
             if message == prompt:
                 continue
@@ -632,11 +615,12 @@ class Chatbot:
         """
         if response.status_code != 200:
             print(response.text)
-            raise Error(
+            error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
+            raise error
 
     @logger(is_timed=True)
     def get_conversations(
@@ -774,11 +758,12 @@ class AsyncChatbot(Chatbot):
         Ask a question to the chatbot
         """
         if parent_id is not None and conversation_id is None:
-            raise Error(
+            error = t.Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
                 code=ErrorType.SERVER_ERROR,
             )
+            raise error
 
         if conversation_id is not None and conversation_id != self.conversation_id:
             self.parent_id = None

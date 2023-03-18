@@ -9,7 +9,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > Make a pull request and fix my bad code.
 
 # Installation
-`pip3 install --upgrade revChatGPT`
+`python -m pip install --upgrade revChatGPT`
 
 <details>
 
