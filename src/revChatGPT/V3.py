@@ -6,6 +6,7 @@ import json
 import os
 import sys
 from typing import NoReturn
+from . import typing as t
 
 import requests
 import tiktoken
@@ -65,7 +66,8 @@ class Chatbot:
         }
 
         if self.get_token_count("default") > self.max_tokens:
-            raise Exception("System prompt is too long")
+            error = t.ChatbotError("System prompt is too long")
+            raise error
 
     def add_to_conversation(
         self,
@@ -105,7 +107,8 @@ class Chatbot:
             "gpt-4-32k",
             "gpt-4-32k-0314",
         ]:
-            raise NotImplementedError("Unsupported engine {self.engine}")
+            error = NotImplementedError("Unsupported engine {self.engine}")
+            raise error
 
         tiktoken.model.MODEL_PREFIX_TO_ENCODING["gpt-4-"] = "cl100k_base"
         tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
@@ -170,9 +173,11 @@ class Chatbot:
             stream=True,
         )
         if response.status_code != 200:
-            raise Exception(
+
+            error = t.APIConnectionError(
                 f"Error: {response.status_code} {response.reason} {response.text}",
             )
+            raise error
         response_role: str = None
         full_response: str = ""
         for line in response.iter_lines():

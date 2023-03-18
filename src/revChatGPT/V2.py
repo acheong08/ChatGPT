@@ -12,6 +12,7 @@ import tiktoken
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input_async
+from . import typing as t
 
 ENCODER = tiktoken.get_encoding("gpt2")
 
@@ -153,19 +154,27 @@ class Chatbot:
             async for line in response.aiter_lines():
                 if response.status_code == 429:
                     print("error: " + "Too many requests")
-                    raise Exception("Too many requests")
-                if response.status_code == 523:
+                    error = t.RequestError("Too many requests")
+                    raise error
+                elif response.status_code == 523:
                     print(
                         "error: "
                         + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
                     )
-                    raise Exception(
-                        "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
-                    )
-                if response.status_code == 503:
+                    error = t.AuthenticationError("Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
+                    raise error
+                elif response.status_code == 503:
                     print("error: " + "OpenAI error!")
-                    raise Exception("OpenAI error!")
-                if response.status_code != 200:
+                    error = t.OpenAIError("OpenAI error!")
+                    raise error
+                elif response.status_code >= 400 and response.status_code < 500:
+                    print(f"Unknown error")
+                    error = t.APIConnectionError(f"Unrecognized HTTP status code: {response.status_code}")
+                    raise error
+                elif response.status_code >= 500:
+                    print(f"Unknown error")
+                    error = t.OpenAIError(f"HTTP status codes are not recognized due to OpenAI: {response.status_code}")
+                elif response.status_code != 200:
                     print(response.status_code)
                     print(line)
                     # raise Exception("Unknown error")
