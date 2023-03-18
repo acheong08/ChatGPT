@@ -156,18 +156,25 @@ class Chatbot:
                     print("error: " + "Too many requests")
                     error = t.RequestError("Too many requests")
                     raise error
-                if response.status_code == 523:
+                elif response.status_code == 523:
                     print(
                         "error: "
                         + "Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.",
                     )
                     error = t.AuthenticationError("Origin is unreachable. Ensure that you are authenticated and are using the correct pricing model.")
                     raise error
-                if response.status_code == 503:
+                elif response.status_code == 503:
                     print("error: " + "OpenAI error!")
                     error = t.OpenAIError("OpenAI error!")
                     raise error
-                if response.status_code != 200:
+                elif response.status_code >= 400 and response.status_code < 500:
+                    print(f"Unknown error")
+                    error = t.APIConnectionError(f"Unrecognized HTTP status code: {response.status_code}")
+                    raise error
+                elif response.status_code >= 500:
+                    print(f"Unknown error")
+                    error = t.OpenAIError(f"HTTP status codes are not recognized due to OpenAI: {response.status_code}")
+                elif response.status_code != 200:
                     print(response.status_code)
                     print(line)
                     # raise Exception("Unknown error")
