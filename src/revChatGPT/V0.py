@@ -489,6 +489,9 @@ def main() -> NoReturn:
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
+        except BaseException as e:
+            error = t.CommandError("command line program unknown error")
+            raise error from e
         if prompt.startswith("!") and chatbot_commands(prompt):
             continue
         if not args.stream:

@@ -18,6 +18,9 @@ class ChatbotError(Exception, metaclass=ABCMeta):
             super().add_note("Project URL: https://github.com/acheong08/ChatGPT")
         super().__init__(*args)
 
+class CommandError(ChatbotError):
+    pass
+
 class Error(ChatbotError):
     """
     Base class for exceptions in V1 module.
