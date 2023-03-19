@@ -314,6 +314,9 @@ async def main() -> None:
     except KeyboardInterrupt:
         print("Exiting...")
         sys.exit(0)
+    except BaseException as e:
+        error = t.CommandError("command line program unknown error")
+        raise error from e
 
 
 if __name__ == "__main__":
