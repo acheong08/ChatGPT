@@ -77,50 +77,7 @@ def logger(is_timed: bool):
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.duti.tech/api/"
 
-
-class ErrorType:
-    # define consts for the error codes
-    USER_ERROR = -1
-    UNKNOWN_ERROR = 0
-    SERVER_ERROR = 1
-    RATE_LIMIT_ERROR = 2
-    INVALID_REQUEST_ERROR = 3
-    EXPIRED_ACCESS_TOKEN_ERROR = 4
-    INVALID_ACCESS_TOKEN_ERROR = 5
-    PROHIBITED_CONCURRENT_QUERY_ERROR = 6
-    AUTHENTICATION_ERROR = 7
-    CLOUDFLARE_ERROR = 8
-
-
-class colors:
-    """
-    Colors for printing
-    """
-
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-
-    def __init__(self) -> None:
-        if getenv("NO_COLOR"):
-            self.HEADER = ""
-            self.OKBLUE = ""
-            self.OKCYAN = ""
-            self.OKGREEN = ""
-            self.WARNING = ""
-            self.FAIL = ""
-            self.ENDC = ""
-            self.BOLD = ""
-            self.UNDERLINE = ""
-
-
-bcolors = colors()
+bcolors = t.colors()
 
 
 class Chatbot:
@@ -305,14 +262,14 @@ class Chatbot:
                 error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
-                    code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
+                    code=t.ErrorType.INVALID_ACCESS_TOKEN_ERROR,
                 )
                 raise error from None
             except json.JSONDecodeError:
                 error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
-                    code=ErrorType.INVALID_ACCESS_TOKEN_ERROR,
+                    code=t.ErrorType.INVALID_ACCESS_TOKEN_ERROR,
                 )
                 raise error from None
 
@@ -321,7 +278,7 @@ class Chatbot:
                 error = t.Error(
                     source="__get_cached_access_token",
                     message="Access token expired",
-                    code=ErrorType.EXPIRED_ACCESS_TOKEN_ERROR,
+                    code=t.ErrorType.EXPIRED_ACCESS_TOKEN_ERROR,
                 )
                 raise error
 
@@ -423,7 +380,7 @@ class Chatbot:
             error = t.Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
-                code=ErrorType.USER_ERROR,
+                code=t.ErrorType.USER_ERROR,
             )
             raise error
 
@@ -509,7 +466,7 @@ class Chatbot:
                 error = t.Error(
                     source="ask",
                     message="Internal Server Error",
-                    code=ErrorType.SERVER_ERROR,
+                    code=t.ErrorType.SERVER_ERROR,
                 )
                 raise error
             if line == "" or line is None:
@@ -535,28 +492,28 @@ class Chatbot:
                     error = t.Error(
                         source="ask",
                         message="Permission denied",
-                        code=ErrorType.AUTHENTICATION_ERROR,
+                        code=t.ErrorType.AUTHENTICATION_ERROR,
                     )
                     raise error
                 elif response.status_code == 403:
                     error = t.Error(
                         source="ask",
                         message="Cloudflare triggered a 403 error",
-                        code=ErrorType.CLOUDFLARE_ERROR,
+                        code=t.ErrorType.CLOUDFLARE_ERROR,
                     )
                     raise error
                 elif response.status_code == 429:
                    error = t.Error(
                         source="ask",
                         message="Rate limit exceeded",
-                        code=ErrorType.RATE_LIMIT_ERROR,
+                        code=t.ErrorType.RATE_LIMIT_ERROR,
                     )
                    raise error
                 else:
                     error = t.Error(
                         source="ask",
                         message=line,
-                        code=ErrorType.SERVER_ERROR,
+                        code=t.ErrorType.SERVER_ERROR,
                     )
                     raise error
             message: str = line["message"]["content"]["parts"][0]
@@ -761,7 +718,7 @@ class AsyncChatbot(Chatbot):
             error = t.Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
-                code=ErrorType.SERVER_ERROR,
+                code=t.ErrorType.SERVER_ERROR,
             )
             raise error
 
