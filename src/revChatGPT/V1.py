@@ -24,7 +24,6 @@ from OpenAIAuth import Error as AuthError
 from . import typing as t
 from .utils import create_completer
 from .utils import create_session
-from .utils import DataCollector
 from .utils import get_input
 
 if __name__ == "__main__":
@@ -93,7 +92,6 @@ class Chatbot:
         parent_id: str | None = None,
         session_client=None,
         lazy_loading: bool = False,
-        collect_data: bool = False,
     ) -> None:
         """Initialize a chatbot
 
@@ -115,7 +113,6 @@ class Chatbot:
         Raises:
             Exception: _description_
         """
-        self.collect_data = collect_data
         user_home = getenv("HOME")
         if user_home is None:
             self.cache_path = osp.join(os.getcwd(), ".chatgpt_cache.json")
@@ -164,14 +161,6 @@ class Chatbot:
         self.lazy_loading = lazy_loading
 
         self.__check_credentials()
-        if self.collect_data:
-            from hashlib import md5
-
-            # Get MD5 of access token
-            self.access_token_md5 = md5(
-                self.config["access_token"].encode(),
-            ).hexdigest()
-            self.data_collector = DataCollector(user=self.access_token_md5)
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
@@ -541,16 +530,6 @@ class Chatbot:
             self.parent_id = parent_id
         if conversation_id is not None:
             self.conversation_id = conversation_id
-        if self.collect_data:
-            self.data_collector.collect(
-                prompt=prompt,
-                message={
-                    "message": message,
-                    "conversation_id": conversation_id,
-                    "parent_id": parent_id,
-                    "model": model,
-                },
-            )
 
     @logger(is_timed=False)
     def __check_fields(self, data: dict) -> bool:
@@ -928,8 +907,6 @@ def main(config: dict) -> NoReturn:
         config,
         conversation_id=config.get("conversation_id"),
         parent_id=config.get("parent_id"),
-        collect_data=config.get("collect_analytics")
-        or input("Allow analytics? (y/n) ") == "y",
     )
 
     def handle_commands(command: str) -> bool:
