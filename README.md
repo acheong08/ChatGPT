@@ -18,15 +18,10 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
 # V1 Standard ChatGPT
 ⚠️ Warning: As of 2023/03/15 - [OpenAI has deactivated some accounts using V1](https://github.com/acheong08/ChatGPT/issues/1158). We recommend using V3 to avoid getting banned.
-> Update 2023/03/10 11:00AM - Everything works
 > > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
 
 > ### [Privacy policy](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
 > <br>
->
-> #### [Discussion regarding data collection](https://github.com/acheong08/ChatGPT/discussions/1147)
-
-> :warning: **Avoid untrusted servers**. It was discovered today that access tokens can also be used to call the paid API. If your token is logged, it could be easily abused and cost you money.
 
 > ### !!! Server is now open source at https://github.com/acheong08/ChatGPT-Proxy-V4 for personal use (requires ChatGPT plus)
 
