@@ -28,6 +28,7 @@ class Chatbot:
         api_key: str,
         engine: str = os.environ.get("GPT_ENGINE") or "gpt-3.5-turbo",
         proxy: str = None,
+        timeout: float = None,
         max_tokens: int = None,
         temperature: float = 0.5,
         top_p: float = 1.0,
@@ -49,6 +50,7 @@ class Chatbot:
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
         self.reply_count = reply_count
+        self.timeout = timeout
 
         if proxy:
             self.session.proxies = {
@@ -170,6 +172,7 @@ class Chatbot:
                 "user": role,
                 "max_tokens": self.get_max_tokens(convo_id=convo_id),
             },
+            timeout=kwargs.get('timeout', self.timeout),
             stream=True,
         )
         if response.status_code != 200:
