@@ -223,7 +223,11 @@ If you have a cool project you want added to the list, open an issue.
 
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me.
 
-# Credits
 
-- [virtualharby](https://twitter.com/virtualharby) - Memes for emotional support
-- [All contributors](https://github.com/acheong08/ChatGPT/graphs/contributors) - Pull requests
+## Contributors
+
+This project exists thanks to all the people who contribute.
+
+ <a href="https://github.com/acheong08/ChatGPT/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=acheong08/ChatGPT" />
+ </a>
