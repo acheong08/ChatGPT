@@ -227,6 +227,10 @@ This is not an official OpenAI product. This is a personal project and is not af
 
 This project exists thanks to all the people who contribute.
 
- <a href="https://github.com/acheong08/ChatGPT/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=acheong08/ChatGPT" />
- </a>
+<a href="https://github.com/acheong08/ChatGPT/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=acheong08/ChatGPT" />
+</a>
+
+## Additional credits
+
+- Coding while listening to [this amazing song](https://www.youtube.com/watch?v=VaMR_xDhsGg) by [virtualharby](https://www.youtube.com/@virtualharby)
