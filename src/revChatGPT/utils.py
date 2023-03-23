@@ -1,7 +1,6 @@
 import re
 from typing import Set
 
-import requests
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
