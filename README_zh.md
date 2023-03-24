@@ -170,7 +170,7 @@ print(response)
 
 从 https://platform.openai.com/account/api-keys 获取API-key
 
-## Command line
+## 命令行程序
 ```
 python3 -m revChatGPT.V3 --api_key <api_key>
 ```
