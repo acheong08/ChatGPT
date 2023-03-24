@@ -66,7 +66,7 @@ https://chat.openai.com/api/auth/session
 }
 ```
 
-- Optional configuration:
+#### - Optional configuration:
 
 ```json
 {

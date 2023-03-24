@@ -68,7 +68,7 @@ https://chat.openai.com/api/auth/session
 }
 ```
 
-- 可选配置：
+#### - 可选配置：
 
 ```json
 {
