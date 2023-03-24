@@ -42,7 +42,7 @@ python -m pip install --upgrade revChatGPT
 2. Save your email and password
 
 ### Authentication method: (Choose 1)
-- Email/Password
+#### - Email/Password
 Not supported for Google/Microsoft accounts
 ```json
 {
@@ -50,7 +50,7 @@ Not supported for Google/Microsoft accounts
   "password": "your password"
 }
 ```
-- Session token
+#### - Session token
 Comes from cookies on chat.openai.com as "__Secure-next-auth.session-token"
 
 ```json
@@ -58,7 +58,7 @@ Comes from cookies on chat.openai.com as "__Secure-next-auth.session-token"
   "session_token": "..."
 }
 ```
-- Access token
+#### - Access token
 https://chat.openai.com/api/auth/session
 ```json
 {
