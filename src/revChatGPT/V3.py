@@ -44,7 +44,8 @@ class Chatbot:
         self.session = requests.Session()
         self.api_key = api_key
         self.system_prompt = system_prompt
-        self.max_tokens = max_tokens or (7000 if engine == "gpt-4" else 3000)
+        self.max_tokens = max_tokens or (7000 if engine == "gpt-4" else 4000)
+        self.truncate_limit = 3500
         self.temperature = temperature
         self.top_p = top_p
         self.presence_penalty = presence_penalty
@@ -88,7 +89,7 @@ class Chatbot:
         """
         while True:
             if (
-                self.get_token_count(convo_id) > self.max_tokens
+                self.get_token_count(convo_id) > self.truncate_limit
                 and len(self.conversation[convo_id]) > 1
             ):
                 # Don't remove the first message
