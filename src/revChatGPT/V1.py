@@ -74,7 +74,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.duti.tech/api/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.churchless.tech/api/"
 
 bcolors = t.colors()
 
@@ -492,12 +492,12 @@ class Chatbot:
                     )
                     raise error
                 elif response.status_code == 429:
-                   error = t.Error(
+                    error = t.Error(
                         source="ask",
                         message="Rate limit exceeded",
                         code=t.ErrorType.RATE_LIMIT_ERROR,
                     )
-                   raise error
+                    raise error
                 else:
                     error = t.Error(
                         source="ask",
