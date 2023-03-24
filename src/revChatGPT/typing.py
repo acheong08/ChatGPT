@@ -21,6 +21,9 @@ class ChatbotError(Exception, metaclass=ABCMeta):
         super().__init__(*args)
 
 class MetaNotAllowInstance(type):
+    """
+    Metaclasses that do not allow classes to be instantiated
+    """
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         error = ChatbotError("This class is not allowed to be instantiated")
         raise error
