@@ -888,16 +888,6 @@ def configure() -> dict:
     return config
 
 
-def exit() -> NoReturn:
-    """
-    Exit the program
-    """
-    import sys
-
-    print("Exiting program...")
-    sys.exit(0)
-
-
 @logger(is_timed=False)
 def main(config: dict) -> NoReturn:
     """
@@ -979,9 +969,6 @@ def main(config: dict) -> NoReturn:
             print()
     except (KeyboardInterrupt, EOFError):
         exit()
-    except BaseException as e:
-        error = t.CommandError("command line program unknown error")
-        raise error from e
 
 
 if __name__ == "__main__":
