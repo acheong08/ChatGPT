@@ -1,72 +1,74 @@
 # ChatGPT <img src="https://github.com/acheong08/ChatGPT/blob/main/logo.png?raw=true" width="7%"></img>
 
-English - [中文](./README_zh.md)
+[English](./README.md) - 中文
 
 [![PyPi](https://img.shields.io/pypi/v/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
-[![Support_Platform](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
+[![支持的平台](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
 [![Downloads](https://static.pepy.tech/badge/revchatgpt)](https://pypi.python.org/pypi/revChatGPT)
 
-Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
+ChatGPT的逆向工程API。可扩展用于聊天机器人等。
 
-> ## Support my work
-> Make a pull request and fix my bad code.
+> ## 支持本项目
+> 开启Pull Request并修复我的代码
 
-# Installation
+# 安装
 
 ```
 python -m pip install --upgrade revChatGPT
 ```
 
-### Suport Python Version
-- Minimum - Python3.9
-- Recommend - Python3.11+
+### 支持的Python版本
+- 最低版本 - Python3.9
+- 推荐版本 - Python3.11+
 
 
 <details>
 
 <summary>
 
-# V1 Standard ChatGPT
-> > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
+# V1 标准 ChatGPT
+> > 下午 3：35 - 由于服务器小，速率限制为5个请求/10秒（我没钱了）。
 
-> ### [Privacy policy](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
+> ### [隐私政策](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
 > <br>
 
-> ### !!! Server is now open source at https://github.com/acheong08/ChatGPT-Proxy-V4 for personal use (requires ChatGPT plus)
+> ### !!! 服务器源码已经开源在 https://github.com/acheong08/ChatGPT-Proxy-V4 提供给个人使用 (要求ChatGPT+)
 
 </summary>
 
-## Configuration
+## 配置
 
-1. Create account on [OpenAI's ChatGPT](https://chat.openai.com/)
-2. Save your email and password
+1. 在OpenAI的 [ChatGPT](https://chat.openai.com/)创建账户
+2. 记住你的邮箱地址与密码
 
-### Authentication method: (Choose 1)
-#### - Email/Password
-Not supported for Google/Microsoft accounts
+### 身份验证方式: (任选其一)
+#### - 邮箱/密码
+不支持使用 Google/Microsoft 授权登录的账户
 ```json
 {
   "email": "email",
   "password": "your password"
 }
 ```
-#### - Session token
-Comes from cookies on chat.openai.com as "__Secure-next-auth.session-token"
+#### - 会话令牌
+获取来自 chat.openai.com 中的`__Secure-next-auth.session-token`的值
 
 ```json
 {
   "session_token": "..."
 }
 ```
-#### - Access token
+#### - 访问令牌
+
 https://chat.openai.com/api/auth/session
+
 ```json
 {
   "access_token": "<access_token>"
 }
 ```
 
-#### - Optional configuration:
+#### - 可选配置：
 
 ```json
 {
@@ -78,16 +80,18 @@ https://chat.openai.com/api/auth/session
   "model": "gpt-4"
 }
 ```
-Analytics is disabled by default. Set `collect_analytics` to `true` to enable it.
+默认情况下，分析处于禁用状态。将`collect_analytics`设置为`true`以启用它。
 
-3. Save this as `$HOME/.config/revChatGPT/config.json`
-4. If you are using Windows, you will need to create an environment variable named ```HOME``` and set it to your home profile for the script to be able to locate the config.json file.
+3. 另存为 `$HOME/.config/revChatGPT/config.json`
+4. 如果您使用的是 Windows，则需要创建一个名为`HOME`的环境变量，并将其设置为您的主配置文件，以便脚本能够找到 config.json 文件。
 
-## Usage
+## 使用方法
 
-### Command line
+### 命令行程序
 
-`python3 -m revChatGPT.V1`
+```
+python3 -m revChatGPT.V1
+```
 
 ```
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
@@ -101,14 +105,14 @@ You:
 (Press Esc followed by Enter to finish)
 ```
 
-The command line interface supports multi-line inputs and allows navigation using arrow keys. Besides, you can also edit history inputs by arrow keys when the prompt is empty. It also completes your input if it finds matched previous prompts. To finish input, press `Esc` and then `Enter` as solely `Enter` itself is used for creating new line in multi-line mode.
+命令行界面支持多行输入，并允许使用箭头键进行导航。此外，您还可以在提示为空时通过箭头键编辑历史记录输入。如果找到匹配的先前提示，它也会完成您的输入。要完成输入，请按`Esc`，然后按`Enter`，因为仅`Enter`本身用于在多行模式下创建新行。
 
-Set the environment variable `NO_COLOR` to `true` to disable color output.
+设置环境变量`NO_COLOR`为`true`可以禁用带色彩的命令行输出
 
 
-### Developer API
+### 开发人员的API
 
-#### Basic example (streamed):
+#### 基础开发（命令行程序）:
 ```python
 from revChatGPT.V1 import Chatbot
 
@@ -128,7 +132,7 @@ for data in chatbot.ask(
 print()
 ```
 
-#### Basic example (single result):
+#### 基础开发 (结果获取):
 
 ```python
 from revChatGPT.V1 import Chatbot
@@ -148,8 +152,8 @@ for data in chatbot.ask(
 
 print(response)
 ```
-#### All API methods
-Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced developer usage.
+#### 所有的API方法
+移步到 [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) 来获取高级的开发者功能
 
 </details>
 
@@ -158,16 +162,18 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) for advanced d
 
 <summary>
 
-# V3 Official Chat API
-> Recently released by OpenAI
-> - Paid
+# V3 官方API
+> 最近由OpenAI发布
+> - 说白了就是要钱
 
 </summary>
 
-Get API key from https://platform.openai.com/account/api-keys
+从 https://platform.openai.com/account/api-keys 获取API-key
 
-## Command line
-`python3 -m revChatGPT.V3 --api_key <api_key>`
+## 命令行程序
+```
+python3 -m revChatGPT.V3 --api_key <api_key>
+```
 
 ```
  $ python3 -m revChatGPT.V3 -h
@@ -203,16 +209,16 @@ options:
   --model {gpt-3.5-turbo,gpt-4,gpt-4-32k}
 ```
 
-## Developer API
+## 开发API
 
-### Basic example
+### 基础开发
 ```python
 from revChatGPT.V3 import Chatbot
 chatbot = Chatbot(api_key="<api_key>")
 chatbot.ask("Hello world")
 ```
 
-### Streaming example
+### 命令行程序
 ```python
 from revChatGPT.V3 import Chatbot
 chatbot = Chatbot(api_key="<api_key>")
@@ -222,25 +228,25 @@ for data in chatbot.ask("Hello world"):
 
 </details>
 
-# Awesome ChatGPT
+# 贼好用的ChatGPT工具
 
-[My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
+[我的列表](https://github.com/stars/acheong08/lists/awesome-chatgpt)
 
-If you have a cool project you want added to the list, open an issue.
+如果要将很酷的项目添加到列表中，请提出issue
 
-# Disclaimers
+# 免责声明
 
-This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me.
+这不是OpenAI官方的产品，这仅仅是我个人的项目，与OpenAI没有任何关系，不要以任何理由起诉我。
 
 
-## Contributors
+## 贡献
 
-This project exists thanks to all the people who contribute.
+感谢所有为本项目做出贡献的开发者们
 
 <a href="https://github.com/acheong08/ChatGPT/graphs/contributors">
 <img src="https://contrib.rocks/image?repo=acheong08/ChatGPT" />
 </a>
 
-## Additional credits
+## 附加说明
 
-- Coding while listening to [this amazing song](https://www.youtube.com/watch?v=VaMR_xDhsGg) by [virtualharby](https://www.youtube.com/@virtualharby)
+- 一边写代码一边听由 [virtualharby](https://www.youtube.com/@virtualharby) 写的[无与伦比的歌曲](https://www.youtube.com/watch?v=VaMR_xDhsGg)
