@@ -30,6 +30,7 @@ class Chatbot:
         proxy: str = None,
         timeout: float = None,
         max_tokens: int = None,
+        min_reply_tokens: int = 300,
         temperature: float = 0.5,
         top_p: float = 1.0,
         presence_penalty: float = 0.0,
@@ -45,6 +46,7 @@ class Chatbot:
         self.api_key = api_key
         self.system_prompt = system_prompt
         self.max_tokens = max_tokens or (7000 if engine == "gpt-4" else 3000)
+        self.min_reply_tokens = min_reply_tokens
         self.temperature = temperature
         self.top_p = top_p
         self.presence_penalty = presence_penalty
@@ -88,7 +90,7 @@ class Chatbot:
         """
         while True:
             if (
-                self.get_token_count(convo_id) > self.max_tokens
+                self.get_token_count(convo_id) > self.max_tokens - self.min_reply_tokens
                 and len(self.conversation[convo_id]) > 1
             ):
                 # Don't remove the first message
