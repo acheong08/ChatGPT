@@ -2,6 +2,8 @@ from platform import python_version_tuple
 from abc import ABCMeta, abstractmethod
 from os import getenv
 
+Any = object()
+
 SUPPORT = [int(each) for each in python_version_tuple()][0] >= 3 and [int(each) for each in python_version_tuple()][1] >= 11
 del python_version_tuple
 
@@ -17,6 +19,14 @@ class ChatbotError(Exception, metaclass=ABCMeta):
             )
             super().add_note("Project URL: https://github.com/acheong08/ChatGPT")
         super().__init__(*args)
+
+class MetaNotAllowInstance(type):
+    """
+    Metaclasses that do not allow classes to be instantiated
+    """
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        error = ChatbotError("This class is not allowed to be instantiated")
+        raise error
 
 class CommandError(ChatbotError):
     pass
@@ -69,7 +79,7 @@ class OpenAIError(APIConnectionError):
 class RequestError(APIConnectionError):
     pass
 
-class ErrorType:
+class ErrorType(metaclass=MetaNotAllowInstance):
     # define consts for the error codes
     USER_ERROR = -1
     UNKNOWN_ERROR = 0
