@@ -316,7 +316,8 @@ class Chatbot:
             "email" not in self.config or "password" not in self.config
         ) and "session_token" not in self.config:
             log.error("Insufficient login details provided!")
-            raise Exception("Insufficient login details provided!")
+            error = t.AuthenticationError("Insufficient login details provided!")
+            raise error
         auth = Authenticator(
             email_address=self.config.get("email"),
             password=self.config.get("password"),
@@ -757,7 +758,7 @@ class AsyncChatbot(Chatbot):
                 except json.decoder.JSONDecodeError:
                     continue
                 if not self.__check_fields(line):
-                    raise Exception(f"Field missing. Details: {str(line)}")
+                    raise ValueError(f"Field missing. Details: {str(line)}")
 
                 message = line["message"]["content"]["parts"][0]
                 conversation_id = line["conversation_id"]
@@ -884,7 +885,7 @@ def configure() -> dict:
             config = json.load(f)
     else:
         print("No config file found.")
-        raise Exception("No config file found.")
+        raise FileNotFoundError("No config file found.")
     return config
 
 
@@ -969,7 +970,7 @@ def main(config: dict) -> NoReturn:
             print()
     except (KeyboardInterrupt, EOFError):
         exit()
-    except BaseException as e:
+    except Exception as e:
         error = t.CLIError("command line program unknown error")
         raise error from e
 

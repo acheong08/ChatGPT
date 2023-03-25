@@ -69,7 +69,7 @@ class Chatbot:
         }
 
         if self.get_token_count("default") > self.max_tokens:
-            error = t.ChatbotError("System prompt is too long")
+            error = t.ActionRefuseError("System prompt is too long")
             raise error
 
     def add_to_conversation(
@@ -505,9 +505,6 @@ def main() -> NoReturn:
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()
-        except BaseException as e:
-            error = t.CLIError("Command line program unknown error")
-            raise error from e
         if prompt.startswith("!"):
             try:
                 chatbot.handle_commands(prompt)
@@ -555,6 +552,9 @@ def main() -> NoReturn:
 if __name__ == "__main__":
     try:
         main()
+    except Exception as e:
+        error = t.CLIError("Command line program unknown error")
+        raise error from e
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit()
