@@ -10,7 +10,7 @@ from typing import NoReturn
 import requests
 import tiktoken
 
-from . import typing as t
+from . import typings as t
 from .utils import create_completer
 from .utils import create_keybindings
 from .utils import create_session
@@ -40,26 +40,26 @@ class Chatbot:
         """
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
-        self.engine = engine
+        self.engine: str = engine
         self.session = requests.Session()
-        self.api_key = api_key
-        self.system_prompt = system_prompt
-        self.max_tokens = max_tokens or (7000 if engine == "gpt-4" else 4000)
-        self.truncate_limit = 3500
-        self.temperature = temperature
-        self.top_p = top_p
-        self.presence_penalty = presence_penalty
-        self.frequency_penalty = frequency_penalty
-        self.reply_count = reply_count
-        self.timeout = timeout
+        self.api_key: str = api_key
+        self.system_prompt: str = system_prompt
+        self.max_tokens: int = max_tokens or (7000 if engine == "gpt-4" else 4000)
+        self.truncate_limit: int = 3500
+        self.temperature: float = temperature
+        self.top_p: float = top_p
+        self.presence_penalty: float = presence_penalty
+        self.frequency_penalty: float = frequency_penalty
+        self.reply_count: int = reply_count
+        self.timeout:float = timeout
 
         if proxy:
-            self.session.proxies = {
+            self.session.proxies: dict = {
                 "http": proxy,
                 "https": proxy,
             }
 
-        self.conversation: dict = {
+        self.conversation: dict[str, list[dict]] = {
             "default": [
                 {
                     "role": "system",
@@ -506,7 +506,7 @@ def main() -> NoReturn:
             print("\nExiting...")
             sys.exit()
         except BaseException as e:
-            error = t.CommandError("Command line program unknown error")
+            error = t.CLIError("Command line program unknown error")
             raise error from e
         if prompt.startswith("!"):
             try:

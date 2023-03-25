@@ -11,7 +11,7 @@ from typing import NoReturn
 import openai
 import tiktoken
 
-from . import typing as t
+from . import typings as t
 
 ENGINE = os.environ.get("GPT_ENGINE") or "text-davinci-003"
 
@@ -117,15 +117,15 @@ class Chatbot:
             if response.get("choices") is None:
                 error = t.ResponseError("ChatGPT API returned no choices")
                 raise error
-            if len(response["choices"]) == 0:
+            elif len(response["choices"]) == 0:
                 error = t.ResponseError("ChatGPT API returned no choices")
                 raise error
-            if response["choices"][0].get("finish_details") is not None:
+            elif response["choices"][0].get("finish_details") is not None:
                 break
-            if response["choices"][0].get("text") is None:
+            elif response["choices"][0].get("text") is None:
                 error = t.ResponseError("ChatGPT API returned no text")
                 raise error
-            if response["choices"][0]["text"] == "<|im_end|>":
+            elif response["choices"][0]["text"] == "<|im_end|>":
                 break
             yield response["choices"][0]["text"]
             full_response += response["choices"][0]["text"]
@@ -490,7 +490,7 @@ def main() -> NoReturn:
             print("\nExiting...")
             sys.exit()
         except BaseException as e:
-            error = t.CommandError("command line program unknown error")
+            error = t.CLIError("command line program unknown error")
             raise error from e
         if prompt.startswith("!") and chatbot_commands(prompt):
             continue

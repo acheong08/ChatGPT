@@ -21,7 +21,7 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from . import typing as t
+from . import typings as t
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
@@ -969,6 +969,9 @@ def main(config: dict) -> NoReturn:
             print()
     except (KeyboardInterrupt, EOFError):
         exit()
+    except BaseException as e:
+        error = t.CLIError("command line program unknown error")
+        raise error from e
 
 
 if __name__ == "__main__":
