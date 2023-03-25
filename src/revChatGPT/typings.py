@@ -1,49 +1,63 @@
-from platform import python_version_tuple
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+from abc import abstractmethod
 from os import getenv
+from platform import python_version_tuple
 
 Any = object()
 
-SUPPORT = [int(each) for each in python_version_tuple()][0] >= 3 and [int(each) for each in python_version_tuple()][1] >= 11
+SUPPORT = [int(each) for each in python_version_tuple()][0] >= 3 and [
+    int(each) for each in python_version_tuple()
+][1] >= 11
 del python_version_tuple
+
 
 class ChatbotError(Exception, metaclass=ABCMeta):
     """
     Base class for all Chatbot errors in this Project
     """
+
     @abstractmethod
     def __init__(self, *args: object) -> None:
         if SUPPORT:
             super().add_note(
-                "Please check that the input is correct, or you can resolve this issue by filing an issue"
+                "Please check that the input is correct, or you can resolve this issue by filing an issue",
             )
             super().add_note("Project URL: https://github.com/acheong08/ChatGPT")
         super().__init__(*args)
+
 
 class MetaNotAllowInstance(type):
     """
     Metaclasses that do not allow classes to be instantiated
     """
+
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         error = ActionNotAllowedError("This class is not allowed to be instantiated")
         raise error
 
+
 class ActionError(ChatbotError):
     def __init__(self, *args: object) -> None:
         if SUPPORT:
-            super().add_note("The current operation is not allowed, which may be intentional")
+            super().add_note(
+                "The current operation is not allowed, which may be intentional"
+            )
         super().__init__(*args)
+
 
 class ActionNotAllowedError(ActionError):
     """
     Subclass of ActionError
-    
+
     An object that throws an error because the execution of an unallowed operation is blocked
     """
+
     pass
+
 
 class ActionRefuseError(ActionError):
     pass
+
 
 class CLIError(ChatbotError):
     """
@@ -51,7 +65,9 @@ class CLIError(ChatbotError):
 
     The error caused by a CLI program error
     """
+
     pass
+
 
 class Error(ChatbotError):
     """
@@ -79,16 +95,21 @@ class Error(ChatbotError):
     def __repr__(self) -> str:
         return f"{self.source}: {self.message} (code: {self.code})"
 
+
 class AuthenticationError(ChatbotError):
     """
     Subclass of ChatbotError
 
     The object of the error thrown by a validation failure or exception
     """
+
     def __init__(self, *args: object) -> None:
         if SUPPORT:
-            super().add_note("Please check if your key is correct, maybe it may not be valid")
+            super().add_note(
+                "Please check if your key is correct, maybe it may not be valid"
+            )
         super().__init__(*args)
+
 
 class APIConnectionError(ChatbotError):
     """
@@ -96,10 +117,14 @@ class APIConnectionError(ChatbotError):
 
     An exception object thrown when an API connection fails or fails to connect due to network or other miscellaneous reasons
     """
+
     def __init__(self, *args: object) -> None:
         if SUPPORT:
-            super().add_note("Please check if there is a problem with your network connection")
+            super().add_note(
+                "Please check if there is a problem with your network connection"
+            )
         super().__init__(*args)
+
 
 class ResponseError(APIConnectionError):
     """
@@ -107,14 +132,17 @@ class ResponseError(APIConnectionError):
 
     Error objects caused by API request errors due to network or other miscellaneous reasons
     """
+
     pass
+
 
 class OpenAIError(APIConnectionError):
     """
     Subclass of APIConnectionError
-    
+
     Error objects caused by OpenAI's own server errors
     """
+
     pass
 
 
@@ -124,7 +152,9 @@ class RequestError(APIConnectionError):
 
     There is a problem with the API response due to network or other miscellaneous reasons, or there is no reply to the object that caused the error at all
     """
+
     pass
+
 
 class ErrorType(metaclass=MetaNotAllowInstance):
     # define consts for the error codes
@@ -138,6 +168,7 @@ class ErrorType(metaclass=MetaNotAllowInstance):
     PROHIBITED_CONCURRENT_QUERY_ERROR = 6
     AUTHENTICATION_ERROR = 7
     CLOUDFLARE_ERROR = 8
+
 
 class colors:
     """

@@ -51,7 +51,7 @@ class Chatbot:
         self.presence_penalty: float = presence_penalty
         self.frequency_penalty: float = frequency_penalty
         self.reply_count: int = reply_count
-        self.timeout:float = timeout
+        self.timeout: float = timeout
 
         if proxy:
             self.session.proxies: dict = {
