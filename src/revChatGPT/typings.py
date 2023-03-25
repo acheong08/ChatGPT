@@ -25,10 +25,26 @@ class MetaNotAllowInstance(type):
     Metaclasses that do not allow classes to be instantiated
     """
     def __call__(self, *args: Any, **kwds: Any) -> Any:
-        error = ChatbotError("This class is not allowed to be instantiated")
+        error = ActionNotAllowedError("This class is not allowed to be instantiated")
         raise error
 
-class CommandError(ChatbotError):
+class ActionNotAllowedError(ChatbotError):
+    """
+    Subclass of ChatbotError
+    
+    An object that throws an error because the execution of an unallowed operation is blocked
+    """
+    def __init__(self, *args: object) -> None:
+        if SUPPORT:
+            super().add_note("The current operation is not allowed, which may be intentional")
+        super().__init__(*args)
+
+class CLIError(ChatbotError):
+    """
+    Subclass of ChatbotError
+
+    The error caused by a CLI program error
+    """
     pass
 
 class Error(ChatbotError):
@@ -58,25 +74,50 @@ class Error(ChatbotError):
         return f"{self.source}: {self.message} (code: {self.code})"
 
 class AuthenticationError(ChatbotError):
+    """
+    Subclass of ChatbotError
+
+    The object of the error thrown by a validation failure or exception
+    """
     def __init__(self, *args: object) -> None:
         if SUPPORT:
             super().add_note("Please check if your key is correct, maybe it may not be valid")
         super().__init__(*args)
 
 class APIConnectionError(ChatbotError):
+    """
+    Subclass of ChatbotError
+
+    An exception object thrown when an API connection fails or fails to connect due to network or other miscellaneous reasons
+    """
     def __init__(self, *args: object) -> None:
         if SUPPORT:
             super().add_note("Please check if there is a problem with your network connection")
         super().__init__(*args)
 
 class ResponseError(APIConnectionError):
+    """
+    Subclass of APIConnectionError
+
+    Error objects caused by API request errors due to network or other miscellaneous reasons
+    """
     pass
 
 class OpenAIError(APIConnectionError):
+    """
+    Subclass of APIConnectionError
+    
+    Error objects caused by OpenAI's own server errors
+    """
     pass
 
 
 class RequestError(APIConnectionError):
+    """
+    Subclass of APIConnectionError
+
+    There is a problem with the API response due to network or other miscellaneous reasons, or there is no reply to the object that caused the error at all
+    """
     pass
 
 class ErrorType(metaclass=MetaNotAllowInstance):

@@ -490,7 +490,7 @@ def main() -> NoReturn:
             print("\nExiting...")
             sys.exit()
         except BaseException as e:
-            error = t.CommandError("command line program unknown error")
+            error = t.CLIError("command line program unknown error")
             raise error from e
         if prompt.startswith("!") and chatbot_commands(prompt):
             continue

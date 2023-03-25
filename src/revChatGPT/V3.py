@@ -506,7 +506,7 @@ def main() -> NoReturn:
             print("\nExiting...")
             sys.exit()
         except BaseException as e:
-            error = t.CommandError("Command line program unknown error")
+            error = t.CLIError("Command line program unknown error")
             raise error from e
         if prompt.startswith("!"):
             try:
