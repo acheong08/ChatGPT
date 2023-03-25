@@ -1,6 +1,5 @@
 name: Code Analysis Scanning
 on:
-  push:
   pull_request:
   schedule:
     - cron: "0 0 * * *"
