@@ -28,16 +28,22 @@ class MetaNotAllowInstance(type):
         error = ActionNotAllowedError("This class is not allowed to be instantiated")
         raise error
 
-class ActionNotAllowedError(ChatbotError):
-    """
-    Subclass of ChatbotError
-    
-    An object that throws an error because the execution of an unallowed operation is blocked
-    """
+class ActionError(ChatbotError):
     def __init__(self, *args: object) -> None:
         if SUPPORT:
             super().add_note("The current operation is not allowed, which may be intentional")
         super().__init__(*args)
+
+class ActionNotAllowedError(ActionError):
+    """
+    Subclass of ActionError
+    
+    An object that throws an error because the execution of an unallowed operation is blocked
+    """
+    pass
+
+class ActionRefuseError(ActionError):
+    pass
 
 class CLIError(ChatbotError):
     """
