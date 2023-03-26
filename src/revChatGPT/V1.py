@@ -459,7 +459,7 @@ class Chatbot:
                     code=t.ErrorType.SERVER_ERROR,
                 )
                 raise error
-            if line == "" or line is None:
+            if not line or line is None:
                 continue
             if "data: " in line:
                 line = line[6:]
@@ -746,7 +746,7 @@ class AsyncChatbot(Chatbot):
         ) as response:
             self.__check_response(response)
             async for line in response.aiter_lines():
-                if line == "" or line is None:
+                if not line or line is None:
                     continue
                 if "data: " in line:
                     line = line[6:]
