@@ -18,6 +18,22 @@ permissions:
   contents: read
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.2'
+      - name: Install dependencies
+        run: make
+      - name: Build CI
+        run: make build
+      - name: Syntax CI
+        run: make ci
+
   deploy:
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
@@ -36,16 +52,3 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
-  ci:
-    runs-on: ubuntu-latest
-    if: github.event_name != 'release'
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11.2'
-      - name: Install dependencies
-        run: make
-      - name: CI
-        run: make ci
