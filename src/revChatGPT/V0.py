@@ -415,7 +415,7 @@ def main() -> NoReturn:
         # Read lines of input until the user enters an empty line
         while True:
             line = input()
-            if line == "":
+            if not line:
                 break
             lines.append(line)
 
