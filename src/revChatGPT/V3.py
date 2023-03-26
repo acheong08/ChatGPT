@@ -44,8 +44,10 @@ class Chatbot:
         self.session = requests.Session()
         self.api_key: str = api_key
         self.system_prompt: str = system_prompt
-        self.max_tokens: int = max_tokens or (7000 if engine == "gpt-4" else 4000)
-        self.truncate_limit: int = 6500 if engine == "gpt-4" else 3500
+        self.max_tokens: int = max_tokens or (31000 if engine == "gpt-4-32k" else
+                                               7000 if engine == "gpt-4" else 4000)
+        self.truncate_limit: int = 30500 if engine == "gpt-4-32k" else 
+                                    6500 if engine == "gpt-4" else 3500
         self.temperature: float = temperature
         self.top_p: float = top_p
         self.presence_penalty: float = presence_penalty
