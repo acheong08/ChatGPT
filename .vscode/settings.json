@@ -6,7 +6,11 @@
     "acreate",
     "Browserless",
     "CHATGPT",
-    "endoftext"
+    "endoftext",
+    "mainloop",
+    "padx",
+    "pady",
+    "tkinter"
   ],
   "python.formatting.provider": "black",
 }
