@@ -164,7 +164,7 @@ print(response)
 
 # V3 官方API
 > 最近由OpenAI发布
-> - 说白了就是要钱
+> - 付费账户
 
 </summary>
 

@@ -1,11 +1,19 @@
 from setuptools import find_namespace_packages
 from setuptools import setup
+from pathlib import Path
+
+DOCS_PATH = Path(__file__).parents[0] / "docs/README.md"
+PATH = Path("README.md")
+if not PATH.exists():
+    with open(DOCS_PATH, "rt", encoding="utf-8") as f1:
+        with open(PATH, "wt+", encoding="utf-8") as f2:
+            f2.write(f1.read())
 
 setup(
     name="revChatGPT",
     version="4.0.9",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
-    long_description=open("README.md", encoding="utf-8").read(),
+    long_description=open(PATH, encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/acheong08/ChatGPT",
     project_urls={
