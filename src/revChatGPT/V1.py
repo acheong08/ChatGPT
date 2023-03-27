@@ -132,7 +132,7 @@ class Chatbot:
             )
         except t.Error as error:
             if error.code == 5:
-                raise error
+                raise
             cached_access_token = None
         if cached_access_token is not None:
             self.config["access_token"] = cached_access_token
@@ -186,7 +186,7 @@ class Chatbot:
             try:
                 self.login()
             except AuthError as error:
-                raise error
+                raise
 
     @logger(is_timed=False)
     def set_access_token(self, access_token: str) -> None:
@@ -484,28 +484,25 @@ class Chatbot:
                         message="Permission denied",
                         code=t.ErrorType.AUTHENTICATION_ERROR,
                     )
-                    raise error
                 elif response.status_code == 403:
                     error = t.Error(
                         source="ask",
                         message="Cloudflare triggered a 403 error",
                         code=t.ErrorType.CLOUDFLARE_ERROR,
                     )
-                    raise error
                 elif response.status_code == 429:
                     error = t.Error(
                         source="ask",
                         message="Rate limit exceeded",
                         code=t.ErrorType.RATE_LIMIT_ERROR,
                     )
-                    raise error
                 else:
                     error = t.Error(
                         source="ask",
                         message=line,
                         code=t.ErrorType.SERVER_ERROR,
                     )
-                    raise error
+                raise error
             message: str = line["message"]["content"]["parts"][0]
             if message == prompt:
                 continue
