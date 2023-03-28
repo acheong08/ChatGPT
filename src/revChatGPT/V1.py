@@ -91,7 +91,7 @@ class Chatbot:
         conversation_id: str | None = None,
         parent_id: str | None = None,
         session_client=None,
-        lazy_loading: bool = False,
+        lazy_loading: bool = True,
     ) -> None:
         """Initialize a chatbot
 
