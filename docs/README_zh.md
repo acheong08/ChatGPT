@@ -32,7 +32,7 @@ python -m pip install --upgrade revChatGPT
 > ### [隐私政策](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
 > <br>
 
-> ### !!! 服务器源码已经开源在 https://github.com/acheong08/ChatGPT-Proxy-V4 提供给个人使用 (要求ChatGPT+)
+> ### !!! 服务器源码已经开源在 https://github.com/acheong08/ChatGPT-Proxy-V4 提供给个人使用 (要求ChatGPT Plus)
 
 </summary>
 
