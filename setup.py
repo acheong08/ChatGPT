@@ -11,7 +11,7 @@ if not PATH.exists():
 
 setup(
     name="revChatGPT",
-    version="4.0.11",
+    version="4.0.12",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     long_description=open(PATH, encoding="utf-8").read(),
     long_description_content_type="text/markdown",
@@ -28,7 +28,7 @@ setup(
     py_modules=["V2", "V1", "V0", "V3"],
     package_data={"": ["*.json"]},
     install_requires=[
-        "OpenAIAuth==0.3.2",
+        "OpenAIAuth==0.3.6",
         "requests[socks]",
         "httpx[socks]",
         "prompt-toolkit",
