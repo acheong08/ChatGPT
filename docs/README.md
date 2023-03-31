@@ -42,6 +42,7 @@ python -m pip install --upgrade revChatGPT
 2. Save your email and password
 
 ### Authentication method: (Choose 1)
+
 #### - Email/Password
 > *Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`*
 Not supported for Google/Microsoft accounts.
@@ -51,14 +52,7 @@ Not supported for Google/Microsoft accounts.
   "password": "your password"
 }
 ```
-#### - Session token
-Comes from cookies on chat.openai.com as "__Secure-next-auth.session-token"
 
-```json
-{
-  "session_token": "..."
-}
-```
 #### - Access token
 https://chat.openai.com/api/auth/session
 ```json
