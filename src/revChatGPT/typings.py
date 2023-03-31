@@ -125,6 +125,15 @@ class APIConnectionError(ChatbotError):
             )
         super().__init__(*args)
 
+class NotAllowRunning(ActionNotAllowedError):
+    """
+    Subclass of ActionNotAllowedError
+
+    Direct startup is not allowed for some reason
+    """
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 
 class ResponseError(APIConnectionError):
     """
