@@ -153,7 +153,7 @@ for data in chatbot.ask(
 print(response)
 ```
 #### 所有的API方法
-移步到 [wiki](https://github.com/acheong08/ChatGPT/wiki/V1) 来获取高级的开发者功能
+移步到 [wiki](https://github.com/CoolPlayLin/ChatGPT_Wiki/tree/main/docs/ChatGPT) 来获取高级的开发者功能
 
 </details>
 
