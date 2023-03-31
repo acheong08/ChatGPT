@@ -43,7 +43,8 @@ python -m pip install --upgrade revChatGPT
 
 ### Authentication method: (Choose 1)
 #### - Email/Password
-Not supported for Google/Microsoft accounts
+> *Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`*
+Not supported for Google/Microsoft accounts.
 ```json
 {
   "email": "email",
