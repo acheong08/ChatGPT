@@ -15,4 +15,5 @@
     "tkinter"
   ],
   "python.formatting.provider": "black",
+  "python.linting.mypyEnabled": true,
 }
