@@ -42,6 +42,7 @@ python -m pip install --upgrade revChatGPT
 2. 记住你的邮箱地址与密码
 
 ### 身份验证方式: (任选其一)
+
 #### - 邮箱/密码
 不支持使用 Google/Microsoft 授权登录的账户
 ```json
@@ -50,14 +51,7 @@ python -m pip install --upgrade revChatGPT
   "password": "your password"
 }
 ```
-#### - 会话令牌
-获取来自 chat.openai.com 中的`__Secure-next-auth.session-token`的值
 
-```json
-{
-  "session_token": "..."
-}
-```
 #### - 访问令牌
 
 https://chat.openai.com/api/auth/session

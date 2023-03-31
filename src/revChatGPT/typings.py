@@ -5,7 +5,7 @@ from platform import python_version_tuple
 
 Any = object()
 
-SUPPORT = [int(each) for each in python_version_tuple()][0] >= 3 and [
+SUPPORT_ADD_NOTES = [int(each) for each in python_version_tuple()][0] >= 3 and [
     int(each) for each in python_version_tuple()
 ][1] >= 11
 del python_version_tuple
@@ -18,7 +18,7 @@ class ChatbotError(Exception, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self, *args: object) -> None:
-        if SUPPORT:
+        if SUPPORT_ADD_NOTES:
             super().add_note(
                 "Please check that the input is correct, or you can resolve this issue by filing an issue",
             )
@@ -28,7 +28,7 @@ class ChatbotError(Exception, metaclass=ABCMeta):
 
 class MetaNotAllowInstance(type):
     """
-    Metaclasses that do not allow classes to be instantiated
+    Metaclass that do not allow classes to be instantiated
     """
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
@@ -38,7 +38,7 @@ class MetaNotAllowInstance(type):
 
 class ActionError(ChatbotError):
     def __init__(self, *args: object) -> None:
-        if SUPPORT:
+        if SUPPORT_ADD_NOTES:
             super().add_note(
                 "The current operation is not allowed, which may be intentional"
             )
@@ -104,7 +104,7 @@ class AuthenticationError(ChatbotError):
     """
 
     def __init__(self, *args: object) -> None:
-        if SUPPORT:
+        if SUPPORT_ADD_NOTES:
             super().add_note(
                 "Please check if your key is correct, maybe it may not be valid"
             )
@@ -119,7 +119,7 @@ class APIConnectionError(ChatbotError):
     """
 
     def __init__(self, *args: object) -> None:
-        if SUPPORT:
+        if SUPPORT_ADD_NOTES:
             super().add_note(
                 "Please check if there is a problem with your network connection"
             )
