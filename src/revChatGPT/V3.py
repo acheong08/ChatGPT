@@ -7,6 +7,7 @@ import os
 import sys
 from typing import AsyncGenerator, Generator, NoReturn
 
+import requests
 import httpx
 import tiktoken
 
@@ -56,9 +57,8 @@ class Chatbot:
         self.reply_count: int = reply_count
         self.timeout: float = timeout
         self.proxy = proxy
-        self.session = httpx.Client(
-            follow_redirects=True, proxies=proxy, timeout=timeout
-        )
+        self.session = requests.Session()
+        self.session.proxies = proxy
         self.aclient = httpx.AsyncClient(
             follow_redirects=True, proxies=proxy, timeout=timeout
         )
@@ -154,7 +154,7 @@ class Chatbot:
         self.add_to_conversation(prompt, "user", convo_id=convo_id)
         self.__truncate_conversation(convo_id=convo_id)
         # Get response
-        with self.session.stream(
+        response = self.session.post(
             "post",
             os.environ.get("API_URL") or "https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
@@ -178,37 +178,38 @@ class Chatbot:
                 "max_tokens": self.get_max_tokens(convo_id=convo_id),
             },
             timeout=kwargs.get("timeout", self.timeout),
-        ) as response:
-            if response.status_code != 200:
-                response.read()
-                error = t.APIConnectionError(
-                    f"{response.status_code} {response.reason_phrase} {response.text}",
-                )
-                raise error
+            stream=True,
+        )
+        if response.status_code != 200:
+            response.read()
+            error = t.APIConnectionError(
+                f"{response.status_code} {response.reason_phrase} {response.text}",
+            )
+            raise error
 
-            response_role: str = ""
-            full_response: str = ""
-            for line in response.iter_lines():
-                line = line.strip()
-                if not line:
-                    continue
-                # Remove "data: "
-                line = line[6:]
-                if line == "[DONE]":
-                    break
-                resp: dict = json.loads(line)
-                choices = resp.get("choices")
-                if not choices:
-                    continue
-                delta: dict[str, str] = choices[0].get("delta")
-                if not delta:
-                    continue
-                if "role" in delta:
-                    response_role = delta["role"]
-                if "content" in delta:
-                    content: str = delta["content"]
-                    full_response += content
-                    yield content
+        response_role: str = ""
+        full_response: str = ""
+        for line in response.iter_lines():
+            line = line.strip()
+            if not line:
+                continue
+            # Remove "data: "
+            line = line[6:]
+            if line == "[DONE]":
+                break
+            resp: dict = json.loads(line)
+            choices = resp.get("choices")
+            if not choices:
+                continue
+            delta: dict[str, str] = choices[0].get("delta")
+            if not delta:
+                continue
+            if "role" in delta:
+                response_role = delta["role"]
+            if "content" in delta:
+                content: str = delta["content"]
+                full_response += content
+                yield content
         self.add_to_conversation(full_response, response_role, convo_id=convo_id)
 
     async def ask_stream_async(
