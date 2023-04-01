@@ -386,9 +386,10 @@ class Chatbot:
                     cookies=self.session.cookies,
                     headers=self.session.headers,
                 )
-
-            keys.remove("session")
-            keys.remove("aclient")
+            if "session" in keys:
+                keys.remove("session")
+            if "aclient" in keys:
+                keys.remove("aclient")
             self.__dict__.update({key: loaded_config[key] for key in keys})
 
 
@@ -645,7 +646,7 @@ def main() -> NoReturn:
             # Get search results
             search_results = '{"results": "No search results"}'
             if query != "none":
-                resp = requests.post(
+                resp = httpx.post(
                     url="https://ddg-api.herokuapp.com/search",
                     json={"query": query, "limit": 3},
                     timeout=10,
