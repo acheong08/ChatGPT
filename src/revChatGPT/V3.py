@@ -5,9 +5,9 @@ import argparse
 import json
 import os
 import sys
-from typing import NoReturn
+from typing import AsyncGenerator, Generator, NoReturn
 
-import requests
+import httpx
 import tiktoken
 
 from . import typings as t
@@ -41,25 +41,27 @@ class Chatbot:
         Initialize Chatbot with API key (from https://platform.openai.com/account/api-keys)
         """
         self.engine: str = engine
-        self.session = requests.Session()
         self.api_key: str = api_key
         self.system_prompt: str = system_prompt
-        self.max_tokens: int = max_tokens or (31000 if engine == "gpt-4-32k" else
-                                               7000 if engine == "gpt-4" else 4000)
-        self.truncate_limit: int = (30500 if engine == "gpt-4-32k" else 
-                                    6500 if engine == "gpt-4" else 3500)
+        self.max_tokens: int = max_tokens or (
+            31000 if engine == "gpt-4-32k" else 7000 if engine == "gpt-4" else 4000
+        )
+        self.truncate_limit: int = (
+            30500 if engine == "gpt-4-32k" else 6500 if engine == "gpt-4" else 3500
+        )
         self.temperature: float = temperature
         self.top_p: float = top_p
         self.presence_penalty: float = presence_penalty
         self.frequency_penalty: float = frequency_penalty
         self.reply_count: int = reply_count
         self.timeout: float = timeout
-
-        if proxy:
-            self.session.proxies: dict = {
-                "http": proxy,
-                "https": proxy,
-            }
+        self.proxy = proxy
+        self.session = httpx.Client(
+            follow_redirects=True, proxies=proxy, timeout=timeout
+        )
+        self.aclient = httpx.AsyncClient(
+            follow_redirects=True, proxies=proxy, timeout=timeout
+        )
 
         self.conversation: dict[str, list[dict]] = {
             "default": [
@@ -115,7 +117,6 @@ class Chatbot:
             error = NotImplementedError("Unsupported engine {self.engine}")
             raise error
 
-        tiktoken.model.MODEL_PREFIX_TO_ENCODING["gpt-4-"] = "cl100k_base"
         tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
 
         encoding = tiktoken.encoding_for_model(self.engine)
@@ -143,7 +144,7 @@ class Chatbot:
         role: str = "user",
         convo_id: str = "default",
         **kwargs,
-    ) -> str:
+    ) -> Generator[str, None, None]:
         """
         Ask a question
         """
@@ -153,7 +154,8 @@ class Chatbot:
         self.add_to_conversation(prompt, "user", convo_id=convo_id)
         self.__truncate_conversation(convo_id=convo_id)
         # Get response
-        response = self.session.post(
+        with self.session.stream(
+            "post",
             os.environ.get("API_URL") or "https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
             json={
@@ -176,36 +178,130 @@ class Chatbot:
                 "max_tokens": self.get_max_tokens(convo_id=convo_id),
             },
             timeout=kwargs.get("timeout", self.timeout),
-            stream=True,
-        )
-        if response.status_code != 200:
-            error = t.APIConnectionError(
-                f"{response.status_code} {response.reason} {response.text}",
-            )
-            raise error
-        response_role: str = None
-        full_response: str = ""
-        for line in response.iter_lines():
-            if not line:
-                continue
-            # Remove "data: "
-            line = line.decode("utf-8")[6:]
-            if line == "[DONE]":
-                break
-            resp: dict = json.loads(line)
-            choices = resp.get("choices")
-            if not choices:
-                continue
-            delta = choices[0].get("delta")
-            if not delta:
-                continue
-            if "role" in delta:
-                response_role = delta["role"]
-            if "content" in delta:
-                content = delta["content"]
-                full_response += content
-                yield content
+        ) as response:
+            if response.status_code != 200:
+                response.read()
+                error = t.APIConnectionError(
+                    f"{response.status_code} {response.reason_phrase} {response.text}",
+                )
+                raise error
+
+            response_role: str = ""
+            full_response: str = ""
+            for line in response.iter_lines():
+                line = line.strip()
+                if not line:
+                    continue
+                # Remove "data: "
+                line = line[6:]
+                if line == "[DONE]":
+                    break
+                resp: dict = json.loads(line)
+                choices = resp.get("choices")
+                if not choices:
+                    continue
+                delta: dict[str, str] = choices[0].get("delta")
+                if not delta:
+                    continue
+                if "role" in delta:
+                    response_role = delta["role"]
+                if "content" in delta:
+                    content: str = delta["content"]
+                    full_response += content
+                    yield content
         self.add_to_conversation(full_response, response_role, convo_id=convo_id)
+
+    async def ask_stream_async(
+        self,
+        prompt: str,
+        role: str = "user",
+        convo_id: str = "default",
+        **kwargs,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Ask a question
+        """
+        # Make conversation if it doesn't exist
+        if convo_id not in self.conversation:
+            self.reset(convo_id=convo_id, system_prompt=self.system_prompt)
+        self.add_to_conversation(prompt, "user", convo_id=convo_id)
+        self.__truncate_conversation(convo_id=convo_id)
+        # Get response
+        async with self.aclient.stream(
+            "post",
+            os.environ.get("API_URL") or "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
+            json={
+                "model": self.engine,
+                "messages": self.conversation[convo_id],
+                "stream": True,
+                # kwargs
+                "temperature": kwargs.get("temperature", self.temperature),
+                "top_p": kwargs.get("top_p", self.top_p),
+                "presence_penalty": kwargs.get(
+                    "presence_penalty",
+                    self.presence_penalty,
+                ),
+                "frequency_penalty": kwargs.get(
+                    "frequency_penalty",
+                    self.frequency_penalty,
+                ),
+                "n": kwargs.get("n", self.reply_count),
+                "user": role,
+                "max_tokens": self.get_max_tokens(convo_id=convo_id),
+            },
+            timeout=kwargs.get("timeout", self.timeout),
+        ) as response:
+            if response.status_code != 200:
+                await response.aread()
+                error = t.APIConnectionError(
+                    f"{response.status_code} {response.reason_phrase} {response.text}",
+                )
+                raise error
+
+            response_role: str = ""
+            full_response: str = ""
+            async for line in response.aiter_lines():
+                line = line.strip()
+                if not line:
+                    continue
+                # Remove "data: "
+                line = line[6:]
+                if line == "[DONE]":
+                    break
+                resp: dict = json.loads(line)
+                choices = resp.get("choices")
+                if not choices:
+                    continue
+                delta: dict[str, str] = choices[0].get("delta")
+                if not delta:
+                    continue
+                if "role" in delta:
+                    response_role = delta["role"]
+                if "content" in delta:
+                    content: str = delta["content"]
+                    full_response += content
+                    yield content
+        self.add_to_conversation(full_response, response_role, convo_id=convo_id)
+
+    async def ask_async(
+        self,
+        prompt: str,
+        role: str = "user",
+        convo_id: str = "default",
+        **kwargs,
+    ) -> str:
+        """
+        Non-streaming ask
+        """
+        response = self.ask_stream_async(
+            prompt=prompt,
+            role=role,
+            convo_id=convo_id,
+            **kwargs,
+        )
+        full_response: str = "".join([r async for r in response])
+        return full_response
 
     def ask(
         self,
@@ -246,29 +342,53 @@ class Chatbot:
         Save the Chatbot configuration to a JSON file
         """
         with open(file, "w", encoding="utf-8") as f:
+            data = {
+                key: self.__dict__[key]
+                for key in get_filtered_keys_from_object(self, *keys)
+            }
+            # saves session.proxies dict as session
+            # leave this here for compatibility
+            data["session"] = data["proxy"]
+            del data["aclient"]
             json.dump(
-                {
-                    key: self.__dict__[key]
-                    for key in get_filtered_keys_from_object(self, *keys)
-                },
+                data,
                 f,
                 indent=2,
-                # saves session.proxies dict as session
-                default=lambda o: o.__dict__["proxies"],
             )
 
-    def load(self, file: str, *keys: str) -> None:
+    def load(self, file: str, *keys_: str) -> None:
         """
         Load the Chatbot configuration from a JSON file
         """
         with open(file, encoding="utf-8") as f:
             # load json, if session is in keys, load proxies
             loaded_config = json.load(f)
-            keys = get_filtered_keys_from_object(self, *keys)
+            keys = get_filtered_keys_from_object(self, *keys_)
 
-            if "session" in keys and loaded_config["session"]:
-                self.session.proxies = loaded_config["session"]
-            keys = keys - {"session"}
+            if (
+                "session" in keys
+                and loaded_config["session"]
+                or "proxy" in keys
+                and loaded_config["proxy"]
+            ):
+                self.proxy = loaded_config.get("session", loaded_config["proxy"])
+                self.session = httpx.Client(
+                    follow_redirects=True,
+                    proxies=self.proxy,
+                    timeout=self.timeout,
+                    cookies=self.session.cookies,
+                    headers=self.session.headers,
+                )
+                self.aclient = httpx.AsyncClient(
+                    follow_redirects=True,
+                    proxies=self.proxy,
+                    timeout=self.timeout,
+                    cookies=self.session.cookies,
+                    headers=self.session.headers,
+                )
+
+            keys.remove("session")
+            keys.remove("aclient")
             self.__dict__.update({key: loaded_config[key] for key in keys})
 
 

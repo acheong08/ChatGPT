@@ -78,7 +78,7 @@ def get_filtered_keys_from_object(obj: object, *keys: str) -> Set[str]:
     """
     class_keys = obj.__dict__.keys()
     if not keys:
-        return class_keys
+        return set(class_keys)
 
     # Remove the passed keys from the class keys.
     if keys[0] == "not":
