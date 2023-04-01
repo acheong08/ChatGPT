@@ -64,6 +64,10 @@ class Chatbot:
                 self.aclient = httpx.AsyncClient(
                     follow_redirects=True, proxies=proxy, timeout=timeout
                 )
+        else:
+            self.aclient = httpx.AsyncClient(
+                follow_redirects=True, proxies=proxy, timeout=timeout
+            )
 
         self.conversation: dict[str, list[dict]] = {
             "default": [
