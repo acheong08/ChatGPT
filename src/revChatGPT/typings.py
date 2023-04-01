@@ -1,5 +1,4 @@
 from abc import ABCMeta
-from abc import abstractmethod
 from os import getenv
 from platform import python_version_tuple
 
@@ -16,7 +15,6 @@ class ChatbotError(Exception, metaclass=ABCMeta):
     Base class for all Chatbot errors in this Project
     """
 
-    @abstractmethod
     def __init__(self, *args: object) -> None:
         if SUPPORT_ADD_NOTES:
             super().add_note(
@@ -125,12 +123,14 @@ class APIConnectionError(ChatbotError):
             )
         super().__init__(*args)
 
+
 class NotAllowRunning(ActionNotAllowedError):
     """
     Subclass of ActionNotAllowedError
 
     Direct startup is not allowed for some reason
     """
+
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
