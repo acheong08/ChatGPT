@@ -5,7 +5,7 @@ import argparse
 import json
 import os
 import sys
-from typing import AsyncGenerator, Generator, NoReturn
+from typing import AsyncGenerator, NoReturn
 
 import requests
 import httpx
@@ -652,7 +652,7 @@ def main() -> NoReturn:
             # Get search results
             search_results = '{"results": "No search results"}'
             if query != "none":
-                resp = httpx.post(
+                resp = requests.post(
                     url="https://ddg-api.herokuapp.com/search",
                     json={"query": query, "limit": 3},
                     timeout=10,
