@@ -42,6 +42,7 @@ python -m pip install --upgrade revChatGPT
 2. 记住你的邮箱地址与密码
 
 ### 身份验证方式: (任选其一)
+
 #### - 邮箱/密码
 不支持使用 Google/Microsoft 授权登录的账户
 ```json
@@ -50,14 +51,7 @@ python -m pip install --upgrade revChatGPT
   "password": "your password"
 }
 ```
-#### - 会话令牌
-获取来自 chat.openai.com 中的`__Secure-next-auth.session-token`的值
 
-```json
-{
-  "session_token": "..."
-}
-```
 #### - 访问令牌
 
 https://chat.openai.com/api/auth/session
@@ -153,7 +147,7 @@ for data in chatbot.ask(
 print(response)
 ```
 #### 所有的API方法
-移步到 [wiki](https://github.com/CoolPlayLin/ChatGPT_Wiki/tree/main/docs/ChatGPT) 来获取高级的开发者功能
+移步到 [wiki](https://github.com/acheong08/ChatGPT/wiki/) 来获取高级的开发者功能
 
 </details>
 
