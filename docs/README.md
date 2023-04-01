@@ -1,4 +1,4 @@
-# ChatGPT <img src="https://github.com/acheong08/ChatGPT/blob/main/logo.png?raw=true" width="20%"></img>
+# ChatGPT <img src="https://github.com/acheong08/ChatGPT/blob/main/logo.png?raw=true" width="15%"></img>
 
 English - [中文](./README_zh.md)
 
