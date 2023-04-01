@@ -58,7 +58,12 @@ class Chatbot:
         self.timeout: float = timeout
         self.proxy = proxy
         self.session = requests.Session()
-        self.session.proxies = proxy
+        self.session.proxies.update(
+            {
+                "http": proxy,
+                "https": proxy,
+            }
+        )
         proxy = (
             proxy or os.environ.get("all_proxy") or os.environ.get("ALL_PROXY") or None
         )
