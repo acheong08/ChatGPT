@@ -1,5 +1,5 @@
 {
-  "python.linting.pylintEnabled": false,
+  "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
   "cSpell.words": [
     "acheong",
@@ -33,5 +33,5 @@
     "unallowed"
   ],
   "python.formatting.provider": "black",
-  "python.linting.mypyEnabled": true,
+  "python.linting.mypyEnabled": false
 }
