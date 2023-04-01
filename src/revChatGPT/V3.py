@@ -59,6 +59,9 @@ class Chatbot:
         self.proxy = proxy
         self.session = requests.Session()
         self.session.proxies = proxy
+        proxy = (
+            proxy or os.environ.get("all_proxy") or os.environ.get("ALL_PROXY") or None
+        )
         if proxy:
             if "socks5h" not in proxy:
                 self.aclient = httpx.AsyncClient(
