@@ -59,9 +59,10 @@ class Chatbot:
         self.proxy = proxy
         self.session = requests.Session()
         self.session.proxies = proxy
-        self.aclient = httpx.AsyncClient(
-            follow_redirects=True, proxies=proxy, timeout=timeout
-        )
+        if "socks5h" not in proxy:
+            self.aclient = httpx.AsyncClient(
+                follow_redirects=True, proxies=proxy, timeout=timeout
+            )
 
         self.conversation: dict[str, list[dict]] = {
             "default": [
