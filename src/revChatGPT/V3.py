@@ -153,7 +153,7 @@ class Chatbot:
         role: str = "user",
         convo_id: str = "default",
         **kwargs,
-    ) -> Generator[str, None, None]:
+    ):
         """
         Ask a question
         """
@@ -189,33 +189,30 @@ class Chatbot:
             stream=True,
         )
         if response.status_code != 200:
-            response.read()
             error = t.APIConnectionError(
-                f"{response.status_code} {response.reason_phrase} {response.text}",
+                f"{response.status_code} {response.reason} {response.text}",
             )
             raise error
-
-        response_role: str = ""
+        response_role: str = None
         full_response: str = ""
         for line in response.iter_lines():
-            line = line.strip()
             if not line:
                 continue
             # Remove "data: "
-            line = line[6:]
+            line = line.decode("utf-8")[6:]
             if line == "[DONE]":
                 break
             resp: dict = json.loads(line)
             choices = resp.get("choices")
             if not choices:
                 continue
-            delta: dict[str, str] = choices[0].get("delta")
+            delta = choices[0].get("delta")
             if not delta:
                 continue
             if "role" in delta:
                 response_role = delta["role"]
             if "content" in delta:
-                content: str = delta["content"]
+                content = delta["content"]
                 full_response += content
                 yield content
         self.add_to_conversation(full_response, response_role, convo_id=convo_id)
