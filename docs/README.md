@@ -29,7 +29,7 @@ python -m pip install --upgrade revChatGPT
 # V1 Standard ChatGPT
 > > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
 
-> ### [Privacy policy](https://github.com/acheong08/ChatGPT/blob/main/docs/PRIVACY.md)
+> ### [Privacy policy](./PRIVACY.md)
 > <br>
 
 > ### !!! Server is now open source at https://github.com/acheong08/ChatGPT-Proxy-V4 for personal use (requires ChatGPT plus)
