@@ -325,7 +325,9 @@ class Chatbot:
         )
         if self.config.get("session_token"):
             log.debug("Using session token")
-            auth.session_token = self.config["session_token"]
+            auth.session.cookies.set(
+                "__Secure-next-auth.session-token", self.config["session_token"]
+            )
             auth.get_access_token()
             if auth.access_token is None:
                 del self.config["session_token"]
@@ -334,7 +336,6 @@ class Chatbot:
         else:
             log.debug("Using authenticator to get access token")
             auth.begin()
-            self.config["session_token"] = auth.session_token
             auth.get_access_token()
 
         self.set_access_token(auth.access_token)
