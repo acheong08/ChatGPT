@@ -1,4 +1,4 @@
-# ChatGPT <img src="https://github.com/acheong08/ChatGPT/blob/main/logo.png?raw=true" width="7%"></img>
+# ChatGPT <img src="https://github.com/acheong08/ChatGPT/blob/main/logo.png?raw=true" width="15%"></img>
 
 [English](./README.md) - 中文
 
@@ -29,7 +29,7 @@ python -m pip install --upgrade revChatGPT
 # V1 标准 ChatGPT
 > > 下午 3：35 - 由于服务器小，速率限制为5个请求/10秒（我没钱了）。
 
-> ### [隐私政策](https://github.com/acheong08/ChatGPT/blob/main/PRIVACY.md)
+> ### [隐私政策](./PRIVACY.md)
 > <br>
 
 > ### !!! 服务器源码已经开源在 https://github.com/acheong08/ChatGPT-Proxy-V4 提供给个人使用 (要求ChatGPT Plus)
