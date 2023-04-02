@@ -186,7 +186,9 @@ class Chatbot:
             try:
                 self.login()
             except AuthError as error:
-                raise
+                print(error.details)
+                print(error.status_code)
+                raise error
 
     @logger(is_timed=False)
     def set_access_token(self, access_token: str) -> None:
