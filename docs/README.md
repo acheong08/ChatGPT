@@ -11,6 +11,8 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 > ## Support my work
 > Make a pull request and fix my bad code.
 
+> #### Discord Server: https://discord.gg/9K2BvbXEHT
+
 # Installation
 
 ```
