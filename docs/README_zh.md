@@ -216,7 +216,7 @@ chatbot.ask("Hello world")
 ```python
 from revChatGPT.V3 import Chatbot
 chatbot = Chatbot(api_key="<api_key>")
-for data in chatbot.ask("Hello world"):
+for data in chatbot.ask_stream("Hello world"):
     print(data, end="", flush=True)
 ```
 
