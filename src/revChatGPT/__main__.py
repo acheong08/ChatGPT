@@ -1,7 +1,9 @@
-from . import V1, V3
-from . import typings as t
-import sys
 import argparse
+import sys
+
+from . import typings as t
+from . import V1
+from . import V3
 
 __all__ = ()
 
@@ -39,9 +41,9 @@ def main():
     elif mode == "V3":
         try:
             V3.main()
-        except Exception as e:
+        except Exception as exc:
             error = t.CLIError("Command line program unknown error")
-            raise error from e
+            raise error from exc
         except KeyboardInterrupt:
             print("\nExiting...")
             sys.exit()

@@ -971,9 +971,9 @@ def main(config: dict) -> NoReturn:
             print()
     except (KeyboardInterrupt, EOFError):
         exit()
-    except Exception as e:
+    except Exception as exc:
         error = t.CLIError("command line program unknown error")
-        raise error from e
+        raise error from exc
 
 
 if __name__ == "__main__":

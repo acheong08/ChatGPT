@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import sys
+from importlib.resources import path
 from typing import AsyncGenerator
 from typing import NoReturn
 
@@ -92,8 +93,7 @@ class Chatbot:
         }
 
         if self.get_token_count("default") > self.max_tokens:
-            error = t.ActionRefuseError("System prompt is too long")
-            raise error
+            raise t.ActionRefuseError("System prompt is too long")
 
     def add_to_conversation(
         self,
@@ -133,8 +133,7 @@ class Chatbot:
             "gpt-4-32k",
             "gpt-4-32k-0314",
         ]:
-            error = NotImplementedError("Unsupported engine {self.engine}")
-            raise error
+            raise NotImplementedError("Unsupported engine {self.engine}")
 
         tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
 
@@ -199,10 +198,9 @@ class Chatbot:
             stream=True,
         )
         if response.status_code != 200:
-            error = t.APIConnectionError(
+            raise t.APIConnectionError(
                 f"{response.status_code} {response.reason} {response.text}",
             )
-            raise error
         response_role: str = None
         full_response: str = ""
         for line in response.iter_lines():
@@ -270,10 +268,9 @@ class Chatbot:
         ) as response:
             if response.status_code != 200:
                 await response.aread()
-                error = t.APIConnectionError(
+                raise t.APIConnectionError(
                     f"{response.status_code} {response.reason_phrase} {response.text}",
                 )
-                raise error
 
             response_role: str = ""
             full_response: str = ""
@@ -410,6 +407,10 @@ class Chatbot:
 
 
 class ChatbotCLI(Chatbot):
+    """
+    Command Line Interface for Chatbot
+    """
+
     def print_config(self, convo_id: str = "default") -> None:
         """
         Prints the current configuration
@@ -459,11 +460,11 @@ Examples:
   """,
         )
 
-    def handle_commands(self, input: str, convo_id: str = "default") -> bool:
+    def handle_commands(self, prompt: str, convo_id: str = "default") -> bool:
         """
         Handle chatbot commands
         """
-        command, *value = input.split(" ")
+        command, *value = prompt.split(" ")
         if command == "!help":
             self.print_help()
         elif command == "!exit":
@@ -592,9 +593,9 @@ def main() -> NoReturn:
         chatbot = ChatbotCLI(args.api_key)
         try:
             chatbot.load(config)
-        except Exception:
+        except Exception as err:
             print(f"Error: {args.config} could not be loaded")
-            sys.exit()
+            raise err
     else:
         chatbot = ChatbotCLI(
             api_key=args.api_key,
@@ -607,8 +608,6 @@ def main() -> NoReturn:
         )
     # Check if internet is enabled
     if args.enable_internet:
-        from importlib.resources import path
-
         config = path("revChatGPT", "config").__str__()
         chatbot.load(os.path.join(config, "enable_internet.json"), "conversation")
 
@@ -647,8 +646,8 @@ def main() -> NoReturn:
         if prompt.startswith("!"):
             try:
                 chatbot.handle_commands(prompt)
-            except Exception as e:
-                print(f"Error: {e}")
+            except Exception as err:
+                print(f"Error: {err}")
             continue
         print()
         print("ChatGPT: ", flush=True)
@@ -691,9 +690,8 @@ def main() -> NoReturn:
 if __name__ == "__main__":
     try:
         main()
-    except Exception as e:
-        error = t.CLIError("Command line program unknown error")
-        raise error from e
+    except Exception as exc:
+        raise t.CLIError("Command line program unknown error") from exc
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit()

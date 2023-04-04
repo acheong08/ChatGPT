@@ -37,7 +37,7 @@ class ActionError(ChatbotError):
     def __init__(self, *args: object) -> None:
         if SUPPORT_ADD_NOTES:
             super().add_note(
-                "The current operation is not allowed, which may be intentional"
+                "The current operation is not allowed, which may be intentional",
             )
         super().__init__(*args)
 
@@ -103,7 +103,7 @@ class AuthenticationError(ChatbotError):
     def __init__(self, *args: object) -> None:
         if SUPPORT_ADD_NOTES:
             super().add_note(
-                "Please check if your key is correct, maybe it may not be valid"
+                "Please check if your key is correct, maybe it may not be valid",
             )
         super().__init__(*args)
 
@@ -118,7 +118,7 @@ class APIConnectionError(ChatbotError):
     def __init__(self, *args: object) -> None:
         if SUPPORT_ADD_NOTES:
             super().add_note(
-                "Please check if there is a problem with your network connection"
+                "Please check if there is a problem with your network connection",
             )
         super().__init__(*args)
 
