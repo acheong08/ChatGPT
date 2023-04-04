@@ -4,6 +4,7 @@ import sys
 
 __all__ = ()
 
+
 def main():
     if sys.argv[1].replace("--", "") in ["V1", "V3"]:
         mode = sys.argv[1].replace("--", "")
@@ -12,11 +13,11 @@ def main():
         mode = sys.argv[-1].replace("--", "")
         sys.argv.remove(sys.argv[-1])
     else:
-        mode = input("Please choose the version you want to use:\nV0, V1, V3\n")
+        mode = input("Please choose the version you want to use:\nV1, V3\n")
 
     if mode == "V1":
         print(
-        """
+            """
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
         """,
@@ -38,6 +39,7 @@ def main():
     else:
         error = NotImplementedError(f"Unknown version: {mode}")
         raise error
+
 
 if __name__ == "__main__":
     main()
