@@ -12,7 +12,7 @@ import httpx
 import requests
 import tiktoken
 
-from . import typings as t
+from . import typing as t
 from .utils import create_completer
 from .utils import create_keybindings
 from .utils import create_session

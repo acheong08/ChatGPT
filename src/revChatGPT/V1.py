@@ -21,7 +21,7 @@ from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
-from . import typings as t
+from . import typing as t
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
