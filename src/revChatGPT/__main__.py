@@ -14,7 +14,7 @@ def main():
     else:
         mode = input("Please choose the version you want to use:\nV0, V1, V3\n")
 
-    el mode == "V1":
+    if mode == "V1":
         print(
         """
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
