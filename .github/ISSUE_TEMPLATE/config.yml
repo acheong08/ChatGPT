@@ -1,6 +1,11 @@
-
 blank_issues_enabled: false
 contact_links:
-  - name: Discussions, questions, and niche issues
+  - name: Discussions, questions, and niche issues in Github
     url: https://github.com/acheong08/ChatGPT/discussions/new/choose
     about: For anything that is not an explicit bug
+  - name: Discuss in the Discord
+    url: https://discord.gg/9K2BvbXEHT
+    about: 'Personal server: Chill discussions and more detailed updates'
+  - name: Communicate in the Discord
+    url: https://discord.gg/WMNtbDUjUv
+    about: 'Public server: Large technical community with many high profile members like @transitive-bullshit'
