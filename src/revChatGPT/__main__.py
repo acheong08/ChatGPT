@@ -1,5 +1,5 @@
 from . import V1, V3
-from . import typing as t
+from . import typings as t
 import sys
 
 __all__ = ()

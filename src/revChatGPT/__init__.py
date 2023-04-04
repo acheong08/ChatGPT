@@ -9,7 +9,7 @@ revChatGPT.V3
 __all__ = ()
 
 # Available Python Version Verify
-from . import typing as t
+from . import typings as t
 from platform import python_version_tuple
 from platform import python_version
 from warnings import warn
