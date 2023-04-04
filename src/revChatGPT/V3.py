@@ -586,7 +586,7 @@ def main() -> NoReturn:
         choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
     )
 
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     # Initialize chatbot
     if config := args.config or os.environ.get("GPT_CONFIG_PATH"):

@@ -12,6 +12,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)",
         epilog="Repo: github.com/acheong08/ChatGPT",
+        allow_abbrev=True,
     )
     parser.add_argument(
         "--V1",
@@ -23,7 +24,7 @@ def main():
         action="store_true",
         help="Use the API version of ChatGPT",
     )
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
     mode = "V1" if args.V1 else "V3" if args.V3 else input("Version (V1/V3):")
 
     if mode == "V1":
