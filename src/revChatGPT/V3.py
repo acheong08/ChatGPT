@@ -5,10 +5,11 @@ import argparse
 import json
 import os
 import sys
-from typing import AsyncGenerator, NoReturn
+from typing import AsyncGenerator
+from typing import NoReturn
 
-import requests
 import httpx
+import requests
 import tiktoken
 
 from . import typings as t
@@ -62,7 +63,7 @@ class Chatbot:
             {
                 "http": proxy,
                 "https": proxy,
-            }
+            },
         )
         proxy = (
             proxy or os.environ.get("all_proxy") or os.environ.get("ALL_PROXY") or None
@@ -70,11 +71,15 @@ class Chatbot:
         if proxy:
             if "socks5h" not in proxy:
                 self.aclient = httpx.AsyncClient(
-                    follow_redirects=True, proxies=proxy, timeout=timeout
+                    follow_redirects=True,
+                    proxies=proxy,
+                    timeout=timeout,
                 )
         else:
             self.aclient = httpx.AsyncClient(
-                follow_redirects=True, proxies=proxy, timeout=timeout
+                follow_redirects=True,
+                proxies=proxy,
+                timeout=timeout,
             )
 
         self.conversation: dict[str, list[dict]] = {
