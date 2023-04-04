@@ -1,19 +1,28 @@
 from . import V1, V3
 from . import typings as t
 import sys
+import argparse
 
 __all__ = ()
 
 
 def main():
-    if sys.argv[1].replace("--", "") in ["V1", "V3"]:
-        mode = sys.argv[1].replace("--", "")
-        sys.argv.remove(sys.argv[0])
-    elif sys.argv[-1].replace("--", "") in ["V1", "V3"]:
-        mode = sys.argv[-1].replace("--", "")
-        sys.argv.remove(sys.argv[-1])
-    else:
-        mode = input("Please choose the version you want to use:\nV1, V3\n")
+    parser = argparse.ArgumentParser(
+        description="ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)",
+        epilog="Repo: github.com/acheong08/ChatGPT",
+    )
+    parser.add_argument(
+        "--V1",
+        action="store_true",
+        help="Use the website version of ChatGPT",
+    )
+    parser.add_argument(
+        "--V3",
+        action="store_true",
+        help="Use the API version of ChatGPT",
+    )
+    args = parser.parse_args()
+    mode = "V1" if args.V1 else "V3" if args.V3 else input("Version (V1/V3):")
 
     if mode == "V1":
         print(
