@@ -20,14 +20,19 @@ permissions:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
     if: github.event_name != 'release'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11.2'
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: make
       - name: Build CI
@@ -49,7 +54,7 @@ jobs:
     - name: Build package
       run: make build
     - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      uses: pypa/gh-action-pypi-publish@v1.8.5
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}

@@ -26,7 +26,7 @@ setup(
     license="GNU General Public License v2.0",
     packages=find_namespace_packages("src"),
     package_dir={"": "src"},
-    py_modules=["V2", "V1", "V0", "V3"],
+    py_modules=["revChatGPT"],
     package_data={"": ["*.json"]},
     install_requires=[
         "OpenAIAuth==0.3.6",
@@ -47,7 +47,4 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    extras_require={
-        "WebGPT": ["duckduckgo_search"],
-    },
 )
