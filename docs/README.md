@@ -112,8 +112,7 @@ Set the environment variable `NO_COLOR` to `true` to disable color output.
 from revChatGPT.V1 import Chatbot
 
 chatbot = Chatbot(config={
-  "email": "<your email>",
-  "password": "<your password>"
+  "access_token": "<your access_token>"
 })
 
 print("Chatbot: ")
@@ -133,8 +132,7 @@ print()
 from revChatGPT.V1 import Chatbot
 
 chatbot = Chatbot(config={
-  "email": "<your email>",
-  "password": "<your password>"
+  "access_token": "<your access_token>"
 })
 
 prompt = "how many beaches does portugal have?"
