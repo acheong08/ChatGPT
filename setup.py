@@ -25,9 +25,9 @@ setup(
     author_email="acheong@student.dalat.org",
     license="GNU General Public License v2.0",
     packages=find_namespace_packages("src"),
-    package_dir={"source": "src"},
-    py_modules=["V1", "V3"],
-    package_data={"cfg": ["*.json"]},
+    package_dir={"": "src"},
+    py_modules=["revChatGPT"],
+    package_data={"": ["*.json"]},
     install_requires=[
         "OpenAIAuth==0.3.6",
         "requests[socks]",
