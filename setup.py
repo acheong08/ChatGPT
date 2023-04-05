@@ -25,9 +25,9 @@ setup(
     author_email="acheong@student.dalat.org",
     license="GNU General Public License v2.0",
     packages=find_namespace_packages("src"),
-    package_dir={"": "src"},
-    py_modules=["V2", "V1", "V0", "V3"],
-    package_data={"": ["*.json"]},
+    package_dir={"source": "src"},
+    py_modules=["V1", "V3"],
+    package_data={"cfg": ["*.json"]},
     install_requires=[
         "OpenAIAuth==0.3.6",
         "requests[socks]",
@@ -47,7 +47,4 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    extras_require={
-        "WebGPT": ["duckduckgo_search"],
-    },
 )

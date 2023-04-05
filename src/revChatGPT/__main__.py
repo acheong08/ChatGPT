@@ -1,3 +1,6 @@
+"""
+Main CLI
+"""
 import argparse
 import sys
 
@@ -9,6 +12,9 @@ __all__ = ()
 
 
 def main():
+    """
+    main function for CLI
+    """
     parser = argparse.ArgumentParser(
         description="ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)",
         epilog="Repo: github.com/acheong08/ChatGPT",
