@@ -6,7 +6,9 @@
 [![支持的平台](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
 [![Downloads](https://static.pepy.tech/badge/revchatgpt)](https://pypi.python.org/pypi/revChatGPT)
 
-ChatGPT的逆向工程API。可扩展用于聊天机器人等。
+ChatGPT的逆向工程API。可扩展用于 Chatbot 等。
+
+[![](./view.gif)](https://pypi.python.org/pypi/revChatGPT)
 
 > ## 支持本项目
 > 开启Pull Request并修复我的代码
