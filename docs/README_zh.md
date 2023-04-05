@@ -13,6 +13,8 @@ ChatGPT的逆向工程API。可扩展用于 Chatbot 等。
 > ## 支持本项目
 > 开启Pull Request并修复我的代码
 
+> #### Discord 服务器: https://discord.gg/9K2BvbXEHT
+
 # 安装
 
 ```
