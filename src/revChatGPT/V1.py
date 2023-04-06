@@ -349,6 +349,7 @@ class Chatbot:
         prompt: str,
         conversation_id: str | None = None,
         parent_id: str | None = None,
+        model: str | None = None,
         timeout: float = 360,
     ) -> str:
         """Ask a question to the chatbot
@@ -430,7 +431,8 @@ class Chatbot:
             ],
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": self.config.get("model")
+            "model": model
+            or self.config.get("model")
             or (
                 "text-davinci-002-render-paid"
                 if self.config.get("paid")
