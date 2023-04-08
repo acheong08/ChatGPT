@@ -90,8 +90,9 @@ class Chatbot:
         config: dict[str, str],
         conversation_id: str | None = None,
         parent_id: str | None = None,
-        session_client=None,
+        session_client = None,
         lazy_loading: bool = True,
+        base_url: str = None,
     ) -> None:
         """Initialize a chatbot
 
@@ -159,6 +160,7 @@ class Chatbot:
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
         self.lazy_loading = lazy_loading
+        self.base_url = base_url or BASE_URL
 
         self.__check_credentials()
 
@@ -447,7 +449,7 @@ class Chatbot:
         )
         self.parent_id_prev_queue.append(data["parent_message_id"])
         response = self.session.post(
-            url=f"{BASE_URL}conversation",
+            url=f"{self.base_url}conversation",
             data=json.dumps(data),
             timeout=timeout,
             stream=True,
@@ -574,7 +576,7 @@ class Chatbot:
         :param offset: Integer
         :param limit: Integer
         """
-        url = f"{BASE_URL}conversations?offset={offset}&limit={limit}"
+        url = f"{self.base_url}conversations?offset={offset}&limit={limit}"
         response = self.session.get(url)
         self.__check_response(response)
         if encoding is not None:
@@ -589,7 +591,7 @@ class Chatbot:
         :param id: UUID of conversation
         :param encoding: String
         """
-        url = f"{BASE_URL}conversation/{convo_id}"
+        url = f"{self.base_url}conversation/{convo_id}"
         response = self.session.get(url)
         self.__check_response(response)
         if encoding is not None:
@@ -602,7 +604,7 @@ class Chatbot:
         Generate title for conversation
         """
         response = self.session.post(
-            f"{BASE_URL}conversation/gen_title/{convo_id}",
+            f"{self.base_url}conversation/gen_title/{convo_id}",
             data=json.dumps(
                 {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
@@ -617,7 +619,7 @@ class Chatbot:
         :param id: UUID of conversation
         :param title: String
         """
-        url = f"{BASE_URL}conversation/{convo_id}"
+        url = f"{self.base_url}conversation/{convo_id}"
         response = self.session.patch(url, data=json.dumps({"title": title}))
         self.__check_response(response)
 
@@ -627,7 +629,7 @@ class Chatbot:
         Delete conversation
         :param id: UUID of conversation
         """
-        url = f"{BASE_URL}conversation/{convo_id}"
+        url = f"{self.base_url}conversation/{convo_id}"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -636,7 +638,7 @@ class Chatbot:
         """
         Delete all conversations
         """
-        url = f"{BASE_URL}conversations"
+        url = f"{self.base_url}conversations"
         response = self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -679,12 +681,14 @@ class AsyncChatbot(Chatbot):
         config: dict,
         conversation_id: str | None = None,
         parent_id: str | None = None,
+        base_url: str = None,
     ) -> None:
         super().__init__(
             config=config,
             conversation_id=conversation_id,
             parent_id=parent_id,
             session_client=AsyncClient,
+            base_url=base_url,
         )
 
     async def ask(
@@ -743,7 +747,7 @@ class AsyncChatbot(Chatbot):
 
         async with self.session.stream(
             method="POST",
-            url=f"{BASE_URL}conversation",
+            url=f"{self.base_url}conversation",
             data=json.dumps(data),
             timeout=timeout,
         ) as response:
@@ -789,7 +793,7 @@ class AsyncChatbot(Chatbot):
         :param offset: Integer
         :param limit: Integer
         """
-        url = f"{BASE_URL}conversations?offset={offset}&limit={limit}"
+        url = f"{self.base_url}conversations?offset={offset}&limit={limit}"
         response = await self.session.get(url)
         self.__check_response(response)
         data = json.loads(response.text)
@@ -804,7 +808,7 @@ class AsyncChatbot(Chatbot):
         Get message history
         :param id: UUID of conversation
         """
-        url = f"{BASE_URL}conversation/{convo_id}"
+        url = f"{self.base_url}conversation/{convo_id}"
         response = await self.session.get(url)
         if encoding is not None:
             response.encoding = encoding
@@ -816,7 +820,7 @@ class AsyncChatbot(Chatbot):
         """
         Generate title for conversation
         """
-        url = f"{BASE_URL}conversation/gen_title/{convo_id}"
+        url = f"{self.base_url}conversation/gen_title/{convo_id}"
         response = await self.session.post(
             url,
             data=json.dumps(
@@ -831,7 +835,7 @@ class AsyncChatbot(Chatbot):
         :param convo_id: UUID of conversation
         :param title: String
         """
-        url = f"{BASE_URL}conversation/{convo_id}"
+        url = f"{self.base_url}conversation/{convo_id}"
         response = await self.session.patch(url, data=f'{{"title": "{title}"}}')
         self.__check_response(response)
 
@@ -840,7 +844,7 @@ class AsyncChatbot(Chatbot):
         Delete conversation
         :param convo_id: UUID of conversation
         """
-        url = f"{BASE_URL}conversation/{convo_id}"
+        url = f"{self.base_url}conversation/{convo_id}"
         response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
@@ -848,7 +852,7 @@ class AsyncChatbot(Chatbot):
         """
         Delete all conversations
         """
-        url = f"{BASE_URL}conversations"
+        url = f"{self.base_url}conversations"
         response = await self.session.patch(url, data='{"is_visible": false}')
         self.__check_response(response)
 
