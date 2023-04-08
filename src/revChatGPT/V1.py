@@ -90,7 +90,7 @@ class Chatbot:
         config: dict[str, str],
         conversation_id: str | None = None,
         parent_id: str | None = None,
-        session_client = None,
+        session_client=None,
         lazy_loading: bool = True,
         base_url: str = None,
     ) -> None:
