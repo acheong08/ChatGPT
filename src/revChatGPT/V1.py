@@ -7,8 +7,6 @@ import base64
 import contextlib
 import json
 import logging
-import os
-import os.path as osp
 import time
 import uuid
 from functools import wraps
@@ -17,6 +15,7 @@ from os import getenv
 from typing import NoReturn
 
 import requests
+from pathlib import Path
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
@@ -116,14 +115,14 @@ class Chatbot:
         """
         user_home = getenv("HOME")
         if user_home is None:
-            self.cache_path = osp.join(os.getcwd(), ".chatgpt_cache.json")
+            self.cache_path = Path(Path().cwd(), ".chatgpt_cache.json")
         else:
             # mkdir ~/.config/revChatGPT
-            if not osp.exists(osp.join(user_home, ".config")):
-                os.mkdir(osp.join(user_home, ".config"))
-            if not osp.exists(osp.join(user_home, ".config", "revChatGPT")):
-                os.mkdir(osp.join(user_home, ".config", "revChatGPT"))
-            self.cache_path = osp.join(user_home, ".config", "revChatGPT", "cache.json")
+            if not Path(user_home, ".config").exists():
+                Path(user_home, ".config").mkdir()
+            if not Path(user_home, ".config", "revChatGPT").exists():
+                Path(user_home, ".config", "revChatGPT").mkdir()
+            self.cache_path = Path(user_home, ".config", "revChatGPT", "cache.json")
 
         self.config = config
         self.session = session_client() if session_client else requests.Session()
@@ -302,8 +301,8 @@ class Chatbot:
                 "access_tokens":{"someone@example.com": 'this account's access token', }
             }
         """
-        dirname = osp.dirname(self.cache_path) or "."
-        os.makedirs(dirname, exist_ok=True)
+        dirname = self.cache_path.home() or Path(".")
+        dirname.mkdir(parents=True, exist_ok=True)
         json.dump(info, open(self.cache_path, "w", encoding="utf-8"), indent=4)
 
     @logger(is_timed=False)
@@ -881,13 +880,13 @@ def configure() -> dict:
     """
     Looks for a config file in the following locations:
     """
-    config_files = ["config.json"]
+    config_files:list[Path] = [Path("config.json")]
     if xdg_config_home := getenv("XDG_CONFIG_HOME"):
-        config_files.append(f"{xdg_config_home}/revChatGPT/config.json")
+        config_files.append(Path(xdg_config_home, "revChatGPT/config.json"))
     if user_home := getenv("HOME"):
-        config_files.append(f"{user_home}/.config/revChatGPT/config.json")
+        config_files.append(Path(user_home, ".config/revChatGPT/config.json"))
 
-    if config_file := next((f for f in config_files if osp.exists(f)), None):
+    if config_file := next((f for f in config_files if f.exists()), None):
         with open(config_file, encoding="utf-8") as f:
             config = json.load(f)
     else:
