@@ -876,7 +876,7 @@ def configure() -> dict:
     if user_home := getenv("HOME"):
         config_files.append(Path(user_home, ".config/revChatGPT/config.json"))
     if windows_home := getenv("HOMEPATH"):
-        config_files.append(f"{windows_home}/.config/revChatGPT/config.json")
+        config_files.append(Path(f"{windows_home}/.config/revChatGPT/config.json"))
 
     if config_file := next((f for f in config_files if f.exists()), None):
         with open(config_file, encoding="utf-8") as f:
