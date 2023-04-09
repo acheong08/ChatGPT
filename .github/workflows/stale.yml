@@ -1,23 +1,27 @@
 name: Close inactive issues
 on:
   schedule:
-    - cron: "30 1 * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
   close-issues:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
-      - uses: actions/stale@v5
+      - uses: actions/stale@v8
         with:
           days-before-issue-stale: 2
           days-before-issue-close: 3
           stale-issue-label: "stale"
           stale-issue-message: "This issue is stale because it has been open for 2 days with no activity."
           close-issue-message: "This issue was closed because it has been inactive for 3 days since being marked as stale."
-          days-before-pr-stale: -1
-          days-before-pr-close: -1
-          repo-token: ${{ secrets.GH_TOKEN }}
+          stale-pr-label: "stale"
+          days-before-pr-stale: 25
+          days-before-pr-close: 30
+          stale-pr-message: "This issue is stale because it has been open for 5 days with no activity."
+          close-pr-message: "This issue was closed because it has been inactive for 30 days since being marked as stale."
