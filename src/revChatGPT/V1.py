@@ -870,11 +870,13 @@ def configure() -> dict:
     """
     Looks for a config file in the following locations:
     """
-    config_files:list[Path] = [Path("config.json")]
+    config_files: list[Path] = [Path("config.json")]
     if xdg_config_home := getenv("XDG_CONFIG_HOME"):
         config_files.append(Path(xdg_config_home, "revChatGPT/config.json"))
     if user_home := getenv("HOME"):
         config_files.append(Path(user_home, ".config/revChatGPT/config.json"))
+    if windows_home := getenv("HOMEPATH"):
+        config_files.append(f"{windows_home}/.config/revChatGPT/config.json")
 
     if config_file := next((f for f in config_files if f.exists()), None):
         with open(config_file, encoding="utf-8") as f:
