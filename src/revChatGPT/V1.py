@@ -48,23 +48,17 @@ def logger(is_timed: bool):
 
         def wrapper(*args, **kwargs):
             log.debug(
-                "Entering %s with args %s and kwargs %s",
-                func.__name__,
-                args,
-                kwargs,
+                f"Entering {func.__name__} with args {args} and kwargs {kwargs}",
             )
             start = time.time()
             out = func(*args, **kwargs)
             end = time.time()
             if is_timed:
                 log.debug(
-                    "Exiting %s with return value %s. Took %s seconds.",
-                    func.__name__,
-                    out,
-                    end - start,
+                    f"Exiting {func.__name__} with return value {out}. Took {end - start} seconds.",
                 )
             else:
-                log.debug("Exiting %s with return value %s", func.__name__, out)
+                log.debug(f"Exiting {func.__name__} with return value {out}")
 
             return out
 
@@ -388,14 +382,13 @@ class Chatbot:
         parent_id = parent_id or self.parent_id
         if conversation_id is None and parent_id is None:
             parent_id = str(uuid.uuid4())
-            log.debug("New conversation, setting parent_id to new UUID4: %s", parent_id)
+            log.debug(f"New conversation, setting parent_id to new UUID4: {parent_id}")
 
         if conversation_id is not None and parent_id is None:
             if conversation_id not in self.conversation_mapping:
                 if self.lazy_loading:
                     log.debug(
-                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
-                        conversation_id,
+                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
                     )
                     with contextlib.suppress(Exception):
                         history = self.get_msg_history(conversation_id)
@@ -404,17 +397,14 @@ class Chatbot:
                         ]
                 else:
                     log.debug(
-                        "Conversation ID %s not found in conversation mapping, mapping conversations",
-                        conversation_id,
+                        f"Conversation ID {conversation_id} not found in conversation mapping, mapping conversations",
                     )
 
                     self.__map_conversations()
 
             if conversation_id in self.conversation_mapping:
                 log.debug(
-                    "Conversation ID %s found in conversation mapping, setting parent_id to %s",
-                    conversation_id,
-                    self.conversation_mapping[conversation_id],
+                    f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
                 )
                 parent_id = self.conversation_mapping[conversation_id]
             else:  # invalid conversation_id provided, treat as a new conversation
@@ -459,7 +449,7 @@ class Chatbot:
             # remove b' and ' at the beginning and end and ignore case
             line = str(line)[2:-1]
             if line.lower() == "internal server error":
-                log.error("Internal Server Error: %s", line)
+                log.error(f"Internal Server Error: {line}")
                 error = t.Error(
                     source="ask",
                     message="Internal Server Error",
@@ -519,9 +509,9 @@ class Chatbot:
                 model = line["message"]["metadata"]["model_slug"]
             except KeyError:
                 model = None
-            log.debug("Received message: %s", message)
-            log.debug("Received conversation_id: %s", conversation_id)
-            log.debug("Received parent_id: %s", parent_id)
+            log.debug(f"Received message: {message}")
+            log.debug(f"Received conversation_id: {conversation_id}")
+            log.debug(f"Received parent_id: {parent_id}")
             yield {
                 "message": message.strip("\n"),
                 "conversation_id": conversation_id,
