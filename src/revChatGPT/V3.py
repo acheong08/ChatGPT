@@ -6,6 +6,7 @@ import json
 import os
 import sys
 from importlib.resources import path
+from pathlib import Path
 from typing import AsyncGenerator
 from typing import NoReturn
 
@@ -608,7 +609,7 @@ def main() -> NoReturn:
     # Check if internet is enabled
     if args.enable_internet:
         config = path("revChatGPT", "config").__str__()
-        chatbot.load(os.path.join(config, "enable_internet.json"), "conversation")
+        chatbot.load(Path(config, "enable_internet.json"), "conversation")
 
     session = create_session()
     completer = create_completer(

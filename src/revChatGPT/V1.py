@@ -7,8 +7,6 @@ import base64
 import contextlib
 import json
 import logging
-import os
-import os.path as osp
 import time
 import uuid
 from functools import wraps
@@ -17,6 +15,7 @@ from os import getenv
 from typing import NoReturn
 
 import requests
+from pathlib import Path
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
@@ -49,23 +48,17 @@ def logger(is_timed: bool):
 
         def wrapper(*args, **kwargs):
             log.debug(
-                "Entering %s with args %s and kwargs %s",
-                func.__name__,
-                args,
-                kwargs,
+                f"Entering {func.__name__} with args {args} and kwargs {kwargs}",
             )
             start = time.time()
             out = func(*args, **kwargs)
             end = time.time()
             if is_timed:
                 log.debug(
-                    "Exiting %s with return value %s. Took %s seconds.",
-                    func.__name__,
-                    out,
-                    end - start,
+                    f"Exiting {func.__name__} with return value {out}. Took {end - start} seconds.",
                 )
             else:
-                log.debug("Exiting %s with return value %s", func.__name__, out)
+                log.debug(f"Exiting {func.__name__} with return value {out}")
 
             return out
 
@@ -116,14 +109,14 @@ class Chatbot:
         """
         user_home = getenv("HOME")
         if user_home is None:
-            self.cache_path = osp.join(os.getcwd(), ".chatgpt_cache.json")
+            self.cache_path = Path(Path().cwd(), ".chatgpt_cache.json")
         else:
             # mkdir ~/.config/revChatGPT
-            if not osp.exists(osp.join(user_home, ".config")):
-                os.mkdir(osp.join(user_home, ".config"))
-            if not osp.exists(osp.join(user_home, ".config", "revChatGPT")):
-                os.mkdir(osp.join(user_home, ".config", "revChatGPT"))
-            self.cache_path = osp.join(user_home, ".config", "revChatGPT", "cache.json")
+            if not Path(user_home, ".config").exists():
+                Path(user_home, ".config").mkdir()
+            if not Path(user_home, ".config", "revChatGPT").exists():
+                Path(user_home, ".config", "revChatGPT").mkdir()
+            self.cache_path = Path(user_home, ".config", "revChatGPT", "cache.json")
 
         self.config = config
         self.session = session_client() if session_client else requests.Session()
@@ -302,8 +295,8 @@ class Chatbot:
                 "access_tokens":{"someone@example.com": 'this account's access token', }
             }
         """
-        dirname = osp.dirname(self.cache_path) or "."
-        os.makedirs(dirname, exist_ok=True)
+        dirname = self.cache_path.home() or Path(".")
+        dirname.mkdir(parents=True, exist_ok=True)
         json.dump(info, open(self.cache_path, "w", encoding="utf-8"), indent=4)
 
     @logger(is_timed=False)
@@ -389,14 +382,13 @@ class Chatbot:
         parent_id = parent_id or self.parent_id
         if conversation_id is None and parent_id is None:
             parent_id = str(uuid.uuid4())
-            log.debug("New conversation, setting parent_id to new UUID4: %s", parent_id)
+            log.debug(f"New conversation, setting parent_id to new UUID4: {parent_id}")
 
         if conversation_id is not None and parent_id is None:
             if conversation_id not in self.conversation_mapping:
                 if self.lazy_loading:
                     log.debug(
-                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
-                        conversation_id,
+                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
                     )
                     with contextlib.suppress(Exception):
                         history = self.get_msg_history(conversation_id)
@@ -405,17 +397,14 @@ class Chatbot:
                         ]
                 else:
                     log.debug(
-                        "Conversation ID %s not found in conversation mapping, mapping conversations",
-                        conversation_id,
+                        f"Conversation ID {conversation_id} not found in conversation mapping, mapping conversations",
                     )
 
                     self.__map_conversations()
 
             if conversation_id in self.conversation_mapping:
                 log.debug(
-                    "Conversation ID %s found in conversation mapping, setting parent_id to %s",
-                    conversation_id,
-                    self.conversation_mapping[conversation_id],
+                    f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
                 )
                 parent_id = self.conversation_mapping[conversation_id]
             else:  # invalid conversation_id provided, treat as a new conversation
@@ -460,7 +449,7 @@ class Chatbot:
             # remove b' and ' at the beginning and end and ignore case
             line = str(line)[2:-1]
             if line.lower() == "internal server error":
-                log.error("Internal Server Error: %s", line)
+                log.error(f"Internal Server Error: {line}")
                 error = t.Error(
                     source="ask",
                     message="Internal Server Error",
@@ -520,9 +509,9 @@ class Chatbot:
                 model = line["message"]["metadata"]["model_slug"]
             except KeyError:
                 model = None
-            log.debug("Received message: %s", message)
-            log.debug("Received conversation_id: %s", conversation_id)
-            log.debug("Received parent_id: %s", parent_id)
+            log.debug(f"Received message: {message}")
+            log.debug(f"Received conversation_id: {conversation_id}")
+            log.debug(f"Received parent_id: {parent_id}")
             yield {
                 "message": message.strip("\n"),
                 "conversation_id": conversation_id,
@@ -881,13 +870,15 @@ def configure() -> dict:
     """
     Looks for a config file in the following locations:
     """
-    config_files = ["config.json"]
+    config_files: list[Path] = [Path("config.json")]
     if xdg_config_home := getenv("XDG_CONFIG_HOME"):
-        config_files.append(f"{xdg_config_home}/revChatGPT/config.json")
+        config_files.append(Path(xdg_config_home, "revChatGPT/config.json"))
     if user_home := getenv("HOME"):
-        config_files.append(f"{user_home}/.config/revChatGPT/config.json")
+        config_files.append(Path(user_home, ".config/revChatGPT/config.json"))
+    if windows_home := getenv("HOMEPATH"):
+        config_files.append(f"{windows_home}/.config/revChatGPT/config.json")
 
-    if config_file := next((f for f in config_files if osp.exists(f)), None):
+    if config_file := next((f for f in config_files if f.exists()), None):
         with open(config_file, encoding="utf-8") as f:
             config = json.load(f)
     else:
