@@ -66,6 +66,8 @@ python -m pip install --upgrade revChatGPT
 
 #### - Access token
 
+> Please this!
+
 https://chat.openai.com/api/auth/session
 
 ```json
