@@ -109,6 +109,7 @@ class Chatbot:
         """
         user_home = getenv("HOME")
         if user_home is None:
+            user_home = Path().cwd()
             self.cache_path = Path(Path().cwd(), ".chatgpt_cache.json")
         else:
             # mkdir ~/.config/revChatGPT
