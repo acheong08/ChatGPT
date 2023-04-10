@@ -11,6 +11,7 @@ Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 [![](./view.gif)](https://pypi.python.org/pypi/revChatGPT)
 
 > ## Support my work
+>
 > Make a pull request and fix my bad code.
 >
 > [![support](https://ko-fi.com/img/githubbutton_sm.svg)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
@@ -24,18 +25,20 @@ python -m pip install --upgrade revChatGPT
 ```
 
 ### Suport Python Version
+
 - Minimum - Python3.9
 - Recommend - Python3.11+
-
 
 <details>
 
 <summary>
 
 # V1 Standard ChatGPT
+
 > > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
 
 > ### [Privacy policy](./PRIVACY.md)
+>
 > <br>
 
 > ### !!! Server is now open source at https://github.com/acheong08/ChatGPT-Proxy-V4 for personal use (requires ChatGPT plus)
@@ -50,8 +53,10 @@ python -m pip install --upgrade revChatGPT
 ### Authentication method: (Choose 1)
 
 #### - Email/Password
-> *Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`*
-Not supported for Google/Microsoft accounts.
+
+> _Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`_
+> Not supported for Google/Microsoft accounts.
+
 ```json
 {
   "email": "email",
@@ -60,7 +65,11 @@ Not supported for Google/Microsoft accounts.
 ```
 
 #### - Access token
+
+> Please this!
+
 https://chat.openai.com/api/auth/session
+
 ```json
 {
   "access_token": "<access_token>"
@@ -79,10 +88,11 @@ https://chat.openai.com/api/auth/session
   "model": "gpt-4"
 }
 ```
+
 Analytics is disabled by default. Set `collect_analytics` to `true` to enable it.
 
 3. Save this as `$HOME/.config/revChatGPT/config.json`
-4. If you are using Windows, you will need to create an environment variable named ```HOME``` and set it to your home profile for the script to be able to locate the config.json file.
+4. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
 
 ## Usage
 
@@ -106,10 +116,10 @@ The command line interface supports multi-line inputs and allows navigation usin
 
 Set the environment variable `NO_COLOR` to `true` to disable color output.
 
-
 ### Developer API
 
 #### Basic example (streamed):
+
 ```python
 from revChatGPT.V1 import Chatbot
 
@@ -147,18 +157,21 @@ for data in chatbot.ask(
 
 print(response)
 ```
+
 #### All API methods
+
 Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced developer usage.
 
 </details>
-
 
 <details>
 
 <summary>
 
 # V3 Official Chat API
+
 > Recently released by OpenAI
+>
 > - Paid
 
 </summary>
@@ -166,10 +179,11 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced dev
 Get API key from https://platform.openai.com/account/api-keys
 
 ## Command line
+
 `python3 -m revChatGPT.V3 --api_key <api_key>`
 
 ```
- $ python3 -m revChatGPT.V3 -h
+  $ python3 -m revChatGPT.V3 --help
 
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
@@ -177,11 +191,10 @@ Get API key from https://platform.openai.com/account/api-keys
 Type '!help' to show a full list of commands
 Press Esc followed by Enter or Alt+Enter to send a message.
 
-usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream]
-             [--base_prompt BASE_PROMPT] [--proxy PROXY] [--top_p TOP_P]
-             [--reply_count REPLY_COUNT] [--enable_internet] [--config CONFIG]
-             [--submit_key SUBMIT_KEY]
-             [--model {gpt-3.5-turbo,gpt-4,gpt-4-32k}]
+usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream] [--base_prompt BASE_PROMPT]
+             [--proxy PROXY] [--top_p TOP_P] [--reply_count REPLY_COUNT] [--enable_internet]
+             [--config CONFIG] [--submit_key SUBMIT_KEY] [--model {gpt-3.5-turbo,gpt-4,gpt-4-32k}]
+             [--truncate_limit TRUNCATE_LIMIT]
 
 options:
   -h, --help            show this help message and exit
@@ -198,13 +211,15 @@ options:
   --enable_internet     Allow ChatGPT to search the internet
   --config CONFIG       Path to V3 config json file
   --submit_key SUBMIT_KEY
-                        Custom submit key for chatbot. For more information on keys, see https://python-prompt-toolkit.readthedocs.io/en/stable/pages/advanced_topics/key_bindings.html#list-of-special-keys
+                        Custom submit key for chatbot. For more information on keys, see README
   --model {gpt-3.5-turbo,gpt-4,gpt-4-32k}
+  --truncate_limit TRUNCATE_LIMIT
 ```
 
 ## Developer API
 
 ### Basic example
+
 ```python
 from revChatGPT.V3 import Chatbot
 chatbot = Chatbot(api_key="<api_key>")
@@ -212,6 +227,7 @@ chatbot.ask("Hello world")
 ```
 
 ### Streaming example
+
 ```python
 from revChatGPT.V3 import Chatbot
 chatbot = Chatbot(api_key="<api_key>")
@@ -230,7 +246,6 @@ If you have a cool project you want added to the list, open an issue.
 # Disclaimers
 
 This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me.
-
 
 ## Contributors
 

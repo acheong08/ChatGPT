@@ -39,6 +39,7 @@ class Chatbot:
         presence_penalty: float = 0.0,
         frequency_penalty: float = 0.0,
         reply_count: int = 1,
+        truncate_limit: int = None,
         system_prompt: str = "You are ChatGPT, a large language model trained by OpenAI. Respond conversationally",
     ) -> None:
         """
@@ -50,7 +51,7 @@ class Chatbot:
         self.max_tokens: int = max_tokens or (
             31000 if engine == "gpt-4-32k" else 7000 if engine == "gpt-4" else 4000
         )
-        self.truncate_limit: int = (
+        self.truncate_limit: int = truncate_limit or (
             30500 if engine == "gpt-4-32k" else 6500 if engine == "gpt-4" else 3500
         )
         self.temperature: float = temperature
@@ -586,6 +587,12 @@ def main() -> NoReturn:
         choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
     )
 
+    parser.add_argument(
+        "--truncate_limit",
+        type=int,
+        default=None,
+    )
+
     args, _ = parser.parse_known_args()
 
     # Initialize chatbot
@@ -605,6 +612,7 @@ def main() -> NoReturn:
             top_p=args.top_p,
             reply_count=args.reply_count,
             engine=args.model,
+            truncate_limit=args.truncate_limit,
         )
     # Check if internet is enabled
     if args.enable_internet:

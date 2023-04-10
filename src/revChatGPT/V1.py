@@ -12,10 +12,10 @@ import uuid
 from functools import wraps
 from os import environ
 from os import getenv
+from pathlib import Path
 from typing import NoReturn
 
 import requests
-from pathlib import Path
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
@@ -109,6 +109,7 @@ class Chatbot:
         """
         user_home = getenv("HOME")
         if user_home is None:
+            user_home = Path().cwd()
             self.cache_path = Path(Path().cwd(), ".chatgpt_cache.json")
         else:
             # mkdir ~/.config/revChatGPT
