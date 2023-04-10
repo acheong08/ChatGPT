@@ -12,10 +12,10 @@ import uuid
 from functools import wraps
 from os import environ
 from os import getenv
+from pathlib import Path
 from typing import NoReturn
 
 import requests
-from pathlib import Path
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
