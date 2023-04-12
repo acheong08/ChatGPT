@@ -8,8 +8,6 @@ English - [中文](./README_zh.md)
 
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
-[![](./view.gif)](https://pypi.python.org/pypi/revChatGPT)
-
 > ## Support my work
 >
 > Make a pull request and fix my bad code.
@@ -35,15 +33,15 @@ python -m pip install --upgrade revChatGPT
 
 # V1 Standard ChatGPT
 
-> > 3:35 PM - Rate limit at 5 requests / 10 seconds due to small server (I ran out of budget.)
+This uses a reversed `chat.openai.com`'s API with a [cloudflare bypass server](https://github.com/acheong08/ChatGPT-Proxy-V4) to make programmatic ChatGPT usage free. This specific library is meant for personal use due to severe rate limits on OpenAI's side. It has not been optimized for use with mutliple accounts.
 
-> ### [Privacy policy](./PRIVACY.md)
->
-> <br>
-
-> ### !!! Server is now open source at https://github.com/acheong08/ChatGPT-Proxy-V4 for personal use (requires ChatGPT plus)
+You can check out [this project](https://github.com/acheong08/ChatGPT-to-API) for well supported multi account cycling. It is compatible with the official API. Use [OpenAI's documentation](https://platform.openai.com/docs/guides/chat) as reference on usage. It carries conversations between accounts to ensure rate limits are not hit given a high number of accounts.
 
 </summary>
+
+## Rate limits
+- Proxy server: 5 requests / 10 seconds
+- OpenAI: 50 requests / hour for each account
 
 ## Configuration
 
