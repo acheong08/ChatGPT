@@ -15,7 +15,7 @@ from os import getenv
 from pathlib import Path
 from typing import NoReturn, Generator, AsyncGenerator
 
-import requests
+import requests, httpx
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
@@ -156,7 +156,7 @@ class Chatbot:
         self.parent_id_prev_queue = []
         self.lazy_loading = lazy_loading
 
-        if "_puid" in self.config:
+        if "_puid" in self.config and self.config["_puid"]:
             self.base_url = "https://chat.openai.com/backend-api/"
             self.__set_puid(self.config["_puid"])
         else:
@@ -354,6 +354,179 @@ class Chatbot:
         self.set_access_token(auth.access_token)
 
     @logger(is_timed=True)
+    def __send_request(
+        self,
+        data: dict,
+        auto_continue: bool = False,
+        timeout: float = 360,
+    ) -> Generator[dict, None, None]:
+        log.debug("Sending the payload")
+
+        cid, pid = data["conversation_id"], data["parent_message_id"]
+        model, message = None, ""
+
+        self.conversation_id_prev_queue.append(cid)
+        self.parent_id_prev_queue.append(pid)
+        response = self.session.post(
+            url=f"{self.base_url}conversation",
+            data=json.dumps(data),
+            timeout=timeout,
+            stream=True,
+        )
+        self.__check_response(response)
+
+        finish_details = None
+        for line in response.iter_lines():
+            # remove b' and ' at the beginning and end and ignore case
+            line = str(line)[2:-1]
+            if line.lower() == "internal server error":
+                log.error(f"Internal Server Error: {line}")
+                error = t.Error(
+                    source="ask",
+                    message="Internal Server Error",
+                    code=t.ErrorType.SERVER_ERROR,
+                )
+                raise error
+            if not line or line is None:
+                continue
+            if "data: " in line:
+                line = line[6:]
+            if line == "[DONE]":
+                break
+
+            line = line.replace('\\"', '"')
+            line = line.replace("\\'", "'")
+            line = line.replace("\\\\", "\\")
+
+            try:
+                line = json.loads(line)
+            except json.decoder.JSONDecodeError:
+                continue
+            if not self.__check_fields(line):
+                raise ValueError(f"Field missing. Details: {str(line)}")
+            if line.get("message").get("author").get("role") != "assistant":
+                continue
+            message: str = line["message"]["content"]["parts"][0]
+            cid = line["conversation_id"]
+            pid = line["message"]["id"]
+            metadata = line["message"].get("metadata", {})
+            model = metadata.get("model_slug", None)
+            finish_details = metadata.get("finish_details", {"type": None})["type"]
+            yield {
+                "message": message,
+                "conversation_id": cid,
+                "parent_id": pid,
+                "model": model,
+                "finish_details": finish_details,
+                "end_turn": line["message"].get("end_turn", True),
+                "recipient": line["message"].get("recipient", "all"),
+            }
+
+        self.conversation_mapping[cid] = pid
+        if pid is not None:
+            self.parent_id = pid
+        if cid is not None:
+            self.conversation_id = cid
+
+        if not (auto_continue and finish_details == "max_tokens"):
+            return
+        message = message.strip("\n")
+        for i in self.continue_write(
+            conversation_id=cid,
+            model=model,
+            timeout=timeout,
+        ):
+            i["message"] = message + i["message"]
+            yield i
+
+    @logger(is_timed=True)
+    def post_messages(
+        self,
+        messages: list[dict],
+        conversation_id: str | None = None,
+        parent_id: str | None = None,
+        model: str | None = None,
+        auto_continue: bool = False,
+        timeout: float = 360,
+    ) -> Generator[dict, None, None]:
+        """Ask a question to the chatbot
+        Args:
+            messages (list[dict]): The messages to send
+            conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
+            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
+            model (str | None, optional): The model to use. Defaults to None.
+            auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
+            timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
+
+        Yields: Generator[dict, None, None] - The response from the chatbot
+            dict: {
+                "message": str,
+                "conversation_id": str,
+                "parent_id": str,
+                "model": str,
+                "finish_details": str, # "max_tokens" or "stop"
+                "end_turn": bool,
+                "recipient": str,
+            }
+        """
+        if parent_id and not conversation_id:
+            raise t.Error(
+                source="User",
+                message="conversation_id must be set once parent_id is set",
+                code=t.ErrorType.USER_ERROR,
+            )
+
+        if conversation_id and conversation_id != self.conversation_id:
+            self.parent_id = None
+        conversation_id = conversation_id or self.conversation_id
+        parent_id = parent_id or self.parent_id or ""
+        if not conversation_id and not parent_id:
+            parent_id = str(uuid.uuid4())
+
+        if conversation_id and not parent_id:
+            if conversation_id not in self.conversation_mapping:
+                if self.lazy_loading:
+                    log.debug(
+                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
+                    )
+                    with contextlib.suppress(Exception):
+                        history = self.get_msg_history(conversation_id)
+                        self.conversation_mapping[conversation_id] = history[
+                            "current_node"
+                        ]
+                else:
+                    log.debug(
+                        f"Conversation ID {conversation_id} not found in conversation mapping, mapping conversations",
+                    )
+                    self.__map_conversations()
+            if conversation_id in self.conversation_mapping:
+                log.debug(
+                    f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
+                )
+                parent_id = self.conversation_mapping[conversation_id]
+            else:  # invalid conversation_id provided, treat as a new conversation
+                conversation_id = None
+                parent_id = str(uuid.uuid4())
+
+        data = {
+            "action": "next",
+            "messages": messages,
+            "conversation_id": conversation_id,
+            "parent_message_id": parent_id,
+            "model": model
+            or self.config.get("model")
+            or (
+                "text-davinci-002-render-paid"
+                if self.config.get("paid")
+                else "text-davinci-002-render-sha"
+            ),
+        }
+
+        yield from self.__send_request(
+            data, timeout=timeout, auto_continue=auto_continue
+        )
+
+    @logger(is_timed=True)
     def ask(
         self,
         prompt: str,
@@ -368,231 +541,82 @@ class Chatbot:
             prompt (str): The question
             conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
             parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
+            model (str | None, optional): The model to use. Defaults to None.
+            auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
-        Raises:
-            Error: _description_
-            Exception: _description_
-            Error: _description_
-            Error: _description_
-            Error: _description_
-
-        Yields:
-            _type_: _description_
-        """
-
-        if parent_id is not None and conversation_id is None:
-            log.error("conversation_id must be set once parent_id is set")
-            error = t.Error(
-                source="User",
-                message="conversation_id must be set once parent_id is set",
-                code=t.ErrorType.USER_ERROR,
-            )
-            raise error
-
-        if conversation_id is not None and conversation_id != self.conversation_id:
-            log.debug("Updating to new conversation by setting parent_id to None")
-            self.parent_id = None
-
-        conversation_id = conversation_id or self.conversation_id
-        parent_id = parent_id or self.parent_id
-        if conversation_id is None and parent_id is None:
-            parent_id = str(uuid.uuid4())
-            log.debug(f"New conversation, setting parent_id to new UUID4: {parent_id}")
-
-        if conversation_id is not None and parent_id is None:
-            if conversation_id not in self.conversation_mapping:
-                if self.lazy_loading:
-                    log.debug(
-                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
-                    )
-                    with contextlib.suppress(Exception):
-                        history = self.get_msg_history(conversation_id)
-                        self.conversation_mapping[conversation_id] = history[
-                            "current_node"
-                        ]
-                else:
-                    log.debug(
-                        f"Conversation ID {conversation_id} not found in conversation mapping, mapping conversations",
-                    )
-
-                    self.__map_conversations()
-
-            if conversation_id in self.conversation_mapping:
-                log.debug(
-                    f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
-                )
-                parent_id = self.conversation_mapping[conversation_id]
-            else:  # invalid conversation_id provided, treat as a new conversation
-                conversation_id = None
-                parent_id = str(uuid.uuid4())
-        data = {
-            "action": "next",
-            "messages": [
-                {
-                    "id": str(uuid.uuid4()),
-                    "role": "user",
-                    "author": {"role": "user"},
-                    "content": {"content_type": "text", "parts": [prompt]},
-                },
-            ],
-            "conversation_id": conversation_id,
-            "parent_message_id": parent_id,
-            "model": model
-            or self.config.get("model")
-            or (
-                "text-davinci-002-render-paid"
-                if self.config.get("paid")
-                else "text-davinci-002-render-sha"
-            ),
-        }
-        log.debug("Sending the payload")
-        log.debug(json.dumps(data, indent=2))
-
-        self.conversation_id_prev_queue.append(
-            data["conversation_id"],
-        )
-        self.parent_id_prev_queue.append(data["parent_message_id"])
-        response = self.session.post(
-            url=f"{self.base_url}conversation",
-            data=json.dumps(data),
-            timeout=timeout,
-            stream=True,
-        )
-        self.__check_response(response)
-
-        finish_reason = None
-        for line in response.iter_lines():
-            # remove b' and ' at the beginning and end and ignore case
-            line = str(line)[2:-1]
-            if line.lower() == "internal server error":
-                log.error(f"Internal Server Error: {line}")
-                error = t.Error(
-                    source="ask",
-                    message="Internal Server Error",
-                    code=t.ErrorType.SERVER_ERROR,
-                )
-                raise error
-            if not line or line is None:
-                continue
-            if "data: " in line:
-                line = line[6:]
-            if line == "[DONE]":
-                break
-
-            line = line.replace('\\"', '"')
-            line = line.replace("\\'", "'")
-            line = line.replace("\\\\", "\\")
-
-            try:
-                line = json.loads(line)
-            except json.decoder.JSONDecodeError:
-                continue
-            if not self.__check_fields(line) or response.status_code != 200:
-                log.error("Field missing", exc_info=True)
-                log.error(response.text)
-                if response.status_code == 401:
-                    error = t.Error(
-                        source="ask",
-                        message="Permission denied",
-                        code=t.ErrorType.AUTHENTICATION_ERROR,
-                    )
-                elif response.status_code == 403:
-                    error = t.Error(
-                        source="ask",
-                        message="Cloudflare triggered a 403 error",
-                        code=t.ErrorType.CLOUDFLARE_ERROR,
-                    )
-                elif response.status_code == 429:
-                    error = t.Error(
-                        source="ask",
-                        message="Rate limit exceeded",
-                        code=t.ErrorType.RATE_LIMIT_ERROR,
-                    )
-                else:
-                    error = t.Error(
-                        source="ask",
-                        message=line,
-                        code=t.ErrorType.SERVER_ERROR,
-                    )
-                raise error
-
-            message: str = line["message"]["content"]["parts"][0]
-            if message == prompt:
-                continue
-            conversation_id = line["conversation_id"]
-            parent_id = line["message"]["id"]
-            metadata = line["message"].get("metadata", {})
-            model = metadata.get("model_slug", None)
-            finish_reason = metadata.get("finish_details", {"type": None})["type"]
-            yield {
-                "message": message.strip("\n"),
-                "conversation_id": conversation_id,
-                "parent_id": parent_id,
-                "model": model,
-                "finish_details": finish_reason,
+        Yields: Generator[dict, None, None] - The response from the chatbot
+            dict: {
+                "message": str,
+                "conversation_id": str,
+                "parent_id": str,
+                "model": str,
+                "finish_details": str, # "max_tokens" or "stop"
+                "end_turn": bool,
+                "recipient": str,
             }
+        """
+        messages = [
+            {
+                "id": str(uuid.uuid4()),
+                "role": "user",
+                "author": {"role": "user"},
+                "content": {"content_type": "text", "parts": [prompt]},
+            },
+        ]
 
-        self.conversation_mapping[conversation_id] = parent_id
-        if parent_id is not None:
-            self.parent_id = parent_id
-        if conversation_id is not None:
-            self.conversation_id = conversation_id
-
-        if not (auto_continue and finish_reason == "max_tokens"):
-            return
-        message = message.strip("\n")
-        for i in self.continue_write(
+        yield from self.post_messages(
+            messages,
             conversation_id=conversation_id,
+            parent_id=parent_id,
+            model=model,
+            auto_continue=auto_continue,
             timeout=timeout,
-        ):
-            i["message"] = message + i["message"]
-            yield i
+        )
 
     @logger(is_timed=True)
     def continue_write(
         self,
         conversation_id: str | None = None,
-        parent_id: str | None = None,
-        model: str | None = None,
+        parent_id: str = "",
+        model: str = "",
+        auto_continue: bool = False,
         timeout: float = 360,
     ) -> Generator[dict, None, None]:
         """let the chatbot continue to write
         Args:
             conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
             parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
+            model (str | None, optional): The model to use. Defaults to None.
+            auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
-        Raises:
-            Error: _description_
-            Exception: _description_
-            Error: _description_
-            Error: _description_
-            Error: _description_
-
         Yields:
-            _type_: _description_
+            dict: {
+                "message": str,
+                "conversation_id": str,
+                "parent_id": str,
+                "model": str,
+                "finish_details": str, # "max_tokens" or "stop"
+                "end_turn": bool,
+                "recipient": str,
+            }
         """
-        if parent_id is not None and conversation_id is None:
-            log.error("conversation_id must be set once parent_id is set")
-            error = t.Error(
+        if parent_id and not conversation_id:
+            raise t.Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
                 code=t.ErrorType.USER_ERROR,
             )
-            raise error
 
-        if conversation_id is not None and conversation_id != self.conversation_id:
-            log.debug("Updating to new conversation by setting parent_id to None")
+        if conversation_id and conversation_id != self.conversation_id:
             self.parent_id = None
-
         conversation_id = conversation_id or self.conversation_id
-        parent_id = parent_id or self.parent_id
-        if conversation_id is None and parent_id is None:
+        parent_id = parent_id or self.parent_id or ""
+        if not conversation_id and not parent_id:
             parent_id = str(uuid.uuid4())
-            log.debug(f"New conversation, setting parent_id to new UUID4: {parent_id}")
 
-        if conversation_id is not None and parent_id is None:
+        if conversation_id and not parent_id:
             if conversation_id not in self.conversation_mapping:
                 if self.lazy_loading:
                     log.debug(
@@ -607,9 +631,7 @@ class Chatbot:
                     log.debug(
                         f"Conversation ID {conversation_id} not found in conversation mapping, mapping conversations",
                     )
-
                     self.__map_conversations()
-
             if conversation_id in self.conversation_mapping:
                 log.debug(
                     f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
@@ -618,6 +640,7 @@ class Chatbot:
             else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
+
         data = {
             "action": "continue",
             "conversation_id": conversation_id,
@@ -630,92 +653,10 @@ class Chatbot:
                 else "text-davinci-002-render-sha"
             ),
         }
-        log.debug("Sending the payload")
-        log.debug(json.dumps(data, indent=2))
 
-        self.conversation_id_prev_queue.append(
-            data["conversation_id"],
+        yield from self.__send_request(
+            data, timeout=timeout, auto_continue=auto_continue
         )
-        self.parent_id_prev_queue.append(data["parent_message_id"])
-        response = self.session.post(
-            url=f"{self.base_url}conversation",
-            data=json.dumps(data),
-            timeout=timeout,
-            stream=True,
-        )
-        self.__check_response(response)
-        for line in response.iter_lines():
-            # remove b' and ' at the beginning and end and ignore case
-            line = str(line)[2:-1]
-            if line.lower() == "internal server error":
-                log.error(f"Internal Server Error: {line}")
-                error = t.Error(
-                    source="ask",
-                    message="Internal Server Error",
-                    code=t.ErrorType.SERVER_ERROR,
-                )
-                raise error
-            if not line or line is None:
-                continue
-            if "data: " in line:
-                line = line[6:]
-            if line == "[DONE]":
-                break
-
-            line = line.replace('\\"', '"')
-            line = line.replace("\\'", "'")
-            line = line.replace("\\\\", "\\")
-
-            try:
-                line = json.loads(line)
-            except json.decoder.JSONDecodeError:
-                continue
-            if not self.__check_fields(line) or response.status_code != 200:
-                log.error("Field missing", exc_info=True)
-                log.error(response.text)
-                if response.status_code == 401:
-                    error = t.Error(
-                        source="continue_write",
-                        message="Permission denied",
-                        code=t.ErrorType.AUTHENTICATION_ERROR,
-                    )
-                elif response.status_code == 403:
-                    error = t.Error(
-                        source="continue_write",
-                        message="Cloudflare triggered a 403 error",
-                        code=t.ErrorType.CLOUDFLARE_ERROR,
-                    )
-                elif response.status_code == 429:
-                    error = t.Error(
-                        source="continue_write",
-                        message="Rate limit exceeded",
-                        code=t.ErrorType.RATE_LIMIT_ERROR,
-                    )
-                else:
-                    error = t.Error(
-                        source="continue_write",
-                        message=line,
-                        code=t.ErrorType.SERVER_ERROR,
-                    )
-                raise error
-            message: str = line["message"]["content"]["parts"][0]
-            conversation_id = line["conversation_id"]
-            parent_id = line["message"]["id"]
-            metadata = line["message"].get("metadata", {})
-            model = metadata.get("model_slug", None)
-            finish_reason = metadata.get("finish_details", {"type": None})["type"]
-            yield {
-                "message": message.strip("\n"),
-                "conversation_id": conversation_id,
-                "parent_id": parent_id,
-                "model": model,
-                "finish_details": finish_reason,
-            }
-        self.conversation_mapping[conversation_id] = parent_id
-        if parent_id is not None:
-            self.parent_id = parent_id
-        if conversation_id is not None:
-            self.conversation_id = conversation_id
 
     @logger(is_timed=False)
     def __check_fields(self, data: dict) -> bool:
@@ -735,8 +676,9 @@ class Chatbot:
         Raises:
             Error: _description_
         """
-        if response.status_code != 200:
-            print(response.text)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError:
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
@@ -860,9 +802,17 @@ class AsyncChatbot(Chatbot):
         self,
         config: dict,
         conversation_id: str | None = None,
-        parent_id: str | None = None,
-        base_url: str = None,
+        parent_id: str = "",
+        base_url: str = "",
     ) -> None:
+        """
+        Same as Chatbot class, but with async methods.
+
+        Note:
+            AsyncChatbot is not compatible with OpenAI Web API, I don't know why the stream method doesn't work.
+            (But the sync version works fine)
+            So, if you want to use AsyncChatbot, you don't need to set the "_puid" parameter in the config.
+        """
         super().__init__(
             config=config,
             conversation_id=conversation_id,
@@ -871,70 +821,24 @@ class AsyncChatbot(Chatbot):
             base_url=base_url,
         )
 
-    async def ask(
-        self,
-        prompt: str,
-        conversation_id: str | None = None,
-        parent_id: str | None = None,
-        auto_continue: bool = False,
-        timeout: int = 360,
+    async def __send_request(
+        self, data: dict, auto_continue: bool = False, timeout: float = 360
     ) -> AsyncGenerator[dict, None]:
-        """
-        Ask a question to the chatbot
-        """
-        if parent_id is not None and conversation_id is None:
-            error = t.Error(
-                source="User",
-                message="conversation_id must be set once parent_id is set",
-                code=t.ErrorType.SERVER_ERROR,
-            )
-            raise error
+        cid, pid = data["conversation_id"], data["parent_message_id"]
 
-        if conversation_id is not None and conversation_id != self.conversation_id:
-            self.parent_id = None
-
-        conversation_id = conversation_id or self.conversation_id
-        parent_id = parent_id or self.parent_id
-        if conversation_id is None and parent_id is None:
-            parent_id = str(uuid.uuid4())
-
-        if conversation_id is not None and parent_id is None:
-            if conversation_id not in self.conversation_mapping:
-                await self.__map_conversations()
-            parent_id = self.conversation_mapping[conversation_id]
-        data = {
-            "action": "next",
-            "messages": [
-                {
-                    "id": str(uuid.uuid4()),
-                    "role": "user",
-                    "content": {"content_type": "text", "parts": [prompt]},
-                },
-            ],
-            "conversation_id": conversation_id,
-            "parent_message_id": parent_id,
-            "model": self.config.get("model")
-            or (
-                "text-davinci-002-render-paid"
-                if self.config.get("paid")
-                else "text-davinci-002-render-sha"
-            ),
-        }
-
-        self.conversation_id_prev_queue.append(
-            data["conversation_id"],
-        )
-        self.parent_id_prev_queue.append(data["parent_message_id"])
-
-        finish_reason = None
+        self.conversation_id_prev_queue.append(cid)
+        self.parent_id_prev_queue.append(pid)
         message = ""
+
+        finish_details = None
+        response = None
         async with self.session.stream(
             method="POST",
             url=f"{self.base_url}conversation",
             data=json.dumps(data),
             timeout=timeout,
         ) as response:
-            self.__check_response(response)
+            await self.__check_response(response)
             async for line in response.aiter_lines():
                 if not line or line is None:
                     continue
@@ -950,86 +854,95 @@ class AsyncChatbot(Chatbot):
                 if not self.__check_fields(line):
                     raise ValueError(f"Field missing. Details: {str(line)}")
 
-                message = line["message"]["content"]["parts"][0]
-                finish_reason = line["message"]["metadata"].get(
-                    "finish_details", {"type": None}
-                )["type"]
-                conversation_id = line["conversation_id"]
-                parent_id = line["message"]["id"]
-                model = (
-                    line["message"]["metadata"]["model_slug"]
-                    if "model_slug" in line["message"]["metadata"]
-                    else None
-                )
-
+                message: str = line["message"]["content"]["parts"][0]
+                cid = line["conversation_id"]
+                pid = line["message"]["id"]
+                metadata = line["message"].get("metadata", {})
+                model = metadata.get("model_slug", None)
+                finish_details = metadata.get("finish_details", {"type": None})["type"]
                 yield {
                     "message": message,
-                    "conversation_id": conversation_id,
-                    "parent_id": parent_id,
+                    "conversation_id": cid,
+                    "parent_id": pid,
                     "model": model,
-                    "finish_details": finish_reason,
+                    "finish_details": finish_details,
+                    "end_turn": line["message"].get("end_turn", True),
+                    "recipient": line["message"].get("recipient", "all"),
                 }
-            self.conversation_mapping[conversation_id] = parent_id
-            if parent_id is not None:
-                self.parent_id = parent_id
-            if conversation_id is not None:
-                self.conversation_id = conversation_id
-        if not (auto_continue or finish_reason == "max_tokens"):
+
+            self.conversation_mapping[cid] = pid
+            if pid:
+                self.parent_id = pid
+            if cid:
+                self.conversation_id = cid
+
+        if not (auto_continue and finish_details == "max_tokens"):
             return
         async for msg in self.continue_write(
-            conversation_id=conversation_id,
+            conversation_id=cid,
+            auto_continue=auto_continue,
             timeout=timeout,
         ):
             msg["message"] = message + msg["message"]
             yield msg
 
-    async def continue_write(
+    async def post_messages(
         self,
+        messages: list[dict],
         conversation_id: str | None = None,
-        parent_id: str | None = None,
+        parent_id: str = "",
+        model: str = "",
+        auto_continue: bool = False,
         timeout: int = 360,
     ) -> AsyncGenerator[dict, None]:
-        """let the chatbot continue to write
+        """Post messages to the chatbot
+
         Args:
+            messages (list[dict]): the messages to post
             conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
-            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
+            parent_id (str, optional): UUID for the message to continue on. Defaults to "".
+            model (str, optional): The model to use. Defaults to "".
+            auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
-        Raises:
-            Error: _description_
-            Exception: _description_
-            Error: _description_
-            Error: _description_
-            Error: _description_
-
         Yields:
-            _type_: _description_
+            AsyncGenerator[dict, None]: The response from the chatbot
+            {
+                "message": str,
+                "conversation_id": str,
+                "parent_id": str,
+                "model": str,
+                "finish_details": str,
+                "end_turn": bool,
+                "recipient": str,
+            }
         """
-        if parent_id is not None and conversation_id is None:
+        if parent_id and not conversation_id:
             error = t.Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
                 code=t.ErrorType.SERVER_ERROR,
             )
             raise error
-
-        if conversation_id is not None and conversation_id != self.conversation_id:
+        if conversation_id and conversation_id != self.conversation_id:
             self.parent_id = None
-
         conversation_id = conversation_id or self.conversation_id
-        parent_id = parent_id or self.parent_id
-        if conversation_id is None and parent_id is None:
-            parent_id = str(uuid.uuid4())
 
-        if conversation_id is not None and parent_id is None:
+        parent_id = parent_id or self.parent_id or ""
+        if not conversation_id and not parent_id:
+            parent_id = str(uuid.uuid4())
+        if conversation_id and not parent_id:
             if conversation_id not in self.conversation_mapping:
                 await self.__map_conversations()
             parent_id = self.conversation_mapping[conversation_id]
+
         data = {
-            "action": "continue",
+            "action": "next",
+            "messages": messages,
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": self.config.get("model")
+            "model": model
+            or self.config.get("model")
             or (
                 "text-davinci-002-render-paid"
                 if self.config.get("paid")
@@ -1037,52 +950,130 @@ class AsyncChatbot(Chatbot):
             ),
         }
 
-        self.conversation_id_prev_queue.append(
-            data["conversation_id"],
-        )
-        self.parent_id_prev_queue.append(data["parent_message_id"])
-
-        async with self.session.stream(
-            method="POST",
-            url=f"{self.base_url}conversation",
-            data=json.dumps(data),
+        async for msg in self.__send_request(
+            data=data,
+            auto_continue=auto_continue,
             timeout=timeout,
-        ) as response:
-            self.__check_response(response)
-            async for line in response.aiter_lines():
-                if not line or line is None:
-                    continue
-                if "data: " in line:
-                    line = line[6:]
-                if "[DONE]" in line:
-                    break
+        ):
+            yield msg
 
-                try:
-                    line = json.loads(line)
-                except json.decoder.JSONDecodeError:
-                    continue
-                if not self.__check_fields(line):
-                    raise ValueError(f"Field missing. Details: {str(line)}")
+    async def ask(
+        self,
+        prompt: str,
+        conversation_id: str | None = None,
+        parent_id: str = "",
+        model: str = "",
+        auto_continue: bool = False,
+        timeout: int = 360,
+    ) -> AsyncGenerator[dict, None]:
+        """Ask a question to the chatbot
 
-                message = line["message"]["content"]["parts"][0]
-                conversation_id = line["conversation_id"]
-                parent_id = line["message"]["id"]
-                model = (
-                    line["message"]["metadata"]["model_slug"]
-                    if "model_slug" in line["message"]["metadata"]
-                    else None
-                )
-                yield {
-                    "message": message,
-                    "conversation_id": conversation_id,
-                    "parent_id": parent_id,
-                    "model": model,
-                }
-            self.conversation_mapping[conversation_id] = parent_id
-            if parent_id is not None:
-                self.parent_id = parent_id
-            if conversation_id is not None:
-                self.conversation_id = conversation_id
+        Args:
+            prompt (str): The question to ask
+            conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
+            parent_id (str, optional): UUID for the message to continue on. Defaults to "".
+            model (str, optional): The model to use. Defaults to "".
+            auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
+            timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
+
+        Yields:
+            AsyncGenerator[dict, None]: The response from the chatbot
+            {
+                "message": str,
+                "conversation_id": str,
+                "parent_id": str,
+                "model": str,
+                "finish_details": str,
+                "end_turn": bool,
+                "recipient": str,
+            }
+        """
+
+        messages = [
+            {
+                "id": str(uuid.uuid4()),
+                "author": {"role": "user"},
+                "content": {"content_type": "text", "parts": [prompt]},
+            },
+        ]
+
+        async for msg in self.post_messages(
+            messages=messages,
+            conversation_id=conversation_id,
+            parent_id=parent_id,
+            model=model,
+            auto_continue=auto_continue,
+            timeout=timeout,
+        ):
+            yield msg
+
+    async def continue_write(
+        self,
+        conversation_id: str | None = None,
+        parent_id: str = "",
+        model: str = "",
+        auto_continue: bool = False,
+        timeout: float = 360,
+    ) -> AsyncGenerator[dict, None]:
+        """let the chatbot continue to write
+        Args:
+            conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
+            parent_id (str, optional): UUID for the message to continue on. Defaults to None.
+            model (str, optional): Model to use. Defaults to None.
+            auto_continue (bool, optional): Whether to continue writing automatically. Defaults to False.
+            timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
+
+
+        Yields:
+            AsyncGenerator[dict, None]: The response from the chatbot
+            {
+                "message": str,
+                "conversation_id": str,
+                "parent_id": str,
+                "model": str,
+                "finish_details": str,
+                "end_turn": bool,
+                "recipient": str,
+            }
+        """
+        if parent_id and not conversation_id:
+            error = t.Error(
+                source="User",
+                message="conversation_id must be set once parent_id is set",
+                code=t.ErrorType.SERVER_ERROR,
+            )
+            raise error
+        if conversation_id and conversation_id != self.conversation_id:
+            self.parent_id = None
+        conversation_id = conversation_id or self.conversation_id
+
+        parent_id = parent_id or self.parent_id or ""
+        if not conversation_id and not parent_id:
+            parent_id = str(uuid.uuid4())
+        if conversation_id and not parent_id:
+            if conversation_id not in self.conversation_mapping:
+                await self.__map_conversations()
+            parent_id = self.conversation_mapping[conversation_id]
+
+        data = {
+            "action": "continue",
+            "conversation_id": conversation_id,
+            "parent_message_id": parent_id,
+            "model": model
+            or self.config.get("model")
+            or (
+                "text-davinci-002-render-paid"
+                if self.config.get("paid")
+                else "text-davinci-002-render-sha"
+            ),
+        }
+
+        async for msg in self.__send_request(
+            data=data,
+            auto_continue=auto_continue,
+            timeout=timeout,
+        ):
+            yield msg
 
     async def get_conversations(self, offset: int = 0, limit: int = 20) -> list:
         """
@@ -1092,7 +1083,7 @@ class AsyncChatbot(Chatbot):
         """
         url = f"{self.base_url}conversations?offset={offset}&limit={limit}"
         response = await self.session.get(url)
-        self.__check_response(response)
+        await self.__check_response(response)
         data = json.loads(response.text)
         return data["items"]
 
@@ -1109,7 +1100,7 @@ class AsyncChatbot(Chatbot):
         response = await self.session.get(url)
         if encoding is not None:
             response.encoding = encoding
-            self.__check_response(response)
+            await self.__check_response(response)
             return json.loads(response.text)
         return None
 
@@ -1134,7 +1125,7 @@ class AsyncChatbot(Chatbot):
         """
         url = f"{self.base_url}conversation/{convo_id}"
         response = await self.session.patch(url, data=f'{{"title": "{title}"}}')
-        self.__check_response(response)
+        await self.__check_response(response)
 
     async def delete_conversation(self, convo_id: str) -> None:
         """
@@ -1143,7 +1134,7 @@ class AsyncChatbot(Chatbot):
         """
         url = f"{self.base_url}conversation/{convo_id}"
         response = await self.session.patch(url, data='{"is_visible": false}')
-        self.__check_response(response)
+        await self.__check_response(response)
 
     async def clear_conversations(self) -> None:
         """
@@ -1151,7 +1142,7 @@ class AsyncChatbot(Chatbot):
         """
         url = f"{self.base_url}conversations"
         response = await self.session.patch(url, data='{"is_visible": false}')
-        self.__check_response(response)
+        await self.__check_response(response)
 
     async def __map_conversations(self) -> None:
         conversations = await self.get_conversations()
@@ -1166,8 +1157,18 @@ class AsyncChatbot(Chatbot):
             return False
         return True
 
-    def __check_response(self, response) -> None:
-        response.raise_for_status()
+    async def __check_response(self, response: httpx.Response) -> None:
+        # 改成自带的错误处理
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError:
+            await response.aread()
+            error = t.Error(
+                source="OpenAI",
+                message=response.text,
+                code=response.status_code,
+            )
+            raise error
 
 
 get_input = logger(is_timed=False)(get_input)
@@ -1304,7 +1305,7 @@ if __name__ == "__main__":
         """
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-        Version: 4.1.6
+        Version: 4.2.0
         """,
     )
     print("Type '!help' to show a full list of commands")
