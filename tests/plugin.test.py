@@ -1,14 +1,19 @@
-import revChatGPT.V1
+import datetime
+import json
+from typing import Optional
+
 import requests
-import json, datetime
+import revChatGPT.V1
 from revChatGPT.V1 import Chatbot, uuid
 
 config = revChatGPT.V1.configure()
 cbt = Chatbot(config)
 
 
-def construct_message(msg, role, name=None, content_type="text"):
-    msg = {
+def construct_message(
+    msg: str, role: str, name: Optional[str] = None, content_type: str = "text"
+) -> str:
+    return {
         "id": str(uuid.uuid4()),
         "author": {
             "role": role,
@@ -16,18 +21,17 @@ def construct_message(msg, role, name=None, content_type="text"):
         },
         "content": {"content_type": content_type, "parts": [msg]},
     }
-    return msg
 
 
-def search(q, region="wt-wt", time=None) -> str:
-    url = "https://ddg-webapp-aagd.vercel.app/search?q={}&region={}".format(
-        q, region
-    ) + ("&t={}".format(time) if time else "")
+def search(q: str, region: str = "wt-wt", time: int = None) -> str:
+    url = f"https://ddg-webapp-aagd.vercel.app/search?q={q}&region={region}" + (
+        f"&t={time}" if time else ""
+    )
     r = requests.get(url)
     return json.dumps(r.json(), ensure_ascii=False)
 
 
-def browse(url) -> str:
+def browse(url: str) -> str:
     r = requests.get(url)
     return r.text
 
@@ -69,24 +73,32 @@ DDG-Searcher Function:
         print(result)
         recipient = result["recipient"]
         if recipient == "DDG-Searcher":
-            if result["message"][0:6] in ["search", "browse"]:
+            if result["message"][:6] in ["search", "browse"]:
                 try:
                     msg = construct_message(
-                        eval(result["message"]), "tool", "DDG-Searcher"
+                        eval(result["message"]),
+                        "tool",
+                        "DDG-Searcher",
                     )
                 except Exception as e:
                     msg = construct_message(str(e), "tool", "DDG-Searcher")
             else:
                 msg = construct_message(
-                    "Error: don't find the command", "tool", "DDG-Searcher"
+                    "Error: don't find the command",
+                    "tool",
+                    "DDG-Searcher",
                 )
         elif recipient == "python":
             msg = construct_message(
-                "Error: python isn't supported.", "tool", "DDG-Searcher"
+                "Error: python isn't supported.",
+                "tool",
+                "DDG-Searcher",
             )
         else:
             msg = construct_message(
-                "Error: don't find the recipient", "tool", "DDG-Searcher"
+                "Error: don't find the recipient",
+                "tool",
+                "DDG-Searcher",
             )
         for i in cbt.post_messages([msg]):
             result = i

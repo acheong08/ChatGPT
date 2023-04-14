@@ -678,13 +678,13 @@ class Chatbot:
         """
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError:
+        except requests.exceptions.HTTPError as e:
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
-            raise error
+            raise error from e
 
     @logger(is_timed=True)
     def get_conversations(
@@ -1161,14 +1161,14 @@ class AsyncChatbot(Chatbot):
         # 改成自带的错误处理
         try:
             response.raise_for_status()
-        except httpx.HTTPStatusError:
+        except httpx.HTTPStatusError as e:
             await response.aread()
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
-            raise error
+            raise error from e
 
 
 get_input = logger(is_timed=False)(get_input)
