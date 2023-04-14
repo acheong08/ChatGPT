@@ -404,7 +404,8 @@ class Chatbot:
                 continue
             if not self.__check_fields(line):
                 raise ValueError(f"Field missing. Details: {str(line)}")
-
+            if line.get("message").get("author").get("role") != "assistant":
+                continue
             message: str = line["message"]["content"]["parts"][0]
             cid = line["conversation_id"]
             pid = line["message"]["id"]
