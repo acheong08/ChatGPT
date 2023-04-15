@@ -9,12 +9,12 @@ from importlib.resources import path
 from pathlib import Path
 from typing import AsyncGenerator
 from typing import NoReturn
-from . import __version__
 
 import httpx
 import requests
 import tiktoken
 
+from . import __version__
 from . import typings as t
 from .utils import create_completer
 from .utils import create_keybindings
