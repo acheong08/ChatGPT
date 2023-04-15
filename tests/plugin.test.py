@@ -4,14 +4,18 @@ from typing import Optional
 
 import requests
 import revChatGPT.V1
-from revChatGPT.V1 import Chatbot, uuid
+from revChatGPT.V1 import Chatbot
+from revChatGPT.V1 import uuid
 
 config = revChatGPT.V1.configure()
 cbt = Chatbot(config)
 
 
 def construct_message(
-    msg: str, role: str, name: Optional[str] = None, content_type: str = "text"
+    msg: str,
+    role: str,
+    name: Optional[str] = None,
+    content_type: str = "text",
 ) -> str:
     return {
         "id": str(uuid.uuid4()),
@@ -43,7 +47,7 @@ Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
 ###Available Tools:
 DDG-Searcher
 
-You have the tool DDG-Searcher and it works in the following manner: 
+You have the tool DDG-Searcher and it works in the following manner:
 
 You need to call api to perform the tool and you do not to run python.
 DDG-Searcher Function:

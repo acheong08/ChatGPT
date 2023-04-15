@@ -14,6 +14,7 @@ import httpx
 import requests
 import tiktoken
 
+from . import __version__
 from . import typings as t
 from .utils import create_completer
 from .utils import create_keybindings
@@ -512,9 +513,10 @@ def main() -> NoReturn:
     Main function
     """
     print(
-        """
+        f"""
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
+    Version: {__version__}
     """,
     )
     print("Type '!help' to show a full list of commands")

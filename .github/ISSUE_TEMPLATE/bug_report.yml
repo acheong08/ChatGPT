@@ -1,7 +1,6 @@
 name: Bug Report
 description: DO NOT OPEN A DUPLICATE
 title: "[Bug]: "
-labels: ["bug-report"]
 
 body:
   - type: checkboxes

@@ -4,6 +4,7 @@ Main CLI
 import argparse
 import sys
 
+from . import __version__
 from . import typings as t
 from . import V1
 from . import V3
@@ -35,9 +36,10 @@ def main():
 
     if mode == "V1":
         print(
-            """
+            f"""
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
+        Version: {__version__}
         """,
         )
         print("Type '!help' to show a full list of commands")

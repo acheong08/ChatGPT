@@ -9,11 +9,15 @@ permissions:
   issues: write
   pull-requests: write
 
+concurrency:
+  group: lock
+
 jobs:
   close-issues:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v8
+      - name: Close inactive issues
+        uses: actions/stale@v8
         with:
           days-before-issue-stale: 2
           days-before-issue-close: 3
@@ -25,3 +29,10 @@ jobs:
           days-before-pr-close: 30
           stale-pr-message: "This issue is stale because it has been open for 5 days with no activity."
           close-pr-message: "This issue was closed because it has been inactive for 30 days since being marked as stale."
+      - name: Lock inactive issues
+        uses: dessant/lock-threads@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-inactive-days: '180'
+          process-only: 'issues'
+          log-output: true

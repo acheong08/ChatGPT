@@ -13,13 +13,17 @@ from functools import wraps
 from os import environ
 from os import getenv
 from pathlib import Path
-from typing import NoReturn, Generator, AsyncGenerator
+from typing import AsyncGenerator
+from typing import Generator
+from typing import NoReturn
 
-import requests, httpx
+import httpx
+import requests
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
 
+from . import __version__
 from . import typings as t
 from .utils import create_completer
 from .utils import create_session
@@ -122,16 +126,17 @@ class Chatbot:
 
         self.config = config
         self.session = session_client() if session_client else requests.Session()
-        try:
-            cached_access_token = self.__get_cached_access_token(
-                self.config.get("email", None),
-            )
-        except t.Error as error:
-            if error.code == 5:
-                raise
-            cached_access_token = None
-        if cached_access_token is not None:
-            self.config["access_token"] = cached_access_token
+        if "email" in config and "password" in config:
+            try:
+                cached_access_token = self.__get_cached_access_token(
+                    self.config.get("email", None),
+                )
+            except t.Error as error:
+                if error.code == 5:
+                    raise
+                cached_access_token = None
+            if cached_access_token is not None:
+                self.config["access_token"] = cached_access_token
 
         if "proxy" in config:
             if not isinstance(config["proxy"], str):
@@ -523,7 +528,9 @@ class Chatbot:
         }
 
         yield from self.__send_request(
-            data, timeout=timeout, auto_continue=auto_continue
+            data,
+            timeout=timeout,
+            auto_continue=auto_continue,
         )
 
     @logger(is_timed=True)
@@ -655,7 +662,9 @@ class Chatbot:
         }
 
         yield from self.__send_request(
-            data, timeout=timeout, auto_continue=auto_continue
+            data,
+            timeout=timeout,
+            auto_continue=auto_continue,
         )
 
     @logger(is_timed=False)
@@ -822,7 +831,10 @@ class AsyncChatbot(Chatbot):
         )
 
     async def __send_request(
-        self, data: dict, auto_continue: bool = False, timeout: float = 360
+        self,
+        data: dict,
+        auto_continue: bool = False,
+        timeout: float = 360,
     ) -> AsyncGenerator[dict, None]:
         cid, pid = data["conversation_id"], data["parent_message_id"]
 
@@ -1302,10 +1314,10 @@ def main(config: dict) -> NoReturn:
 
 if __name__ == "__main__":
     print(
-        """
+        f"""
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-        Version: 4.2.0
+        Version: {__version__}
         """,
     )
     print("Type '!help' to show a full list of commands")
