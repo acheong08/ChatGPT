@@ -55,11 +55,11 @@ jobs:
           script: |
             const reviewers = ['acheong08'];
             const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
-
+            console.log(context.payload)
             github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.payload.issue.number,
+              pull_number: context.payload.pulls.number,
               reviewers: [reviewer]
             }).catch(error => {
               console.log(error);
