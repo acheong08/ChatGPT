@@ -51,7 +51,7 @@ jobs:
         if: always()
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const reviewers = ['acheong08'];
             const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
@@ -71,7 +71,7 @@ jobs:
         if: always()
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const payload = context.payload;
             const prNumber = payload.number;
