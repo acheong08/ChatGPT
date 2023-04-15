@@ -74,7 +74,7 @@ jobs:
               repo: context.repo.repo,
               body: `
               **Welcome**, contributor!
-              Your PR will review by ${reviewer}
+              Your PR will review by @${reviewer}
               We look forward to reviewing your Pull request shortly ✨
               `
             })
