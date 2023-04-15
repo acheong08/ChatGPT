@@ -20,7 +20,7 @@ jobs:
             const labelsToAdd = []
             const labelConditions = [
             {label: 'bug-report', keywords: ['Bug', 'bug']},
-            {label: 'enhancement', keywords: ['suggestion', 'enhancement', 'feature request', 'Feature request', 'Feature Request', 'advice']},
+            {label: 'enhancement', keywords: ['suggestion', 'enhancement', 'feature request', 'Feature request', 'Feature Request']},
             {label: 'documentation', keywords: ['docs', 'documentation', 'Wiki', 'wiki']}
             ]
             // Add tags based on conditions
