@@ -76,6 +76,6 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `👋 Thanks for reporting! your question will solve by ${assignee}`
+                body: `Automated:\n 👋 Thanks for reporting this issue. ${assignee} will review it shortly. In the meantime, please check to see if there are any similar issues already closed.`
             })
           github-token: ${{ secrets.GITHUB_TOKEN }}
