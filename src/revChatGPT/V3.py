@@ -9,7 +9,7 @@ from importlib.resources import path
 from pathlib import Path
 from typing import AsyncGenerator
 from typing import NoReturn
-from revChatGPT import __version__
+from . import __version__
 
 import httpx
 import requests

@@ -7,7 +7,7 @@ import sys
 from . import typings as t
 from . import V1
 from . import V3
-from revChatGPT import __version__
+from . import __version__
 
 __all__ = ()
 

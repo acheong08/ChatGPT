@@ -19,7 +19,7 @@ import requests, httpx
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
-from revChatGPT import __version__
+from . import __version__
 
 from . import typings as t
 from .utils import create_completer
