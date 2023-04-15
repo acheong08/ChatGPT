@@ -41,7 +41,9 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `**Welcome**, new contributor!\nYour PR will review by ${reviewer}\nPlease make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
+            body: `**Welcome**, new contributor!
+            Your PR will review by ${reviewer}
+            Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
           })
   assignees:
     runs-on: ubuntu-latest
@@ -67,7 +69,10 @@ jobs:
               issue_number: context.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Automated:\n**Welcome**.\nYour PR will reviewed shortly by @${reviewer}\nThank you for your contribution. ✨
+              body: `Automated:
+              **Welcome**.
+              Your PR will reviewed shortly by @${reviewer}
+              Thank you for your contribution. ✨
               `
             })
       - name: Assign to dev branch
