@@ -2,7 +2,7 @@ name: Auto Pull Requests
 
 on:
   pull_request_target:
-    types: [opened, reopened]
+    types: [opened, reopened, edited]
 
 permissions:
   pull-requests: write
@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Welcome New Contributor
+        if: github.event_name == 'issues' && github.event.action == 'opened'
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GH_TOKEN }}
@@ -59,7 +60,6 @@ jobs:
             const repoName = payload.repository.name
             const ownerName = payload.repository.owner.login
             const branchName = 'dev'
-
 
             github.rest.git.getRef({
               owner: ownerName,
