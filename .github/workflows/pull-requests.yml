@@ -68,10 +68,10 @@ jobs:
               issue_number: context.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `
-              **Welcome**, contributor!
-              Your PR will review by @${reviewer}
-              We look forward to reviewing your Pull request shortly ✨
+              body: `Automated:
+                **Welcome**.
+                Your PR will reviewed shortly by @${reviewer}
+                Thank you for your contribution. ✨
               `
             })
       - name: Assign to dev branch
