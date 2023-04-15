@@ -45,65 +45,35 @@ jobs:
             Your PR will review by ${reviewer}
             Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
           })
-  assignees:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Assign Reviewer
-        uses: actions/github-script@v6.4.1
-        if: steps.check_existing_reviews.outputs.existingReviews.length == 0
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            const reviewers = ['acheong08'];
-            const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
-            github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.number,
-              reviewers: [reviewer]
-            }).catch(error => {
-              console.log(error);
-            });
-
-            await github.rest.issues.createComment({
-              issue_number: context.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Automated:
-              **Welcome**.
-              Your PR will reviewed shortly by @${reviewer}
-              Thank you for your contribution. ✨
-              `
-            })
-      - name: Assign to dev branch
-        if: github.ref != 'refs/heads/dev'
-        uses: actions/github-script@v6.4.1
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          script: |
-            const payload = context.payload
-            const prNumber = payload.number
-            const repoName = payload.repository.name
-            const ownerName = payload.repository.owner.login
-            const branchName = 'dev'
-            console.log(payload.repository.name, payload.repository.owner.login)
+    - name: Assign to dev branch
+      if: github.ref != 'refs/heads/dev'
+      uses: actions/github-script@v6.4.1
+      with:
+        github-token: ${{ secrets.GH_TOKEN }}
+        script: |
+          const payload = context.payload
+          const prNumber = payload.number
+          const repoName = payload.repository.name
+          const ownerName = payload.repository.owner.login
+          const branchName = 'dev'
+          console.log(payload.repository.name, payload.repository.owner.login)
 
 
-            github.rest.git.getRef({
+          github.rest.git.getRef({
+            owner: ownerName,
+            repo: repoName,
+            ref: `heads/${branchName}`
+          }).then(result => {
+            const branchRef = result.data.ref;
+            github.rest.pulls.update({
               owner: ownerName,
               repo: repoName,
-              ref: `heads/${branchName}`
-            }).then(result => {
-              const branchRef = result.data.ref;
-              github.rest.pulls.update({
-                owner: ownerName,
-                repo: repoName,
-                pull_number: prNumber,
-                base: branchRef
-              });
-            }).catch(error => {
-              console.log(error);
+              pull_number: prNumber,
+              base: branchRef
             });
+          }).catch(error => {
+            console.log(error);
+          });
   label:
     runs-on: ubuntu-latest
     steps:
