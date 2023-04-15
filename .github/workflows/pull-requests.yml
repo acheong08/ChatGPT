@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Welcome New Contributor
-      uses: actions/github-script@v6
+      uses: actions/github-script@v6.4.1
       with:
           script: |
             // Get a list of all issues created by the PR opener
@@ -43,11 +43,33 @@ jobs:
 
                 Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
             })
+  assignees:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign Reviewer
+        uses: actions/github-script@v6.4.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const reviewers = ['acheong08'];
+            const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+            const prNumber = context.payload.number;
+            const repoName = context.payload.repository.name;
+            const ownerName = context.payload.repository.owner.login;
+
+            github.pulls.createReviewRequest({
+              owner: ownerName,
+              repo: repoName,
+              pull_number: prNumber,
+              reviewers: [reviewer]
+            }).catch(error => {
+              console.log(error);
+            });
   assign_dev_branch:
     runs-on: ubuntu-latest
     steps:
       - name: Assign to dev branch
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

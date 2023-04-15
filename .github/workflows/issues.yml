@@ -53,11 +53,14 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           script: |
+            const reviewers = ['acheong08'];
+            const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+
             // Add assignees
             github.rest.issues.addAssignees({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              assignees: ['acheong08']
+              assignees: reviewer
             })
           github-token: ${{ secrets.GITHUB_TOKEN }}
