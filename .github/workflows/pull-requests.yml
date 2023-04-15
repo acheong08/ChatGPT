@@ -102,7 +102,7 @@ jobs:
               {label: 'V3', keywords: ['V3', 'v3']},
               {label: 'authentication', keywords: ['auth', 'Auth', 'token', 'Token', 'TOKEN', 'config', 'Config', 'CONFIG', 'Unauthorized', 'access']},
               {label: 'network', keywords: ['openai.com', 'ssl', 'SSL', 'HTTPS', 'Connection', 'connection', 'proxy', 'Proxy', 'PROXY', 'VPN']},
-              {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI']},
+              {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI', 'keybindings', 'Keybindings']},
               {label: 'refactor', keywords: ['Refactor', 'refactor', 'move', 'Move']},
               {label: 'Exception', keywords: ['Exception', 'exception']}
             ]

@@ -35,7 +35,7 @@ jobs:
               {label: 'V3', keywords: ['V3', 'v3']},
               {label: 'authentication', keywords: ['auth', 'Auth', 'token', 'Token', 'TOKEN', 'config', 'Config', 'CONFIG', 'Unauthorized', '401', '403', '502', '503', 'forbidden', 'Forbidden', 'access', 'block']},
               {label: 'network', keywords: ['openai.com', 'ssl', 'SSL', 'HTTPS', 'Connection', 'connection', 'proxy', 'Proxy', 'PROXY', 'VPN']},
-              {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI']}
+              {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI', 'keybindings', 'Keybindings']}
             ]
             // Add tags based on conditions
             for (const {label, keywords} of labelConditions) {
