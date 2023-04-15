@@ -15,41 +15,43 @@ jobs:
     - name: Welcome New Contributor
       uses: actions/github-script@v6.4.1
       with:
-          script: |
-            // Get a list of all issues created by the PR opener
-            // See: https://octokit.github.io/rest.js/#pagination
-            const creator = context.payload.sender.login
-            const opts = github.rest.issues.listForRepo.endpoint.merge({
-              ...context.issue,
-              creator,
-              state: 'all'
-            })
-            const issues = await github.paginate(opts)
+        github-token: ${{ secrets.GH_TOKEN }}
+        script: |
+          // Get a list of all issues created by the PR opener
+          // See: https://octokit.github.io/rest.js/#pagination
+          const creator = context.payload.sender.login
+          const opts = github.rest.issues.listForRepo.endpoint.merge({
+            ...context.issue,
+            creator,
+            state: 'all'
+          })
+          const issues = await github.paginate(opts)
 
-            for (const issue of issues) {
-              if (issue.number === context.issue.number) {
-                continue
-              }
-
-              if (issue.pull_request) {
-                return // Creator is already a contributor.
-              }
+          for (const issue of issues) {
+            if (issue.number === context.issue.number) {
+              continue
             }
 
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `**Welcome**, new contributor!
-              Your PR will review by ${reviewer}
-              Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
-            })
+            if (issue.pull_request) {
+              return // Creator is already a contributor.
+            }
+          }
+
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `**Welcome**, new contributor!
+            Your PR will review by ${reviewer}
+            Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
+          })
   assignees:
     runs-on: ubuntu-latest
     steps:
       - name: Assign Reviewer
         uses: actions/github-script@v6.4.1
         with:
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const reviewers = ['acheong08'];
             const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
@@ -80,6 +82,7 @@ jobs:
         if: github.ref != 'refs/heads/dev'
         uses: actions/github-script@v6.4.1
         with:
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const payload = context.payload
             const prNumber = payload.number
