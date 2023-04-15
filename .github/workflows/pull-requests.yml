@@ -58,7 +58,7 @@ jobs:
             github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.payload.pulls.number,
+              pull_number: context.payload.number,
               reviewers: [reviewer]
             }).catch(error => {
               console.log(error);
