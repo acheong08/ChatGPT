@@ -3,8 +3,9 @@ name: Auto Pull Requests
 on:
   pull_request
 
-permissions:
-  pull-requests: write
+permissions: 
+  write-all
+
 
 jobs:
   welcome:
