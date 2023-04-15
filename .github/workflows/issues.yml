@@ -16,6 +16,14 @@ jobs:
         with:
           script: |
             const issue = context.payload.issue
+
+            // remove All of the labels
+            github.rest.issues.removeAllLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+            });
+
             const labelsToAdd = []
             const labelConditions = [
               {label: 'bug', keywords: ['Bug', 'bug']},
@@ -76,6 +84,6 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `Automated:\n 👋 Thanks for reporting this issue. ${assignee} will review it shortly. In the meantime, please check to see if there are any similar issues already closed.`
+                body: `*Automated*:\n 👋 Thanks for reporting this issue. ${assignee} will review it shortly. In the meantime, please check to see if there are any similar issues already closed.`
             })
           github-token: ${{ secrets.GITHUB_TOKEN }}
