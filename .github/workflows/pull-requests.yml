@@ -73,11 +73,13 @@ jobs:
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
-            const payload = context.payload;
-            const prNumber = payload.number;
-            const repoName = payload.repository.name;
-            const ownerName = payload.repository.owner.login;
-            const branchName = 'dev';
+            const payload = context.payload
+            const prNumber = payload.number
+            const repoName = payload.repository.name
+            const ownerName = payload.repository.owner.login
+            const branchName = 'dev'
+            console.log(payload.repository.name, payload.repository.owner.login)
+
 
             github.rest.git.getRef({
               owner: ownerName,
