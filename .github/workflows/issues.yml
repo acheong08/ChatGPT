@@ -67,6 +67,7 @@ jobs:
     steps:
       - name: Add assignees
         uses: actions/github-script@v6.4.1
+        if: github.event_name == 'issues' && github.event.action == 'opened'
         with:
           script: |
             const assignees = ['acheong08'];
