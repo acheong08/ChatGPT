@@ -4,12 +4,13 @@ on:
   pull_request:
     types: [opened, reopened]
 
+permissions:
+  pull-requests: write
+  contents: write
 
 jobs:
   welcome:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     steps:
     - name: Welcome New Contributor
       uses: actions/github-script@v6.4.1
@@ -47,9 +48,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Assign Reviewer
+        if: always()
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const reviewers = ['acheong08'];
             const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
@@ -66,9 +68,10 @@ jobs:
               console.log(error);
             });
       - name: Assign to dev branch
+        if: always()
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const payload = context.payload;
             const prNumber = payload.number;
