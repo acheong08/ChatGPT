@@ -57,7 +57,7 @@ jobs:
             const repoName = context.payload.repository.name;
             const ownerName = context.payload.repository.owner.login;
 
-            github.pulls.createReviewRequest({
+            github.rest.pulls.createReviewRequest({
               owner: ownerName,
               repo: repoName,
               pull_number: prNumber,
