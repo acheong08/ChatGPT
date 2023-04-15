@@ -134,14 +134,33 @@ for data in chatbot.ask(
 print()
 ```
 
-#### 基础开发 (结果获取):
+#### 基础示例 (对话流):
 
 ```python
 from revChatGPT.V1 import Chatbot
 
 chatbot = Chatbot(config={
-  "email": "<your email>",
-  "password": "<your password>"
+  "access_token": "<your access_token>"
+})
+
+print("Chatbot: ")
+prev_text = ""
+for data in chatbot.ask(
+    "Hello world",
+):
+    message = data["message"][len(prev_text) :]
+    print(message, end="", flush=True)
+    prev_text = data["message"]
+print()
+```
+
+#### 基础示例 (获取返回值):
+
+```python
+from revChatGPT.V1 import Chatbot
+
+chatbot = Chatbot(config={
+  "access_token": "<your access_token>"
 })
 
 prompt = "how many beaches does portugal have?"
@@ -213,7 +232,7 @@ options:
 
 ## 开发API
 
-### 基础开发
+### 基础示例
 ```python
 from revChatGPT.V3 import Chatbot
 chatbot = Chatbot(api_key="<api_key>")
