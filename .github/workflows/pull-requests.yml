@@ -46,23 +46,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Assign to dev branch
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const payload = github.context.payload;
+            const payload = context.payload;
             const prNumber = payload.number;
             const repoName = payload.repository.name;
             const ownerName = payload.repository.owner.login;
             const branchName = 'dev';
 
-            github.git.getRef({
+            github.rest.git.getRef({
               owner: ownerName,
               repo: repoName,
               ref: `heads/${branchName}`
             }).then(result => {
               const branchRef = result.data.ref;
-              github.pulls.update({
+              github.rest.pulls.update({
                 owner: ownerName,
                 repo: repoName,
                 pull_number: prNumber,
