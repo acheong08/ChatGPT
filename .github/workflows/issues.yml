@@ -20,7 +20,7 @@ jobs:
             const labelsToAdd = []
             const labelConditions = [
             {label: 'bug-report', keywords: ['Bug', 'bug']},
-            {label: 'enhancement', keywords: ['suggestion', 'enhancement', 'feature request', 'Feature request', 'Feature Request', 'advice']},
+            {label: 'enhancement', keywords: ['suggestion', 'enhancement', 'feature request', 'Feature request', 'Feature Request']},
             {label: 'documentation', keywords: ['docs', 'documentation', 'Wiki', 'wiki']}
             ]
             // Add tags based on conditions
@@ -45,7 +45,7 @@ jobs:
               issue_number: issue.number,
               labels: labelsToAdd
             })
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
   assignees:
     runs-on: ubuntu-latest
     steps:
@@ -63,4 +63,4 @@ jobs:
               repo: context.repo.repo,
               assignees: [reviewer]
             })
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
