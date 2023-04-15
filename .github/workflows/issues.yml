@@ -45,7 +45,7 @@ jobs:
               issue_number: issue.number,
               labels: labelsToAdd
             })
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
   assignees:
     runs-on: ubuntu-latest
     steps:
@@ -63,4 +63,4 @@ jobs:
               repo: context.repo.repo,
               assignees: reviewer
             })
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
