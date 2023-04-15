@@ -49,7 +49,7 @@ jobs:
       - name: Assign Reviewer
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.gh_token }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const reviewers = ['acheong08'];
             const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
@@ -71,7 +71,7 @@ jobs:
       - name: Assign to dev branch
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.gh_token }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const payload = context.payload;
             const prNumber = payload.number;
