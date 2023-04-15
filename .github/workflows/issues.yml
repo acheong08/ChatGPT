@@ -26,16 +26,17 @@ jobs:
 
             const labelsToAdd = []
             const labelConditions = [
-              {label: 'bug', keywords: ['Bug', 'bug']},
+              {label: 'bug', keywords: ['Bug', 'bug', 'error', 'Error']},
+              {label: 'vulnerability', keywords: ['vulnerability', 'Vulnerability', 'leak', 'Leak']},
               {label: 'enhancement', keywords: ['suggestion', 'enhancement', 'feature request', 'Feature request', 'Feature Request']},
               {label: 'documentation', keywords: ['docs', 'documentation', 'Wiki', 'wiki']},
               {label: 'help wanted', keywords: ['help wanted']},
-              {label: 'question', keywords: ['question', 'Why', 'why', 'How', 'how']},
+              {label: 'question', keywords: ['question', 'Question', 'Why', 'why', 'How', 'how']},
               {label: 'V1', keywords: ['V1', 'v1']},
               {label: 'V3', keywords: ['V3', 'v3']},
               {label: 'authentication', keywords: ['auth', 'Auth', 'token', 'Token', 'TOKEN', 'config', 'Config', 'CONFIG', 'Unauthorized', '401', '403', '502', '503', 'forbidden', 'Forbidden', 'access', 'block']},
               {label: 'network', keywords: ['openai.com', 'ssl', 'SSL', 'HTTPS', 'Connection', 'connection', 'proxy', 'Proxy', 'PROXY', 'VPN']},
-              {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI', 'keybindings', 'Keybindings']}
+              {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI', 'keybindings', 'Keybindings']},
             ]
             // Add tags based on conditions
             for (const {label, keywords} of labelConditions) {
@@ -46,6 +47,7 @@ jobs:
                     }
                 }
             }
+
             if (labelsToAdd.length == 0) {
                 labelsToAdd.push('triage-needed')
             }

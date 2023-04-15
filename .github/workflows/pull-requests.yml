@@ -104,7 +104,8 @@ jobs:
               {label: 'network', keywords: ['openai.com', 'ssl', 'SSL', 'HTTPS', 'Connection', 'connection', 'proxy', 'Proxy', 'PROXY', 'VPN']},
               {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI', 'keybindings', 'Keybindings']},
               {label: 'refactor', keywords: ['Refactor', 'refactor', 'move', 'Move']},
-              {label: 'Exception', keywords: ['Exception', 'exception']}
+              {label: 'Exception', keywords: ['Exception', 'exception']},
+              {label: 'dependencies', keywords: ['dependencies', 'Dependencies']}
             ]
             // Add tags based on conditions
             for (const {label, keywords} of labelConditions) {
