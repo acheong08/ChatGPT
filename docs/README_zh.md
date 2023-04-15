@@ -31,14 +31,16 @@ python -m pip install --upgrade revChatGPT
 <summary>
 
 # V1 标准 ChatGPT
-> > 下午 3：35 - 由于服务器小，速率限制为5个请求/10秒（我没钱了）。
 
-> ### [隐私政策](./PRIVACY.md)
-> <br>
+使用逆向`chat.openai.com`API工程和[绕过Cloudflare Server](https://github.com/acheong08/ChatGPT-Proxy-V4)来免费使用的ChatGPT。由于OpenAI方面的严格速率限制，此特定库仅供个人使用。尚未针对多个帐户进行优化。
 
-> ### !!! 服务器源码已经开源在 https://github.com/acheong08/ChatGPT-Proxy-V4 提供给个人使用 (要求ChatGPT Plus)
+您可以查看此[项目](https://github.com/acheong08/ChatGPT-to-API)用于支持良好的多帐户循环，它与官方 API 兼容。使用 [OpenAI 的文档](https://platform.openai.com/docs/guides/chat) 作为使用参考。它在帐户之间进行对话，以确保在帐户数量过多的情况下不会达到速率限制。
 
 </summary>
+
+## 速率限制
+- 代理服务器：5 请求/秒
+- OpenAI：60 请求/小时（每个账户）
 
 ## 配置
 
@@ -57,6 +59,8 @@ python -m pip install --upgrade revChatGPT
 ```
 
 #### - 访问令牌
+
+> 请使用这种方式！
 
 https://chat.openai.com/api/auth/session
 
@@ -130,14 +134,33 @@ for data in chatbot.ask(
 print()
 ```
 
-#### 基础开发 (结果获取):
+#### 基础示例 (对话流):
 
 ```python
 from revChatGPT.V1 import Chatbot
 
 chatbot = Chatbot(config={
-  "email": "<your email>",
-  "password": "<your password>"
+  "access_token": "<your access_token>"
+})
+
+print("Chatbot: ")
+prev_text = ""
+for data in chatbot.ask(
+    "Hello world",
+):
+    message = data["message"][len(prev_text) :]
+    print(message, end="", flush=True)
+    prev_text = data["message"]
+print()
+```
+
+#### 基础示例 (获取返回值):
+
+```python
+from revChatGPT.V1 import Chatbot
+
+chatbot = Chatbot(config={
+  "access_token": "<your access_token>"
 })
 
 prompt = "how many beaches does portugal have?"
@@ -209,7 +232,7 @@ options:
 
 ## 开发API
 
-### 基础开发
+### 基础示例
 ```python
 from revChatGPT.V3 import Chatbot
 chatbot = Chatbot(api_key="<api_key>")
