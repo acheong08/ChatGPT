@@ -5,7 +5,8 @@ on:
     types: [opened, reopened]
 
 permissions:
-  write-all
+  pull-requests: write
+  contents: write
 
 jobs:
   welcome:
@@ -70,7 +71,7 @@ jobs:
         if: always()
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const payload = context.payload;
             const prNumber = payload.number;
