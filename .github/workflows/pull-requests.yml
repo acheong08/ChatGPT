@@ -41,17 +41,15 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `**Welcome**, new contributor!
-
-                Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
+              Your PR will review by ${reviewer}
+              Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
             })
   assignees:
     runs-on: ubuntu-latest
     steps:
       - name: Assign Reviewer
-        if: always()
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const reviewers = ['acheong08'];
             const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
@@ -67,11 +65,21 @@ jobs:
             }).catch(error => {
               console.log(error);
             });
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `
+              **Welcome**, contributor!
+              Your PR will review by ${reviewer}
+              We look forward to reviewing your Pull request shortly ✨
+              `
+            })
       - name: Assign to dev branch
-        if: always()
+        if: github.ref != 'refs/heads/dev'
         uses: actions/github-script@v6.4.1
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const payload = context.payload
             const prNumber = payload.number
