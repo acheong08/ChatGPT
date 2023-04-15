@@ -1,8 +1,7 @@
 name: Auto Pull Requests
 
 on:
-  pull_request:
-    types: [opened, edited, reopened]
+  pull_request
 
 permissions:
   pull-requests: write
