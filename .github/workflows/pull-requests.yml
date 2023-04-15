@@ -1,7 +1,8 @@
 name: Auto Pull Requests
 
 on:
-  pull_request
+  pull_request:
+    types: [opened, edited, reopened]
 
 permissions:
   pull-requests: write
@@ -42,3 +43,32 @@ jobs:
 
                 Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
             })
+  assign_dev_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign to dev branch
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const payload = github.context.payload;
+            const prNumber = payload.number;
+            const repoName = payload.repository.name;
+            const ownerName = payload.repository.owner.login;
+            const branchName = 'dev';
+
+            github.git.getRef({
+              owner: ownerName,
+              repo: repoName,
+              ref: `heads/${branchName}`
+            }).then(result => {
+              const branchRef = result.data.ref;
+              github.pulls.update({
+                owner: ownerName,
+                repo: repoName,
+                pull_number: prNumber,
+                base: branchRef
+              });
+            }).catch(error => {
+              console.log(error);
+            });
