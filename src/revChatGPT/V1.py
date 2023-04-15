@@ -126,16 +126,17 @@ class Chatbot:
 
         self.config = config
         self.session = session_client() if session_client else requests.Session()
-        try:
-            cached_access_token = self.__get_cached_access_token(
-                self.config.get("email", None),
-            )
-        except t.Error as error:
-            if error.code == 5:
-                raise
-            cached_access_token = None
-        if cached_access_token is not None:
-            self.config["access_token"] = cached_access_token
+        if "email" in config and "password" in config:
+            try:
+                cached_access_token = self.__get_cached_access_token(
+                    self.config.get("email", None),
+                )
+            except t.Error as error:
+                if error.code == 5:
+                    raise
+                cached_access_token = None
+            if cached_access_token is not None:
+                self.config["access_token"] = cached_access_token
 
         if "proxy" in config:
             if not isinstance(config["proxy"], str):
