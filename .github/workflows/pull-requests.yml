@@ -56,21 +56,17 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const payload = context.payload
-            const prNumber = payload.number
-            const repoName = payload.repository.name
-            const ownerName = payload.repository.owner.login
-            const branchName = 'dev'
 
             github.rest.git.getRef({
-              owner: ownerName,
-              repo: repoName,
-              ref: `heads/${branchName}`
+              owner: payload.repository.owner.login,
+              repo: payload.repository.name,
+              ref: 'heads/dev'
             }).then(result => {
               const branchRef = result.data.ref;
               github.rest.pulls.update({
-                owner: ownerName,
-                repo: repoName,
-                pull_number: prNumber,
+                owner: payload.repository.owner.login,
+                repo: payload.repository.name,
+                pull_number: payload.number,
                 base: branchRef
               });
             }).catch(error => {
