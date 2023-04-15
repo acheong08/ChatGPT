@@ -12,70 +12,44 @@ jobs:
   welcome:
     runs-on: ubuntu-latest
     steps:
-    - name: Welcome New Contributor
-      uses: actions/github-script@v6.4.1
-      with:
-        github-token: ${{ secrets.GH_TOKEN }}
-        script: |
-          // Get a list of all issues created by the PR opener
-          // See: https://octokit.github.io/rest.js/#pagination
-          const creator = context.payload.sender.login
-          const opts = github.rest.issues.listForRepo.endpoint.merge({
-            ...context.issue,
-            creator,
-            state: 'all'
-          })
-          const issues = await github.paginate(opts)
-
-          for (const issue of issues) {
-            if (issue.number === context.issue.number) {
-              continue
-            }
-
-            if (issue.pull_request) {
-              return // Creator is already a contributor.
-            }
-          }
-
-          await github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: `**Welcome**, new contributor!
-            Your PR will review by ${reviewer}
-            Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
-          })
-  assignees:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Assign Reviewer
+      - name: Welcome New Contributor
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
-            const reviewers = ['acheong08'];
-            const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
-            github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.number,
-              reviewers: [reviewer]
-            }).catch(error => {
-              console.log(error);
-            });
+            // Get a list of all issues created by the PR opener
+            // See: https://octokit.github.io/rest.js/#pagination
+            const creator = context.payload.sender.login
+            const opts = github.rest.issues.listForRepo.endpoint.merge({
+              ...context.issue,
+              creator,
+              state: 'all'
+            })
+            const issues = await github.paginate(opts)
+
+            for (const issue of issues) {
+              if (issue.number === context.issue.number) {
+                continue
+              }
+
+              if (issue.pull_request) {
+                return // Creator is already a contributor.
+              }
+            }
 
             await github.rest.issues.createComment({
-              issue_number: context.number,
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Automated:
-                **Welcome**.
-                Your PR will reviewed shortly by @${reviewer}
-                Thank you for your contribution. ✨
-              `
+              body: `**Welcome**, new contributor!
+              Your PR will review by ${reviewer}
+              Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
             })
+  assignees:
+    runs-on: ubuntu-latest
+    steps:
       - name: Assign to dev branch
-        if: github.ref != 'refs/heads/dev'
+        if: github.ref != 'refs/heads/dev' && github.event_name == 'pull_request_target' && github.event.action == 'opened'
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GH_TOKEN }}
@@ -85,7 +59,6 @@ jobs:
             const repoName = payload.repository.name
             const ownerName = payload.repository.owner.login
             const branchName = 'dev'
-            console.log(payload.repository.name, payload.repository.owner.login)
 
 
             github.rest.git.getRef({
@@ -103,3 +76,56 @@ jobs:
             }).catch(error => {
               console.log(error);
             });
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add label
+        uses: actions/github-script@v6.4.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue
+
+            // remove All of the labels
+            github.rest.issues.removeAllLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+            });
+
+            const labelsToAdd = []
+            const labelConditions = [
+              {label: 'bugfix', keywords: ['Bug', 'bug', 'fix', 'Fix', ]},
+              {label: 'enhancement', keywords: ['suggestion', 'enhancement', 'feature request', 'Feature request', 'Feature Request', 'Improve', 'improve', 'add', 'Add', 'Update', 'update', 'implement', 'Implement', ]},
+              {label: 'documentation', keywords: ['docs', 'Docs', 'Documentation', 'documentation', 'Wiki', 'wiki', 'doc', 'Doc']},
+              {label: 'V1', keywords: ['V1', 'v1']},
+              {label: 'V3', keywords: ['V3', 'v3']},
+              {label: 'authentication', keywords: ['auth', 'Auth', 'token', 'Token', 'TOKEN', 'config', 'Config', 'CONFIG', 'Unauthorized', 'access']},
+              {label: 'network', keywords: ['openai.com', 'ssl', 'SSL', 'HTTPS', 'Connection', 'connection', 'proxy', 'Proxy', 'PROXY', 'VPN']},
+              {label: 'CLI', keywords: ['command program', 'Command Program', 'CLI', 'keybindings', 'Keybindings']},
+              {label: 'refactor', keywords: ['Refactor', 'refactor', 'move', 'Move']},
+              {label: 'Exception', keywords: ['Exception', 'exception']},
+              {label: 'dependencies', keywords: ['dependencies', 'Dependencies']}
+            ]
+            // Add tags based on conditions
+            for (const {label, keywords} of labelConditions) {
+                for (const keyword of keywords) {
+                    if (issue.title.includes(keyword)) {
+                        labelsToAdd.push(label)
+                        break
+                    }
+                }
+            }
+            if (labelsToAdd.length == 0) {
+                labelsToAdd.push('triage-needed')
+            }
+
+            console.log("All of tags:", labelsToAdd)
+
+            // Add tags
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: labelsToAdd
+            })
