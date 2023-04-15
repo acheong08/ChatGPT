@@ -19,6 +19,7 @@ import requests, httpx
 from httpx import AsyncClient
 from OpenAIAuth import Authenticator
 from OpenAIAuth import Error as AuthError
+from . import __version__
 
 from . import typings as t
 from .utils import create_completer
@@ -1302,10 +1303,10 @@ def main(config: dict) -> NoReturn:
 
 if __name__ == "__main__":
     print(
-        """
+        f"""
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-        Version: 4.2.0
+        Version: {__version__}
         """,
     )
     print("Type '!help' to show a full list of commands")

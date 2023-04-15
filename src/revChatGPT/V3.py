@@ -9,6 +9,7 @@ from importlib.resources import path
 from pathlib import Path
 from typing import AsyncGenerator
 from typing import NoReturn
+from . import __version__
 
 import httpx
 import requests
@@ -512,9 +513,10 @@ def main() -> NoReturn:
     Main function
     """
     print(
-        """
+        f"""
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
+    Version: {__version__}
     """,
     )
     print("Type '!help' to show a full list of commands")
