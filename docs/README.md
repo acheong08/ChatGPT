@@ -27,8 +27,125 @@ python -m pip install --upgrade revChatGPT
 - Minimum - Python3.9
 - Recommend - Python3.11+
 
-# V1 disabled
-- Cloudflare has tightened their security and thus the current tls spoofing libraries no longer work with cf_clearance. OpenAI also removed the ability of ChatGPT Plus users to bypass cloudflare. This will not work until further notice 
+<summary>
+
+# V1 Standard ChatGPT
+
+Due to recent tightening of OpenAI's security, the default endpoint has been swapped over to one provided by @pengzhile. It is not open source and privacy is not guarenteed. Use it at your own risk. I am working on an open source implementation with the latest changes but that could take a while.
+
+</summary>
+
+## Rate limits
+- Proxy server: 5 requests / 10 seconds
+- OpenAI: 50 requests / hour for each account
+
+## Configuration
+
+1. Create account on [OpenAI's ChatGPT](https://chat.openai.com/)
+2. Save your email and password
+
+### Authentication method: (Choose 1)
+
+#### - Email/Password
+
+> _Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`_
+> Not supported for Google/Microsoft accounts.
+```json
+{
+  "email": "email",
+  "password": "your password"
+}
+```
+
+#### - Access token
+
+> Please this!
+https://chat.openai.com/api/auth/session
+
+```json
+{
+  "access_token": "<access_token>"
+}
+```
+
+#### - Optional configuration:
+
+```json
+{
+  "conversation_id": "UUID...",
+  "parent_id": "UUID...",
+  "proxy": "...",
+  "paid": false,
+  "collect_analytics": true,
+  "model": "gpt-4"
+}
+```
+
+Analytics is disabled by default. Set `collect_analytics` to `true` to enable it.
+
+3. Save this as `$HOME/.config/revChatGPT/config.json`
+4. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
+
+## Usage
+
+### Command line
+
+`python3 -m revChatGPT.V1`
+
+```
+        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        Repo: github.com/acheong08/ChatGPT
+Type '!help' to show a full list of commands
+Logging in...
+You:
+(Press Esc followed by Enter to finish)
+```
+
+The command line interface supports multi-line inputs and allows navigation using arrow keys. Besides, you can also edit history inputs by arrow keys when the prompt is empty. It also completes your input if it finds matched previous prompts. To finish input, press `Esc` and then `Enter` as solely `Enter` itself is used for creating new line in multi-line mode.
+
+Set the environment variable `NO_COLOR` to `true` to disable color output.
+
+### Developer API
+
+#### Basic example (streamed):
+
+```python
+from revChatGPT.V1 import Chatbot
+chatbot = Chatbot(config={
+  "access_token": "<your access_token>"
+})
+print("Chatbot: ")
+prev_text = ""
+for data in chatbot.ask(
+    "Hello world",
+):
+    message = data["message"][len(prev_text) :]
+    print(message, end="", flush=True)
+    prev_text = data["message"]
+print()
+```
+
+#### Basic example (single result):
+
+```python
+from revChatGPT.V1 import Chatbot
+chatbot = Chatbot(config={
+  "access_token": "<your access_token>"
+})
+prompt = "how many beaches does portugal have?"
+response = ""
+for data in chatbot.ask(
+  prompt
+):
+    response = data["message"]
+print(response)
+```
+
+#### All API methods
+
+Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced developer usage.
+
+</details>
 
 <summary>  
 
