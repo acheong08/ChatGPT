@@ -28,14 +28,12 @@ python -m pip install --upgrade revChatGPT
 - Recommend - Python3.11+
 
 <details>
-
-<summary>
+  
+  <summary>
 
 # V1 Standard ChatGPT
 
-This uses a reversed `chat.openai.com`'s API with a [cloudflare bypass server](https://github.com/acheong08/ChatGPT-Proxy-V4) to make programmatic ChatGPT usage free. This specific library is meant for personal use due to severe rate limits on OpenAI's side. It has not been optimized for use with mutliple accounts.
-
-You can check out [this project](https://github.com/acheong08/ChatGPT-to-API) for well supported multi account cycling. It is compatible with the official API. Use [OpenAI's documentation](https://platform.openai.com/docs/guides/chat) as reference on usage. It carries conversations between accounts to ensure rate limits are not hit given a high number of accounts.
+Due to recent tightening of OpenAI's security, the default endpoint has been swapped over to one provided by @pengzhile. It is not open source and privacy is not guarenteed. Use it at your own risk. I am working on an open source implementation with the latest changes but that could take a while.
 
 </summary>
 
@@ -54,7 +52,6 @@ You can check out [this project](https://github.com/acheong08/ChatGPT-to-API) fo
 
 > _Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`_
 > Not supported for Google/Microsoft accounts.
-
 ```json
 {
   "email": "email",
@@ -65,7 +62,6 @@ You can check out [this project](https://github.com/acheong08/ChatGPT-to-API) fo
 #### - Access token
 
 > Please this!
-
 https://chat.openai.com/api/auth/session
 
 ```json
@@ -101,11 +97,8 @@ Analytics is disabled by default. Set `collect_analytics` to `true` to enable it
 ```
         ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-
 Type '!help' to show a full list of commands
-
 Logging in...
-
 You:
 (Press Esc followed by Enter to finish)
 ```
@@ -120,11 +113,9 @@ Set the environment variable `NO_COLOR` to `true` to disable color output.
 
 ```python
 from revChatGPT.V1 import Chatbot
-
 chatbot = Chatbot(config={
   "access_token": "<your access_token>"
 })
-
 print("Chatbot: ")
 prev_text = ""
 for data in chatbot.ask(
@@ -140,19 +131,15 @@ print()
 
 ```python
 from revChatGPT.V1 import Chatbot
-
 chatbot = Chatbot(config={
   "access_token": "<your access_token>"
 })
-
 prompt = "how many beaches does portugal have?"
 response = ""
-
 for data in chatbot.ask(
   prompt
 ):
     response = data["message"]
-
 print(response)
 ```
 
@@ -162,9 +149,7 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced dev
 
 </details>
 
-<details>
-
-<summary>
+<summary>  
 
 # V3 Official Chat API
 
