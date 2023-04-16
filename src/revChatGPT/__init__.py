@@ -6,7 +6,7 @@ revChatGPT.V0
 revChatGPT.V1
 revChatGPT.V3
 """
-__version__ = "4.2.1"
+__version__ = "4.2.2"
 __all__ = ()
 
 # Available Python Version Verify
