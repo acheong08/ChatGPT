@@ -27,8 +27,6 @@ python -m pip install --upgrade revChatGPT
 - Minimum - Python3.9
 - Recommend - Python3.11+
 
-<details>
-
 # V1 disabled
 - Cloudflare has tightened their security and thus the current tls spoofing libraries no longer work with cf_clearance. OpenAI also removed the ability of ChatGPT Plus users to bypass cloudflare. This will not work until further notice 
 
