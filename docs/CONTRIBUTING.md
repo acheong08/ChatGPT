@@ -25,6 +25,8 @@ If you would like to contribute to ChatGPT, follow these steps:
 
 We will review your pull request and, if everything looks good, merge it into the main codebase.
 
+**Notes**: For maintenance purposes, you should commit your code to the dev branch, but when you commit to other branches, our bot will change to the dev branch for you.
+
 ## Questions
 
 If you have any questions about contributing to ChatGPT, feel free to open an issue in the ChatGPT repository and ask.
