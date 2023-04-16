@@ -10,8 +10,8 @@ permissions:
 
 jobs:
   welcome:
-    runs-on: ubuntu-latest
     if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
     steps:
       - name: Welcome New Contributor
         uses: actions/github-script@v6.4.1
