@@ -11,9 +11,9 @@ permissions:
 jobs:
   welcome:
     runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
     steps:
       - name: Welcome New Contributor
-        if: github.event_name == 'issues' && github.event.action == 'opened'
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GH_TOKEN }}
