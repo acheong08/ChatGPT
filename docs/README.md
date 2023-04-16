@@ -27,7 +27,9 @@ python -m pip install --upgrade revChatGPT
 - Minimum - Python3.9
 - Recommend - Python3.11+
 
-<summary>
+<details>
+  
+  <summary>
 
 # V1 Standard ChatGPT
 
