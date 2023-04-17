@@ -73,7 +73,7 @@ def logger(is_timed: bool):
 
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.gateway.do/api/"
 
-bcolors = t.colors()
+bcolors = t.Colors()
 
 
 class Chatbot:

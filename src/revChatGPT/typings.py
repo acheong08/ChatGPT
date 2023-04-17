@@ -1,6 +1,5 @@
 from os import getenv
 from platform import python_version_tuple
-
 Any = object()
 
 SUPPORT_ADD_NOTES = [int(each) for each in python_version_tuple()][0] >= 3 and [
@@ -28,7 +27,7 @@ class MetaNotAllowInstance(type):
     Metaclass that do not allow classes to be instantiated
     """
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         error = ActionNotAllowedError("This class is not allowed to be instantiated")
         raise error
 
@@ -46,7 +45,7 @@ class ActionNotAllowedError(ActionError):
     """
     Subclass of ActionError
 
-    An object that throws an error because the execution of an unallowed operation is blocked
+    An object that throws an error because the execution of an unalloyed operation is blocked
     """
 
     pass
@@ -80,7 +79,7 @@ class Error(ChatbotError):
     6: Prohibited concurrent query error
     """
 
-    def __init__(self, source: str, message: str, code: int = 0, *args) -> None:
+    def __init__(self, source: str, message: str, code: int = 0, *args: object) -> None:
         self.source: str = source
         self.message: str = message
         self.code: int = code
@@ -178,7 +177,7 @@ class ErrorType(metaclass=MetaNotAllowInstance):
     CLOUDFLARE_ERROR = 8
 
 
-class colors:
+class Colors:
     """
     Colors for printing
     """
