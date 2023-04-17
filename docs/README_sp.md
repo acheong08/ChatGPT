@@ -24,18 +24,18 @@ API ChatGPT de ingeniería inversa de OpenAI. Extensible para chatbots, etc.
 python -m pip install --upgrade revChatGPT
 ```
 
-### Suport Python Version
+### Apoyo con la versión de Python
 
-- Minimum - Python3.9
-- Recommend - Python3.11+
+- Mínimo - Python3.9
+- Recomendar - Python3.11+
 
 <details>
   
   <summary>
 
-# V1 Standard ChatGPT
+# V1  estándar ChatGPT
 
-Due to recent tightening of OpenAI's security, the default endpoint has been swapped over to one provided by @pengzhile. It is not open source and privacy is not guarenteed. Use it at your own risk. I am working on an open source implementation with the latest changes but that could take a while.
+Debido al reciente endurecimiento de la seguridad de OpenAI, el punto final predeterminado se ha cambiado a uno proporcionado por @pengzhile. No es de código abierto y la privacidad no está garantizada. Úselo bajo su propio riesgo. Estoy trabajando en una implementación de código abierto con los últimos cambios, pero eso podría llevar un tiempo.
 
 </summary>
 
