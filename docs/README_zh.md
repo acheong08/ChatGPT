@@ -8,7 +8,7 @@
 
 ChatGPT的逆向工程API。可扩展用于 Chatbot 等。
 
-[![](./view.gif)](https://pypi.python.org/pypi/revChatGPT)
+[![](https://github.com/acheong08/ChatGPT/blob/main/docs/view.gif?raw=true)](https://pypi.python.org/pypi/revChatGPT)
 
 > ## 支持本项目
 > 开启Pull Request并修复我的代码

@@ -203,7 +203,7 @@ class Chatbot:
             raise t.APIConnectionError(
                 f"{response.status_code} {response.reason} {response.text}",
             )
-        response_role: str = None
+        response_role: str or None = None
         full_response: str = ""
         for line in response.iter_lines():
             if not line:
@@ -371,7 +371,7 @@ class Chatbot:
                 indent=2,
             )
 
-    def load(self, file: str, *keys_: str) -> None:
+    def load(self, file: Path, *keys_: str) -> None:
         """
         Load the Chatbot configuration from a JSON file
         """

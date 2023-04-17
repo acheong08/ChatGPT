@@ -10,10 +10,10 @@ permissions:
 
 jobs:
   welcome:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
     runs-on: ubuntu-latest
     steps:
       - name: Welcome New Contributor
-        if: github.event_name == 'issues' && github.event.action == 'opened'
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GH_TOKEN }}
@@ -73,3 +73,11 @@ jobs:
             }).catch(error => {
               console.log(error);
             });
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `**Hello**, Contributor!
+              We've changed your target branch to dev branch, which is better for maintenance!
+              Please make sure you've read our [contributing guide](https://github.com/acheong08/ChatGPT/blob/main/docs/CONTRIBUTING.md) and we look forward to reviewing your Pull request shortly ✨`
+            })
