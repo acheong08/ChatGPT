@@ -135,7 +135,7 @@ class Chatbot:
             "gpt-4-32k",
             "gpt-4-32k-0314",
         ]:
-            raise NotImplementedError("Unsupported engine {self.engine}")
+            raise NotImplementedError(f"Unsupported engine {self.engine}")
 
         tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
 
