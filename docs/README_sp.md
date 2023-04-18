@@ -39,18 +39,18 @@ Debido al reciente endurecimiento de la seguridad de OpenAI, el punto final pred
 
 </summary>
 
-## Rate limits
-- Proxy server: 5 requests / 10 seconds
-- OpenAI: 50 requests / hour for each account
+## Límites se Tasa
+- Servidor Proxy: 5 peticiones / 10 segundos
+- OpenAI: 50 peticiones / hora para cada cuenta
 
-## Configuration
+## Configuración
 
-1. Create account on [OpenAI's ChatGPT](https://chat.openai.com/)
-2. Save your email and password
+1. Crear Cuenta en [OpenAI's ChatGPT](https://chat.openai.com/)
+2. Guarde su correo electrónico y contraseña
 
-### Authentication method: (Choose 1)
+### Método de autentificación: (Choose 1)
 
-#### - Email/Password
+#### - Email / Contraseña de
 
 > _Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`_
 > Not supported for Google/Microsoft accounts.
@@ -61,9 +61,9 @@ Debido al reciente endurecimiento de la seguridad de OpenAI, el punto final pred
 }
 ```
 
-#### - Access token
+#### - ficha de acceso
 
-> Please this!
+> por favor esto!
 https://chat.openai.com/api/auth/session
 
 ```json
@@ -72,7 +72,7 @@ https://chat.openai.com/api/auth/session
 }
 ```
 
-#### - Optional configuration:
+#### - Configuración Opcional:
 
 ```json
 {
@@ -85,33 +85,34 @@ https://chat.openai.com/api/auth/session
 }
 ```
 
-Analytics is disabled by default. Set `collect_analytics` to `true` to enable it.
+El análisis está deshabilitado de forma predeterminada. Establezca `collect_analytics` en `true` para habilitarlo.
 
-3. Save this as `$HOME/.config/revChatGPT/config.json`
-4. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
+3. Guardar esto como `$HOME/.config/revChatGPT/config.json`
+4. Si está utilizando Windows, deberá crear una variable de entorno llamada `HOME` y establecerla en su perfil de inicio para que el script pueda ubicar el archivo config.json.
 
-## Usage
+## Uso
 
-### Command line
+### Línea de comando
 
 `python3 -m revChatGPT.V1`
 
 ```
-        ChatGPT - A command-line interface to OpenAI's ChatGPT (https://chat.openai.com/chat)
+        ChatGPT - Una interfaz de línea de comandos para ChatGPT de OpenAI (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-Type '!help' to show a full list of commands
+Tipo '!help' para mostrar una lista completa de comandos
 Logging in...
 You:
-(Press Esc followed by Enter to finish)
+(Presiona Esc seguido de Enter para terminar)
 ```
 
-The command line interface supports multi-line inputs and allows navigation using arrow keys. Besides, you can also edit history inputs by arrow keys when the prompt is empty. It also completes your input if it finds matched previous prompts. To finish input, press `Esc` and then `Enter` as solely `Enter` itself is used for creating new line in multi-line mode.
+La interfaz de línea de comandos admite entradas de varias líneas y permite la navegación con las teclas de flecha. Además, también puede editar las entradas del historial con las teclas de flecha cuando el aviso está vacío. También completa su entrada si encuentra indicaciones anteriores coincidentes. Para finalizar la entrada, presione `Esc` y luego `Enter` ya que únicamente `Enter` se usa para crear una nueva línea en el modo multilínea.
 
-Set the environment variable `NO_COLOR` to `true` to disable color output.
+Establezca la variable de entorno `NO_COLOR` en `true` para deshabilitar la salida de color.
 
-### Developer API
+### API de desarrollador
 
-#### Basic example (streamed):
+
+#### Ejemplo básico (streamed):
 
 ```python
 from revChatGPT.V1 import Chatbot
@@ -129,7 +130,7 @@ for data in chatbot.ask(
 print()
 ```
 
-#### Basic example (single result):
+#### Ejemplo básico (resultado único):
 
 ```python
 from revChatGPT.V1 import Chatbot
@@ -145,25 +146,25 @@ for data in chatbot.ask(
 print(response)
 ```
 
-#### All API methods
+#### Todos los métodos de la API
 
-Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced developer usage.
+Referirse a [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced developer usage.
 
 </details>
 
 <summary>  
 
-# V3 Official Chat API
+# API de chat oficial V3
 
-> Recently released by OpenAI
+> Lanzado recientemente por OpenAI
 >
-> - Paid
+> - Pagado
 
 </summary>
 
-Get API key from https://platform.openai.com/account/api-keys
+Obtener clave API de https://platform.openai.com/account/api-keys
 
-## Command line
+## Línea de comando
 
 `python3 -m revChatGPT.V3 --api_key <api_key>`
 
@@ -173,37 +174,37 @@ Get API key from https://platform.openai.com/account/api-keys
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
 
-Type '!help' to show a full list of commands
-Press Esc followed by Enter or Alt+Enter to send a message.
+Escriba '!help' para mostrar una lista completa de comandos
+Presione Esc seguido de Enter o Alt+Enter para enviar un mensaje.
 
 usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream] [--base_prompt BASE_PROMPT]
              [--proxy PROXY] [--top_p TOP_P] [--reply_count REPLY_COUNT] [--enable_internet]
              [--config CONFIG] [--submit_key SUBMIT_KEY] [--model {gpt-3.5-turbo,gpt-4,gpt-4-32k}]
              [--truncate_limit TRUNCATE_LIMIT]
 
-options:
-  -h, --help            show this help message and exit
-  --api_key API_KEY     OpenAI API key
+opciones:
+  -h, --help            mostrar este mensaje de ayuda y salir
+  --api_key API_KEY     Clave API de OpenAI
   --temperature TEMPERATURE
-                        Temperature for response
-  --no_stream           Disable streaming
+                        Temperatura de respuesta
+  --no_stream           Deshabilitar transmisión
   --base_prompt BASE_PROMPT
-                        Base prompt for chatbot
-  --proxy PROXY         Proxy address
-  --top_p TOP_P         Top p for response
+                        Indicación base para chatbot
+  --proxy PROXY         Dirección proxy
+  --top_p TOP_P         Top p para respuesta
   --reply_count REPLY_COUNT
-                        Number of replies for each prompt
-  --enable_internet     Allow ChatGPT to search the internet
-  --config CONFIG       Path to V3 config json file
+                        Número de respuestas para cada mensaje
+  --enable_internet     Permitir que ChatGPT busque en Internet
+  --config CONFIG       Ruta al archivo json de configuración V3
   --submit_key SUBMIT_KEY
-                        Custom submit key for chatbot. For more information on keys, see README
+                        Clave de envío personalizada para chatbot. Para obtener más información sobre las claves, consulte LÉAME
   --model {gpt-3.5-turbo,gpt-4,gpt-4-32k}
   --truncate_limit TRUNCATE_LIMIT
 ```
 
-## Developer API
+## API de desarrollador
 
-### Basic example
+### Ejemplo básico
 
 ```python
 from revChatGPT.V3 import Chatbot
@@ -211,7 +212,7 @@ chatbot = Chatbot(api_key="<api_key>")
 chatbot.ask("Hello world")
 ```
 
-### Streaming example
+### Ejemplo de transmisión
 
 ```python
 from revChatGPT.V3 import Chatbot
@@ -222,24 +223,24 @@ for data in chatbot.ask_stream("Hello world"):
 
 </details>
 
-# Awesome ChatGPT
+# Impresionante ChatGPT
 
-[My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
+[Mi lista](https://github.com/stars/acheong08/lists/awesome-chatgpt)
 
-If you have a cool project you want added to the list, open an issue.
+Si tiene un proyecto interesante que desea agregar a la lista, abra un problema.
 
-# Disclaimers
+# Descargos de responsabilidad
 
-This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me.
+Este no es un producto oficial de OpenAI. Este es un proyecto personal y no está afiliado a OpenAI de ninguna manera. No me demandes.
 
-## Contributors
+## Colaboradores
 
-This project exists thanks to all the people who contribute.
+Este proyecto existe gracias a todas las personas que contribuyen.
 
 <a href="https://github.com/acheong08/ChatGPT/graphs/contributors">
 <img src="https://contrib.rocks/image?repo=acheong08/ChatGPT" />
 </a>
 
-## Additional credits
+## Créditos adicionales
 
-- Coding while listening to [this amazing song](https://www.youtube.com/watch?v=VaMR_xDhsGg) by [virtualharby](https://www.youtube.com/@virtualharby)
+- Codificando mientras escuchas [esta increíble canción](https://www.youtube.com/watch?v=VaMR_xDhsGg) por [virtualharby](https://www.youtube.com/@virtualharby)
