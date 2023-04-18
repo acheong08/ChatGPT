@@ -1,6 +1,6 @@
 # ChatGPT <img src="https://github.com/acheong08/ChatGPT/blob/main/logo.png?raw=true" width="15%"></img>
 
-English - [中文](./README_zh.md)
+English - [中文](./README_zh.md) - [Spanish](./README_sp.md)
 
 [![PyPi](https://img.shields.io/pypi/v/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
 [![Plataforma_de_Soporte](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
