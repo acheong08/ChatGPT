@@ -30,7 +30,7 @@ def construct_message(
 def search(q: str, region: str = "wt-wt", time: int = None) -> str:
     url = f"https://ddg-webapp-aagd.vercel.app/search?q={q}&region={region}" + (
         f"&t={time}" if time else ""
-    )
+    )  # This api is invalid now.
     r = requests.get(url)
     return json.dumps(r.json(), ensure_ascii=False)
 
@@ -71,7 +71,7 @@ DDG-Searcher Function:
     for i in cbt.ask(promt, model=""):
         result = i
     print(result)
-    for i in cbt.ask("帮我查查怎么喝水。"):  # test
+    for i in cbt.ask("How to Drink? "):  # test
         result = i
     while not result["end_turn"]:
         print(result)
