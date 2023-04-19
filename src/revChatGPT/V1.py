@@ -71,7 +71,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.gateway.do/api/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://ai.fakeopen.com/api/"
 
 bcolors = t.Colors()
 
@@ -500,14 +500,8 @@ class Chatbot:
                             "current_node"
                         ]
                 else:
-                    log.debug(
-                        f"Conversation ID {conversation_id} not found in conversation mapping, mapping conversations",
-                    )
                     self.__map_conversations()
             if conversation_id in self.conversation_mapping:
-                log.debug(
-                    f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
-                )
                 parent_id = self.conversation_mapping[conversation_id]
             else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
@@ -640,9 +634,6 @@ class Chatbot:
                     )
                     self.__map_conversations()
             if conversation_id in self.conversation_mapping:
-                log.debug(
-                    f"Conversation ID {conversation_id} found in conversation mapping, setting parent_id to {self.conversation_mapping[conversation_id]}",
-                )
                 parent_id = self.conversation_mapping[conversation_id]
             else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
@@ -946,7 +937,11 @@ class AsyncChatbot(Chatbot):
         if conversation_id and not parent_id:
             if conversation_id not in self.conversation_mapping:
                 await self.__map_conversations()
-            parent_id = self.conversation_mapping[conversation_id]
+            if conversation_id in self.conversation_mapping:
+                parent_id = self.conversation_mapping[conversation_id]
+            else:  # invalid conversation_id provided, treat as a new conversation
+                conversation_id = None
+                parent_id = str(uuid.uuid4())
 
         data = {
             "action": "next",
@@ -1065,7 +1060,11 @@ class AsyncChatbot(Chatbot):
         if conversation_id and not parent_id:
             if conversation_id not in self.conversation_mapping:
                 await self.__map_conversations()
-            parent_id = self.conversation_mapping[conversation_id]
+            if conversation_id in self.conversation_mapping:
+                parent_id = self.conversation_mapping[conversation_id]
+            else:  # invalid conversation_id provided, treat as a new conversation
+                conversation_id = None
+                parent_id = str(uuid.uuid4())
 
         data = {
             "action": "continue",
