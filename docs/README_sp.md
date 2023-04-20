@@ -6,17 +6,17 @@ English - [中文](./README_zh.md) - [Spanish](./README_sp.md)
 [![Plataforma_de_Soporte](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
 [![Descargas](https://static.pepy.tech/badge/revchatgpt)](https://pypi.python.org/pypi/revChatGPT)
 
-API ChatGPT de ingeniería inversa de OpenAI. Extensible para chatbots, etc.
+API de ingeniería reversa para ChatGPT de OpenAI. Extensible para chatbots y más.
 
 [![](https://github.com/acheong08/ChatGPT/blob/main/docs/view.gif?raw=true)](https://pypi.python.org/pypi/revChatGPT)
 
 > ## Apoya mi trabajo
 >
-> Haga una solicitud de extracción y corrija mi código incorrecto.
+> Puedes colaborar con Pull Requests corrigiendo mi código imperfecto.
 >
 > [![Apoyo](https://ko-fi.com/img/githubbutton_sm.svg)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
-> #### Servidor de Discordia: https://discord.gg/9K2BvbXEHT
+> #### Servidor de Discord: https://discord.gg/9K2BvbXEHT
 
 # Instalación
 
@@ -24,24 +24,24 @@ API ChatGPT de ingeniería inversa de OpenAI. Extensible para chatbots, etc.
 python -m pip install --upgrade revChatGPT
 ```
 
-### Apoyo con la versión de Python
+### Soporte para versiones de Python
 
 - Mínimo - Python3.9
-- Recomendar - Python3.11+
+- Recomendado - Python3.11+
 
 <details>
   
   <summary>
 
-# V1  estándar ChatGPT
+# V1 (ChatGPT Estándar)
 
-Debido al reciente endurecimiento de la seguridad de OpenAI, el punto final predeterminado se ha cambiado a uno proporcionado por @pengzhile. No es de código abierto y la privacidad no está garantizada. Úselo bajo su propio riesgo. Estoy trabajando en una implementación de código abierto con los últimos cambios, pero eso podría llevar un tiempo.
+Debido al reciente endurecimiento de la seguridad de OpenAI, el endpoint predeterminado de este API se ha cambiado a uno proporcionado por @pengzhile. No es de código abierto y la privacidad no está garantizada. Úsalo bajo tu propio riesgo. Estoy trabajando en una implementación de código abierto con los últimos cambios, pero eso podría llevar un tiempo.
 
 </summary>
 
-## Límites se Tasa
-- Servidor Proxy: 5 peticiones / 10 segundos
-- OpenAI: 50 peticiones / hora para cada cuenta
+## Límites de peticiones
+- Servidor Proxy: 5 peticiones por cada 10 segundos
+- OpenAI: 50 peticiones por hora para cada cuenta
 
 ## Configuración
 
@@ -52,23 +52,23 @@ Debido al reciente endurecimiento de la seguridad de OpenAI, el punto final pred
 
 #### - Email / Contraseña de
 
-> _Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`_
-> Not supported for Google/Microsoft accounts.
+> _Actualmente no funciona para usuarios gratuitos de ChatGPT. Ejecuta `export PUID="..."` en el terminal si tienes una cuenta Plus. El PUID es un cookie de navegador llamado `_puid`_
+> No está disponible para cuentas con login por Google/Microsoft.
 ```json
 {
   "email": "email",
-  "password": "your password"
+  "password": "tu contraseña"
 }
 ```
 
-#### - ficha de acceso
+#### - Token de Acceso
 
-> por favor esto!
+> por favor lee esto primero!
 https://chat.openai.com/api/auth/session
 
 ```json
 {
-  "access_token": "<access_token>"
+  "access_token": "<token de acceso de openai>"
 }
 ```
 
@@ -85,9 +85,9 @@ https://chat.openai.com/api/auth/session
 }
 ```
 
-El análisis está deshabilitado de forma predeterminada. Establezca `collect_analytics` en `true` para habilitarlo.
+La recolección de datos para análisis de OpenAI está deshabilitada de forma predeterminada. Establezca `collect_analytics` en `true` para habilitarlo.
 
-3. Guardar esto como `$HOME/.config/revChatGPT/config.json`
+3. Guardar esto en un archivo json en `$HOME/.config/revChatGPT/config.json`
 4. Si está utilizando Windows, deberá crear una variable de entorno llamada `HOME` y establecerla en su perfil de inicio para que el script pueda ubicar el archivo config.json.
 
 ## Uso
@@ -99,15 +99,15 @@ El análisis está deshabilitado de forma predeterminada. Establezca `collect_an
 ```
         ChatGPT - Una interfaz de línea de comandos para ChatGPT de OpenAI (https://chat.openai.com/chat)
         Repo: github.com/acheong08/ChatGPT
-Tipo '!help' para mostrar una lista completa de comandos
+Escribe '!help' para mostrar una lista completa de comandos
 Logging in...
 You:
 (Presiona Esc seguido de Enter para terminar)
 ```
 
-La interfaz de línea de comandos admite entradas de varias líneas y permite la navegación con las teclas de flecha. Además, también puede editar las entradas del historial con las teclas de flecha cuando el aviso está vacío. También completa su entrada si encuentra indicaciones anteriores coincidentes. Para finalizar la entrada, presione `Esc` y luego `Enter` ya que únicamente `Enter` se usa para crear una nueva línea en el modo multilínea.
+La interfaz de línea de comandos admite entradas multilinea y permite la navegación con las flechas del teclado. Además, también puede autocompletar la entrada si encuentra Prompts similares en el historial. Para finalizar presione `Esc` y luego `Enter` ya que únicamente `Enter` se usa para crear una nueva línea en el modo multilínea.
 
-Establezca la variable de entorno `NO_COLOR` en `true` para deshabilitar la salida de color.
+Establezca la variable de entorno `NO_COLOR` a `true` para deshabilitar el texto colorido.
 
 ### API de desarrollador
 
@@ -154,15 +154,15 @@ Referirse a [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced deve
 
 <summary>  
 
-# API de chat oficial V3
+# API oficial V3 (Chat API)
 
 > Lanzado recientemente por OpenAI
 >
-> - Pagado
+> - De pago
 
 </summary>
 
-Obtener clave API de https://platform.openai.com/account/api-keys
+Obtén clave API de https://platform.openai.com/account/api-keys
 
 ## Línea de comando
 
@@ -223,11 +223,11 @@ for data in chatbot.ask_stream("Hello world"):
 
 </details>
 
-# Impresionante ChatGPT
+# Awesome ChatGPT
 
-[Mi lista](https://github.com/stars/acheong08/lists/awesome-chatgpt)
+[Más proyectos recomendados](https://github.com/stars/acheong08/lists/awesome-chatgpt)
 
-Si tiene un proyecto interesante que desea agregar a la lista, abra un problema.
+Si tienes un proyecto interesante que desearias agregar a la lista, agrega un Issue en este repositorio de Github.
 
 # Descargos de responsabilidad
 
