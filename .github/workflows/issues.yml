@@ -2,7 +2,7 @@ name: Auto Label Issues
 
 on:
   issues:
-    types: [opened, edited, reopened]
+    types: [opened, edited, reopened, milestoned, demilestoned]
 
 permissions:
   issues: write
@@ -10,6 +10,7 @@ permissions:
 jobs:
   label:
     runs-on: ubuntu-latest
+    if: github.event.action != 'milestoned' && github.event.action != 'demilestoned'
     steps:
       - name: Remove invited labels
         if: github.event.action != 'opened'
@@ -65,12 +66,16 @@ jobs:
             console.log("All of tags:", labelsToAdd)
 
             // Add tags
-            github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue.number,
-              labels: labelsToAdd
-            })
+            if (labelsToAdd.length > 0){
+              github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labelsToAdd
+              })
+            } else {
+              console.warn('No label needs to add')
+            }
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Add assignees
         if: github.event.sender.login != github.repository_owner && github.event.action == 'opened'
@@ -97,3 +102,56 @@ jobs:
                 body: `*Automated*:\n 👋 Thanks for reporting this issue. @${assignee} will review it shortly. In the meantime, please check to see if there are any similar issues already closed.`
             })
           github-token: ${{ secrets.GITHUB_TOKEN }}
+  WIP:
+    runs-on: ubuntu-latest
+    if: github.event.action != 'milestoned' | github.event.action != 'demilestoned'
+    steps:
+      - name: add WIP
+        if: github.event.action != 'milestoned'
+        uses: actions/github-script@v6.4.1
+        with:
+          script: |
+            const issue = context.payload.issue
+            const labelsToAdd = []
+            // Get all name of labels
+            const labels = issue.labels.map(function(obj){
+              return obj.name
+            })
+
+            if (!labels.includes('WIP')) {
+              labelsToAdd.push('WIP')
+            }
+
+            if (labelsToAdd.length > 0){
+              github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labelsToAdd
+              })
+            } else {
+              console.warn('No label needs to add')
+            }
+      - name: remove WIP
+        if: github.event.action != 'demilestoned'
+        uses: actions/github-script@v6.4.1
+        with:
+          script: |
+            const issue = context.payload.issue
+            const labelsToRemove = []
+            // Get all name of labels
+            const labels = issue.labels.map(function(obj){
+              return obj.name
+            })
+
+            if (labels.includes('WIP')) {
+              labelsToRemove.push('WIP')
+            }
+            for (each of labelsToRemove){
+              github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: each
+              })
+            }
