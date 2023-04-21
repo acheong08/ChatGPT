@@ -73,12 +73,8 @@ jobs:
               labels: labelsToAdd
             })
           github-token: ${{ secrets.GITHUB_TOKEN }}
-  assignees:
-    runs-on: ubuntu-latest
-    if: github.event.sender.login != github.repository_owner
-    steps:
       - name: Assign to dev branch
-        if: github.base_ref != 'refs/heads/dev'
+        if: github.base_ref != 'refs/heads/dev' && github.event.sender.login != github.repository_owner
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GH_TOKEN }}

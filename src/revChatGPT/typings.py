@@ -1,12 +1,9 @@
 from os import getenv
-from platform import python_version_tuple
 Any = object()
 
-SUPPORT_ADD_NOTES = [int(each) for each in python_version_tuple()][0] >= 3 and [
-    int(each) for each in python_version_tuple()
+SUPPORT_ADD_NOTES = [int(each) for each in __import__('platform').python_version_tuple()][0] >= 3 and [
+    int(each) for each in __import__('platform').python_version_tuple()
 ][1] >= 11
-del python_version_tuple
-
 
 class ChatbotError(Exception):
     """

@@ -10,7 +10,6 @@ permissions:
 jobs:
   label:
     runs-on: ubuntu-latest
-    if: github.event.action != 'milestoned' && github.event.action != 'demilestoned'
     steps:
       - name: Remove invited labels
         if: github.event.action != 'opened'
