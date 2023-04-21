@@ -30,7 +30,7 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           script: |
-            const issue = context.payload.issue
+            const pr = context.payload.pull_request
 
             const labelsToAdd = []
             const labelConditions = [
@@ -52,7 +52,7 @@ jobs:
             // Add tags based on conditions
             for (const {label, keywords} of labelConditions) {
                 for (const keyword of keywords) {
-                    if (issue.title.includes(keyword)) {
+                    if (pr.title.includes(keyword)) {
                         labelsToAdd.push(label)
                         break
                     }
@@ -69,7 +69,7 @@ jobs:
             github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: issue.number,
+              issue_number: pr.number,
               labels: labelsToAdd
             })
           github-token: ${{ secrets.GITHUB_TOKEN }}
