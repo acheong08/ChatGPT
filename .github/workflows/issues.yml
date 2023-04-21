@@ -104,7 +104,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
   WIP:
     runs-on: ubuntu-latest
-    if: github.event.action != 'milestoned' || github.event.action != 'demilestoned'
+    if: github.event.action == 'milestoned' || github.event.action == 'demilestoned'
     steps:
       - name: add WIP
         if: github.event.action != 'milestoned'
