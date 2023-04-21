@@ -29,10 +29,10 @@ jobs:
           days-before-pr-close: 30
           stale-pr-message: "This issue is stale because it has been open for 5 days with no activity."
           close-pr-message: "This issue was closed because it has been inactive for 30 days since being marked as stale."
-      - name: Lock inactive issues
-        uses: dessant/lock-threads@v4
+      - name: Lock Threads
+        uses: dessant/lock-threads@v4.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-inactive-days: '180'
+          issue-inactive-days: '90'
           process-only: 'issues'
           log-output: true
