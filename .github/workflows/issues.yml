@@ -107,7 +107,7 @@ jobs:
     if: github.event.action == 'milestoned' || github.event.action == 'demilestoned'
     steps:
       - name: add WIP
-        if: github.event.action != 'milestoned'
+        if: github.event.action == 'milestoned'
         uses: actions/github-script@v6.4.1
         with:
           script: |
@@ -133,7 +133,7 @@ jobs:
               console.warn('No label needs to add')
             }
       - name: remove WIP
-        if: github.event.action != 'demilestoned'
+        if: github.event.action == 'demilestoned'
         uses: actions/github-script@v6.4.1
         with:
           script: |
