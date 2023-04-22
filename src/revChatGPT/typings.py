@@ -1,6 +1,11 @@
-from os import getenv
+"""
+A module that contains all the types used in this project
+"""
+
+import os
 from platform import python_version_tuple
-Any = object()
+from enum import Enum
+from typing import Union
 
 SUPPORT_ADD_NOTES = [int(each) for each in python_version_tuple()][0] >= 3 and [
     int(each) for each in python_version_tuple()
@@ -22,17 +27,13 @@ class ChatbotError(Exception):
         super().__init__(*args)
 
 
-class MetaNotAllowInstance(type):
-    """
-    Metaclass that do not allow classes to be instantiated
-    """
-
-    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
-        error = ActionNotAllowedError("This class is not allowed to be instantiated")
-        raise error
-
-
 class ActionError(ChatbotError):
+    """
+    Subclass of ChatbotError
+
+    An object that throws an error because the execution of an operation is blocked
+    """
+
     def __init__(self, *args: object) -> None:
         if SUPPORT_ADD_NOTES:
             super().add_note(
@@ -48,11 +49,13 @@ class ActionNotAllowedError(ActionError):
     An object that throws an error because the execution of an unalloyed operation is blocked
     """
 
-    pass
-
 
 class ActionRefuseError(ActionError):
-    pass
+    """
+    Subclass of ActionError
+
+    An object that throws an error because the execution of a refused operation is blocked.
+    """
 
 
 class CLIError(ChatbotError):
@@ -62,27 +65,39 @@ class CLIError(ChatbotError):
     The error caused by a CLI program error
     """
 
-    pass
+
+class ErrorType(Enum):
+    """
+    Enumeration class for different types of errors.
+    """
+
+    USER_ERROR = -1
+    UNKNOWN_ERROR = 0
+    SERVER_ERROR = 1
+    RATE_LIMIT_ERROR = 2
+    INVALID_REQUEST_ERROR = 3
+    EXPIRED_ACCESS_TOKEN_ERROR = 4
+    INVALID_ACCESS_TOKEN_ERROR = 5
+    PROHIBITED_CONCURRENT_QUERY_ERROR = 6
+    AUTHENTICATION_ERROR = 7
+    CLOUDFLARE_ERROR = 8
 
 
 class Error(ChatbotError):
     """
     Base class for exceptions in V1 module.
-    Error codes:
-    -1: User error
-    0: Unknown error
-    1: Server error
-    2: Rate limit error
-    3: Invalid request error
-    4: Expired access token error
-    5: Invalid access token error
-    6: Prohibited concurrent query error
     """
 
-    def __init__(self, source: str, message: str, code: int = 0, *args: object) -> None:
+    def __init__(
+        self,
+        source: str,
+        message: str,
+        *args: object,
+        code: Union[ErrorType, int] = ErrorType.UNKNOWN_ERROR,
+    ) -> None:
         self.source: str = source
         self.message: str = message
-        self.code: int = code
+        self.code: ErrorType | int = code
         super().__init__(*args)
 
     def __str__(self) -> str:
@@ -111,7 +126,8 @@ class APIConnectionError(ChatbotError):
     """
     Subclass of ChatbotError
 
-    An exception object thrown when an API connection fails or fails to connect due to network or other miscellaneous reasons
+    An exception object thrown when an API connection fails or fails to connect due to network or
+    other miscellaneous reasons
     """
 
     def __init__(self, *args: object) -> None:
@@ -129,9 +145,6 @@ class NotAllowRunning(ActionNotAllowedError):
     Direct startup is not allowed for some reason
     """
 
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
-
 
 class ResponseError(APIConnectionError):
     """
@@ -139,8 +152,6 @@ class ResponseError(APIConnectionError):
 
     Error objects caused by API request errors due to network or other miscellaneous reasons
     """
-
-    pass
 
 
 class OpenAIError(APIConnectionError):
@@ -150,31 +161,14 @@ class OpenAIError(APIConnectionError):
     Error objects caused by OpenAI's own server errors
     """
 
-    pass
-
 
 class RequestError(APIConnectionError):
     """
     Subclass of APIConnectionError
 
-    There is a problem with the API response due to network or other miscellaneous reasons, or there is no reply to the object that caused the error at all
+    There is a problem with the API response due to network or other miscellaneous reasons, or there
+    is no reply to the object that caused the error at all
     """
-
-    pass
-
-
-class ErrorType(metaclass=MetaNotAllowInstance):
-    # define consts for the error codes
-    USER_ERROR = -1
-    UNKNOWN_ERROR = 0
-    SERVER_ERROR = 1
-    RATE_LIMIT_ERROR = 2
-    INVALID_REQUEST_ERROR = 3
-    EXPIRED_ACCESS_TOKEN_ERROR = 4
-    INVALID_ACCESS_TOKEN_ERROR = 5
-    PROHIBITED_CONCURRENT_QUERY_ERROR = 6
-    AUTHENTICATION_ERROR = 7
-    CLOUDFLARE_ERROR = 8
 
 
 class Colors:
@@ -193,13 +187,13 @@ class Colors:
     UNDERLINE = "\033[4m"
 
     def __init__(self) -> None:
-        if getenv("NO_COLOR"):
-            self.HEADER = ""
-            self.OKBLUE = ""
-            self.OKCYAN = ""
-            self.OKGREEN = ""
-            self.WARNING = ""
-            self.FAIL = ""
-            self.ENDC = ""
-            self.BOLD = ""
-            self.UNDERLINE = ""
+        if os.getenv("NO_COLOR"):
+            Colors.HEADER = ""
+            Colors.OKBLUE = ""
+            Colors.OKCYAN = ""
+            Colors.OKGREEN = ""
+            Colors.WARNING = ""
+            Colors.FAIL = ""
+            Colors.ENDC = ""
+            Colors.BOLD = ""
+            Colors.UNDERLINE = ""

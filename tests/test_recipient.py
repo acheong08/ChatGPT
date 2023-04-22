@@ -1,0 +1,68 @@
+import asyncio
+import datetime
+import revChatGPT.V1
+from revChatGPT.V1 import Chatbot
+from revChatGPT.recipient import PythonRecipient
+
+
+def test_recipient():
+    """
+    Test the chatbot
+    """
+    config = revChatGPT.V1.configure()
+    assert "access_token" in config
+    cbt = Chatbot(config)
+    assert cbt is not None
+
+    try:
+        _ = cbt.recipients["python"]
+        assert False
+    except Exception as ex:
+        assert isinstance(ex, KeyError)
+        assert ex.args[0] == "Recipient 'python' is not registered."
+
+    cbt.recipients["python"] = PythonRecipient
+    assert cbt.recipients["python"].DESCRIPTION == "Python Interpreter Remote"
+    try:
+        cbt.recipients["python"] = PythonRecipient
+        assert False
+    except Exception as ex:
+        assert isinstance(ex, KeyError)
+        assert ex.args[0] == "Recipient 'python' is already registered."
+
+    python = cbt.recipients["python"]()
+
+    api_docs = f"""
+
+    Knowledge cutoff: 2021-09
+    Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
+
+    ###Available Tools:
+    python
+
+    {python.API_DOCS}
+    """
+    for _ in cbt.ask("You are ChatGPT." + api_docs):
+        pass
+    result = {}
+    for _ in cbt.ask("Please calculate 27! + 8! using python."):
+        result = _
+    assert result
+    assert not result["end_turn"]
+
+    times = 0
+    while not result.get("end_turn", True):
+        times += 1
+        recipient_name = result["recipient"]
+        if times >= 3:
+            break
+        assert recipient_name == "python"
+        msg = asyncio.get_event_loop().run_until_complete(
+            python.aprocess(message=result.copy())
+        )
+        assert msg['content']['parts'][0].startswith("```")
+        for _ in cbt.post_messages([msg]):
+            result = _
+
+    assert times == 1
+    assert "10888869450418352160768040320" in result["message"].replace(",", "")

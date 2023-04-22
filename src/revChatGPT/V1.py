@@ -3,6 +3,7 @@ Standard ChatGPT
 """
 from __future__ import annotations
 
+import binascii
 import base64
 import contextlib
 import json
@@ -28,6 +29,7 @@ from . import typings as t
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
+from .recipient import RecipientManager
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -52,18 +54,20 @@ def logger(is_timed: bool):
 
         def wrapper(*args, **kwargs):
             log.debug(
-                f"Entering {func.__name__} with args {args} and kwargs {kwargs}",
+                "Entering %s with args %s and kwargs %s", func.__name__, args, kwargs
             )
             start = time.time()
             out = func(*args, **kwargs)
             end = time.time()
             if is_timed:
                 log.debug(
-                    f"Exiting {func.__name__} with return value {out}. Took {end - start} seconds.",
+                    "Exiting %s with return value %s. Took %s seconds.",
+                    func.__name__,
+                    out,
+                    end - start,
                 )
             else:
-                log.debug(f"Exiting {func.__name__} with return value {out}")
-
+                log.debug("Exiting %s with return value %s", func.__name__, out)
             return out
 
         return wrapper
@@ -80,6 +84,8 @@ class Chatbot:
     """
     Chatbot class for ChatGPT
     """
+
+    recipients: RecipientManager
 
     @logger(is_timed=True)
     def __init__(
@@ -102,7 +108,6 @@ class Chatbot:
                     "access_token": "<access_token>"
                     "proxy": "<proxy_url_string>",
                     "paid": True/False, # whether this is a plus account
-                    "_puid": "puid", # V4 only, if it is set, base_url will be changed to https://chat.openai.com/backend-api/
                 }
                 More details on these are available at https://github.com/acheong08/ChatGPT#configuration
             conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
@@ -151,21 +156,18 @@ class Chatbot:
                     "http://": config["proxy"],
                     "https://": config["proxy"],
                 }
-                self.session = AsyncClient(proxies=proxies)
+                self.session = AsyncClient(proxies=proxies)  # type: ignore
             else:
                 self.session.proxies.update(proxies)
+
         self.conversation_id = conversation_id
         self.parent_id = parent_id
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
         self.lazy_loading = lazy_loading
-
-        if "_puid" in self.config and self.config["_puid"]:
-            self.base_url = "https://chat.openai.com/backend-api/"
-            self.__set_puid(self.config["_puid"])
-        else:
-            self.base_url = base_url or BASE_URL
+        self.base_url = base_url or BASE_URL
+        self.recipients = RecipientManager()
 
         self.__check_credentials()
 
@@ -196,14 +198,6 @@ class Chatbot:
                 print(error.details)
                 print(error.status_code)
                 raise error
-
-    @logger(is_timed=False)
-    def __set_puid(self, puid: str) -> None:
-        self.session.cookies.update(
-            {
-                "_puid": puid,
-            },
-        )
 
     @logger(is_timed=False)
     def set_access_token(self, access_token: str) -> None:
@@ -264,7 +258,7 @@ class Chatbot:
                 s_access_token[1] += "=" * ((4 - len(s_access_token[1]) % 4) % 4)
                 d_access_token = base64.b64decode(s_access_token[1])
                 d_access_token = json.loads(d_access_token)
-            except base64.binascii.Error:
+            except binascii.Error:
                 error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
@@ -336,9 +330,9 @@ class Chatbot:
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
         auth = Authenticator(
-            email_address=self.config.get("email"),
-            password=self.config.get("password"),
-            proxy=self.config.get("proxy"),
+            email_address=self.config.get("email", ""),
+            password=self.config.get("password", ""),
+            proxy=self.config.get("proxy", ""),
         )
         if self.config.get("session_token"):
             log.debug("Using session token")
@@ -364,6 +358,7 @@ class Chatbot:
         data: dict,
         auto_continue: bool = False,
         timeout: float = 360,
+        **kwargs,
     ) -> Generator[dict, None, None]:
         log.debug("Sending the payload")
 
@@ -438,8 +433,8 @@ class Chatbot:
         message = message.strip("\n")
         for i in self.continue_write(
             conversation_id=cid,
-            model=model,
             timeout=timeout,
+            auto_continue=False,
         ):
             i["message"] = message + i["message"]
             yield i
@@ -453,6 +448,7 @@ class Chatbot:
         model: str | None = None,
         auto_continue: bool = False,
         timeout: float = 360,
+        **kwargs,
     ) -> Generator[dict, None, None]:
         """Ask a question to the chatbot
         Args:
@@ -492,7 +488,8 @@ class Chatbot:
             if conversation_id not in self.conversation_mapping:
                 if self.lazy_loading:
                     log.debug(
-                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
+                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
+                        conversation_id,
                     )
                     with contextlib.suppress(Exception):
                         history = self.get_msg_history(conversation_id)
@@ -532,21 +529,22 @@ class Chatbot:
         self,
         prompt: str,
         conversation_id: str | None = None,
-        parent_id: str | None = None,
-        model: str | None = None,
+        parent_id: str = "",
+        model: str = "",
         auto_continue: bool = False,
         timeout: float = 360,
+        **kwargs,
     ) -> Generator[dict, None, None]:
         """Ask a question to the chatbot
         Args:
             prompt (str): The question
-            conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
-            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
-            model (str | None, optional): The model to use. Defaults to None.
+            conversation_id (str, optional): UUID for the conversation to continue on. Defaults to None.
+            parent_id (str, optional): UUID for the message to continue on. Defaults to "".
+            model (str, optional): The model to use. Defaults to "".
             auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
-        Yields: Generator[dict, None, None] - The response from the chatbot
+        Yields: The response from the chatbot
             dict: {
                 "message": str,
                 "conversation_id": str,
@@ -584,11 +582,11 @@ class Chatbot:
         auto_continue: bool = False,
         timeout: float = 360,
     ) -> Generator[dict, None, None]:
-        """let the chatbot continue to write
+        """let the chatbot continue to write.
         Args:
             conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
-            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
-            model (str | None, optional): The model to use. Defaults to None.
+            parent_id (str, optional): UUID for the message to continue on. Defaults to None.
+            model (str, optional): The model to use. Defaults to None.
             auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
@@ -621,7 +619,8 @@ class Chatbot:
             if conversation_id not in self.conversation_mapping:
                 if self.lazy_loading:
                     log.debug(
-                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
+                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
+                        conversation_id,
                     )
                     with contextlib.suppress(Exception):
                         history = self.get_msg_history(conversation_id)
@@ -678,13 +677,13 @@ class Chatbot:
         """
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError as ex:
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
-            raise error from e
+            raise error from ex
 
     @logger(is_timed=True)
     def get_conversations(
@@ -794,9 +793,7 @@ class Chatbot:
 
 
 class AsyncChatbot(Chatbot):
-    """
-    Async Chatbot class for ChatGPT
-    """
+    """Async Chatbot class for ChatGPT"""
 
     def __init__(
         self,
@@ -807,11 +804,6 @@ class AsyncChatbot(Chatbot):
     ) -> None:
         """
         Same as Chatbot class, but with async methods.
-
-        Note:
-            AsyncChatbot is not compatible with OpenAI Web API, I don't know why the stream method doesn't work.
-            (But the sync version works fine)
-            So, if you want to use AsyncChatbot, you don't need to set the "_puid" parameter in the config.
         """
         super().__init__(
             config=config,
@@ -883,7 +875,7 @@ class AsyncChatbot(Chatbot):
             return
         async for msg in self.continue_write(
             conversation_id=cid,
-            auto_continue=auto_continue,
+            auto_continue=False,
             timeout=timeout,
         ):
             msg["message"] = message + msg["message"]
@@ -1172,14 +1164,14 @@ class AsyncChatbot(Chatbot):
         # 改成自带的错误处理
         try:
             response.raise_for_status()
-        except httpx.HTTPStatusError as e:
+        except httpx.HTTPStatusError as ex:
             await response.aread()
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
-            raise error from e
+            raise error from ex
 
 
 get_input = logger(is_timed=False)(get_input)
