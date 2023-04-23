@@ -1274,6 +1274,8 @@ def main(config: dict) -> NoReturn:
                 log.exception("Please include plugin name in command")
                 print("Please include plugin name in command")
         elif command == "!exit":
+            if isinstance(chatbot.session, httpx.AsyncClient):
+                chatbot.session.aclose()
             exit()
         else:
             return False
