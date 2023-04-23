@@ -22,6 +22,7 @@ attribute of the class to the name of the class, if the attribute is not already
 """
 
 import uuid
+import asyncio
 from abc import ABCMeta
 from abc import abstractmethod
 from typing import Callable
@@ -287,4 +288,6 @@ class PythonRecipient(Recipient):
         await self.tio.close()
 
     def process(self, message: dict, **kwargs: dict) -> dict:
-        raise NotImplementedError("PythonRecipient is asynchronous only.")
+        return asyncio.get_event_loop().run_until_complete(
+            self.aprocess(message, **kwargs)
+        )

@@ -8,6 +8,7 @@ import base64
 import contextlib
 import json
 import logging
+import datetime
 import time
 import uuid
 from functools import wraps
@@ -30,6 +31,8 @@ from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
 from .recipient import RecipientManager
+from .recipient import Recipient
+from .recipient import PythonRecipient
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -1192,6 +1195,8 @@ def main(config: dict) -> NoReturn:
         conversation_id=config.get("conversation_id"),
         parent_id=config.get("parent_id"),
     )
+    plugins: dict[str, Recipient] = {}
+    chatbot.recipients["python"] = PythonRecipient
 
     def handle_commands(command: str) -> bool:
         if command == "!help":
@@ -1200,9 +1205,11 @@ def main(config: dict) -> NoReturn:
             !help - Show this message
             !reset - Forget the current conversation
             !config - Show the current configuration
+            !plugins - Show the current plugins
+            !switch x - Switch to plugin x. Need to reset the conversation to ativate the plugin.
             !rollback x - Rollback the conversation (x being the number of messages to rollback)
-            !exit - Exit this program
             !setconversation - Changes the conversation
+            !exit - Exit this program
             """,
             )
         elif command == "!reset":
@@ -1243,6 +1250,26 @@ def main(config: dict) -> NoReturn:
                 prev_text = data["message"]
             print(bcolors.ENDC)
             print()
+        elif command == "!plugins":
+            print("Plugins:")
+            for plugin, docs in chatbot.recipients.available_recipients.items():
+                print(" [x] " if plugin in plugins else " [ ] ", plugin, ": ", docs)
+            print()
+        elif command.startswith("!switch"):
+            try:
+                plugin = command.split(" ")[1]
+                if plugin in plugins:
+                    del plugins[plugin]
+                else:
+                    plugins[plugin] = chatbot.recipients[plugin]()
+                print(
+                    f"Plugin {plugin} has been "
+                    + ("enabled" if plugin in plugins else "disabled")
+                )
+                print()
+            except IndexError:
+                log.exception("Please include plugin name in command")
+                print("Please include plugin name in command")
         elif command == "!exit":
             exit()
         else:
@@ -1259,26 +1286,80 @@ def main(config: dict) -> NoReturn:
             "!exit",
             "!setconversation",
             "!continue",
+            "!plugins",
+            "!switch",
         ],
     )
     print()
     try:
+        msg = {}
+        result = {}
+        times = 0
         while True:
-            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}")
+            if not msg:
+                times = 0
+                print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}")
 
-            prompt = get_input(session=session, completer=completer)
-            if prompt.startswith("!") and handle_commands(prompt):
-                continue
+                prompt = get_input(session=session, completer=completer)
+                if prompt.startswith("!") and handle_commands(prompt):
+                    continue
+                if not chatbot.conversation_id and plugins:
+                    prompt = (
+                        (
+                            f"""You are ChatGPT.
+
+Knowledge cutoff: 2021-09
+Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
+
+###Available Tools:
+"""
+                            + ";".join(plugins)
+                            + "\n\n"
+                            + "\n\n".join([i.API_DOCS for i in plugins.values()])
+                        )
+                        + "\n\n\n\n"
+                        + prompt
+                    )
+                msg = {
+                    "id": str(uuid.uuid4()),
+                    "author": {"role": "user"},
+                    "content": {"content_type": "text", "parts": [prompt]},
+                }
+            else:
+                print(
+                    f"{bcolors.OKCYAN + bcolors.BOLD}{result['recipient'] if result['recipient'] != 'user' else 'You'}: {bcolors.ENDC}"
+                )
+                print(msg["content"]["parts"][0])
 
             print()
             print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}")
             prev_text = ""
-            for data in chatbot.ask(prompt, auto_continue=True):
+            for data in chatbot.post_messages([msg], auto_continue=True):
+                result = data
                 message = data["message"][len(prev_text) :]
                 print(message, end="", flush=True)
                 prev_text = data["message"]
             print(bcolors.ENDC)
             print()
+
+            msg = {}
+            if not result.get("end_turn", True):
+                times += 1
+                if times >= 5:
+                    continue
+                api = plugins.get(result["recipient"], None)
+                if not api:
+                    msg = {
+                        "id": str(uuid.uuid4()),
+                        "author": {"role": "user"},
+                        "content": {
+                            "content_type": "text",
+                            "parts": [f"Error: No plugin {result['recipient']} found"],
+                        },
+                    }
+                    continue
+                msg = api.process(result)
+
     except (KeyboardInterrupt, EOFError):
         exit()
     except Exception as exc:
