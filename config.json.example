@@ -1,4 +1,3 @@
 {
-  "session_token": "<token>",
-  "proxy":"<proxy>"
+    "access_token": "<access_token>"
 }

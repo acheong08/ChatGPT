@@ -104,7 +104,6 @@ class Chatbot:
                 {
                     "email": "OpenAI account email",
                     "password": "OpenAI account password",
-                    "session_token": "<session_token>"
                     "access_token": "<access_token>"
                     "proxy": "<proxy_url_string>",
                     "paid": True/False, # whether this is a plus account
@@ -177,7 +176,6 @@ class Chatbot:
 
         Any one of the following is sufficient for login. Multiple login info can be provided at the same time and they will be used in the order listed below.
             - access_token
-            - session_token
             - email + password
 
         Raises:
@@ -186,8 +184,6 @@ class Chatbot:
         """
         if "access_token" in self.config:
             self.set_access_token(self.config["access_token"])
-        elif "session_token" in self.config:
-            pass
         elif "email" not in self.config or "password" not in self.config:
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
@@ -323,32 +319,19 @@ class Chatbot:
 
     @logger(is_timed=True)
     def login(self) -> None:
-        if (
-            "email" not in self.config or "password" not in self.config
-        ) and "session_token" not in self.config:
+        """Login to OpenAI by email and password"""
+        if self.config.get("email") and self.config.get("password"):
             log.error("Insufficient login details provided!")
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
         auth = Authenticator(
-            email_address=self.config.get("email", ""),
-            password=self.config.get("password", ""),
-            proxy=self.config.get("proxy", ""),
+            email_address=self.config.get("email"),
+            password=self.config.get("password"),
+            proxy=self.config.get("proxy"),
         )
-        if self.config.get("session_token"):
-            log.debug("Using session token")
-            auth.session.cookies.set(
-                "__Secure-next-auth.session-token",
-                self.config["session_token"],
-            )
-            auth.get_access_token()
-            if auth.access_token is None:
-                del self.config["session_token"]
-                self.login()
-                return
-        else:
-            log.debug("Using authenticator to get access token")
-            auth.begin()
-            auth.get_access_token()
+        log.debug("Using authenticator to get access token")
+        auth.begin()
+        auth.get_access_token()
 
         self.set_access_token(auth.access_token)
 

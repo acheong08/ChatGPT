@@ -1,59 +1,24 @@
 """
-This module provides a framework for managing multiple message recipients in a Python application.
-It defines two classes: 'Recipient' and 'RecipientManager', both of which can be extended to 
-implement custom message recipients.
+This module provides a framework for managing recipients. It defines three class 
+`Recipient`, `RecipientManager` and `PythonRecipient`. It also defines a metaclass 
+`RecipientMeta` for the `Recipient` class.
 
-Recipient is an abstract base class that defines the basic structure and methods for a message 
-recipient. It provides an interface for processing a message and an asynchronous processing method, 
-along with a UUID generator for generating unique message IDs.
+`Recipient` is an abstract base class that defines the basic structure and methods 
+for a recipient. It provides an interface for processing a message and an 
+asynchronous processing method, along with a UUID generator for generating unique 
+message IDs.
 
-RecipientManager is a class that manages a registry of available message recipients. 
-It allows users to register and unregister recipients by name, and provides an interface for 
-accessing and retrieving registered recipients. The class also provides a property for listing 
-all available recipients, along with their descriptions.
+`RecipientManager` is a class that manages a registry of recipients. It allows users 
+to register and unregister recipients by name, and provides an interface for 
+accessing and retrieving registered recipients. The class also provides a property 
+for listing all available recipients, along with their descriptions.
 
-Example usage:
+`PythonRecipient` is a class that provides an interface for processing Python code. 
+It provides an asynchronous context manager for executing code in a separate thread, 
+and an asynchronous processing method for processing messages.
 
-    # Define a custom recipient by extending the Recipient base class
-    class CustomRecipient(Recipient):
-        def process(self, message: dict, **kwargs: dict) -> dict:
-            # Custom message processing logic here
-            return {
-                "id": self._uuid(),
-                "author": {
-                    "role": "tool",
-                    "name": self.RECIPIENT_NAME,
-                },
-                "content": {"content_type": "text", "parts": ["success"]},
-            }
-        async def aprocess(self, message: dict, **kwargs: dict) -> dict:
-            raise NotImplementedError("Please call the process method instead.")
-
-    # Create a recipient manager instance
-    manager = RecipientManager()
-
-    # Register the custom recipient with the manager using the __setitem__ method
-    manager["custom"] = CustomRecipient()
-
-    # Register the custom recipient with the manager using the @manager.register decorator
-    @manager.register("another_custom")
-    class AsyncCustomRecipient(CustomRecipient):
-        async def aprocess(self, message: dict, **kwargs: dict) -> dict:
-            # Custom asynchronous message processing logic here
-            return {
-                "id": self._uuid(),
-                "author": {
-                    "role": "tool",
-                    "name": self.RECIPIENT_NAME,
-                },
-                "content": {"content_type": "text", "parts": ["success"]},
-            }
-
-    # Retrieve the custom recipient from the manager
-    custom_recipient = manager["custom"]
-
-    # Get a list of all available recipients
-    available_recipients = manager.available_recipients
+`RecipientMeta` is a metaclass for the `Recipient` class. It sets the `RECIPIENT_NAME` 
+attribute of the class to the name of the class, if the attribute is not already set.
 """
 
 import uuid
