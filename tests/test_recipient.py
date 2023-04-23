@@ -1,8 +1,9 @@
 import asyncio
 import datetime
+
 import revChatGPT.V1
-from revChatGPT.V1 import Chatbot
 from revChatGPT.recipient import PythonRecipient
+from revChatGPT.V1 import Chatbot
 
 
 def test_recipient():
@@ -65,7 +66,7 @@ def test_recipient():
             break
         assert recipient_name == "python"
         msg = asyncio.get_event_loop().run_until_complete(
-            python.aprocess(message=result.copy())
+            python.aprocess(message=result.copy()),
         )
         assert msg["content"]["parts"][0].startswith("```")
         for _ in cbt.post_messages([msg]):

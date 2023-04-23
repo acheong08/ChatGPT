@@ -5,7 +5,7 @@ You can import the following module to use:
 revChatGPT.V1
 revChatGPT.V3
 """
-__version__ = "4.2.6"
+__version__ = "5.0.0"
 __all__ = ()
 
 # Available Python Version Verify
@@ -16,7 +16,7 @@ if int(__import__("platform").python_version_tuple()[0]) < 3:
     raise error
 elif int(__import__("platform").python_version_tuple()[1]) < 9:
     error = t.NotAllowRunning(
-        f"Not available Python version: {__import__('platform').python_version()}"
+        f"Not available Python version: {__import__('platform').python_version()}",
     )
     raise error
 else:
@@ -27,5 +27,5 @@ else:
         __import__("warnings").warn(
             UserWarning(
                 "The current Python is not a recommended version, 3.10+ is recommended",
-            )
+            ),
         )

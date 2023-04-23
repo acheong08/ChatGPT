@@ -30,7 +30,7 @@ python -m pip install --upgrade revChatGPT
 - Recommend - Python3.11+
 
 <details>
-  
+
   <summary>
 
 # V1 Standard ChatGPT
@@ -151,7 +151,7 @@ Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced dev
 
 </details>
 
-<summary>  
+<summary>
 
 # V3 Official Chat API
 

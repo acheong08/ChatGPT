@@ -2,7 +2,6 @@ from pathlib import Path
 
 from setuptools import find_namespace_packages
 from setuptools import setup
-from src.revChatGPT import __version__ as VERSION
 
 DOCS_PATH = Path(__file__).parents[0] / "docs/README.md"
 PATH = Path("README.md")
@@ -13,7 +12,7 @@ if not PATH.exists():
 
 setup(
     name="revChatGPT",
-    version=VERSION,
+    version="5.0.0",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     long_description=open(PATH, encoding="utf-8").read(),
     long_description_content_type="text/markdown",

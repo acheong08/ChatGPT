@@ -17,7 +17,7 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          
+
           script: |
             const pr = context.payload.pull_request
             // remove All of the labels

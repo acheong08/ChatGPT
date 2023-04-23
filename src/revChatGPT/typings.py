@@ -1,15 +1,17 @@
 """
 A module that contains all the types used in this project
 """
-
 import os
 from enum import Enum
 from typing import Union
 
 
-SUPPORT_ADD_NOTES = [int(each) for each in __import__('platform').python_version_tuple()][0] >= 3 and [
-    int(each) for each in __import__('platform').python_version_tuple()
-][1] >= 11
+SUPPORT_ADD_NOTES = [
+    int(each) for each in __import__("platform").python_version_tuple()
+][0] >= 3 and [int(each) for each in __import__("platform").python_version_tuple()][
+    1
+] >= 11
+
 
 class ChatbotError(Exception):
     """

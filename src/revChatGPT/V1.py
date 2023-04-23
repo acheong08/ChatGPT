@@ -3,12 +3,12 @@ Standard ChatGPT
 """
 from __future__ import annotations
 
-import binascii
 import base64
+import binascii
 import contextlib
+import datetime
 import json
 import logging
-import datetime
 import time
 import uuid
 from functools import wraps
@@ -27,12 +27,12 @@ from OpenAIAuth import Error as AuthError
 
 from . import __version__
 from . import typings as t
+from .recipient import PythonRecipient
+from .recipient import Recipient
+from .recipient import RecipientManager
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
-from .recipient import RecipientManager
-from .recipient import Recipient
-from .recipient import PythonRecipient
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -57,7 +57,10 @@ def logger(is_timed: bool):
 
         def wrapper(*args, **kwargs):
             log.debug(
-                "Entering %s with args %s and kwargs %s", func.__name__, args, kwargs
+                "Entering %s with args %s and kwargs %s",
+                func.__name__,
+                args,
+                kwargs,
             )
             start = time.time()
             out = func(*args, **kwargs)
@@ -1264,7 +1267,7 @@ def main(config: dict) -> NoReturn:
                     plugins[plugin] = chatbot.recipients[plugin]()
                 print(
                     f"Plugin {plugin} has been "
-                    + ("enabled" if plugin in plugins else "disabled")
+                    + ("enabled" if plugin in plugins else "disabled"),
                 )
                 print()
             except IndexError:
@@ -1327,7 +1330,7 @@ Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
                 }
             else:
                 print(
-                    f"{bcolors.OKCYAN + bcolors.BOLD}{result['recipient'] if result['recipient'] != 'user' else 'You'}: {bcolors.ENDC}"
+                    f"{bcolors.OKCYAN + bcolors.BOLD}{result['recipient'] if result['recipient'] != 'user' else 'You'}: {bcolors.ENDC}",
                 )
                 print(msg["content"]["parts"][0])
 

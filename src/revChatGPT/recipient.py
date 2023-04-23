@@ -1,32 +1,32 @@
 """
-This module provides a framework for managing recipients. It defines three class 
-`Recipient`, `RecipientManager` and `PythonRecipient`. It also defines a metaclass 
+This module provides a framework for managing recipients. It defines three class
+`Recipient`, `RecipientManager` and `PythonRecipient`. It also defines a metaclass
 `RecipientMeta` for the `Recipient` class.
 
-`Recipient` is an abstract base class that defines the basic structure and methods 
-for a recipient. It provides an interface for processing a message and an 
-asynchronous processing method, along with a UUID generator for generating unique 
+`Recipient` is an abstract base class that defines the basic structure and methods
+for a recipient. It provides an interface for processing a message and an
+asynchronous processing method, along with a UUID generator for generating unique
 message IDs.
 
-`RecipientManager` is a class that manages a registry of recipients. It allows users 
-to register and unregister recipients by name, and provides an interface for 
-accessing and retrieving registered recipients. The class also provides a property 
+`RecipientManager` is a class that manages a registry of recipients. It allows users
+to register and unregister recipients by name, and provides an interface for
+accessing and retrieving registered recipients. The class also provides a property
 for listing all available recipients, along with their descriptions.
 
-`PythonRecipient` is a class that provides an interface for processing Python code. 
-It provides an asynchronous context manager for executing code in a separate thread, 
+`PythonRecipient` is a class that provides an interface for processing Python code.
+It provides an asynchronous context manager for executing code in a separate thread,
 and an asynchronous processing method for processing messages.
 
-`RecipientMeta` is a metaclass for the `Recipient` class. It sets the `RECIPIENT_NAME` 
+`RecipientMeta` is a metaclass for the `Recipient` class. It sets the `RECIPIENT_NAME`
 attribute of the class to the name of the class, if the attribute is not already set.
 """
-
-import uuid
 import asyncio
+import uuid
 from abc import ABCMeta
 from abc import abstractmethod
 from typing import Callable
 from typing import Type
+
 from async_tio import Tio
 
 
@@ -289,5 +289,5 @@ class PythonRecipient(Recipient):
 
     def process(self, message: dict, **kwargs: dict) -> dict:
         return asyncio.get_event_loop().run_until_complete(
-            self.aprocess(message, **kwargs)
+            self.aprocess(message, **kwargs),
         )

@@ -16,7 +16,7 @@ jobs:
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          
+
           script: |
             const issue = context.payload.issue
             // remove All of the labels
