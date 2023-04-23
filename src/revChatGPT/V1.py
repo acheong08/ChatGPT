@@ -1352,7 +1352,7 @@ Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
                 times += 1
                 if times >= 5:
                     continue
-                api = plugins.get(result["recipient"], None)
+                api = plugins.get(result["recipient"])
                 if not api:
                     msg = {
                         "id": str(uuid.uuid4()),
