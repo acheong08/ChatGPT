@@ -4,7 +4,9 @@ Standard ChatGPT
 from __future__ import annotations
 
 import base64
+import binascii
 import contextlib
+import datetime
 import json
 import logging
 import time
@@ -25,6 +27,9 @@ from OpenAIAuth import Error as AuthError
 
 from . import __version__
 from . import typings as t
+from .recipient import PythonRecipient
+from .recipient import Recipient
+from .recipient import RecipientManager
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
@@ -52,18 +57,23 @@ def logger(is_timed: bool):
 
         def wrapper(*args, **kwargs):
             log.debug(
-                f"Entering {func.__name__} with args {args} and kwargs {kwargs}",
+                "Entering %s with args %s and kwargs %s",
+                func.__name__,
+                args,
+                kwargs,
             )
             start = time.time()
             out = func(*args, **kwargs)
             end = time.time()
             if is_timed:
                 log.debug(
-                    f"Exiting {func.__name__} with return value {out}. Took {end - start} seconds.",
+                    "Exiting %s with return value %s. Took %s seconds.",
+                    func.__name__,
+                    out,
+                    end - start,
                 )
             else:
-                log.debug(f"Exiting {func.__name__} with return value {out}")
-
+                log.debug("Exiting %s with return value %s", func.__name__, out)
             return out
 
         return wrapper
@@ -80,6 +90,8 @@ class Chatbot:
     """
     Chatbot class for ChatGPT
     """
+
+    recipients: RecipientManager
 
     @logger(is_timed=True)
     def __init__(
@@ -98,11 +110,9 @@ class Chatbot:
                 {
                     "email": "OpenAI account email",
                     "password": "OpenAI account password",
-                    "session_token": "<session_token>"
                     "access_token": "<access_token>"
                     "proxy": "<proxy_url_string>",
                     "paid": True/False, # whether this is a plus account
-                    "_puid": "puid", # V4 only, if it is set, base_url will be changed to https://chat.openai.com/backend-api/
                 }
                 More details on these are available at https://github.com/acheong08/ChatGPT#configuration
             conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
@@ -151,21 +161,18 @@ class Chatbot:
                     "http://": config["proxy"],
                     "https://": config["proxy"],
                 }
-                self.session = AsyncClient(proxies=proxies)
+                self.session = AsyncClient(proxies=proxies)  # type: ignore
             else:
                 self.session.proxies.update(proxies)
+
         self.conversation_id = conversation_id
         self.parent_id = parent_id
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
         self.lazy_loading = lazy_loading
-
-        if "_puid" in self.config and self.config["_puid"]:
-            self.base_url = "https://chat.openai.com/backend-api/"
-            self.__set_puid(self.config["_puid"])
-        else:
-            self.base_url = base_url or BASE_URL
+        self.base_url = base_url or BASE_URL
+        self.recipients = RecipientManager()
 
         self.__check_credentials()
 
@@ -175,7 +182,6 @@ class Chatbot:
 
         Any one of the following is sufficient for login. Multiple login info can be provided at the same time and they will be used in the order listed below.
             - access_token
-            - session_token
             - email + password
 
         Raises:
@@ -184,8 +190,6 @@ class Chatbot:
         """
         if "access_token" in self.config:
             self.set_access_token(self.config["access_token"])
-        elif "session_token" in self.config:
-            pass
         elif "email" not in self.config or "password" not in self.config:
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
@@ -196,14 +200,6 @@ class Chatbot:
                 print(error.details)
                 print(error.status_code)
                 raise error
-
-    @logger(is_timed=False)
-    def __set_puid(self, puid: str) -> None:
-        self.session.cookies.update(
-            {
-                "_puid": puid,
-            },
-        )
 
     @logger(is_timed=False)
     def set_access_token(self, access_token: str) -> None:
@@ -264,7 +260,7 @@ class Chatbot:
                 s_access_token[1] += "=" * ((4 - len(s_access_token[1]) % 4) % 4)
                 d_access_token = base64.b64decode(s_access_token[1])
                 d_access_token = json.loads(d_access_token)
-            except base64.binascii.Error:
+            except binascii.Error:
                 error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
@@ -329,9 +325,8 @@ class Chatbot:
 
     @logger(is_timed=True)
     def login(self) -> None:
-        if (
-            "email" not in self.config or "password" not in self.config
-        ) and "session_token" not in self.config:
+        """Login to OpenAI by email and password"""
+        if self.config.get("email") and self.config.get("password"):
             log.error("Insufficient login details provided!")
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
@@ -340,21 +335,9 @@ class Chatbot:
             password=self.config.get("password"),
             proxy=self.config.get("proxy"),
         )
-        if self.config.get("session_token"):
-            log.debug("Using session token")
-            auth.session.cookies.set(
-                "__Secure-next-auth.session-token",
-                self.config["session_token"],
-            )
-            auth.get_access_token()
-            if auth.access_token is None:
-                del self.config["session_token"]
-                self.login()
-                return
-        else:
-            log.debug("Using authenticator to get access token")
-            auth.begin()
-            auth.get_access_token()
+        log.debug("Using authenticator to get access token")
+        auth.begin()
+        auth.get_access_token()
 
         self.set_access_token(auth.access_token)
 
@@ -364,6 +347,7 @@ class Chatbot:
         data: dict,
         auto_continue: bool = False,
         timeout: float = 360,
+        **kwargs,
     ) -> Generator[dict, None, None]:
         log.debug("Sending the payload")
 
@@ -438,8 +422,8 @@ class Chatbot:
         message = message.strip("\n")
         for i in self.continue_write(
             conversation_id=cid,
-            model=model,
             timeout=timeout,
+            auto_continue=False,
         ):
             i["message"] = message + i["message"]
             yield i
@@ -453,6 +437,7 @@ class Chatbot:
         model: str | None = None,
         auto_continue: bool = False,
         timeout: float = 360,
+        **kwargs,
     ) -> Generator[dict, None, None]:
         """Ask a question to the chatbot
         Args:
@@ -492,7 +477,8 @@ class Chatbot:
             if conversation_id not in self.conversation_mapping:
                 if self.lazy_loading:
                     log.debug(
-                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
+                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
+                        conversation_id,
                     )
                     with contextlib.suppress(Exception):
                         history = self.get_msg_history(conversation_id)
@@ -532,21 +518,22 @@ class Chatbot:
         self,
         prompt: str,
         conversation_id: str | None = None,
-        parent_id: str | None = None,
-        model: str | None = None,
+        parent_id: str = "",
+        model: str = "",
         auto_continue: bool = False,
         timeout: float = 360,
+        **kwargs,
     ) -> Generator[dict, None, None]:
         """Ask a question to the chatbot
         Args:
             prompt (str): The question
-            conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
-            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
-            model (str | None, optional): The model to use. Defaults to None.
+            conversation_id (str, optional): UUID for the conversation to continue on. Defaults to None.
+            parent_id (str, optional): UUID for the message to continue on. Defaults to "".
+            model (str, optional): The model to use. Defaults to "".
             auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
-        Yields: Generator[dict, None, None] - The response from the chatbot
+        Yields: The response from the chatbot
             dict: {
                 "message": str,
                 "conversation_id": str,
@@ -584,11 +571,11 @@ class Chatbot:
         auto_continue: bool = False,
         timeout: float = 360,
     ) -> Generator[dict, None, None]:
-        """let the chatbot continue to write
+        """let the chatbot continue to write.
         Args:
             conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
-            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
-            model (str | None, optional): The model to use. Defaults to None.
+            parent_id (str, optional): UUID for the message to continue on. Defaults to None.
+            model (str, optional): The model to use. Defaults to None.
             auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
@@ -621,7 +608,8 @@ class Chatbot:
             if conversation_id not in self.conversation_mapping:
                 if self.lazy_loading:
                     log.debug(
-                        f"Conversation ID {conversation_id} not found in conversation mapping, try to get conversation history for the given ID",
+                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
+                        conversation_id,
                     )
                     with contextlib.suppress(Exception):
                         history = self.get_msg_history(conversation_id)
@@ -678,13 +666,13 @@ class Chatbot:
         """
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError as ex:
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
-            raise error from e
+            raise error from ex
 
     @logger(is_timed=True)
     def get_conversations(
@@ -794,9 +782,7 @@ class Chatbot:
 
 
 class AsyncChatbot(Chatbot):
-    """
-    Async Chatbot class for ChatGPT
-    """
+    """Async Chatbot class for ChatGPT"""
 
     def __init__(
         self,
@@ -807,11 +793,6 @@ class AsyncChatbot(Chatbot):
     ) -> None:
         """
         Same as Chatbot class, but with async methods.
-
-        Note:
-            AsyncChatbot is not compatible with OpenAI Web API, I don't know why the stream method doesn't work.
-            (But the sync version works fine)
-            So, if you want to use AsyncChatbot, you don't need to set the "_puid" parameter in the config.
         """
         super().__init__(
             config=config,
@@ -883,7 +864,7 @@ class AsyncChatbot(Chatbot):
             return
         async for msg in self.continue_write(
             conversation_id=cid,
-            auto_continue=auto_continue,
+            auto_continue=False,
             timeout=timeout,
         ):
             msg["message"] = message + msg["message"]
@@ -1172,14 +1153,14 @@ class AsyncChatbot(Chatbot):
         # 改成自带的错误处理
         try:
             response.raise_for_status()
-        except httpx.HTTPStatusError as e:
+        except httpx.HTTPStatusError as ex:
             await response.aread()
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
-            raise error from e
+            raise error from ex
 
 
 get_input = logger(is_timed=False)(get_input)
@@ -1217,6 +1198,8 @@ def main(config: dict) -> NoReturn:
         conversation_id=config.get("conversation_id"),
         parent_id=config.get("parent_id"),
     )
+    plugins: dict[str, Recipient] = {}
+    chatbot.recipients["python"] = PythonRecipient
 
     def handle_commands(command: str) -> bool:
         if command == "!help":
@@ -1225,9 +1208,11 @@ def main(config: dict) -> NoReturn:
             !help - Show this message
             !reset - Forget the current conversation
             !config - Show the current configuration
+            !plugins - Show the current plugins
+            !switch x - Switch to plugin x. Need to reset the conversation to ativate the plugin.
             !rollback x - Rollback the conversation (x being the number of messages to rollback)
-            !exit - Exit this program
             !setconversation - Changes the conversation
+            !exit - Exit this program
             """,
             )
         elif command == "!reset":
@@ -1268,7 +1253,29 @@ def main(config: dict) -> NoReturn:
                 prev_text = data["message"]
             print(bcolors.ENDC)
             print()
+        elif command == "!plugins":
+            print("Plugins:")
+            for plugin, docs in chatbot.recipients.available_recipients.items():
+                print(" [x] " if plugin in plugins else " [ ] ", plugin, ": ", docs)
+            print()
+        elif command.startswith("!switch"):
+            try:
+                plugin = command.split(" ")[1]
+                if plugin in plugins:
+                    del plugins[plugin]
+                else:
+                    plugins[plugin] = chatbot.recipients[plugin]()
+                print(
+                    f"Plugin {plugin} has been "
+                    + ("enabled" if plugin in plugins else "disabled"),
+                )
+                print()
+            except IndexError:
+                log.exception("Please include plugin name in command")
+                print("Please include plugin name in command")
         elif command == "!exit":
+            if isinstance(chatbot.session, httpx.AsyncClient):
+                chatbot.session.aclose()
             exit()
         else:
             return False
@@ -1284,26 +1291,80 @@ def main(config: dict) -> NoReturn:
             "!exit",
             "!setconversation",
             "!continue",
+            "!plugins",
+            "!switch",
         ],
     )
     print()
     try:
+        msg = {}
+        result = {}
+        times = 0
         while True:
-            print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}")
+            if not msg:
+                times = 0
+                print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}")
 
-            prompt = get_input(session=session, completer=completer)
-            if prompt.startswith("!") and handle_commands(prompt):
-                continue
+                prompt = get_input(session=session, completer=completer)
+                if prompt.startswith("!") and handle_commands(prompt):
+                    continue
+                if not chatbot.conversation_id and plugins:
+                    prompt = (
+                        (
+                            f"""You are ChatGPT.
+
+Knowledge cutoff: 2021-09
+Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
+
+###Available Tools:
+"""
+                            + ";".join(plugins)
+                            + "\n\n"
+                            + "\n\n".join([i.API_DOCS for i in plugins.values()])
+                        )
+                        + "\n\n\n\n"
+                        + prompt
+                    )
+                msg = {
+                    "id": str(uuid.uuid4()),
+                    "author": {"role": "user"},
+                    "content": {"content_type": "text", "parts": [prompt]},
+                }
+            else:
+                print(
+                    f"{bcolors.OKCYAN + bcolors.BOLD}{result['recipient'] if result['recipient'] != 'user' else 'You'}: {bcolors.ENDC}",
+                )
+                print(msg["content"]["parts"][0])
 
             print()
             print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}")
             prev_text = ""
-            for data in chatbot.ask(prompt, auto_continue=True):
+            for data in chatbot.post_messages([msg], auto_continue=True):
+                result = data
                 message = data["message"][len(prev_text) :]
                 print(message, end="", flush=True)
                 prev_text = data["message"]
             print(bcolors.ENDC)
             print()
+
+            msg = {}
+            if not result.get("end_turn", True):
+                times += 1
+                if times >= 5:
+                    continue
+                api = plugins.get(result["recipient"], None)
+                if not api:
+                    msg = {
+                        "id": str(uuid.uuid4()),
+                        "author": {"role": "user"},
+                        "content": {
+                            "content_type": "text",
+                            "parts": [f"Error: No plugin {result['recipient']} found"],
+                        },
+                    }
+                    continue
+                msg = api.process(result)
+
     except (KeyboardInterrupt, EOFError):
         exit()
     except Exception as exc:
