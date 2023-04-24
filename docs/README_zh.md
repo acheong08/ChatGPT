@@ -6,12 +6,12 @@
 [![支持的平台](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
 [![Downloads](https://static.pepy.tech/badge/revchatgpt)](https://pypi.python.org/pypi/revChatGPT)
 
-ChatGPT的逆向工程API。可扩展用于 Chatbot 等。
+ChatGPT 的逆向工程可扩展 API，可用于聊天机器人等。
 
 [![](https://github.com/acheong08/ChatGPT/blob/main/docs/view.gif?raw=true)](https://pypi.python.org/pypi/revChatGPT)
 
 > ## 支持本项目
-> 开启Pull Request并修复我的代码
+> 开 Pull Request 并修复我的代码
 
 > #### Discord 服务器: https://discord.gg/9K2BvbXEHT
 
@@ -32,9 +32,9 @@ python -m pip install --upgrade revChatGPT
 
 # V1 标准 ChatGPT
 
-使用逆向`chat.openai.com`API工程和[绕过Cloudflare Server](https://github.com/acheong08/ChatGPT-Proxy-V4)来免费使用的ChatGPT。由于OpenAI方面的严格速率限制，此特定库仅供个人使用。尚未针对多个帐户进行优化。
+通过对 `chat.openai.com` API 进行逆向工程，再[绕过Cloudflare Server](https://github.com/acheong08/ChatGPT-Proxy-V4)，以免费使用 ChatGPT API。由于 OpenAI 严格的访问频率限制，此特定库仅供个人使用。尚未针对多帐户进行优化。
 
-您可以查看此[项目](https://github.com/acheong08/ChatGPT-to-API)用于支持良好的多帐户循环，它与官方 API 兼容。使用 [OpenAI 的文档](https://platform.openai.com/docs/guides/chat) 作为使用参考。它在帐户之间进行对话，以确保在帐户数量过多的情况下不会达到速率限制。
+您也可以查看此[项目](https://github.com/acheong08/ChatGPT-to-API)用于搭建多账户循环调用系统，鉴于它与官方 API 兼容。使用 [OpenAI 的文档](https://platform.openai.com/docs/guides/chat) 作为使用参考。它在帐户之间进行对话，以确保在帐户数量过多的情况下不会达到速率限制。
 
 </summary>
 
@@ -44,13 +44,13 @@ python -m pip install --upgrade revChatGPT
 
 ## 配置
 
-1. 在OpenAI的 [ChatGPT](https://chat.openai.com/)创建账户
+1. 在OpenAI的 [ChatGPT 网站](https://chat.openai.com/)创建账户
 2. 记住你的邮箱地址与密码
 
 ### 身份验证方式: (任选其一)
 
-#### - 邮箱/密码
-不支持使用 Google/Microsoft 授权登录的账户
+#### - 邮箱/密码 登录
+不支持使用 Google/Microsoft 账号 授权登录的账户
 ```json
 {
   "email": "email",
@@ -58,9 +58,9 @@ python -m pip install --upgrade revChatGPT
 }
 ```
 
-#### - 访问令牌
+#### - 访问令牌（Access Token）验证
 
-> 请使用这种方式！
+> 建议使用该方式验证！
 
 https://chat.openai.com/api/auth/session
 
@@ -70,7 +70,7 @@ https://chat.openai.com/api/auth/session
 }
 ```
 
-#### - 可选配置：
+#### - 可选配置内容：
 
 ```json
 {
@@ -82,7 +82,7 @@ https://chat.openai.com/api/auth/session
   "model": "gpt-4"
 }
 ```
-默认情况下，分析处于禁用状态。将`collect_analytics`设置为`true`以启用它。
+默认情况下，数据收集&分析处于禁用状态。将`collect_analytics`设置为`true`以启用它。
 
 3. 另存为 `$HOME/.config/revChatGPT/config.json`
 4. 如果您使用的是 Windows，则需要创建一个名为`HOME`的环境变量，并将其设置为您的主配置文件，以便脚本能够找到 config.json 文件。
@@ -174,7 +174,7 @@ for data in chatbot.ask(
 print(response)
 ```
 #### 所有的API方法
-移步到 [wiki](https://github.com/acheong08/ChatGPT/wiki/) 来获取高级的开发者功能
+请移步 [wiki](https://github.com/acheong08/ChatGPT/wiki/) 以了解高级的开发者功能
 
 </details>
 
