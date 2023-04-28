@@ -8,6 +8,8 @@ English - [中文](./README_zh.md) - [Spanish](./README_sp.md) -  [日本語](./
 
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
+Status: Working but unmaintained. 
+
 [![](https://github.com/acheong08/ChatGPT/blob/main/docs/view.gif?raw=true)](https://pypi.python.org/pypi/revChatGPT)
 
 > ## Support my work
