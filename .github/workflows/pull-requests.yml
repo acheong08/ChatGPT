@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Remove invited labels
-        if: github.event.action != 'opened'
+        if: github.event.action != 'opened' && github.base_ref == 'refs/heads/dev'
         uses: actions/github-script@v6.4.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -27,6 +27,7 @@ jobs:
               issue_number: pr.number,
             });
       - name: Add new labels
+        if: github.base_ref == 'refs/heads/dev'
         uses: actions/github-script@v6.4.1
         with:
           script: |
@@ -36,7 +37,7 @@ jobs:
             const labelConditions = [
               {label: 'bugfix', keywords: ['Bug', 'bug', 'error', 'Error', 'fix', 'Fix']},
               {label: 'vulnerability', keywords: ['vulnerability', 'Vulnerability', 'leak', 'Leak']},
-              {label: 'enhancement', keywords: ['suggestion', 'enhancement', 'feature request', 'Feature request', 'Feature Request']},
+              {label: 'enhancement', keywords: ['Add', 'add', 'improve', 'Improve']},
               {label: 'documentation', keywords: ['docs', 'documentation', 'Wiki', 'wiki']},
               {label: 'help wanted', keywords: ['help wanted']},
               {label: 'question', keywords: ['question', 'Question', 'Why', 'why', 'How', 'how']},

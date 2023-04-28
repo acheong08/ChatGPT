@@ -35,11 +35,10 @@ class RecipientMeta(ABCMeta):
     Metaclass for the Recipient class.
     """
 
-    def __new__(mcs, name, bases, namespace, /, **kwargs):
-        if not "RECIPIENT_NAME" in namespace or not namespace["RECIPIENT_NAME"]:
+    def __new__(cls, name, bases, namespace, /, **kwargs):
+        if "RECIPIENT_NAME" not in namespace or not namespace["RECIPIENT_NAME"]:
             namespace["RECIPIENT_NAME"] = name
-        cls = super().__new__(mcs, name, bases, namespace, **kwargs)
-        return cls
+        return super().__new__(cls, name, bases, namespace, **kwargs)
 
 
 class Recipient(metaclass=RecipientMeta):
