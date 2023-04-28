@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   ci:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev')
+    if: github.event_name != 'release'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
