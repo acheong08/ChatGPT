@@ -5,7 +5,7 @@ on:
     types: [published]
   push:
     branches: [main]
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, synchronize]
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   ci:
-    if: github.event_name != 'release'
+    if: github.event_name != 'release' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
