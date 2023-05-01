@@ -37,7 +37,7 @@ python -m pip install --upgrade revChatGPT
 
 # V1 Standard ChatGPT
 
-Due to recent tightening of OpenAI's security, the default endpoint has been swapped over to one provided by @pengzhile. It is not open source and privacy is not guarenteed. Use it at your own risk. I am working on an open source implementation with the latest changes but that could take a while.
+Uses a proxy to get around cloudflare. It's open source: https://github.com/acheong08/ChatGPT-Proxy-V4. I currently host the default proxy. As always, no data collected other than by Cloudflare and OpenAI.
 
 </summary>
 
