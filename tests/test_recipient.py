@@ -6,7 +6,7 @@ from revChatGPT.recipient import PythonRecipient
 from revChatGPT.V1 import Chatbot
 
 
-def test_recipient():
+def test_recipient() -> None:
     """
     Test the chatbot
     """
@@ -18,7 +18,7 @@ def test_recipient():
     # Try to get the recipient which is not registered
     try:
         _ = cbt.recipients["python"]
-        assert False
+        raise AssertionError
     except Exception as ex:
         assert isinstance(ex, KeyError)
         assert ex.args[0] == "Recipient 'python' is not registered."
@@ -30,7 +30,7 @@ def test_recipient():
     # Try to register the recipient which is already registered
     try:
         cbt.recipients["python"] = PythonRecipient
-        assert False
+        raise AssertionError
     except Exception as ex:
         assert isinstance(ex, KeyError)
         assert ex.args[0] == "Recipient 'python' is already registered."
@@ -48,7 +48,7 @@ def test_recipient():
 
     {python.API_DOCS}
     """
-    for _ in cbt.ask("You are ChatGPT." + api_docs):
+    for _ in cbt.ask(f"You are ChatGPT.{api_docs}"):
         pass
 
     # Test the python recipient
