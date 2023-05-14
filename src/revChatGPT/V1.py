@@ -214,15 +214,7 @@ class Chatbot:
                 "Accept": "text/event-stream",
                 "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json",
-                "X-Openai-Assistant-App-Id": "",
-                "Connection": "close",
-                "Accept-Language": "en-US,en;q=0.9",
-                "Referer": "https://chat.openai.com/chat",
-            },
-        )
-        self.session.cookies.update(
-            {
-                "library": "revChatGPT",
+                "User-Agent": "OpenAI-API-Client/0.1.0",
             },
         )
 
