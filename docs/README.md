@@ -76,12 +76,14 @@ https://chat.openai.com/api/auth/session
   "parent_id": "UUID...",
   "proxy": "...",
   "model": "gpt-4", // gpt-4-browsing, text-davinci-002-render-sha, gpt-4, gpt-4-plugins
-  "plugin_ids" : ["plugin-d1d6eb04-3375-40aa-940a-c2fc57ce0f51"] // Wolfram Alpha. Get IDs from [here](./docs/plugins.json)
+  "plugin_ids" : ["plugin-d1d6eb04-3375-40aa-940a-c2fc57ce0f51"] // Wolfram Alpha example
 }
 ```
 
 1. Save this as `$HOME/.config/revChatGPT/config.json`
 2. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
+
+Plugin IDs can be found [here](./docs/plugins.json). Remember to set model to `gpt-4-plugins` if plugins are enabled
 
 ## Usage
 
