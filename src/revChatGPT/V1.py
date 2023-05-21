@@ -507,7 +507,7 @@ class Chatbot:
             "model": model or self.config.get("model") or "text-davinci-002-render-sha",
         }
         plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
-        if len(plugin_ids) > 0:
+        if len(plugin_ids) > 0 and not conversation_id:
             data["plugin_ids"] = plugin_ids
 
         yield from self.__send_request(
@@ -1363,8 +1363,6 @@ Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
             prev_text = ""
             for data in chatbot.post_messages([msg], auto_continue=True):
                 result = data
-                if data.get("author").get("role") == "tool":
-                    continue
                 message = data["message"][len(prev_text) :]
                 print(message, end="", flush=True)
                 prev_text = data["message"]
