@@ -3,8 +3,6 @@ Standard ChatGPT
 """
 from __future__ import annotations
 
-import sys
-import asyncio
 import base64
 import binascii
 import contextlib
