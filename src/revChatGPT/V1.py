@@ -108,10 +108,10 @@ class Chatbot:
         Args:
             config (dict[str, str]): Login and proxy info. Example:
                 {
-                    "email": "OpenAI account email",
-                    "password": "OpenAI account password",
                     "access_token": "<access_token>"
                     "proxy": "<proxy_url_string>",
+                    "model": "<model_name>",
+                    "plugin": "<plugin_id>",
                 }
                 More details on these are available at https://github.com/acheong08/ChatGPT#configuration
             conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
@@ -438,6 +438,7 @@ class Chatbot:
         messages: list[dict],
         conversation_id: str | None = None,
         parent_id: str | None = None,
+        plugin_ids: list = [],
         model: str | None = None,
         auto_continue: bool = False,
         timeout: float = 360,
@@ -505,6 +506,8 @@ class Chatbot:
             "parent_message_id": parent_id,
             "model": model or self.config.get("model") or "text-davinci-002-render-sha",
         }
+        if len(plugin_ids) > 0:
+            data["plugin_ids"] = plugin_ids
 
         yield from self.__send_request(
             data,
@@ -519,6 +522,7 @@ class Chatbot:
         conversation_id: str | None = None,
         parent_id: str = "",
         model: str = "",
+        plugin_ids: list = [],
         auto_continue: bool = False,
         timeout: float = 360,
         **kwargs,
@@ -556,6 +560,7 @@ class Chatbot:
             messages,
             conversation_id=conversation_id,
             parent_id=parent_id,
+            plugin_ids=plugin_ids,
             model=model,
             auto_continue=auto_continue,
             timeout=timeout,
@@ -778,6 +783,21 @@ class Chatbot:
         for _ in range(num):
             self.conversation_id = self.conversation_id_prev_queue.pop()
             self.parent_id = self.parent_id_prev_queue.pop()
+
+    @logger(is_timed=True)
+    def get_plugins(self, offset: int = 0, limit: int = 250, status: str = "approved"):
+        url = f"{self.base_url}aip/p?offset={offset}&limit={limit}&statuses={status}"
+        response = self.session.get(url)
+        self.__check_response(response)
+        # Parse as JSON
+        return json.loads(response.text)
+
+    @logger(is_timed=True)
+    def install_plugin(self, plugin_id: str):
+        url = f"{self.base_url}aip/p/{plugin_id}/user-settings"
+        payload = {"is_installed": True}
+        response = self.session.patch(url, data=json.dumps(payload))
+        self.__check_response(response)
 
 
 class AsyncChatbot(Chatbot):
