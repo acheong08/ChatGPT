@@ -83,7 +83,7 @@ https://chat.openai.com/api/auth/session
 1. Save this as `$HOME/.config/revChatGPT/config.json`
 2. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
 
-Plugin IDs can be found [here](./plugins.json). Remember to set model to `gpt-4-plugins` if plugins are enabled
+Plugin IDs can be found [here](./plugins.json). Remember to set model to `gpt-4-plugins` if plugins are enabled. Plugins may or may not work if you haven't installed them from the web interface. You can call `chatbot.install_plugin(plugin_id=plugin_id)` to install any one of them from code. Call `chatbot.get_plugins()` to get a list of all plugins available.
 
 ## Usage
 
