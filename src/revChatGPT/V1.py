@@ -1338,7 +1338,6 @@ def main(config: dict) -> NoReturn:
                 print("Please include plugin name in command")
         elif command == "!exit":
             chatbot.session.close()
-            chatbot.clear_conversation_stream()
             exit()
         else:
             return False
