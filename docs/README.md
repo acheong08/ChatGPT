@@ -75,8 +75,8 @@ https://chat.openai.com/api/auth/session
   "conversation_id": "UUID...",
   "parent_id": "UUID...",
   "proxy": "...",
-  "paid": false,
-  "model": "gpt-4" // gpt-4-browsing, text-davinci-002-render-sha, gpt-4
+  "model": "gpt-4", // gpt-4-browsing, text-davinci-002-render-sha, gpt-4, gpt-4-plugins
+  "plugin_ids" : ["plugin-d1d6eb04-3375-40aa-940a-c2fc57ce0f51"] // Wolfram Alpha. Get IDs from [here](./docs/plugins.json)
 }
 ```
 
@@ -143,6 +143,8 @@ print(response)
 Refer to the [wiki](https://github.com/acheong08/ChatGPT/wiki/) for advanced developer usage.
 
 </details>
+
+<details>
 
 <summary>
 
