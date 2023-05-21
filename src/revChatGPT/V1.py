@@ -390,14 +390,14 @@ class Chatbot:
             cid = line["conversation_id"]
             pid = line["message"]["id"]
             metadata = line["message"].get("metadata", {})
-            author = metadata.get("author", {})
             message_exists = False
+            author = {}
             if line.get("message"):
+                author = metadata.get("author", {}) or line["message"].get("author", {})
                 if line["message"].get("content"):
                     if line["message"]["content"].get("parts"):
                         if len(line["message"]["content"]["parts"]) > 0:
                             message_exists = True
-
             message: str = (
                 line["message"]["content"]["parts"][0] if message_exists else ""
             )
