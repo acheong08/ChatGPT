@@ -506,6 +506,7 @@ class Chatbot:
             "parent_message_id": parent_id,
             "model": model or self.config.get("model") or "text-davinci-002-render-sha",
         }
+        plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
         if len(plugin_ids) > 0:
             data["plugin_ids"] = plugin_ids
 
