@@ -1377,7 +1377,7 @@ Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
                 )
                 for citation in result["citations"]:
                     print(
-                        f'{citation["metadata"]["title"]}: {citation["metadata"]["url"]}'
+                        f'{citation["metadata"]["title"]}: {citation["metadata"]["url"]}',
                     )
                 print()
 

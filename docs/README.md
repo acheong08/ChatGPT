@@ -8,7 +8,7 @@ English - [中文](./README_zh.md) - [Spanish](./README_sp.md) -  [日本語](./
 
 Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
 
-Status: Working but unmaintained. 
+Status: Working but unmaintained.
 
 [![](https://github.com/acheong08/ChatGPT/blob/main/docs/view.gif?raw=true)](https://pypi.python.org/pypi/revChatGPT)
 
@@ -30,7 +30,7 @@ python -m pip install --upgrade revChatGPT
 # V1 Standard ChatGPT
 
 V1 uses a cloudflare bypass proxy to make life convenient for everyone. The proxy is open source: https://github.com/acheong08/ChatGPT-Proxy-V4
-    
+
 To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` to `https://yourproxy.com/api/`
 
 </summary>
