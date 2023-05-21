@@ -1362,6 +1362,8 @@ Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
                 print("Browsing takes a while, please wait...")
             prev_text = ""
             for data in chatbot.post_messages([msg], auto_continue=True):
+                if data["recipient"] != "all":
+                    continue
                 result = data
                 message = data["message"][len(prev_text) :]
                 print(message, end="", flush=True)
