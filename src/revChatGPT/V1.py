@@ -387,13 +387,25 @@ class Chatbot:
                 raise ValueError(f"Field missing. Details: {str(line)}")
             if line.get("message").get("author").get("role") != "assistant":
                 continue
-            message: str = line["message"]["content"]["parts"][0]
+
             cid = line["conversation_id"]
             pid = line["message"]["id"]
             metadata = line["message"].get("metadata", {})
+            author = metadata.get("author", {})
+            message_exists = False
+            if line.get("message"):
+                if line["message"].get("content"):
+                    if line["message"]["content"].get("parts"):
+                        if len(line["message"]["content"]["parts"]) > 0:
+                            message_exists = True
+
+            message: str = (
+                line["message"]["content"]["parts"][0] if message_exists else ""
+            )
             model = metadata.get("model_slug", None)
             finish_details = metadata.get("finish_details", {"type": None})["type"]
             yield {
+                "author": author,
                 "message": message,
                 "conversation_id": cid,
                 "parent_id": pid,
@@ -401,6 +413,7 @@ class Chatbot:
                 "finish_details": finish_details,
                 "end_turn": line["message"].get("end_turn", True),
                 "recipient": line["message"].get("recipient", "all"),
+                "citations": metadata.get("citations", []),
             }
 
         self.conversation_mapping[cid] = pid
@@ -449,6 +462,7 @@ class Chatbot:
                 "finish_details": str, # "max_tokens" or "stop"
                 "end_turn": bool,
                 "recipient": str,
+                "citations": list[dict],
             }
         """
         if parent_id and not conversation_id:
@@ -1330,14 +1344,28 @@ Current date: {datetime.datetime.now().strftime("%Y-%m-%d")}
 
             print()
             print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}")
+            if chatbot.config.get("model") == "gpt-4-browsing":
+                print("Browsing takes a while, please wait...")
             prev_text = ""
             for data in chatbot.post_messages([msg], auto_continue=True):
                 result = data
+                if data.get("author").get("role") == "tool":
+                    continue
                 message = data["message"][len(prev_text) :]
                 print(message, end="", flush=True)
                 prev_text = data["message"]
             print(bcolors.ENDC)
             print()
+
+            if result.get("citations", False):
+                print(
+                    f"{bcolors.WARNING + bcolors.BOLD}Citations: {bcolors.ENDC}",
+                )
+                for citation in result["citations"]:
+                    print(
+                        f'{citation["metadata"]["title"]}: {citation["metadata"]["url"]}'
+                    )
+                print()
 
             msg = {}
             if not result.get("end_turn", True):
