@@ -112,7 +112,6 @@ class Chatbot:
                     "password": "OpenAI account password",
                     "access_token": "<access_token>"
                     "proxy": "<proxy_url_string>",
-                    "paid": True/False, # whether this is a plus account
                 }
                 More details on these are available at https://github.com/acheong08/ChatGPT#configuration
             conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
@@ -504,13 +503,7 @@ class Chatbot:
             "messages": messages,
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": model
-            or self.config.get("model")
-            or (
-                "text-davinci-002-render-paid"
-                if self.config.get("paid")
-                else "text-davinci-002-render-sha"
-            ),
+            "model": model or self.config.get("model") or "text-davinci-002-render-sha",
         }
 
         yield from self.__send_request(

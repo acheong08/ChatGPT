@@ -29,8 +29,6 @@ python -m pip install --upgrade revChatGPT
 
 # V1 Standard ChatGPT
 
-~~Due to recent tightening of OpenAI's security, the default endpoint has been swapped over to one provided by @pengzhile. It is not open source and privacy is not guarenteed. Use it at your own risk. I am working on an open source implementation with the latest changes but that could take a while.~~
-    
 V1 uses a cloudflare bypass proxy to make life convenient for everyone. The proxy is open source: https://github.com/acheong08/ChatGPT-Proxy-V4
     
 To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` to `https://yourproxy.com/api/`
@@ -78,15 +76,12 @@ https://chat.openai.com/api/auth/session
   "parent_id": "UUID...",
   "proxy": "...",
   "paid": false,
-  "collect_analytics": true,
-  "model": "gpt-4"
+  "model": "gpt-4" // gpt-4-browsing, text-davinci-002-render-sha, gpt-4
 }
 ```
 
-Analytics is disabled by default. Set `collect_analytics` to `true` to enable it.
-
-3. Save this as `$HOME/.config/revChatGPT/config.json`
-4. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
+1. Save this as `$HOME/.config/revChatGPT/config.json`
+2. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
 
 ## Usage
 

@@ -12,7 +12,7 @@ if not PATH.exists():
 
 setup(
     name="revChatGPT",
-    version="5.0.3",
+    version="5.0.4",
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     long_description=open(PATH, encoding="utf-8").read(),
     long_description_content_type="text/markdown",
