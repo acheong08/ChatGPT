@@ -82,7 +82,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://chat.openai.com/backend-api/" # "https://bypass.churchless.tech/"
+BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.churchless.tech/" # "https://chat.openai.com/backend-api/"
 
 bcolors = t.Colors()
 
