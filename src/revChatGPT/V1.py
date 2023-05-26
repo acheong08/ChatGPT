@@ -164,8 +164,8 @@ class Chatbot:
             else:
                 self.session.proxies.update(proxies)
 
-        self.conversation_id = conversation_id
-        self.parent_id = parent_id
+        self.conversation_id = conversation_id or config.get("conversation_id", None)
+        self.parent_id = parent_id or config.get("parent_id", None)
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
