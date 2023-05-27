@@ -22,8 +22,7 @@ from typing import NoReturn
 import httpx
 import requests
 from httpx import AsyncClient
-from OpenAIAuth import Authenticator
-from OpenAIAuth import Error as AuthError
+from OpenAIAuth import Auth0 as Authenticator
 
 from . import __version__
 from . import typings as t
@@ -195,9 +194,8 @@ class Chatbot:
         if "access_token" not in self.config:
             try:
                 self.login()
-            except AuthError as error:
-                print(error.details)
-                print(error.status_code)
+            except Exception as error:
+                print(error)
                 raise error
 
     @logger(is_timed=False)
@@ -317,20 +315,18 @@ class Chatbot:
     @logger(is_timed=True)
     def login(self) -> None:
         """Login to OpenAI by email and password"""
-        if self.config.get("email") and self.config.get("password"):
+        if not self.config.get("email") and not self.config.get("password"):
             log.error("Insufficient login details provided!")
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
         auth = Authenticator(
-            email_address=self.config.get("email"),
+            email=self.config.get("email"),
             password=self.config.get("password"),
             proxy=self.config.get("proxy"),
         )
         log.debug("Using authenticator to get access token")
-        auth.begin()
-        auth.get_access_token()
 
-        self.set_access_token(auth.access_token)
+        self.set_access_token(auth.auth())
 
     @logger(is_timed=True)
     def __send_request(
