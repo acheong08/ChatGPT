@@ -46,7 +46,6 @@ To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` 
 
 #### - Email/Password
 
-> _Currently broken for free users. Do `export PUID="..."` if you have a plus account. The PUID is a cookie named `_puid`_
 > Not supported for Google/Microsoft accounts.
 ```json
 {
@@ -56,8 +55,6 @@ To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` 
 ```
 
 #### - Access token
-
-> Please this!
 https://chat.openai.com/api/auth/session
 
 ```json
