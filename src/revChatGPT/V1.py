@@ -171,6 +171,7 @@ class Chatbot:
         self.lazy_loading = lazy_loading
         self.base_url = base_url or BASE_URL
         self.recipients = RecipientManager()
+        self.disable_history = config.get("disable_history", False)
 
         self.__check_credentials()
 
@@ -501,7 +502,7 @@ class Chatbot:
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
             "model": model or self.config.get("model") or "text-davinci-002-render-sha",
-            "history_and_training_disabled": True,
+            "history_and_training_disabled": self.disable_history,
         }
         plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
         if len(plugin_ids) > 0 and not conversation_id:
@@ -640,7 +641,7 @@ class Chatbot:
                 if self.config.get("paid")
                 else "text-davinci-002-render-sha"
             ),
-            "history_and_training_disabled": True,
+            "history_and_training_disabled": self.disable_history,
         }
 
         yield from self.__send_request(
@@ -954,7 +955,7 @@ class AsyncChatbot(Chatbot):
                 if self.config.get("paid")
                 else "text-davinci-002-render-sha"
             ),
-            "history_and_training_disabled": True,
+            "history_and_training_disabled": self.disable_history,
         }
 
         async for msg in self.__send_request(
@@ -1077,7 +1078,7 @@ class AsyncChatbot(Chatbot):
                 if self.config.get("paid")
                 else "text-davinci-002-render-sha"
             ),
-            "history_and_training_disabled": True,
+            "history_and_training_disabled": self.disable_history,
         }
 
         async for msg in self.__send_request(
