@@ -221,7 +221,7 @@ class Chatbot:
                 "Accept": "text/event-stream",
                 "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json",
-                "User-Agent": "OpenAI-API-Client/0.1.0",
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
             },
         )
 
