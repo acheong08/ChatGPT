@@ -36,7 +36,7 @@ setup(
         "prompt-toolkit",
         "tiktoken>=0.3.0",
         "openai",
-        "curl_cffi"
+        "curl_cffi",
     ],
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
