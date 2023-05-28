@@ -162,11 +162,21 @@ class Chatbot:
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
         self.lazy_loading = lazy_loading
-        self.base_url = base_url or BASE_URL
         self.recipients = RecipientManager()
         self.disable_history = config.get("disable_history", False)
 
         self.__check_credentials()
+        # Check if chat.openai.com is reachable
+        if not base_url:
+            response = self.session.get("https://chat.openai.com/backend-api/accounts/check", impersonate='safari15_5')
+            if response.status_code != 200:
+                print(f"Using bypass.churchless.tech backend due to status code {response.status_code}")
+                self.base_url = BASE_URL
+            else:
+                print("Using chat.openai.com backend")
+                self.base_url = "https://chat.openai.com/backend-api/"
+        else:
+            self.base_url = base_url
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
@@ -345,7 +355,7 @@ class Chatbot:
                 url=f"{self.base_url}conversation",
                 data=json.dumps(data),
                 timeout=timeout,
-                impersonate='chrome110',
+                impersonate='safari15_5',
                 content_callback=response_file.write, # a hack around curl_cffi not supporting stream=True
             )
         self.__check_response(response)
@@ -693,7 +703,7 @@ class Chatbot:
         :param limit: Integer
         """
         url = f"{self.base_url}conversations?offset={offset}&limit={limit}"
-        response = self.session.get(url, impersonate='chrome110')
+        response = self.session.get(url, impersonate='safari15_5')
         self.__check_response(response)
         if encoding is not None:
             response.encoding = encoding
@@ -708,7 +718,7 @@ class Chatbot:
         :param encoding: String
         """
         url = f"{self.base_url}conversation/{convo_id}"
-        response = self.session.get(url, impersonate='chrome110')
+        response = self.session.get(url, impersonate='safari15_5')
         self.__check_response(response)
         if encoding is not None:
             response.encoding = encoding
@@ -724,7 +734,7 @@ class Chatbot:
             data=json.dumps(
                 {"message_id": message_id, "model": "text-davinci-002-render"},
             ),
-            impersonate='chrome110'
+            impersonate='safari15_5'
         )
         self.__check_response(response)
         return response.json().get("title", "Error generating title")
@@ -737,7 +747,7 @@ class Chatbot:
         :param title: String
         """
         url = f"{self.base_url}conversation/{convo_id}"
-        response = self.session.patch(url, data=json.dumps({"title": title}), impersonate='chrome110')
+        response = self.session.patch(url, data=json.dumps({"title": title}), impersonate='safari15_5')
         self.__check_response(response)
 
     @logger(is_timed=True)
@@ -747,7 +757,7 @@ class Chatbot:
         :param id: UUID of conversation
         """
         url = f"{self.base_url}conversation/{convo_id}"
-        response = self.session.patch(url, data='{"is_visible": false}', impersonate='chrome110')
+        response = self.session.patch(url, data='{"is_visible": false}', impersonate='safari15_5')
         self.__check_response(response)
 
     @logger(is_timed=True)
@@ -756,7 +766,7 @@ class Chatbot:
         Delete all conversations
         """
         url = f"{self.base_url}conversations"
-        response = self.session.patch(url, data='{"is_visible": false}', impersonate='chrome110')
+        response = self.session.patch(url, data='{"is_visible": false}', impersonate='safari15_5')
         self.__check_response(response)
 
     @logger(is_timed=False)
@@ -790,7 +800,7 @@ class Chatbot:
     @logger(is_timed=True)
     def get_plugins(self, offset: int = 0, limit: int = 250, status: str = "approved"):
         url = f"{self.base_url}aip/p?offset={offset}&limit={limit}&statuses={status}"
-        response = self.session.get(url, impersonate='chrome110')
+        response = self.session.get(url, impersonate='safari15_5')
         self.__check_response(response)
         # Parse as JSON
         return json.loads(response.text)
@@ -799,7 +809,7 @@ class Chatbot:
     def install_plugin(self, plugin_id: str):
         url = f"{self.base_url}aip/p/{plugin_id}/user-settings"
         payload = {"is_installed": True}
-        response = self.session.patch(url, data=json.dumps(payload), impersonate='chrome110')
+        response = self.session.patch(url, data=json.dumps(payload), impersonate='safari15_5')
         self.__check_response(response)
 
     @logger(is_timed=False)
@@ -861,7 +871,7 @@ class AsyncChatbot(Chatbot):
                     url=f"{self.base_url}conversation",
                     data=json.dumps(data),
                     timeout=timeout,
-                    impersonate='chrome110',
+                    impersonate='safari15_5',
                     content_callback=response_file.write,
                     )
             await self.__check_response(response)
@@ -1138,7 +1148,7 @@ class AsyncChatbot(Chatbot):
         :param limit: Integer
         """
         url = f"{self.base_url}conversations?offset={offset}&limit={limit}"
-        response = await self.session.get(url, impersonate='chrome110')
+        response = await self.session.get(url, impersonate='safari15_5')
         await self.__check_response(response)
         data = json.loads(response.text)
         return data["items"]
@@ -1153,7 +1163,7 @@ class AsyncChatbot(Chatbot):
         :param id: UUID of conversation
         """
         url = f"{self.base_url}conversation/{convo_id}"
-        response = await self.session.get(url, impersonate='chrome110')
+        response = await self.session.get(url, impersonate='safari15_5')
         if encoding is not None:
             response.encoding = encoding
             await self.__check_response(response)
@@ -1169,7 +1179,7 @@ class AsyncChatbot(Chatbot):
             url,
             data=json.dumps(
                 {"message_id": message_id, "model": "text-davinci-002-render"},
-            ), impersonate='chrome110'
+            ), impersonate='safari15_5'
         )
         await self.__check_response(response)
 
@@ -1180,7 +1190,7 @@ class AsyncChatbot(Chatbot):
         :param title: String
         """
         url = f"{self.base_url}conversation/{convo_id}"
-        response = await self.session.patch(url, data=f'{{"title": "{title}"}}', impersonate='chrome110')
+        response = await self.session.patch(url, data=f'{{"title": "{title}"}}', impersonate='safari15_5')
         await self.__check_response(response)
 
     async def delete_conversation(self, convo_id: str) -> None:
@@ -1189,7 +1199,7 @@ class AsyncChatbot(Chatbot):
         :param convo_id: UUID of conversation
         """
         url = f"{self.base_url}conversation/{convo_id}"
-        response = await self.session.patch(url, data='{"is_visible": false}', impersonate='chrome110')
+        response = await self.session.patch(url, data='{"is_visible": false}', impersonate='safari15_5')
         await self.__check_response(response)
 
     async def clear_conversations(self) -> None:
@@ -1197,7 +1207,7 @@ class AsyncChatbot(Chatbot):
         Delete all conversations
         """
         url = f"{self.base_url}conversations"
-        response = await self.session.patch(url, data='{"is_visible": false}', impersonate='chrome110')
+        response = await self.session.patch(url, data='{"is_visible": false}', impersonate='safari15_5')
         await self.__check_response(response)
 
     async def __map_conversations(self) -> None:
