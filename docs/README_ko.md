@@ -6,17 +6,17 @@ English - [中文](./README_zh.md) - [Spanish](./README_sp.md) -  [日本語](./
 [![Support_Platform](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
 [![Downloads](https://static.pepy.tech/badge/revchatgpt)](https://pypi.python.org/pypi/revChatGPT)
 
-Reverse Engineered ChatGPT API by OpenAI. Extensible for chatbots etc.
+OpenAI가 개발한 ChatGPT API를 Reverse-Engineering한 프로젝트입니다. 본 프로젝트를 통해 챗봇 등의 확장 가능한 목적으로 사용할 수 있습니다.
 
 [![](https://github.com/acheong08/ChatGPT/blob/main/docs/view.gif?raw=true)](https://pypi.python.org/pypi/revChatGPT)
 
-# Installation
+# 설치
 
 ```
 python -m pip install --upgrade revChatGPT
 ```
 
-### Suport Python Version
+### 지원 가능한 파이썬 버전
 
 - Minimum - Python3.9
 - Recommend - Python3.11+
@@ -27,9 +27,9 @@ python -m pip install --upgrade revChatGPT
 
 # V1 Standard ChatGPT
 
-V1 uses a cloudflare bypass proxy to make life convenient for everyone. The proxy is open source: https://github.com/acheong08/ChatGPT-Proxy-V4
+V1은 모두에게 편리한 사용을 위해 클라우드플레어 우회 프록시를 사용합니다. 이 프록시는 오픈 소스로 제공됩니다: https://github.com/acheong08/ChatGPT-Proxy-V4
 
-To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` to `https://yourproxy.com/api/`
+자체 배포한 프록시를 설정하려면 환경 변수 CHATGPT_BASE_URL을 https://yourproxy.com/api/로 설정하십시오.
 
 </summary>
 
@@ -76,10 +76,10 @@ https://chat.openai.com/api/auth/session
 }
 ```
 
-1. Save this as `$HOME/.config/revChatGPT/config.json`
-2. If you are using Windows, you will need to create an environment variable named `HOME` and set it to your home profile for the script to be able to locate the config.json file.
+1. 위 내용을 $HOME/.config/revChatGPT/config.json로 저장하세요.
+2. Windows를 사용하는 경우, 스크립트가 config.json 파일을 찾을 수 있도록 환경 변수인 HOME을 생성하고 홈 프로필로 설정하셔야 합니다.
 
-Plugin IDs can be found [here](./plugins.json). Remember to set model to `gpt-4-plugins` if plugins are enabled. Plugins may or may not work if you haven't installed them from the web interface. You can call `chatbot.install_plugin(plugin_id=plugin_id)` to install any one of them from code. Call `chatbot.get_plugins()` to get a list of all plugins available.
+Plugin IDs는 다음 [링크](./plugins.json)를 참조하세요.  만약 플러그인이 활성화되어 있다면, 모델을 gpt-4-plugins로 설정하세요. 웹 인터페이스에서 플러그인을 설치하지 않은 경우 플러그인이 작동할 수도 있고 작동하지 않을 수도 있습니다. 코드에서 chatbot.install_plugin(plugin_id=plugin_id)를 호출하여 플러그인 중 하나를 설치할 수 있습니다. chatbot.get_plugins()를 호출하여 사용 가능한 모든 플러그인 목록을 확인하실 수 있습니다.
 
 ## Usage
 
@@ -96,9 +96,9 @@ You:
 (Press Esc followed by Enter to finish)
 ```
 
-The command line interface supports multi-line inputs and allows navigation using arrow keys. Besides, you can also edit history inputs by arrow keys when the prompt is empty. It also completes your input if it finds matched previous prompts. To finish input, press `Esc` and then `Enter` as solely `Enter` itself is used for creating new line in multi-line mode.
+Command line 인터페이스는 여러 줄의 입력을 지원하며, 화살표 키를 사용하여 탐색할 수 있습니다. 또한, 프롬프트가 비어있을 때 화살표 키를 사용하여 이전 입력을 편집할 수도 있습니다. 이전 프롬프트와 일치하는 내용을 찾으면 입력을 자동 완성하며, 입력을 완료하려면 Esc를 누른 다음에 Enter를 누르세요. Enter키만 누르면 여러 줄 모드에서 새 줄을 생성합니다.
 
-Set the environment variable `NO_COLOR` to `true` to disable color output.
+컬러 출력을 비활성화하려면 환경 변수 NO_COLOR를 true로 설정하세요.
 
 ### Developer API
 
@@ -219,15 +219,15 @@ for data in chatbot.ask_stream("Hello world"):
 
 [My list](https://github.com/stars/acheong08/lists/awesome-chatgpt)
 
-If you have a cool project you want added to the list, open an issue.
+만약 추가하고 싶은 멋진 프로젝트가 있다면, 이슈를 생성해주세요.
 
 # Disclaimers
 
-This is not an official OpenAI product. This is a personal project and is not affiliated with OpenAI in any way. Don't sue me.
+이것은 공식적인 OpenAI Product가 아니며, 개인 프로젝트로 OpenAI와 어떠한 관련도 없습니다. 본 코드의 사용으로 인한 어떠한 책임도 지지 않습니다.
 
 ## Contributors
 
-This project exists thanks to all the people who contribute.
+이 프로젝트는 기여해 주신 모든 분들에게 감사드립니다.
 
 <a href="https://github.com/acheong08/ChatGPT/graphs/contributors">
 <img src="https://contrib.rocks/image?repo=acheong08/ChatGPT" />
