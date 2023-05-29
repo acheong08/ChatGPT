@@ -686,15 +686,13 @@ class Chatbot:
         Raises:
             Error: _description_
         """
-        try:
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as ex:
+        if response.status_code != 200:
             error = t.Error(
                 source="OpenAI",
                 message=response.text,
                 code=response.status_code,
             )
-            raise error from ex
+            raise error
 
     @logger(is_timed=True)
     def get_conversations(
