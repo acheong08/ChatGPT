@@ -155,7 +155,7 @@ class Chatbot:
                 "http": config["proxy"],
                 "https": config["proxy"],
             }
-            self.session.proxies.update(proxies)
+            self.session.proxies = proxies
 
         self.conversation_id = conversation_id or config.get("conversation_id", None)
         self.parent_id = parent_id or config.get("parent_id", None)
