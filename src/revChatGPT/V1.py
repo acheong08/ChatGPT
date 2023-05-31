@@ -866,6 +866,7 @@ class AsyncChatbot(Chatbot):
         data: dict,
         auto_continue: bool = False,
         timeout: float = 360,
+            **kwargs
     ) -> AsyncGenerator[dict, None]:
         cid, pid = data["conversation_id"], data["parent_message_id"]
 
@@ -925,13 +926,24 @@ class AsyncChatbot(Chatbot):
                 if line.get("message").get("author").get("role") != "assistant":
                     continue
 
-                message: str = line["message"]["content"]["parts"][0]
                 cid = line["conversation_id"]
                 pid = line["message"]["id"]
                 metadata = line["message"].get("metadata", {})
+                message_exists = False
+                author = {}
+                if line.get("message"):
+                    author = metadata.get("author", {}) or line["message"].get("author", {})
+                    if line["message"].get("content"):
+                        if line["message"]["content"].get("parts"):
+                            if len(line["message"]["content"]["parts"]) > 0:
+                                message_exists = True
+                message: str = (
+                    line["message"]["content"]["parts"][0] if message_exists else ""
+                )
                 model = metadata.get("model_slug", None)
                 finish_details = metadata.get("finish_details", {"type": None})["type"]
                 yield {
+                    "author": author,
                     "message": message,
                     "conversation_id": cid,
                     "parent_id": pid,
@@ -939,6 +951,7 @@ class AsyncChatbot(Chatbot):
                     "finish_details": finish_details,
                     "end_turn": line["message"].get("end_turn", True),
                     "recipient": line["message"].get("recipient", "all"),
+                    "citations": metadata.get("citations", []),
                 }
 
             self.conversation_mapping[cid] = pid
@@ -962,6 +975,7 @@ class AsyncChatbot(Chatbot):
         messages: list[dict],
         conversation_id: str | None = None,
         parent_id: str = "",
+        plugin_ids: list = [],
         model: str = "",
         auto_continue: bool = False,
         timeout: int = 360,
@@ -1025,6 +1039,9 @@ class AsyncChatbot(Chatbot):
             ),
             "history_and_training_disabled": self.disable_history,
         }
+        plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
+        if len(plugin_ids) > 0 and not conversation_id:
+            data["plugin_ids"] = plugin_ids
 
         async for msg in self.__send_request(
             data=data,
@@ -1034,13 +1051,15 @@ class AsyncChatbot(Chatbot):
             yield msg
 
     async def ask(
-        self,
-        prompt: str,
-        conversation_id: str | None = None,
-        parent_id: str = "",
-        model: str = "",
-        auto_continue: bool = False,
-        timeout: int = 360,
+            self,
+            prompt: str,
+            conversation_id: str | None = None,
+            parent_id: str = "",
+            model: str = "",
+            plugin_ids: list = [],
+            auto_continue: bool = False,
+            timeout: int = 360,
+            **kwargs,
     ) -> AsyncGenerator[dict, None]:
         """Ask a question to the chatbot
 
@@ -1077,6 +1096,7 @@ class AsyncChatbot(Chatbot):
             messages=messages,
             conversation_id=conversation_id,
             parent_id=parent_id,
+            plugin_ids=plugin_ids,
             model=model,
             auto_continue=auto_continue,
             timeout=timeout,
