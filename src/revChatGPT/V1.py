@@ -1328,9 +1328,7 @@ def main(config: dict) -> NoReturn:
     print()
     try:
         result = {}
-        times = 0
         while True:
-            times = 0
             print(f"{bcolors.OKBLUE + bcolors.BOLD}You: {bcolors.ENDC}")
 
             prompt = get_input(session=session, completer=completer)
@@ -1342,7 +1340,7 @@ def main(config: dict) -> NoReturn:
             if chatbot.config.get("model") == "gpt-4-browsing":
                 print("Browsing takes a while, please wait...")
             prev_text = ""
-            for data in chatbot.post_messages([msg], auto_continue=True):
+            for data in chatbot.ask(prompt=prompt, auto_continue=True):
                 if data["recipient"] != "all":
                     continue
                 result = data
@@ -1361,8 +1359,6 @@ def main(config: dict) -> NoReturn:
                         f'{citation["metadata"]["title"]}: {citation["metadata"]["url"]}',
                     )
                 print()
-
-            msg = {}
 
     except (KeyboardInterrupt, EOFError):
         exit()
