@@ -98,7 +98,6 @@ class Chatbot:
         config: dict[str, str],
         conversation_id: str | None = None,
         parent_id: str | None = None,
-        session_client=None,
         lazy_loading: bool = True,
         base_url: str | None = None,
     ) -> None:
@@ -133,7 +132,7 @@ class Chatbot:
             self.cache_path = Path(user_home, ".config", "revChatGPT", "cache.json")
 
         self.config = config
-        self.session = session_client() if session_client else requests.Session()
+        self.session = requests.Session()
         if "email" in config and "password" in config:
             try:
                 cached_access_token = self.__get_cached_access_token(
