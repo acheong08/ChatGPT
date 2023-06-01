@@ -364,12 +364,10 @@ class Chatbot:
             if line == "[DONE]":
                 break
 
-            """
-            # this seems to just cut off parts of some messages
+            # DO NOT REMOVE THIS
             line = line.replace('\\"', '"')
             line = line.replace("\\'", "'")
             line = line.replace("\\\\", "\\")
-            """
 
             try:
                 line = json.loads(line)
@@ -850,12 +848,10 @@ class AsyncChatbot(Chatbot):
                 if "[DONE]" in line:
                     break
 
-                """
-                # this seems to just cut off parts of some messages
+                # DO NOT REMOVE THIS
                 line = line.replace('\\"', '"')
                 line = line.replace("\\'", "'")
                 line = line.replace("\\\\", "\\")
-                """
 
                 try:
                     line = json.loads(line)
