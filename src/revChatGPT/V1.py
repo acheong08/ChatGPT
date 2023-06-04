@@ -6,7 +6,6 @@ from __future__ import annotations
 import base64
 import binascii
 import contextlib
-import datetime
 import json
 import logging
 import time
@@ -815,9 +814,7 @@ class AsyncChatbot(Chatbot):
         )
 
         # overwrite inherited normal session with async
-        headers_transfer = self.session.headers
-        self.session = requests.AsyncSession()
-        self.session.headers = headers_transfer
+        self.session = AsyncClient(headers=self.session.headers)
 
     async def __send_request(
         self,
@@ -1226,7 +1223,6 @@ def configure() -> dict:
         config_files.append(Path(user_home, ".config/revChatGPT/config.json"))
     if windows_home := getenv("HOMEPATH"):
         config_files.append(Path(f"{windows_home}/.config/revChatGPT/config.json"))
-
     if config_file := next((f for f in config_files if f.exists()), None):
         with open(config_file, encoding="utf-8") as f:
             config = json.load(f)
