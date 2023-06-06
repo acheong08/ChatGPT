@@ -476,11 +476,13 @@ class Chatbot:
                         "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
                         conversation_id,
                     )
-                    with contextlib.suppress(Exception):
+                    try:
                         history = self.get_msg_history(conversation_id)
                         self.conversation_mapping[conversation_id] = history[
                             "current_node"
                         ]
+                    except requests.exceptions.HTTPError:
+                        print("Conversation unavailable")
                 else:
                     self.__map_conversations()
             if conversation_id in self.conversation_mapping:
@@ -706,7 +708,7 @@ class Chatbot:
         self.__check_response(response)
         if encoding is not None:
             response.encoding = encoding
-        return json.loads(response.text)
+        return response.json()
 
     @logger(is_timed=True)
     def gen_title(self, convo_id: str, message_id: str) -> str:
