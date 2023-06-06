@@ -113,7 +113,7 @@ class Chatbot:
         Raises:
             Exception: _description_
         """
-        user_home = getenv("HOME")
+        user_home = getenv("HOME") or getenv("USERPROFILE")
         if user_home is None:
             user_home = Path().cwd()
             self.cache_path = Path(Path().cwd(), ".chatgpt_cache.json")
