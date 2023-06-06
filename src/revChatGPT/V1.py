@@ -489,7 +489,7 @@ class Chatbot:
                 parent_id = self.conversation_mapping[conversation_id]
             else:
                 print(
-                    "Warning: Invalid conversation_id provided, treat as a new conversation"
+                    "Warning: Invalid conversation_id provided, treat as a new conversation",
                 )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
@@ -805,8 +805,9 @@ class AsyncChatbot(Chatbot):
         self,
         config: dict,
         conversation_id: str | None = None,
-        parent_id: str = "",
-        base_url: str = "",
+        parent_id: str | None = None,
+        base_url: str | None = None,
+        lazy_loading: bool = True,
     ) -> None:
         """
         Same as Chatbot class, but with async methods.
@@ -816,6 +817,7 @@ class AsyncChatbot(Chatbot):
             conversation_id=conversation_id,
             parent_id=parent_id,
             base_url=base_url,
+            lazy_loading=lazy_loading,
         )
 
         # overwrite inherited normal session with async
@@ -826,28 +828,40 @@ class AsyncChatbot(Chatbot):
         data: dict,
         auto_continue: bool = False,
         timeout: float = 360,
+        **kwargs,
     ) -> AsyncGenerator[dict, None]:
+        log.debug("Sending the payload")
+
         cid, pid = data["conversation_id"], data["parent_message_id"]
+        model, message = None, ""
 
         self.conversation_id_prev_queue.append(cid)
         self.parent_id_prev_queue.append(pid)
-        message = ""
-
-        finish_details = None
-        response = None
-        async with self.session.stream(
-            method="POST",
+        async with self.session.post(
             url=f"{self.base_url}conversation",
             data=json.dumps(data),
             timeout=timeout,
+            stream=True,
         ) as response:
             await self.__check_response(response)
+
+            finish_details = None
             async for line in response.aiter_lines():
+                # remove b' and ' at the beginning and end and ignore case
+                line = str(line)[2:-1]
+                if line.lower() == "internal server error":
+                    log.error(f"Internal Server Error: {line}")
+                    error = t.Error(
+                        source="ask",
+                        message="Internal Server Error",
+                        code=t.ErrorType.SERVER_ERROR,
+                    )
+                    raise error
                 if not line or line is None:
                     continue
                 if "data: " in line:
                     line = line[6:]
-                if "[DONE]" in line:
+                if line == "[DONE]":
                     break
 
                 # DO NOT REMOVE THIS
@@ -864,7 +878,6 @@ class AsyncChatbot(Chatbot):
                 if line.get("message").get("author").get("role") != "assistant":
                     continue
 
-                message: str = line["message"]["content"]["parts"][0]
                 cid = line["conversation_id"]
                 pid = line["message"]["id"]
                 metadata = line["message"].get("metadata", {})
@@ -872,7 +885,8 @@ class AsyncChatbot(Chatbot):
                 author = {}
                 if line.get("message"):
                     author = metadata.get("author", {}) or line["message"].get(
-                        "author", {}
+                        "author",
+                        {},
                     )
                     if line["message"].get("content"):
                         if line["message"]["content"].get("parts"):
@@ -896,20 +910,21 @@ class AsyncChatbot(Chatbot):
                 }
 
             self.conversation_mapping[cid] = pid
-            if pid:
+            if pid is not None:
                 self.parent_id = pid
-            if cid:
+            if cid is not None:
                 self.conversation_id = cid
 
-        if not (auto_continue and finish_details == "max_tokens"):
-            return
-        async for msg in self.continue_write(
-            conversation_id=cid,
-            auto_continue=False,
-            timeout=timeout,
-        ):
-            msg["message"] = message + msg["message"]
-            yield msg
+            if not (auto_continue and finish_details == "max_tokens"):
+                return
+            message = message.strip("\n")
+            async for i in self.continue_write(
+                conversation_id=cid,
+                timeout=timeout,
+                auto_continue=False,
+            ):
+                i["message"] = message + i["message"]
+                yield i
 
     async def post_messages(
         self,
