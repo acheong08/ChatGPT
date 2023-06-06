@@ -930,19 +930,20 @@ class AsyncChatbot(Chatbot):
         self,
         messages: list[dict],
         conversation_id: str | None = None,
-        parent_id: str = "",
+        parent_id: str | None = None,
         plugin_ids: list = [],
-        model: str = "",
+        model: str | None = None,
         auto_continue: bool = False,
-        timeout: int = 360,
+        timeout: float = 360,
+        **kwargs,
     ) -> AsyncGenerator[dict, None]:
         """Post messages to the chatbot
 
         Args:
             messages (list[dict]): the messages to post
             conversation_id (str | None, optional): UUID for the conversation to continue on. Defaults to None.
-            parent_id (str, optional): UUID for the message to continue on. Defaults to "".
-            model (str, optional): The model to use. Defaults to "".
+            parent_id (str | None, optional): UUID for the message to continue on. Defaults to None.
+            model (str | None, optional): The model to use. Defaults to None.
             auto_continue (bool, optional): Whether to continue the conversation automatically. Defaults to False.
             timeout (float, optional): Timeout for getting the full response, unit is second. Defaults to 360.
 
@@ -956,28 +957,45 @@ class AsyncChatbot(Chatbot):
                 "finish_details": str,
                 "end_turn": bool,
                 "recipient": str,
+                "citations": list[dict],
             }
         """
         if parent_id and not conversation_id:
-            error = t.Error(
+            raise t.Error(
                 source="User",
                 message="conversation_id must be set once parent_id is set",
-                code=t.ErrorType.SERVER_ERROR,
+                code=t.ErrorType.USER_ERROR,
             )
-            raise error
+
         if conversation_id and conversation_id != self.conversation_id:
             self.parent_id = None
         conversation_id = conversation_id or self.conversation_id
-
         parent_id = parent_id or self.parent_id or ""
         if not conversation_id and not parent_id:
             parent_id = str(uuid.uuid4())
+
         if conversation_id and not parent_id:
             if conversation_id not in self.conversation_mapping:
-                await self.__map_conversations()
+                if self.lazy_loading:
+                    log.debug(
+                        "Conversation ID %s not found in conversation mapping, try to get conversation history for the given ID",
+                        conversation_id,
+                    )
+                    try:
+                        history = await self.get_msg_history(conversation_id)
+                        self.conversation_mapping[conversation_id] = history[
+                            "current_node"
+                        ]
+                    except requests.exceptions.HTTPError:
+                        print("Conversation unavailable")
+                else:
+                    await self.__map_conversations()
             if conversation_id in self.conversation_mapping:
                 parent_id = self.conversation_mapping[conversation_id]
-            else:  # invalid conversation_id provided, treat as a new conversation
+            else:
+                print(
+                    "Warning: Invalid conversation_id provided, treat as a new conversation"
+                )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
 
@@ -986,13 +1004,7 @@ class AsyncChatbot(Chatbot):
             "messages": messages,
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": model
-            or self.config.get("model")
-            or (
-                "text-davinci-002-render-paid"
-                if self.config.get("paid")
-                else "text-davinci-002-render-sha"
-            ),
+            "model": model or self.config.get("model") or "text-davinci-002-render-sha",
             "history_and_training_disabled": self.disable_history,
         }
         plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
@@ -1000,9 +1012,9 @@ class AsyncChatbot(Chatbot):
             data["plugin_ids"] = plugin_ids
 
         async for msg in self.__send_request(
-            data=data,
-            auto_continue=auto_continue,
+            data,
             timeout=timeout,
+            auto_continue=auto_continue,
         ):
             yield msg
 
