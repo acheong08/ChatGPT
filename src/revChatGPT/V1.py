@@ -485,7 +485,10 @@ class Chatbot:
                     self.__map_conversations()
             if conversation_id in self.conversation_mapping:
                 parent_id = self.conversation_mapping[conversation_id]
-            else:  # invalid conversation_id provided, treat as a new conversation
+            else:
+                print(
+                    "Warning: Invalid conversation_id provided, treat as a new conversation"
+                )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
 
