@@ -1334,6 +1334,7 @@ def main(config: dict) -> NoReturn:
             !switch x - Switch to plugin x. Need to reset the conversation to ativate the plugin.
             !rollback x - Rollback the conversation (x being the number of messages to rollback)
             !setconversation - Changes the conversation
+            !share - Creates a share link to the current conversation
             !exit - Exit this program
             """,
             )
@@ -1375,6 +1376,8 @@ def main(config: dict) -> NoReturn:
                 prev_text = data["message"]
             print(bcolors.ENDC)
             print()
+        elif command.startswith("!share"):
+            print(f"Conversation shared at {chatbot.share_conversation()}")
         elif command == "!exit":
             if isinstance(chatbot.session, httpx.AsyncClient):
                 chatbot.session.aclose()
@@ -1395,6 +1398,7 @@ def main(config: dict) -> NoReturn:
             "!continue",
             "!plugins",
             "!switch",
+            "!share",
         ],
     )
     print()
