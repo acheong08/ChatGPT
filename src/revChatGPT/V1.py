@@ -837,11 +837,11 @@ class AsyncChatbot(Chatbot):
 
         self.conversation_id_prev_queue.append(cid)
         self.parent_id_prev_queue.append(pid)
-        async with self.session.post(
+        async with self.session.stream(
+            "POST",
             url=f"{self.base_url}conversation",
             data=json.dumps(data),
             timeout=timeout,
-            stream=True,
         ) as response:
             await self.__check_response(response)
 
