@@ -710,6 +710,27 @@ class Chatbot:
             response.encoding = encoding
         return response.json()
 
+    def share_conversation(
+        self, convo_id: str = None, node_id: str = None, anonymous: bool = True
+    ) -> str:
+        """
+        Creates a share link to a conversation
+        :param convo_id: UUID of conversation
+        :param node_id: UUID of node
+
+        Returns:
+            str: A URL to the shared link
+        """
+        payload = {
+            "conversation_id": convo_id or self.conversation_id,
+            "current_node_id": node_id or self.parent_id,
+            "is_anonymous": anonymous,
+        }
+        url = f"{self.base_url}share/create"
+        response = self.session.post(url, data=json.dumps(payload))
+        self.__check_response(response)
+        return response.json().get("share_url")
+
     @logger(is_timed=True)
     def gen_title(self, convo_id: str, message_id: str) -> str:
         """
@@ -1172,6 +1193,27 @@ class AsyncChatbot(Chatbot):
             await self.__check_response(response)
             return json.loads(response.text)
         return None
+
+    async def share_conversation(
+        self, convo_id: str = None, node_id: str = None, anonymous: bool = True
+    ) -> str:
+        """
+        Creates a share link to a conversation
+        :param convo_id: UUID of conversation
+        :param node_id: UUID of node
+
+        Returns:
+            str: A URL to the shared link
+        """
+        payload = {
+            "conversation_id": convo_id or self.conversation_id,
+            "current_node_id": node_id or self.parent_id,
+            "is_anonymous": anonymous,
+        }
+        url = f"{self.base_url}share/create"
+        response = await self.session.post(url, data=json.dumps(payload))
+        await self.__check_response(response)
+        return response.json().get("share_url")
 
     async def gen_title(self, convo_id: str, message_id: str) -> None:
         """
