@@ -711,7 +711,10 @@ class Chatbot:
         return response.json()
 
     def share_conversation(
-        self, convo_id: str = None, node_id: str = None, anonymous: bool = True
+        self,
+        convo_id: str = None,
+        node_id: str = None,
+        anonymous: bool = True,
     ) -> str:
         """
         Creates a share link to a conversation
@@ -1015,7 +1018,7 @@ class AsyncChatbot(Chatbot):
                 parent_id = self.conversation_mapping[conversation_id]
             else:
                 print(
-                    "Warning: Invalid conversation_id provided, treat as a new conversation"
+                    "Warning: Invalid conversation_id provided, treat as a new conversation",
                 )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
@@ -1195,7 +1198,10 @@ class AsyncChatbot(Chatbot):
         return None
 
     async def share_conversation(
-        self, convo_id: str = None, node_id: str = None, anonymous: bool = True
+        self,
+        convo_id: str = None,
+        node_id: str = None,
+        anonymous: bool = True,
     ) -> str:
         """
         Creates a share link to a conversation
