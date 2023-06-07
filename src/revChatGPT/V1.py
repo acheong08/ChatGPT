@@ -712,6 +712,7 @@ class Chatbot:
 
     def share_conversation(
         self,
+        title: str = None,
         convo_id: str = None,
         node_id: str = None,
         anonymous: bool = True,
@@ -724,15 +725,37 @@ class Chatbot:
         Returns:
             str: A URL to the shared link
         """
+        convo_id = convo_id or self.conversation_id
+        node_id = node_id or self.parent_id
+        headers = {
+            "Content-Type": "application/json",
+            "origin": "https://chat.openai.com",
+            "referer": f"https://chat.openai.com/c/{convo_id}",
+        }
+        # First create the share
         payload = {
-            "conversation_id": convo_id or self.conversation_id,
-            "current_node_id": node_id or self.parent_id,
+            "conversation_id": convo_id,
+            "current_node_id": node_id,
             "is_anonymous": anonymous,
         }
         url = f"{self.base_url}share/create"
-        response = self.session.post(url, data=json.dumps(payload))
+        response = self.session.post(url, data=json.dumps(payload), headers=headers)
         self.__check_response(response)
-        return response.json().get("share_url")
+        share_url = response.json().get("share_url")
+        # Then patch the share to make public
+        share_id = response.json().get("share_id")
+        url = f"{self.base_url}share/{share_id}"
+        payload = {
+            "share_id": share_id,
+            "highlighted_message_id": node_id,
+            "title": title or response.json().get("title", "New chat"),
+            "is_public": True,
+            "is_visible": True,
+            "is_anonymous": True,
+        }
+        response = self.session.patch(url, data=json.dumps(payload), headers=headers)
+        self.__check_response(response)
+        return share_url
 
     @logger(is_timed=True)
     def gen_title(self, convo_id: str, message_id: str) -> str:
@@ -1199,6 +1222,7 @@ class AsyncChatbot(Chatbot):
 
     async def share_conversation(
         self,
+        title: str = None,
         convo_id: str = None,
         node_id: str = None,
         anonymous: bool = True,
@@ -1211,15 +1235,45 @@ class AsyncChatbot(Chatbot):
         Returns:
             str: A URL to the shared link
         """
+        convo_id = convo_id or self.conversation_id
+        node_id = node_id or self.parent_id
+        headers = {
+            "Content-Type": "application/json",
+            "origin": "https://chat.openai.com",
+            "referer": f"https://chat.openai.com/c/{convo_id}",
+        }
+        # First create the share
         payload = {
-            "conversation_id": convo_id or self.conversation_id,
-            "current_node_id": node_id or self.parent_id,
+            "conversation_id": convo_id,
+            "current_node_id": node_id,
             "is_anonymous": anonymous,
         }
         url = f"{self.base_url}share/create"
-        response = await self.session.post(url, data=json.dumps(payload))
+        response = await self.session.post(
+            url,
+            data=json.dumps(payload),
+            headers=headers,
+        )
         await self.__check_response(response)
-        return response.json().get("share_url")
+        share_url = response.json().get("share_url")
+        # Then patch the share to make public
+        share_id = response.json().get("share_id")
+        url = f"{self.base_url}share/{share_id}"
+        payload = {
+            "share_id": share_id,
+            "highlighted_message_id": node_id,
+            "title": title or response.json().get("title", "New chat"),
+            "is_public": True,
+            "is_visible": True,
+            "is_anonymous": True,
+        }
+        response = await self.session.patch(
+            url,
+            data=json.dumps(payload),
+            headers=headers,
+        )
+        await self.__check_response(response)
+        return share_url
 
     async def gen_title(self, convo_id: str, message_id: str) -> None:
         """
