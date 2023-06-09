@@ -909,13 +909,6 @@ class AsyncChatbot(Chatbot):
                 if line == "[DONE]":
                     break
 
-                # print(line)
-
-                # DO NOT REMOVE THIS
-                line = line.replace('\\"', '"')
-                line = line.replace("\\'", "'")
-                line = line.replace("\\\\", "\\")
-
                 try:
                     line = json.loads(line)
                 except json.decoder.JSONDecodeError:
