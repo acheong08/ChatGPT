@@ -894,8 +894,6 @@ class AsyncChatbot(Chatbot):
 
             finish_details = None
             async for line in response.aiter_lines():
-                # remove b' and ' at the beginning and end and ignore case
-                line = str(line)[2:-1]
                 if line.lower() == "internal server error":
                     log.error(f"Internal Server Error: {line}")
                     error = t.Error(
@@ -910,6 +908,8 @@ class AsyncChatbot(Chatbot):
                     line = line[6:]
                 if line == "[DONE]":
                     break
+
+                # print(line)
 
                 # DO NOT REMOVE THIS
                 line = line.replace('\\"', '"')
