@@ -9,6 +9,8 @@ async def main():
     async for message in chatbot.ask("Hello, how are you?"):
         print(message.get("message"))
 
+    print(await chatbot.share_conversation())
+
 
 def sync_main():
     chatbot = Chatbot(config)

@@ -1237,11 +1237,6 @@ class AsyncChatbot(Chatbot):
         """
         convo_id = convo_id or self.conversation_id
         node_id = node_id or self.parent_id
-        headers = {
-            "Content-Type": "application/json",
-            "origin": "https://chat.openai.com",
-            "referer": f"https://chat.openai.com/c/{convo_id}",
-        }
         # First create the share
         payload = {
             "conversation_id": convo_id,
@@ -1252,13 +1247,13 @@ class AsyncChatbot(Chatbot):
         response = await self.session.post(
             url,
             data=json.dumps(payload),
-            headers=headers,
         )
         await self.__check_response(response)
         share_url = response.json().get("share_url")
         # Then patch the share to make public
         share_id = response.json().get("share_id")
         url = f"{self.base_url}share/{share_id}"
+        print(url)
         payload = {
             "share_id": share_id,
             "highlighted_message_id": node_id,
@@ -1270,7 +1265,6 @@ class AsyncChatbot(Chatbot):
         response = await self.session.patch(
             url,
             data=json.dumps(payload),
-            headers=headers,
         )
         await self.__check_response(response)
         return share_url
