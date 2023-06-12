@@ -167,6 +167,9 @@ class Chatbot:
 
         self.__check_credentials()
 
+        if self.config.get("PUID"):
+            self.session.cookies.set("_puid", self.config["PUID"])
+
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
         """Check login info and perform login
