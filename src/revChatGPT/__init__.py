@@ -5,7 +5,7 @@ You can import the following module to use:
 revChatGPT.V1
 revChatGPT.V3
 """
-__version__ = "5.0.0"
+__version__ = "6.2"
 __all__ = ()
 
 
