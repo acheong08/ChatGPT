@@ -178,7 +178,7 @@ usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream]
              [--base_prompt BASE_PROMPT] [--proxy PROXY] [--top_p TOP_P]
              [--reply_count REPLY_COUNT] [--enable_internet] [--config CONFIG]
              [--submit_key SUBMIT_KEY]
-             [--model {gpt-3.5-turbo,gpt-3.5-turbo-16k,gpt-3.5-turbo-0301,gpt-3.5-turbo-0613gpt-4,gpt-4-0314,gpt-4-32k,gpt-4-32k-0314,gpt-4-0613}]
+             [--model {gpt-3.5-turbo,gpt-3.5-turbo-16k,gpt-3.5-turbo-0301,gpt-3.5-turbo-0613,gpt-4,gpt-4-0314,gpt-4-32k,gpt-4-32k-0314,gpt-4-0613}]
              [--truncate_limit TRUNCATE_LIMIT]
 ```
 
