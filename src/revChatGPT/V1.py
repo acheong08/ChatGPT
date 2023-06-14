@@ -520,13 +520,13 @@ class Chatbot:
                 )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "next",
             "messages": messages,
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": model or self.config.get("model") or "text-davinci-002-render-sha",
+            "model": model,
             "history_and_training_disabled": self.disable_history,
         }
         if model.startswith("gpt-4"):
@@ -656,7 +656,7 @@ class Chatbot:
             else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "continue",
             "conversation_id": conversation_id,
@@ -1070,13 +1070,13 @@ class AsyncChatbot(Chatbot):
                 )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "next",
             "messages": messages,
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": model or self.config.get("model") or "text-davinci-002-render-sha",
+            "model": model,
             "history_and_training_disabled": self.disable_history,
         }
         plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
@@ -1195,7 +1195,7 @@ class AsyncChatbot(Chatbot):
             else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "continue",
             "conversation_id": conversation_id,
