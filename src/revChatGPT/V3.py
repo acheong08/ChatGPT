@@ -50,10 +50,10 @@ class Chatbot:
         self.api_key: str = api_key
         self.system_prompt: str = system_prompt
         self.max_tokens: int = max_tokens or (
-            31000 if engine == "gpt-4-32k" else 7000 if engine == "gpt-4" else 4000
+            31000 if engine == "gpt-4-32k" else 7000 if engine == "gpt-4" else 15000 if engine == "gpt-3.5-turbo-16k" else 4000
         )
         self.truncate_limit: int = truncate_limit or (
-            30500 if engine == "gpt-4-32k" else 6500 if engine == "gpt-4" else 3500
+            30500 if engine == "gpt-4-32k" else 6500 if engine == "gpt-4" else 14500 if engine == "gpt-3.5-turbo-16k" else 3500
         )
         self.temperature: float = temperature
         self.top_p: float = top_p
@@ -129,6 +129,7 @@ class Chatbot:
         """
         if self.engine not in [
             "gpt-3.5-turbo",
+            "gpt-3.5-turbo-16k",
             "gpt-3.5-turbo-0301",
             "gpt-4",
             "gpt-4-0314",
