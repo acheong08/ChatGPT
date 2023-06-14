@@ -1,6 +1,6 @@
 # ChatGPT <img src="https://github.com/acheong08/ChatGPT/blob/main/logo.png?raw=true" width="15%"></img>
 
-English - [中文](./README_zh.md) - [Spanish](./README_sp.md) -  [日本語](./README_ja.md) - [한국어](./README_ko.md)
+English - [中文](./README_zh.md) - [Spanish](./README_sp.md) - [日本語](./README_ja.md) - [한국어](./README_ko.md)
 
 [![PyPi](https://img.shields.io/pypi/v/revChatGPT.svg)](https://pypi.python.org/pypi/revChatGPT)
 [![Support_Platform](https://img.shields.io/pypi/pyversions/revChatGPT)](https://pypi.python.org/pypi/revChatGPT)
@@ -34,6 +34,7 @@ To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` 
 </summary>
 
 ## Rate limits
+
 - Proxy server: 5 requests / 10 seconds
 - OpenAI: 50 requests / hour for each account
 
@@ -47,6 +48,7 @@ To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` 
 #### - Email/Password
 
 > Not supported for Google/Microsoft accounts.
+
 ```json
 {
   "email": "email",
@@ -55,6 +57,7 @@ To set your own deployed proxy, set the environment variable `CHATGPT_BASE_URL` 
 ```
 
 #### - Access token
+
 https://chat.openai.com/api/auth/session
 
 ```json
@@ -71,7 +74,7 @@ https://chat.openai.com/api/auth/session
   "parent_id": "UUID...",
   "proxy": "...",
   "model": "gpt-4", // gpt-4-browsing, text-davinci-002-render-sha, gpt-4, gpt-4-plugins
-  "plugin_ids" : ["plugin-d1d6eb04-3375-40aa-940a-c2fc57ce0f51"], // Wolfram Alpha example
+  "plugin_ids": ["plugin-d1d6eb04-3375-40aa-940a-c2fc57ce0f51"], // Wolfram Alpha example
   "disable_history": true,
   "PUID": "<_puid cookie for plus accounts>" // Only if you have a plus account and use GPT-4
 }
@@ -162,37 +165,21 @@ Get API key from https://platform.openai.com/account/api-keys
 `python3 -m revChatGPT.V3 --api_key <api_key>`
 
 ```
-  $ python3 -m revChatGPT.V3 --help
+  $ python3 -m revChatGPT.V3
 
     ChatGPT - Official ChatGPT API
     Repo: github.com/acheong08/ChatGPT
+    Version: 6.2
 
 Type '!help' to show a full list of commands
 Press Esc followed by Enter or Alt+Enter to send a message.
 
-usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream] [--base_prompt BASE_PROMPT]
-             [--proxy PROXY] [--top_p TOP_P] [--reply_count REPLY_COUNT] [--enable_internet]
-             [--config CONFIG] [--submit_key SUBMIT_KEY] [--model {gpt-3.5-turbo,gpt-4,gpt-4-32k}]
+usage: V3.py [-h] --api_key API_KEY [--temperature TEMPERATURE] [--no_stream]
+             [--base_prompt BASE_PROMPT] [--proxy PROXY] [--top_p TOP_P]
+             [--reply_count REPLY_COUNT] [--enable_internet] [--config CONFIG]
+             [--submit_key SUBMIT_KEY]
+             [--model {gpt-3.5-turbo,gpt-3.5-turbo-16k,gpt-3.5-turbo-0301,gpt-3.5-turbo-0613gpt-4,gpt-4-0314,gpt-4-32k,gpt-4-32k-0314,gpt-4-0613}]
              [--truncate_limit TRUNCATE_LIMIT]
-
-options:
-  -h, --help            show this help message and exit
-  --api_key API_KEY     OpenAI API key
-  --temperature TEMPERATURE
-                        Temperature for response
-  --no_stream           Disable streaming
-  --base_prompt BASE_PROMPT
-                        Base prompt for chatbot
-  --proxy PROXY         Proxy address
-  --top_p TOP_P         Top p for response
-  --reply_count REPLY_COUNT
-                        Number of replies for each prompt
-  --enable_internet     Allow ChatGPT to search the internet
-  --config CONFIG       Path to V3 config json file
-  --submit_key SUBMIT_KEY
-                        Custom submit key for chatbot. For more information on keys, see README
-  --model {gpt-3.5-turbo,gpt-4,gpt-4-32k}
-  --truncate_limit TRUNCATE_LIMIT
 ```
 
 ## Developer API
