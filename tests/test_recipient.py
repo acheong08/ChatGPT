@@ -1,5 +1,8 @@
-import asyncio, json
-from revChatGPT.V1 import AsyncChatbot, Chatbot
+import asyncio
+import json
+
+from revChatGPT.V1 import AsyncChatbot
+from revChatGPT.V1 import Chatbot
 
 config = json.load(open("/home/acheong/.config/revChatGPT/config.json"))
 

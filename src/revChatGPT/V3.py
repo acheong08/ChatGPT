@@ -22,6 +22,17 @@ from .utils import create_session
 from .utils import get_filtered_keys_from_object
 from .utils import get_input
 
+ENGINES = [
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-0301",
+    "gpt-3.5-turbo-0613" "gpt-4",
+    "gpt-4-0314",
+    "gpt-4-32k",
+    "gpt-4-32k-0314",
+    "gpt-4-0613",
+]
+
 
 class Chatbot:
     """
@@ -50,10 +61,22 @@ class Chatbot:
         self.api_key: str = api_key
         self.system_prompt: str = system_prompt
         self.max_tokens: int = max_tokens or (
-            31000 if "gpt-4-32k" in engine else 7000 if "gpt-4" in engine else 15000 if "gpt-3.5-turbo-16k" in engine else 4000
+            31000
+            if "gpt-4-32k" in engine
+            else 7000
+            if "gpt-4" in engine
+            else 15000
+            if "gpt-3.5-turbo-16k" in engine
+            else 4000
         )
         self.truncate_limit: int = truncate_limit or (
-            30500 if "gpt-4-32k" in engine else 6500 if "gpt-4" in engine else 14500 if "gpt-3.5-turbo-16k" in engine else 3500
+            30500
+            if "gpt-4-32k" in engine
+            else 6500
+            if "gpt-4" in engine
+            else 14500
+            if "gpt-3.5-turbo-16k" in engine
+            else 3500
         )
         self.temperature: float = temperature
         self.top_p: float = top_p
@@ -127,15 +150,7 @@ class Chatbot:
         """
         Get token count
         """
-        if self.engine not in [
-            "gpt-3.5-turbo",
-            "gpt-3.5-turbo-16k",
-            "gpt-3.5-turbo-0301",
-            "gpt-4",
-            "gpt-4-0314",
-            "gpt-4-32k",
-            "gpt-4-32k-0314",
-        ]:
+        if self.engine not in ENGINES:
             raise NotImplementedError(f"Unsupported engine {self.engine}")
 
         tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
@@ -587,7 +602,7 @@ def main() -> NoReturn:
         "--model",
         type=str,
         default="gpt-3.5-turbo",
-        choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
+        choices=ENGINES,
     )
 
     parser.add_argument(

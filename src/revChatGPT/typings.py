@@ -2,9 +2,9 @@
 A module that contains all the types used in this project
 """
 import os
+import platform
 from enum import Enum
 from typing import Union
-import platform
 
 
 python_version = [each for each in platform.python_version_tuple()]
