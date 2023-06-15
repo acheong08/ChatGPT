@@ -202,7 +202,10 @@ class Chatbot:
                 self.install_plugin(plugin)
         if self.config.get("unverified_plugin_domains", []):
             for domain in self.config.get("unverified_plugin_domains"):
-                self.config["plugin_ids"].append(self.get_unverified_plugin(domain,install=True).get("id"))
+                if self.config.get("plugin_ids"):
+                    self.config["plugin_ids"].append(self.get_unverified_plugin(domain,install=True).get("id"))
+                else:
+                    self.config["plugin_ids"] = [self.get_unverified_plugin(domain,install=True).get("id")]
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
