@@ -200,8 +200,8 @@ class Chatbot:
         if self.config.get("plugin_ids", []):
             for plugin in self.config.get("plugin_ids"):
                 self.install_plugin(plugin)
-        if self.config.get("unverfied_plugin_domains", []):
-            for domain in self.config.get("unverfied_plugin_domains"):
+        if self.config.get("unverified_plugin_domains", []):
+            for domain in self.config.get("unverified_plugin_domains"):
                 self.get_unverified_plugin(domain,install=True)
 
     @logger(is_timed=True)

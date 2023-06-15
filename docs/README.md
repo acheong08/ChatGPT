@@ -77,7 +77,7 @@ https://chat.openai.com/api/auth/session
   "plugin_ids": ["plugin-d1d6eb04-3375-40aa-940a-c2fc57ce0f51"], // Wolfram Alpha example
   "disable_history": true,
   "PUID": "<_puid cookie for plus accounts>", // Only if you have a plus account and use GPT-4
-  "unverfied_plugin_domains":["showme.redstarplugin.com"] // Unverfied plugins to install
+  "unverified_plugin_domains":["showme.redstarplugin.com"] // Unverfied plugins to install
 }
 ```
 
