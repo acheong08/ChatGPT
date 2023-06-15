@@ -196,6 +196,10 @@ class Chatbot:
 
         if self.config.get("PUID"):
             self.session.cookies.set("_puid", self.config["PUID"])
+        
+        if self.config.get("plugin_ids",[]):
+            for plugin in self.config.get("plugin_ids"):
+                self.install_plugin(plugin)
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
