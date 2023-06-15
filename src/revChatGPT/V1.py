@@ -196,8 +196,8 @@ class Chatbot:
 
         if self.config.get("PUID"):
             self.session.cookies.set("_puid", self.config["PUID"])
-        
-        if self.config.get("plugin_ids",[]):
+
+        if self.config.get("plugin_ids", []):
             for plugin in self.config.get("plugin_ids"):
                 self.install_plugin(plugin)
 
@@ -885,9 +885,9 @@ class Chatbot:
         payload = {"is_installed": True}
         response = self.session.patch(url, data=json.dumps(payload))
         self.__check_response(response)
-    
+
     @logger(is_timed=True)
-    def get_unverified_plugin(self, domain:str, install:bool = True) -> dict:
+    def get_unverified_plugin(self, domain: str, install: bool = True) -> dict:
         url = f"{self.base_url}aip/p/domain?domain={domain}"
         response = self.session.get(url)
         self.__check_response(response)
