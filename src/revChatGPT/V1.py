@@ -885,6 +885,15 @@ class Chatbot:
         payload = {"is_installed": True}
         response = self.session.patch(url, data=json.dumps(payload))
         self.__check_response(response)
+    
+    @logger(is_timed=True)
+    def get_unverified_plugin(self, domain:str, install:bool = True) -> dict:
+        url = f"{self.base_url}aip/p/domain?domain={domain}"
+        response = self.session.get(url)
+        self.__check_response(response)
+        if install:
+            self.install_plugin(response.json().get("id"))
+        return response.json()
 
 
 class AsyncChatbot(Chatbot):
