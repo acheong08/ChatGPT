@@ -24,6 +24,9 @@ import requests
 from httpx import AsyncClient
 from OpenAIAuth import Auth0 as Authenticator
 
+from rich.live import Live
+from rich.markdown import Markdown
+
 from . import __version__
 from . import typings as t
 from .utils import create_completer
@@ -203,9 +206,13 @@ class Chatbot:
         if self.config.get("unverified_plugin_domains", []):
             for domain in self.config.get("unverified_plugin_domains"):
                 if self.config.get("plugin_ids"):
-                    self.config["plugin_ids"].append(self.get_unverified_plugin(domain,install=True).get("id"))
+                    self.config["plugin_ids"].append(
+                        self.get_unverified_plugin(domain, install=True).get("id")
+                    )
                 else:
-                    self.config["plugin_ids"] = [self.get_unverified_plugin(domain,install=True).get("id")]
+                    self.config["plugin_ids"] = [
+                        self.get_unverified_plugin(domain, install=True).get("id")
+                    ]
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
@@ -1539,15 +1546,13 @@ def main(config: dict) -> NoReturn:
             print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}")
             if chatbot.config.get("model") == "gpt-4-browsing":
                 print("Browsing takes a while, please wait...")
-            prev_text = ""
-            for data in chatbot.ask(prompt=prompt, auto_continue=True):
-                if data["recipient"] != "all":
-                    continue
-                result = data
-                message = data["message"][len(prev_text) :]
-                print(message, end="", flush=True)
-                prev_text = data["message"]
-            print(bcolors.ENDC)
+            with Live(Markdown(""), auto_refresh=False) as live:
+                for data in chatbot.ask(prompt=prompt, auto_continue=True):
+                    if data["recipient"] != "all":
+                        continue
+                    result = data
+                    message = data["message"]
+                    live.update(Markdown(message), refresh=True)
             print()
 
             if result.get("citations", False):
