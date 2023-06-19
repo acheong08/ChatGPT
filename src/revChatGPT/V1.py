@@ -463,6 +463,7 @@ class Chatbot:
         message = message.strip("\n")
         for i in self.continue_write(
             conversation_id=cid,
+            model=model,
             timeout=timeout,
             auto_continue=False,
         ):
@@ -1043,6 +1044,7 @@ class AsyncChatbot(Chatbot):
             message = message.strip("\n")
             async for i in self.continue_write(
                 conversation_id=cid,
+                model=model,
                 timeout=timeout,
                 auto_continue=False,
             ):
