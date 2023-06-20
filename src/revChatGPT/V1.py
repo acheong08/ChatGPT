@@ -23,7 +23,6 @@ import httpx
 import requests
 from httpx import AsyncClient
 from OpenAIAuth import Auth0 as Authenticator
-
 from rich.live import Live
 from rich.markdown import Markdown
 
@@ -207,11 +206,11 @@ class Chatbot:
             for domain in self.config.get("unverified_plugin_domains"):
                 if self.config.get("plugin_ids"):
                     self.config["plugin_ids"].append(
-                        self.get_unverified_plugin(domain, install=True).get("id")
+                        self.get_unverified_plugin(domain, install=True).get("id"),
                     )
                 else:
                     self.config["plugin_ids"] = [
-                        self.get_unverified_plugin(domain, install=True).get("id")
+                        self.get_unverified_plugin(domain, install=True).get("id"),
                     ]
 
     @logger(is_timed=True)
