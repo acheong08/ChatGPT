@@ -182,6 +182,8 @@ class Chatbot:
         prompt: str,
         role: str = "user",
         convo_id: str = "default",
+        model: str = None,
+        pass_history: bool = True,
         **kwargs,
     ):
         """
@@ -197,8 +199,8 @@ class Chatbot:
             os.environ.get("API_URL") or "https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
             json={
-                "model": self.engine,
-                "messages": self.conversation[convo_id],
+                "model": model or self.engine,
+                "messages": self.conversation[convo_id] if pass_history else [prompt],
                 "stream": True,
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
@@ -251,6 +253,8 @@ class Chatbot:
         prompt: str,
         role: str = "user",
         convo_id: str = "default",
+        model: str = None,
+        pass_history: bool = True,
         **kwargs,
     ) -> AsyncGenerator[str, None]:
         """
@@ -267,8 +271,8 @@ class Chatbot:
             os.environ.get("API_URL") or "https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"},
             json={
-                "model": self.engine,
-                "messages": self.conversation[convo_id],
+                "model": model or self.engine,
+                "messages": self.conversation[convo_id] if pass_history else [prompt],
                 "stream": True,
                 # kwargs
                 "temperature": kwargs.get("temperature", self.temperature),
@@ -323,6 +327,8 @@ class Chatbot:
         prompt: str,
         role: str = "user",
         convo_id: str = "default",
+        model: str = None,
+        pass_history: bool = True,
         **kwargs,
     ) -> str:
         """
@@ -342,6 +348,8 @@ class Chatbot:
         prompt: str,
         role: str = "user",
         convo_id: str = "default",
+        model: str = None,
+        pass_history: bool = True,
         **kwargs,
     ) -> str:
         """
@@ -351,6 +359,8 @@ class Chatbot:
             prompt=prompt,
             role=role,
             convo_id=convo_id,
+            model=model,
+            pass_history=pass_history,
             **kwargs,
         )
         full_response: str = "".join(response)
