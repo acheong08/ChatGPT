@@ -308,6 +308,8 @@ class Chatbot:
                 if line == "[DONE]":
                     break
                 resp: dict = json.loads(line)
+                if 'error' in resp:
+                    raise t.ResponseError(f"{resp['error']}")
                 choices = resp.get("choices")
                 if not choices:
                     continue
