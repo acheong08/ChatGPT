@@ -197,9 +197,6 @@ class Chatbot:
 
         self.__check_credentials()
 
-        if self.config.get("PUID"):
-            self.session.cookies.set("_puid", self.config["PUID"])
-
         if self.config.get("plugin_ids", []):
             for plugin in self.config.get("plugin_ids"):
                 self.install_plugin(plugin)
@@ -213,6 +210,15 @@ class Chatbot:
                     self.config["plugin_ids"] = [
                         self.get_unverified_plugin(domain, install=True).get("id"),
                     ]
+        # Get PUID cookie
+        try:
+            auth = Authenticator("blah", "blah")
+            auth.access_token = self.config["access_token"]
+            puid = auth.get_puid()
+            self.session.headers.update({"PUID": puid})
+            print("Setting PUID (You are a Plus user!): " + puid)
+        except:
+            pass
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
