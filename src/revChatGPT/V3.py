@@ -687,8 +687,9 @@ def main() -> NoReturn:
         if prompt.startswith("!"):
             try:
                 chatbot.handle_commands(prompt)
-            except Exception as err:
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as err:
                 print(f"Error: {err}")
+                continue
             continue
         print()
         print("ChatGPT: ", flush=True)
