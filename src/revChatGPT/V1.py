@@ -21,6 +21,7 @@ from typing import NoReturn
 
 import httpx
 import requests
+import urllib
 from httpx import AsyncClient
 from OpenAIAuth import Auth0 as Authenticator
 from rich.live import Live
@@ -373,7 +374,21 @@ class Chatbot:
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
         }
-        form_data = "public_key=35536E1E-65B4-4D96-9D97-6ADB7EFF8147&site=https%3A%2F%2Fchat.openai.com&userbrowser=Mozilla%2F5.0%20(X11%3B%20Linux%20x86_64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F114.0.0.0%20Safari%2F537.36&capi_version=1.5.2&capi_mode=lightbox&style_theme=default&rnd=0.3649022041957759"
+        form_data = {
+            "public_key": "35536E1E-65B4-4D96-9D97-6ADB7EFF8147",
+            # BDA is btoa(JSON.stringify({ ct: "", iv: "", s: "" })); in JS
+            "bda": str(base64.b64encode(b'{"ct":"","iv":"","s":""}'), "utf-8"),
+            "site": "https://chat.openai.com",
+            "userbrowser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43",
+            "capi_version": "1.5.2",
+            "capi_version": "lightbox",
+            "style_theme": "default",
+            # 17 digit random number
+            "rnd": "".join([str(random_int(0, 9)) for _ in range(17)]),
+        }
+        # URL encoded form data
+        form_data = "&".join([f"{k}={v}" for k, v in form_data.items()])
+        form_data = urllib.parse.quote(form_data, safe="=&")
         url = "https://tcr9i.chat.openai.com/fc/gt2/public_key/35536E1E-65B4-4D96-9D97-6ADB7EFF8147"
         response = self.session.post(url, data=form_data, headers=headers)
         self.__check_response(response)
