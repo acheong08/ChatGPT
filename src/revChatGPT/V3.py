@@ -154,6 +154,8 @@ class Chatbot:
         Get token count
         """
         if self.engine not in ENGINES:
+            # print engines from ticktoken
+            print("Supported engines: ", ", ".join(tiktoken.model.MODEL_TO_ENCODING))
             raise NotImplementedError(f"Unsupported engine {self.engine}")
 
         tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
