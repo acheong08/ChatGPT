@@ -10,9 +10,13 @@ if not PATH.exists():
         with open(PATH, "w+", encoding="utf-8") as f2:
             f2.write(f1.read())
 
+VERSION_PATH = Path(__file__).parents[0] / "src/revChatGPT/version.py"
+with open(VERSION_PATH, encoding="utf-8") as f:
+    version = f.read().split('"')[1]
+
 setup(
     name="revChatGPT",
-    version="6.4.3",
+    version=version,
     description="ChatGPT is a reverse engineering of OpenAI's ChatGPT API",
     long_description=open(PATH, encoding="utf-8").read(),
     long_description_content_type="text/markdown",
