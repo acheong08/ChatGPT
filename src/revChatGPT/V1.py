@@ -372,7 +372,7 @@ class Chatbot:
         )
         log.debug("Using authenticator to get access token")
 
-        self.set_access_token(auth.auth())
+        self.set_access_token(auth.get_access_token())
 
     @logger(is_timed=True)
     def __send_request(
