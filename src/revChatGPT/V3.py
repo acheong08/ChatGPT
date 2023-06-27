@@ -154,7 +154,9 @@ class Chatbot:
         Get token count
         """
         if self.engine not in ENGINES:
-            raise NotImplementedError(f"Engine {self.engine} is not supported. Select from {ENGINES}")
+            raise NotImplementedError(
+                f"Engine {self.engine} is not supported. Select from {ENGINES}"
+            )
         tiktoken.model.MODEL_TO_ENCODING["gpt-4"] = "cl100k_base"
 
         encoding = tiktoken.encoding_for_model(self.engine)
@@ -196,10 +198,18 @@ class Chatbot:
         # Get response
         if os.environ.get("API_URL") and os.environ.get("MODEL_NAME"):
             # https://learn.microsoft.com/en-us/azure/cognitive-services/openai/chatgpt-quickstart?tabs=command-line&pivots=rest-api
-            url = os.environ.get("API_URL") + "openai/deployments/" + os.environ.get("MODEL_NAME") +"/chat/completions?api-version=2023-05-15"
+            url = (
+                os.environ.get("API_URL")
+                + "openai/deployments/"
+                + os.environ.get("MODEL_NAME")
+                + "/chat/completions?api-version=2023-05-15"
+            )
             headers = {"Content-Type": "application/json", "api-key": self.api_key}
         else:
-            url = "https://api.openai.com/v1/chat/completions"
+            url = (
+                os.environ.get("API_URL")
+                or "https://api.openai.com/v1/chat/completions"
+            )
             headers = {"Authorization": f"Bearer {kwargs.get('api_key', self.api_key)}"}
         response = self.session.post(
             url,
@@ -314,7 +324,7 @@ class Chatbot:
                 if line == "[DONE]":
                     break
                 resp: dict = json.loads(line)
-                if 'error' in resp:
+                if "error" in resp:
                     raise t.ResponseError(f"{resp['error']}")
                 choices = resp.get("choices")
                 if not choices:
@@ -693,7 +703,10 @@ def main() -> NoReturn:
         if prompt.startswith("!"):
             try:
                 chatbot.handle_commands(prompt)
-            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as err:
+            except (
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectionError,
+            ) as err:
                 print(f"Error: {err}")
                 continue
             continue
@@ -743,4 +756,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit()
-        
