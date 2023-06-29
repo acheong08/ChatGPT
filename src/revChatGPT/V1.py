@@ -418,7 +418,10 @@ class Chatbot:
             and not self.config.get("SERVER_SIDE_ARKOSE")
             and not getenv("SERVER_SIDE_ARKOSE")
         ):
-            data["arkose_token"] = get_arkose_token()
+            try:
+                data["arkose_token"] = get_arkose_token()
+            except:
+                pass
 
         cid, pid = data["conversation_id"], data["parent_message_id"]
         message = ""
