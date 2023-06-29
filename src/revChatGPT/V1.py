@@ -413,7 +413,11 @@ class Chatbot:
     ) -> Generator[dict, None, None]:
         log.debug("Sending the payload")
 
-        if data.get("model", "").startswith("gpt-4"):
+        if (
+            data.get("model", "").startswith("gpt-4")
+            and not self.config.get("SERVER_SIDE_ARKOSE")
+            and not getenv("SERVER_SIDE_ARKOSE")
+        ):
             data["arkose_token"] = get_arkose_token()
 
         cid, pid = data["conversation_id"], data["parent_message_id"]
