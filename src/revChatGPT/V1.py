@@ -21,7 +21,7 @@ from typing import NoReturn
 
 import httpx
 import requests
-import urllib
+import tls_client
 from httpx import AsyncClient
 from OpenAIAuth import Auth0 as Authenticator
 from rich.live import Live
@@ -109,6 +109,35 @@ def logger(is_timed: bool):
 BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.churchless.tech/"
 
 bcolors = t.Colors()
+
+session = tls_client.Session(
+    client_identifier="firefox110", random_tls_extension_order=True
+)
+
+
+def get_arkose_token() -> str:
+    form_data = session.get(BASE_URL + "arkose").json().get("form")
+    resp: dict = session.post(
+        "https://tcr9i.chat.openai.com/fc/gt2/public_key/35536E1E-65B4-4D96-9D97-6ADB7EFF8147",
+        data=form_data,
+        headers={
+            "Host": "tcr9i.chat.openai.com",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:114.0) Gecko/20100101 Firefox/114.0",
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Origin": "https://tcr9i.chat.openai.com",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Referer": "https://tcr9i.chat.openai.com/v2/1.5.2/enforcement.64b3a4e29686f93d52816249ecbf9857.html",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "TE": "trailers",
+        },
+    ).json()
+    return resp.get("token")
 
 
 class Chatbot:
@@ -383,6 +412,9 @@ class Chatbot:
         **kwargs,
     ) -> Generator[dict, None, None]:
         log.debug("Sending the payload")
+
+        if data.get("model", "").startswith("gpt-4"):
+            data["arkose_token"] = get_arkose_token()
 
         cid, pid = data["conversation_id"], data["parent_message_id"]
         message = ""

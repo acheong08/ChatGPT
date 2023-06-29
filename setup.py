@@ -42,6 +42,7 @@ setup(
         "openai",
         "curl_cffi",
         "rich",
+        "tls_client>=0.2.1",
     ],
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
