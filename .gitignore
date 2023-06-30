@@ -141,3 +141,4 @@ README.md
 src/revChatGPT/V3.test.py
 .gitignore
 .gitignore
+captcha

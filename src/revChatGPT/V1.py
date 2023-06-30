@@ -3,6 +3,8 @@ Standard ChatGPT
 """
 from __future__ import annotations
 
+import sys
+import subprocess
 import base64
 import binascii
 import contextlib
@@ -116,33 +118,54 @@ session = tls_client.Session(
 
 
 def get_arkose_token() -> str:
-    resp = session.get(BASE_URL + "arkose").json()
-    form_data = resp.get("form")
-    referrer_hex = resp.get("hex")
-    resp: dict = session.post(
-        "https://tcr9i.chat.openai.com/fc/gt2/public_key/35536E1E-65B4-4D96-9D97-6ADB7EFF8147",
-        data=form_data,
-        headers={
-            "Host": "tcr9i.chat.openai.com",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:114.0) Gecko/20100101 Firefox/114.0",
-            "Accept": "*/*",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Origin": "https://tcr9i.chat.openai.com",
-            "DNT": "1",
-            "Connection": "keep-alive",
-            "Referer": f"https://tcr9i.chat.openai.com/v2/1.5.2/enforcement.{referrer_hex}.html",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-            "TE": "trailers",
-        },
-    ).json()
-    token: str = resp.get("token")
-    if "|rid=" not in token or "|sup=" not in token:
-        raise Exception("captcha triggered by arkose")
-    return token
+    captcha_url = BASE_URL.replace("/api", "/captcha")
+    resp = session.get(captcha_url + "start?download_images=true")
+    resp_json: dict = resp.json()
+    if resp_json.get("status") == "success":
+        return resp.get("token")
+    if resp.status_code != 511:
+        raise Exception(resp_json.get("error"))
+
+    if resp_json.get("status") != "captcha":
+        raise Exception("unknown error")
+
+    challenge_details: dict = resp_json.get("session", {}).get("concise_challenge")
+    if not challenge_details:
+        raise Exception("missing details")
+
+    images: list[str] = resp_json.get("images")
+
+    # mkdir captcha
+    if not Path("captcha").exists():
+        Path("captcha").mkdir()
+
+    for image in images:
+        filename = Path("captcha", f"{time.time()}.png")
+        with open(filename, "wb") as f:
+            f.write(base64.b64decode(image))
+        print(f"Saved captcha image to {filename}")
+        # If MacOS, open the image
+        if sys.platform == "darwin":
+            subprocess.call(["open", filename])
+        if sys.platform == "linux":
+            subprocess.call(["xdg-open", filename])
+        if sys.platform == "win32":
+            subprocess.call(["start", filename])
+
+    print(f'Captcha instructions: {challenge_details.get("instructions")}')
+    print(
+        "Developer instructions: The captcha images have an index starting from 0 from left to right"
+    )
+    print("Enter the index of the images that matches the captcha instructions:")
+    index = int(input())
+
+    resp = session.post(
+        captcha_url + "verify",
+        json={"session": resp_json.get("session"), "index": index},
+    )
+    if resp.status_code != 200:
+        raise Exception("Failed to verify captcha")
+    return resp_json.get("token")
 
 
 class Chatbot:
