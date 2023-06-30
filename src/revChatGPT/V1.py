@@ -126,7 +126,7 @@ def captcha_solver(images: list[str], challenge_details: dict) -> int:
     filenames: list[Path] = []
 
     for image in images:
-        filename = Path("captcha", f"{time.time()}.png")
+        filename = Path("captcha", f"{time.time()}.jpeg")
         with open(filename, "wb") as f:
             f.write(base64.b64decode(image))
         print(f"Saved captcha image to {filename}")
