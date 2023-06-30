@@ -139,7 +139,10 @@ def get_arkose_token() -> str:
             "TE": "trailers",
         },
     ).json()
-    return resp.get("token")
+    token: str = resp.get("token")
+    if "|rid=" not in token or "|sup=" not in token:
+        raise Exception("captcha triggered by arkose")
+    return token
 
 
 class Chatbot:
