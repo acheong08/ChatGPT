@@ -139,6 +139,8 @@ def get_arkose_token() -> str:
     if not Path("captcha").exists():
         Path("captcha").mkdir()
 
+    filenames: list[Path] = []
+
     for image in images:
         filename = Path("captcha", f"{time.time()}.png")
         with open(filename, "wb") as f:
@@ -151,6 +153,7 @@ def get_arkose_token() -> str:
             subprocess.call(["xdg-open", filename])
         if sys.platform == "win32":
             subprocess.call(["start", filename])
+        filenames.append(filename)
 
     print(f'Captcha instructions: {challenge_details.get("instructions")}')
     print(
@@ -158,6 +161,10 @@ def get_arkose_token() -> str:
     )
     print("Enter the index of the images that matches the captcha instructions:")
     index = int(input())
+
+    # Delete the images
+    for filename in filenames:
+        filename.unlink()
 
     resp = session.post(
         captcha_url + "verify",
