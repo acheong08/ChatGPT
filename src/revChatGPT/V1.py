@@ -3,14 +3,14 @@ Standard ChatGPT
 """
 from __future__ import annotations
 
-import sys
-import subprocess
 import base64
 import binascii
 import contextlib
 import json
 import logging
 import secrets
+import subprocess
+import sys
 import time
 import uuid
 from functools import wraps
@@ -113,7 +113,8 @@ BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.churchless.tech/"
 bcolors = t.Colors()
 
 session = tls_client.Session(
-    client_identifier="firefox110", random_tls_extension_order=True
+    client_identifier="firefox110",
+    random_tls_extension_order=True,
 )
 
 
@@ -140,7 +141,7 @@ def captcha_solver(images: list[str], challenge_details: dict) -> int:
 
     print(f'Captcha instructions: {challenge_details.get("instructions")}')
     print(
-        "Developer instructions: The captcha images have an index starting from 0 from left to right"
+        "Developer instructions: The captcha images have an index starting from 0 from left to right",
     )
     print("Enter the index of the images that matches the captcha instructions:")
     index = int(input())
@@ -153,13 +154,23 @@ def captcha_solver(images: list[str], challenge_details: dict) -> int:
 
 
 def get_arkose_token(
-    download_images: bool = True, solver: function = captcha_solver
+    download_images: bool = True,
+    solver: function = captcha_solver,
 ) -> str:
+    """
+    The solver function should take in a list of images in base64 and a dict of challenge details
+    and return the index of the image that matches the challenge details
+
+    Challenge details:
+        game_type: str - Audio or Image
+        instructions: str - Instructions for the captcha
+        URLs: list[str] - URLs of the images or audio files
+    """
     captcha_url = BASE_URL.replace("/api/", "") + "/captcha/"
     resp = session.get(
         (captcha_url + "start?download_images=true")
         if download_images
-        else captcha_url + "start"
+        else captcha_url + "start",
     )
     resp_json: dict = resp.json()
     if resp_json.get("status") == "success":
@@ -200,6 +211,8 @@ class Chatbot:
         parent_id: str | None = None,
         lazy_loading: bool = True,
         base_url: str | None = None,
+        captcha_solver: function = captcha_solver,
+        captcha_download_images: bool = True,
     ) -> None:
         """Initialize a chatbot
 
@@ -214,7 +227,10 @@ class Chatbot:
                 More details on these are available at https://github.com/acheong08/ChatGPT#configuration
             conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
             parent_id (str | None, optional): Id of the previous response message to continue on. Defaults to None.
-            session_client (_type_, optional): _description_. Defaults to None.
+            lazy_loading (bool, optional): Whether to load only the active conversation. Defaults to True.
+            base_url (str | None, optional): Base URL of the ChatGPT server. Defaults to None.
+            captcha_solver (function, optional): Function to solve captcha. Defaults to captcha_solver.
+            captcha_download_images (bool, optional): Whether to download captcha images. Defaults to True.
 
         Raises:
             Exception: _description_
@@ -295,6 +311,8 @@ class Chatbot:
             print("Setting PUID (You are a Plus user!): " + puid)
         except:
             pass
+        self.captcha_solver = captcha_solver
+        self.captcha_download_images = captcha_download_images
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
@@ -466,7 +484,10 @@ class Chatbot:
             and not getenv("SERVER_SIDE_ARKOSE")
         ):
             try:
-                data["arkose_token"] = get_arkose_token()
+                data["arkose_token"] = get_arkose_token(
+                    self.captcha_download_images,
+                    self.captcha_solver,
+                )
             except Exception as e:
                 print(e)
                 raise e
