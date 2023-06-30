@@ -117,24 +117,7 @@ session = tls_client.Session(
 )
 
 
-def get_arkose_token() -> str:
-    captcha_url = BASE_URL.replace("/api/", "") + "/captcha/"
-    resp = session.get(captcha_url + "start?download_images=true")
-    resp_json: dict = resp.json()
-    if resp_json.get("status") == "success":
-        return resp_json.get("token")
-    if resp.status_code != 511:
-        raise Exception(resp_json.get("error"))
-
-    if resp_json.get("status") != "captcha":
-        raise Exception("unknown error")
-
-    challenge_details: dict = resp_json.get("session", {}).get("concise_challenge")
-    if not challenge_details:
-        raise Exception("missing details")
-
-    images: list[str] = resp_json.get("images")
-
+def captcha_solver(images: list[str], challenge_details: dict) -> int:
     # mkdir captcha
     if not Path("captcha").exists():
         Path("captcha").mkdir()
@@ -165,6 +148,35 @@ def get_arkose_token() -> str:
     # Delete the images
     for filename in filenames:
         filename.unlink()
+
+    return index
+
+
+def get_arkose_token(
+    download_images: bool = True, solver: function = captcha_solver
+) -> str:
+    captcha_url = BASE_URL.replace("/api/", "") + "/captcha/"
+    resp = session.get(
+        (captcha_url + "start?download_images=true")
+        if download_images
+        else captcha_url + "start"
+    )
+    resp_json: dict = resp.json()
+    if resp_json.get("status") == "success":
+        return resp_json.get("token")
+    if resp.status_code != 511:
+        raise Exception(resp_json.get("error"))
+
+    if resp_json.get("status") != "captcha":
+        raise Exception("unknown error")
+
+    challenge_details: dict = resp_json.get("session", {}).get("concise_challenge")
+    if not challenge_details:
+        raise Exception("missing details")
+
+    images: list[str] = resp_json.get("images")
+
+    index = solver(images, challenge_details)
 
     resp = session.post(
         captcha_url + "verify",
