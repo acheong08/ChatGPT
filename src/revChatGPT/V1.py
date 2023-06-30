@@ -118,7 +118,7 @@ session = tls_client.Session(
 
 
 def get_arkose_token() -> str:
-    captcha_url = BASE_URL.replace("/api", "/captcha")
+    captcha_url = BASE_URL.replace("/api/", "") + "/captcha/"
     resp = session.get(captcha_url + "start?download_images=true")
     resp_json: dict = resp.json()
     if resp_json.get("status") == "success":
