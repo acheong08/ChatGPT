@@ -21,6 +21,9 @@ from typing import AsyncGenerator
 from typing import Generator
 from typing import NoReturn
 
+# Import function type
+from typing import Callable as function
+
 import httpx
 import requests
 import tls_client
