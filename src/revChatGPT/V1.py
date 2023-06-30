@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import AsyncGenerator
 from typing import Generator
 from typing import NoReturn
+import tempfile
 
 # Import function type
 from typing import Callable as function
@@ -122,38 +123,32 @@ session = tls_client.Session(
 
 
 def captcha_solver(images: list[str], challenge_details: dict) -> int:
-    # mkdir captcha
-    if not Path("captcha").exists():
-        Path("captcha").mkdir()
+    # Create tempfile
+    with tempfile.TemporaryDirectory() as tempdir:
+        filenames: list[Path] = []
 
-    filenames: list[Path] = []
+        for image in images:
+            filename = Path(tempdir, f"{time.time()}.jpeg")
+            with open(filename, "wb") as f:
+                f.write(base64.b64decode(image))
+            print(f"Saved captcha image to {filename}")
+            # If MacOS, open the image
+            if sys.platform == "darwin":
+                subprocess.call(["open", filename])
+            if sys.platform == "linux":
+                subprocess.call(["xdg-open", filename])
+            if sys.platform == "win32":
+                subprocess.call(["start", filename])
+            filenames.append(filename)
 
-    for image in images:
-        filename = Path("captcha", f"{time.time()}.jpeg")
-        with open(filename, "wb") as f:
-            f.write(base64.b64decode(image))
-        print(f"Saved captcha image to {filename}")
-        # If MacOS, open the image
-        if sys.platform == "darwin":
-            subprocess.call(["open", filename])
-        if sys.platform == "linux":
-            subprocess.call(["xdg-open", filename])
-        if sys.platform == "win32":
-            subprocess.call(["start", filename])
-        filenames.append(filename)
+        print(f'Captcha instructions: {challenge_details.get("instructions")}')
+        print(
+            "Developer instructions: The captcha images have an index starting from 0 from left to right",
+        )
+        print("Enter the index of the images that matches the captcha instructions:")
+        index = int(input())
 
-    print(f'Captcha instructions: {challenge_details.get("instructions")}')
-    print(
-        "Developer instructions: The captcha images have an index starting from 0 from left to right",
-    )
-    print("Enter the index of the images that matches the captcha instructions:")
-    index = int(input())
-
-    # Delete the images
-    for filename in filenames:
-        filename.unlink()
-
-    return index
+        return index
 
 
 def get_arkose_token(
