@@ -122,7 +122,7 @@ def get_arkose_token() -> str:
     resp = session.get(captcha_url + "start?download_images=true")
     resp_json: dict = resp.json()
     if resp_json.get("status") == "success":
-        return resp.get("token")
+        return resp_json.get("token")
     if resp.status_code != 511:
         raise Exception(resp_json.get("error"))
 
@@ -448,8 +448,9 @@ class Chatbot:
         ):
             try:
                 data["arkose_token"] = get_arkose_token()
-            except:
-                pass
+            except Exception as e:
+                print(e)
+                raise e
 
         cid, pid = data["conversation_id"], data["parent_message_id"]
         message = ""
