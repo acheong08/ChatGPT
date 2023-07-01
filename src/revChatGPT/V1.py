@@ -16,7 +16,11 @@ import uuid
 from functools import wraps
 from os import environ
 from os import getenv
-from os import startfile
+
+try:
+    from os import startfile
+except ImportError:
+    pass
 from pathlib import Path
 from typing import AsyncGenerator
 from typing import Generator
