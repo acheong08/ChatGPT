@@ -116,7 +116,7 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.churchless.tech/"
+BASE_URL = environ.get("CHATGPT_BASE_URL", "https://bypass.churchless.tech/")
 
 bcolors = t.Colors()
 
@@ -150,6 +150,9 @@ def captcha_solver(images: list[str], challenge_details: dict) -> int:
         return index
 
 
+CAPTCHA_URL = getenv("CAPTCHA_URL", "https://bypass.churchless.tech/captcha/")
+
+
 def get_arkose_token(
     download_images: bool = True,
     solver: function = captcha_solver,
@@ -163,17 +166,16 @@ def get_arkose_token(
         instructions: str - Instructions for the captcha
         URLs: list[str] - URLs of the images or audio files
     """
-    captcha_url = BASE_URL.replace("/api/", "") + "/captcha/"
     resp = requests.get(
-        (captcha_url + "start?download_images=true")
+        (CAPTCHA_URL + "start?download_images=true")
         if download_images
-        else captcha_url + "start",
+        else CAPTCHA_URL + "start",
     )
     resp_json: dict = resp.json()
-    if resp_json.get("status") == "success":
+    if resp.status_code == 200:
         return resp_json.get("token")
     if resp.status_code != 511:
-        raise Exception(resp_json.get("error"))
+        raise Exception(resp_json.get("error", "Unknown error"))
 
     if resp_json.get("status") != "captcha":
         raise Exception("unknown error")
@@ -187,7 +189,7 @@ def get_arkose_token(
     index = solver(images, challenge_details)
 
     resp = requests.post(
-        captcha_url + "verify",
+        CAPTCHA_URL + "verify",
         json={"session": resp_json.get("session"), "index": index},
     )
     if resp.status_code != 200:
