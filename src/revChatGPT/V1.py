@@ -16,6 +16,7 @@ import uuid
 from functools import wraps
 from os import environ
 from os import getenv
+from os import startfile
 from pathlib import Path
 from typing import AsyncGenerator
 from typing import Generator
@@ -138,7 +139,7 @@ def captcha_solver(images: list[str], challenge_details: dict) -> int:
             if sys.platform == "linux":
                 subprocess.call(["xdg-open", filename])
             if sys.platform == "win32":
-                subprocess.call(["start", filename])
+                startfile(filename)
             filenames.append(filename)
 
         print(f'Captcha instructions: {challenge_details.get("instructions")}')
