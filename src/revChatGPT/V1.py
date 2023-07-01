@@ -32,7 +32,6 @@ from typing import Callable as function
 
 import httpx
 import requests
-import tls_client
 from httpx import AsyncClient
 from OpenAIAuth import Auth0 as Authenticator
 from rich.live import Live
@@ -121,11 +120,6 @@ BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.churchless.tech/"
 
 bcolors = t.Colors()
 
-session = tls_client.Session(
-    client_identifier="firefox110",
-    random_tls_extension_order=True,
-)
-
 
 def captcha_solver(images: list[str], challenge_details: dict) -> int:
     # Create tempfile
@@ -170,7 +164,7 @@ def get_arkose_token(
         URLs: list[str] - URLs of the images or audio files
     """
     captcha_url = BASE_URL.replace("/api/", "") + "/captcha/"
-    resp = session.get(
+    resp = requests.get(
         (captcha_url + "start?download_images=true")
         if download_images
         else captcha_url + "start",
@@ -192,7 +186,7 @@ def get_arkose_token(
 
     index = solver(images, challenge_details)
 
-    resp = session.post(
+    resp = requests.post(
         captcha_url + "verify",
         json={"session": resp_json.get("session"), "index": index},
     )
