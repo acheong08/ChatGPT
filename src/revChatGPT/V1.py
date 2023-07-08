@@ -167,9 +167,10 @@ def get_arkose_token(
         URLs: list[str] - URLs of the images or audio files
     """
     resp = requests.get(
-        (CAPTCHA_URL + "start?download_images=true")
-        if download_images
-        else CAPTCHA_URL + "start",
+        "https://arkose-token.tms.im/"
+        # (CAPTCHA_URL + "start?download_images=true")
+        # if download_images
+        # else CAPTCHA_URL + "start",
     )
     resp_json: dict = resp.json()
     if resp.status_code == 200:
