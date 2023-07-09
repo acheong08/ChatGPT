@@ -36,11 +36,9 @@ setup(
         "OpenAIAuth>=2.0.0",
         "requests[socks]",
         "httpx[socks]",
-        "async_tio",
         "prompt-toolkit",
         "tiktoken>=0.3.0",
         "openai",
-        "curl_cffi",
         "rich",
     ],
     classifiers=[
