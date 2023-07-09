@@ -201,15 +201,18 @@ def get_arkose_token(
     else:
         working_endpoints: list[str] = []
         # Check uptime for different endpoints via gatus
-        resp: list[dict] = requests.get(
+        resp2: list[dict] = requests.get(
             "https://stats.churchless.tech/api/v1/endpoints/statuses?page=1"
         ).json()
-        for endpoint in resp:
+        for endpoint in resp2:
+            # print(endpoint.get("name"))
             if endpoint.get("group") != "Arkose Labs":
                 continue
             # Check the last 5 results
-            results: list[dict] = endpoint.get("results", [])[:5]
+            results: list[dict] = endpoint.get("results", [])[-5:-1]
+            # print(results)
             if not results:
+                print(f"Endpoint {endpoint.get('name')} has no results")
                 continue
             # Check if all the results are up
             if all(result.get("success") == True for result in results):
@@ -218,8 +221,9 @@ def get_arkose_token(
             print("No working endpoints found. Please solve the captcha manually.")
             return get_arkose_token(download_images=True, captcha_supported=True)
         # Choose a random endpoint
+        # print(working_endpoints)
         endpoint = random.choice(working_endpoints)
-        print(f"Using endpoint {endpoint} for captcha")
+        print(f"Using endpoint {endpoint} for captcha\n\n")
         resp: requests.Response = requests.get(endpoint)
         if resp.status_code != 200:
             if resp.status_code != 511:
