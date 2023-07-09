@@ -26,6 +26,7 @@ from typing import AsyncGenerator
 from typing import Generator
 from typing import NoReturn
 import tempfile
+import random
 
 # Import function type
 from typing import Callable as function
@@ -156,6 +157,7 @@ CAPTCHA_URL = getenv("CAPTCHA_URL", "https://bypass.churchless.tech/captcha/")
 def get_arkose_token(
     download_images: bool = True,
     solver: function = captcha_solver,
+    captcha_supported: bool = True,
 ) -> str:
     """
     The solver function should take in a list of images in base64 and a dict of challenge details
@@ -166,35 +168,69 @@ def get_arkose_token(
         instructions: str - Instructions for the captcha
         URLs: list[str] - URLs of the images or audio files
     """
-    resp = requests.get(
-        (CAPTCHA_URL + "start?download_images=true")
-        if download_images
-        else CAPTCHA_URL + "start",
-    )
-    resp_json: dict = resp.json()
-    if resp.status_code == 200:
+    if captcha_supported:
+        resp = requests.get(
+            (CAPTCHA_URL + "start?download_images=true")
+            if download_images
+            else CAPTCHA_URL + "start",
+        )
+        resp_json: dict = resp.json()
+        if resp.status_code == 200:
+            return resp_json.get("token")
+        if resp.status_code != 511:
+            raise Exception(resp_json.get("error", "Unknown error"))
+
+        if resp_json.get("status") != "captcha":
+            raise Exception("unknown error")
+
+        challenge_details: dict = resp_json.get("session", {}).get("concise_challenge")
+        if not challenge_details:
+            raise Exception("missing details")
+
+        images: list[str] = resp_json.get("images")
+
+        index = solver(images, challenge_details)
+
+        resp = requests.post(
+            CAPTCHA_URL + "verify",
+            json={"session": resp_json.get("session"), "index": index},
+        )
+        if resp.status_code != 200:
+            raise Exception("Failed to verify captcha")
         return resp_json.get("token")
-    if resp.status_code != 511:
-        raise Exception(resp_json.get("error", "Unknown error"))
-
-    if resp_json.get("status") != "captcha":
-        raise Exception("unknown error")
-
-    challenge_details: dict = resp_json.get("session", {}).get("concise_challenge")
-    if not challenge_details:
-        raise Exception("missing details")
-
-    images: list[str] = resp_json.get("images")
-
-    index = solver(images, challenge_details)
-
-    resp = requests.post(
-        CAPTCHA_URL + "verify",
-        json={"session": resp_json.get("session"), "index": index},
-    )
-    if resp.status_code != 200:
-        raise Exception("Failed to verify captcha")
-    return resp_json.get("token")
+    else:
+        working_endpoints: list[str] = []
+        # Check uptime for different endpoints via gatus
+        resp: list[dict] = requests.get(
+            "https://stats.churchless.tech/api/v1/endpoints/statuses?page=1"
+        ).json()
+        for endpoint in resp:
+            if endpoint.get("group") != "Arkose Labs":
+                continue
+            # Check the last 5 results
+            results: list[dict] = endpoint.get("results", [])[:5]
+            if not results:
+                continue
+            # Check if all the results are up
+            if all(result.get("success") == True for result in results):
+                working_endpoints.append(endpoint.get("name"))
+        if not working_endpoints:
+            print("No working endpoints found. Please solve the captcha manually.")
+            return get_arkose_token(download_images=True, captcha_supported=True)
+        # Choose a random endpoint
+        endpoint = random.choice(working_endpoints)
+        print(f"Using endpoint {endpoint} for captcha")
+        resp: requests.Response = requests.get(endpoint)
+        if resp.status_code != 200:
+            if resp.status_code != 511:
+                raise Exception("Failed to get captcha token")
+            else:
+                print("Captcha required. Please solve the captcha manually.")
+                return get_arkose_token(download_images=True, captcha_supported=True)
+        try:
+            return resp.json().get("token")
+        except Exception:
+            return resp.text
 
 
 class Chatbot:
@@ -486,7 +522,9 @@ class Chatbot:
                 data["arkose_token"] = get_arkose_token(
                     self.captcha_download_images,
                     self.captcha_solver,
+                    captcha_supported=False,
                 )
+                # print(f"Arkose token obtained: {data['arkose_token']}")
             except Exception as e:
                 print(e)
                 raise e
