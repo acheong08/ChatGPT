@@ -221,9 +221,7 @@ def get_arkose_token(
             print("No working endpoints found. Please solve the captcha manually.")
             return get_arkose_token(download_images=True, captcha_supported=True)
         # Choose a random endpoint
-        # print(working_endpoints)
         endpoint = random.choice(working_endpoints)
-        print(f"Using endpoint {endpoint} for captcha\n\n")
         resp: requests.Response = requests.get(endpoint)
         if resp.status_code != 200:
             if resp.status_code != 511:
