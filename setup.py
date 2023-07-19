@@ -33,7 +33,7 @@ setup(
     py_modules=["revChatGPT"],
     package_data={"": ["*.json"]},
     install_requires=[
-        "OpenAIAuth>=2.0.0",
+        "OpenAIAuth>=3.0.0",
         "requests[socks]",
         "httpx[socks]",
         "prompt-toolkit",
