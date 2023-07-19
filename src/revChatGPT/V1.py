@@ -497,7 +497,7 @@ class Chatbot:
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
         auth = Authenticator(
-            email=self.config.get("email"),
+            email_address=self.config.get("email"),
             password=self.config.get("password"),
             proxy=self.config.get("proxy"),
         )
