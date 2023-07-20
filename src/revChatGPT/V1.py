@@ -573,7 +573,7 @@ class Chatbot:
             except json.decoder.JSONDecodeError:
                 continue
             if not self.__check_fields(line):
-                raise ValueError(f"Field missing. Details: {str(line)}")
+                continue
             if line.get("message").get("author").get("role") != "assistant":
                 continue
 
