@@ -7,11 +7,16 @@ on:
     branches: [main]
     paths:
       - 'src/**'
-      - '/*.py'
+      - '*.py'
       - 'test/**'
       - '.github/workflows/**'
   pull_request:
     types: [opened, reopened, synchronize]
+    paths:
+      - 'src/**'
+      - '*.py'
+      - 'test/**'
+      - '.github/workflows/**'
 
 permissions:
   contents: read
