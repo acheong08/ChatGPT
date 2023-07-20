@@ -573,7 +573,8 @@ class Chatbot:
             except json.decoder.JSONDecodeError:
                 continue
             if not self.__check_fields(line):
-                raise ValueError(f"Field missing. Details: {str(line)}")
+                if line.get("is_completion"):
+                    raise ValueError(f"Field missing. Details: {str(line)}")
             if line.get("message").get("author").get("role") != "assistant":
                 continue
 
@@ -1140,8 +1141,10 @@ class AsyncChatbot(Chatbot):
                     line = json.loads(line)
                 except json.decoder.JSONDecodeError:
                     continue
+                
                 if not self.__check_fields(line):
-                    raise ValueError(f"Field missing. Details: {str(line)}")
+                    if line.get("is_completion"):
+                        raise ValueError(f"Field missing. Details: {str(line)}")
                 if line.get("message").get("author").get("role") != "assistant":
                     continue
 
