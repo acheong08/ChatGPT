@@ -5,6 +5,11 @@ on:
     types: [published]
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - '/*.py'
+      - 'test/**'
+      - '.github/workflows/**'
   pull_request:
     types: [opened, reopened, synchronize]
 
