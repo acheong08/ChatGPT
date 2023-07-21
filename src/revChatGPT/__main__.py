@@ -12,7 +12,7 @@ from . import V3
 __all__ = ()
 
 
-def main():
+def main() -> None:
     """
     main function for CLI
     """
