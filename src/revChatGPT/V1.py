@@ -8,26 +8,67 @@ import binascii
 import contextlib
 import json
 import logging
+import secrets
+import subprocess
+import sys
 import time
 import uuid
 from functools import wraps
 from os import environ
 from os import getenv
+
+try:
+    from os import startfile
+except ImportError:
+    pass
 from pathlib import Path
 from typing import AsyncGenerator
 from typing import Generator
 from typing import NoReturn
+import tempfile
+import random
+
+# Import function type
+from typing import Callable as function
 
 import httpx
 import requests
 from httpx import AsyncClient
 from OpenAIAuth import Auth0 as Authenticator
+from rich.live import Live
+from rich.markdown import Markdown
 
 from . import __version__
 from . import typings as t
 from .utils import create_completer
 from .utils import create_session
 from .utils import get_input
+
+
+def generate_random_hex(length: int = 17) -> str:
+    """Generate a random hex string
+
+    Args:
+        length (int, optional): Length of the hex string. Defaults to 17.
+
+    Returns:
+        str: Random hex string
+    """
+    return secrets.token_hex(length)
+
+
+def random_int(min: int, max: int) -> int:
+    """Generate a random integer
+
+    Args:
+        min (int): Minimum value
+        max (int): Maximum value
+
+    Returns:
+        int: Random integer
+    """
+    return secrets.randbelow(max - min) + min
+
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -76,9 +117,122 @@ def logger(is_timed: bool):
     return decorator
 
 
-BASE_URL = environ.get("CHATGPT_BASE_URL") or "https://bypass.churchless.tech/"
+BASE_URL = environ.get("CHATGPT_BASE_URL", "https://bypass.churchless.tech/")
 
 bcolors = t.Colors()
+
+
+def captcha_solver(images: list[str], challenge_details: dict) -> int:
+    # Create tempfile
+    with tempfile.TemporaryDirectory() as tempdir:
+        filenames: list[Path] = []
+
+        for image in images:
+            filename = Path(tempdir, f"{time.time()}.jpeg")
+            with open(filename, "wb") as f:
+                f.write(base64.b64decode(image))
+            print(f"Saved captcha image to {filename}")
+            # If MacOS, open the image
+            if sys.platform == "darwin":
+                subprocess.call(["open", filename])
+            if sys.platform == "linux":
+                subprocess.call(["xdg-open", filename])
+            if sys.platform == "win32":
+                startfile(filename)
+            filenames.append(filename)
+
+        print(f'Captcha instructions: {challenge_details.get("instructions")}')
+        print(
+            "Developer instructions: The captcha images have an index starting from 0 from left to right",
+        )
+        print("Enter the index of the images that matches the captcha instructions:")
+        index = int(input())
+
+        return index
+
+
+CAPTCHA_URL = getenv("CAPTCHA_URL", "https://bypass.churchless.tech/captcha/")
+
+
+def get_arkose_token(
+    download_images: bool = True,
+    solver: function = captcha_solver,
+    captcha_supported: bool = True,
+) -> str:
+    """
+    The solver function should take in a list of images in base64 and a dict of challenge details
+    and return the index of the image that matches the challenge details
+
+    Challenge details:
+        game_type: str - Audio or Image
+        instructions: str - Instructions for the captcha
+        URLs: list[str] - URLs of the images or audio files
+    """
+    if captcha_supported:
+        resp = requests.get(
+            (CAPTCHA_URL + "start?download_images=true")
+            if download_images
+            else CAPTCHA_URL + "start",
+        )
+        resp_json: dict = resp.json()
+        if resp.status_code == 200:
+            return resp_json.get("token")
+        if resp.status_code != 511:
+            raise Exception(resp_json.get("error", "Unknown error"))
+
+        if resp_json.get("status") != "captcha":
+            raise Exception("unknown error")
+
+        challenge_details: dict = resp_json.get("session", {}).get("concise_challenge")
+        if not challenge_details:
+            raise Exception("missing details")
+
+        images: list[str] = resp_json.get("images")
+
+        index = solver(images, challenge_details)
+
+        resp = requests.post(
+            CAPTCHA_URL + "verify",
+            json={"session": resp_json.get("session"), "index": index},
+        )
+        if resp.status_code != 200:
+            raise Exception("Failed to verify captcha")
+        return resp_json.get("token")
+    else:
+        working_endpoints: list[str] = []
+        # Check uptime for different endpoints via gatus
+        resp2: list[dict] = requests.get(
+            "https://stats.churchless.tech/api/v1/endpoints/statuses?page=1"
+        ).json()
+        for endpoint in resp2:
+            # print(endpoint.get("name"))
+            if endpoint.get("group") != "Arkose Labs":
+                continue
+            # Check the last 5 results
+            results: list[dict] = endpoint.get("results", [])[-5:-1]
+            # print(results)
+            if not results:
+                print(f"Endpoint {endpoint.get('name')} has no results")
+                continue
+            # Check if all the results are up
+            if all(result.get("success") == True for result in results):
+                working_endpoints.append(endpoint.get("name"))
+        if not working_endpoints:
+            print("No working endpoints found. Please solve the captcha manually.")
+            return get_arkose_token(download_images=True, captcha_supported=True)
+        # Choose a random endpoint
+        endpoint = random.choice(working_endpoints)
+        resp: requests.Response = requests.get(endpoint)
+        if resp.status_code != 200:
+            if resp.status_code != 511:
+                raise Exception("Failed to get captcha token")
+            else:
+                print("Captcha required. Please solve the captcha manually.")
+                return get_arkose_token(download_images=True, captcha_supported=True)
+        try:
+            return resp.json().get("token")
+        except Exception:
+            return resp.text
 
 
 class Chatbot:
@@ -94,6 +248,8 @@ class Chatbot:
         parent_id: str | None = None,
         lazy_loading: bool = True,
         base_url: str | None = None,
+        captcha_solver: function = captcha_solver,
+        captcha_download_images: bool = True,
     ) -> None:
         """Initialize a chatbot
 
@@ -108,7 +264,10 @@ class Chatbot:
                 More details on these are available at https://github.com/acheong08/ChatGPT#configuration
             conversation_id (str | None, optional): Id of the conversation to continue on. Defaults to None.
             parent_id (str | None, optional): Id of the previous response message to continue on. Defaults to None.
-            session_client (_type_, optional): _description_. Defaults to None.
+            lazy_loading (bool, optional): Whether to load only the active conversation. Defaults to True.
+            base_url (str | None, optional): Base URL of the ChatGPT server. Defaults to None.
+            captcha_solver (function, optional): Function to solve captcha. Defaults to captcha_solver.
+            captcha_download_images (bool, optional): Whether to download captcha images. Defaults to True.
 
         Raises:
             Exception: _description_
@@ -166,6 +325,31 @@ class Chatbot:
         self.disable_history = config.get("disable_history", False)
 
         self.__check_credentials()
+
+        if self.config.get("plugin_ids", []):
+            for plugin in self.config.get("plugin_ids"):
+                self.install_plugin(plugin)
+        if self.config.get("unverified_plugin_domains", []):
+            for domain in self.config.get("unverified_plugin_domains"):
+                if self.config.get("plugin_ids"):
+                    self.config["plugin_ids"].append(
+                        self.get_unverified_plugin(domain, install=True).get("id"),
+                    )
+                else:
+                    self.config["plugin_ids"] = [
+                        self.get_unverified_plugin(domain, install=True).get("id"),
+                    ]
+        # Get PUID cookie
+        try:
+            auth = Authenticator("blah", "blah")
+            auth.access_token = self.config["access_token"]
+            puid = auth.get_puid()
+            self.session.headers.update({"PUID": puid})
+            print("Setting PUID (You are a Plus user!): " + puid)
+        except:
+            pass
+        self.captcha_solver = captcha_solver
+        self.captcha_download_images = captcha_download_images
 
     @logger(is_timed=True)
     def __check_credentials(self) -> None:
@@ -313,13 +497,13 @@ class Chatbot:
             error = t.AuthenticationError("Insufficient login details provided!")
             raise error
         auth = Authenticator(
-            email=self.config.get("email"),
+            email_address=self.config.get("email"),
             password=self.config.get("password"),
             proxy=self.config.get("proxy"),
         )
         log.debug("Using authenticator to get access token")
 
-        self.set_access_token(auth.auth())
+        self.set_access_token(auth.get_access_token())
 
     @logger(is_timed=True)
     def __send_request(
@@ -331,8 +515,24 @@ class Chatbot:
     ) -> Generator[dict, None, None]:
         log.debug("Sending the payload")
 
+        if (
+            data.get("model", "").startswith("gpt-4")
+            and not self.config.get("SERVER_SIDE_ARKOSE")
+            and not getenv("SERVER_SIDE_ARKOSE")
+        ):
+            try:
+                data["arkose_token"] = get_arkose_token(
+                    self.captcha_download_images,
+                    self.captcha_solver,
+                    captcha_supported=False,
+                )
+                # print(f"Arkose token obtained: {data['arkose_token']}")
+            except Exception as e:
+                print(e)
+                raise e
+
         cid, pid = data["conversation_id"], data["parent_message_id"]
-        model, message = None, ""
+        message = ""
 
         self.conversation_id_prev_queue.append(cid)
         self.parent_id_prev_queue.append(pid)
@@ -373,7 +573,7 @@ class Chatbot:
             except json.decoder.JSONDecodeError:
                 continue
             if not self.__check_fields(line):
-                raise ValueError(f"Field missing. Details: {str(line)}")
+                continue
             if line.get("message").get("author").get("role") != "assistant":
                 continue
 
@@ -416,6 +616,7 @@ class Chatbot:
         message = message.strip("\n")
         for i in self.continue_write(
             conversation_id=cid,
+            model=model,
             timeout=timeout,
             auto_continue=False,
         ):
@@ -493,13 +694,13 @@ class Chatbot:
                 )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "next",
             "messages": messages,
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": model or self.config.get("model") or "text-davinci-002-render-sha",
+            "model": model,
             "history_and_training_disabled": self.disable_history,
         }
         plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
@@ -627,7 +828,7 @@ class Chatbot:
             else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "continue",
             "conversation_id": conversation_id,
@@ -641,7 +842,6 @@ class Chatbot:
             ),
             "history_and_training_disabled": self.disable_history,
         }
-
         yield from self.__send_request(
             data,
             timeout=timeout,
@@ -721,6 +921,8 @@ class Chatbot:
         Creates a share link to a conversation
         :param convo_id: UUID of conversation
         :param node_id: UUID of node
+        :param anonymous: Boolean
+        :param title: String
 
         Returns:
             str: A URL to the shared link
@@ -761,6 +963,8 @@ class Chatbot:
     def gen_title(self, convo_id: str, message_id: str) -> str:
         """
         Generate title for conversation
+        :param id: UUID of conversation
+        :param message_id: UUID of message
         """
         response = self.session.post(
             f"{self.base_url}conversation/gen_title/{convo_id}",
@@ -831,6 +1035,12 @@ class Chatbot:
 
     @logger(is_timed=True)
     def get_plugins(self, offset: int = 0, limit: int = 250, status: str = "approved"):
+        """
+        Get plugins
+        :param offset: Integer. Offset (Only supports 0)
+        :param limit: Integer. Limit (Only below 250)
+        :param status: String. Status of plugin (approved)
+        """
         url = f"{self.base_url}aip/p?offset={offset}&limit={limit}&statuses={status}"
         response = self.session.get(url)
         self.__check_response(response)
@@ -839,10 +1049,28 @@ class Chatbot:
 
     @logger(is_timed=True)
     def install_plugin(self, plugin_id: str):
+        """
+        Install plugin by ID
+        :param plugin_id: String. ID of plugin
+        """
         url = f"{self.base_url}aip/p/{plugin_id}/user-settings"
         payload = {"is_installed": True}
         response = self.session.patch(url, data=json.dumps(payload))
         self.__check_response(response)
+
+    @logger(is_timed=True)
+    def get_unverified_plugin(self, domain: str, install: bool = True) -> dict:
+        """
+        Get unverified plugin by domain
+        :param domain: String. Domain of plugin
+        :param install: Boolean. Install plugin if found
+        """
+        url = f"{self.base_url}aip/p/domain?domain={domain}"
+        response = self.session.get(url)
+        self.__check_response(response)
+        if install:
+            self.install_plugin(response.json().get("id"))
+        return response.json()
 
 
 class AsyncChatbot(Chatbot):
@@ -880,8 +1108,7 @@ class AsyncChatbot(Chatbot):
         log.debug("Sending the payload")
 
         cid, pid = data["conversation_id"], data["parent_message_id"]
-        model, message = None, ""
-
+        message = ""
         self.conversation_id_prev_queue.append(cid)
         self.parent_id_prev_queue.append(pid)
         async with self.session.stream(
@@ -894,8 +1121,6 @@ class AsyncChatbot(Chatbot):
 
             finish_details = None
             async for line in response.aiter_lines():
-                # remove b' and ' at the beginning and end and ignore case
-                line = str(line)[2:-1]
                 if line.lower() == "internal server error":
                     log.error(f"Internal Server Error: {line}")
                     error = t.Error(
@@ -911,17 +1136,13 @@ class AsyncChatbot(Chatbot):
                 if line == "[DONE]":
                     break
 
-                # DO NOT REMOVE THIS
-                line = line.replace('\\"', '"')
-                line = line.replace("\\'", "'")
-                line = line.replace("\\\\", "\\")
-
                 try:
                     line = json.loads(line)
                 except json.decoder.JSONDecodeError:
                     continue
+
                 if not self.__check_fields(line):
-                    raise ValueError(f"Field missing. Details: {str(line)}")
+                    continue
                 if line.get("message").get("author").get("role") != "assistant":
                     continue
 
@@ -967,6 +1188,7 @@ class AsyncChatbot(Chatbot):
             message = message.strip("\n")
             async for i in self.continue_write(
                 conversation_id=cid,
+                model=model,
                 timeout=timeout,
                 auto_continue=False,
             ):
@@ -1045,19 +1267,18 @@ class AsyncChatbot(Chatbot):
                 )
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "next",
             "messages": messages,
             "conversation_id": conversation_id,
             "parent_message_id": parent_id,
-            "model": model or self.config.get("model") or "text-davinci-002-render-sha",
+            "model": model,
             "history_and_training_disabled": self.disable_history,
         }
         plugin_ids = self.config.get("plugin_ids", []) or plugin_ids
         if len(plugin_ids) > 0 and not conversation_id:
             data["plugin_ids"] = plugin_ids
-
         async for msg in self.__send_request(
             data,
             timeout=timeout,
@@ -1169,7 +1390,7 @@ class AsyncChatbot(Chatbot):
             else:  # invalid conversation_id provided, treat as a new conversation
                 conversation_id = None
                 parent_id = str(uuid.uuid4())
-
+        model = model or self.config.get("model") or "text-davinci-002-render-sha"
         data = {
             "action": "continue",
             "conversation_id": conversation_id,
@@ -1183,7 +1404,6 @@ class AsyncChatbot(Chatbot):
             ),
             "history_and_training_disabled": self.disable_history,
         }
-
         async for msg in self.__send_request(
             data=data,
             auto_continue=auto_continue,
@@ -1237,11 +1457,6 @@ class AsyncChatbot(Chatbot):
         """
         convo_id = convo_id or self.conversation_id
         node_id = node_id or self.parent_id
-        headers = {
-            "Content-Type": "application/json",
-            "origin": "https://chat.openai.com",
-            "referer": f"https://chat.openai.com/c/{convo_id}",
-        }
         # First create the share
         payload = {
             "conversation_id": convo_id,
@@ -1252,13 +1467,13 @@ class AsyncChatbot(Chatbot):
         response = await self.session.post(
             url,
             data=json.dumps(payload),
-            headers=headers,
         )
         await self.__check_response(response)
         share_url = response.json().get("share_url")
         # Then patch the share to make public
         share_id = response.json().get("share_id")
         url = f"{self.base_url}share/{share_id}"
+        print(url)
         payload = {
             "share_id": share_id,
             "highlighted_message_id": node_id,
@@ -1270,7 +1485,6 @@ class AsyncChatbot(Chatbot):
         response = await self.session.patch(
             url,
             data=json.dumps(payload),
-            headers=headers,
         )
         await self.__check_response(response)
         return share_url
@@ -1469,15 +1683,13 @@ def main(config: dict) -> NoReturn:
             print(f"{bcolors.OKGREEN + bcolors.BOLD}Chatbot: {bcolors.ENDC}")
             if chatbot.config.get("model") == "gpt-4-browsing":
                 print("Browsing takes a while, please wait...")
-            prev_text = ""
-            for data in chatbot.ask(prompt=prompt, auto_continue=True):
-                if data["recipient"] != "all":
-                    continue
-                result = data
-                message = data["message"][len(prev_text) :]
-                print(message, end="", flush=True)
-                prev_text = data["message"]
-            print(bcolors.ENDC)
+            with Live(Markdown(""), auto_refresh=False) as live:
+                for data in chatbot.ask(prompt=prompt, auto_continue=True):
+                    if data["recipient"] != "all":
+                        continue
+                    result = data
+                    message = data["message"]
+                    live.update(Markdown(message), refresh=True)
             print()
 
             if result.get("citations", False):

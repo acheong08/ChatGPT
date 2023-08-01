@@ -138,3 +138,7 @@ dmypy.json
 .idea/
 src/revChatGPT/test.py
 README.md
+src/revChatGPT/V3.test.py
+.gitignore
+.gitignore
+captcha

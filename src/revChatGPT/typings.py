@@ -2,6 +2,7 @@
 A module that contains all the types used in this project
 """
 import os
+import platform
 from enum import Enum
 from typing import Union
 import platform
