@@ -427,13 +427,27 @@ class Chatbot:
                 d_access_token = base64.b64decode(s_access_token[1])
                 d_access_token = json.loads(d_access_token)
             except binascii.Error:
+                del cache["access_tokens"][email]
+                self.__write_cache(cache)
+                error = t.Error(
+                    source="__get_cached_access_token",
+                    message="Invalid access token",
+                    code=t.ErrorType.INVALID_ACCESS_TOKEN_ERROR,
+                )
+                del cache["access_tokens"][email]
+                raise error from None
+            except json.JSONDecodeError:
+                del cache["access_tokens"][email]
+                self.__write_cache(cache)
                 error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
                     code=t.ErrorType.INVALID_ACCESS_TOKEN_ERROR,
                 )
                 raise error from None
-            except json.JSONDecodeError:
+            except IndexError:
+                del cache["access_tokens"][email]
+                self.__write_cache(cache)
                 error = t.Error(
                     source="__get_cached_access_token",
                     message="Invalid access token",
