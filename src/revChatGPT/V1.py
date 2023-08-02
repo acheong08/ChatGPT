@@ -78,7 +78,7 @@ if __name__ == "__main__":
 log = logging.getLogger(__name__)
 
 
-def logger(is_timed: bool):
+def logger(is_timed: bool) -> function:
     """Logger decorator
 
     Args:
@@ -88,7 +88,7 @@ def logger(is_timed: bool):
         _type_: decorated function
     """
 
-    def decorator(func):
+    def decorator(func: function) -> function:
         wraps(func)
 
         def wrapper(*args, **kwargs):
@@ -146,9 +146,7 @@ def captcha_solver(images: list[str], challenge_details: dict) -> int:
             "Developer instructions: The captcha images have an index starting from 0 from left to right",
         )
         print("Enter the index of the images that matches the captcha instructions:")
-        index = int(input())
-
-        return index
+        return int(input())
 
 
 CAPTCHA_URL = getenv("CAPTCHA_URL", "https://bypass.churchless.tech/captcha/")
@@ -198,41 +196,39 @@ def get_arkose_token(
         if resp.status_code != 200:
             raise Exception("Failed to verify captcha")
         return resp_json.get("token")
-    else:
-        working_endpoints: list[str] = []
-        # Check uptime for different endpoints via gatus
-        resp2: list[dict] = requests.get(
-            "https://stats.churchless.tech/api/v1/endpoints/statuses?page=1"
-        ).json()
-        for endpoint in resp2:
-            # print(endpoint.get("name"))
-            if endpoint.get("group") != "Arkose Labs":
-                continue
-            # Check the last 5 results
-            results: list[dict] = endpoint.get("results", [])[-5:-1]
-            # print(results)
-            if not results:
-                print(f"Endpoint {endpoint.get('name')} has no results")
-                continue
-            # Check if all the results are up
-            if all(result.get("success") == True for result in results):
-                working_endpoints.append(endpoint.get("name"))
-        if not working_endpoints:
-            print("No working endpoints found. Please solve the captcha manually.")
-            return get_arkose_token(download_images=True, captcha_supported=True)
-        # Choose a random endpoint
-        endpoint = random.choice(working_endpoints)
-        resp: requests.Response = requests.get(endpoint)
-        if resp.status_code != 200:
-            if resp.status_code != 511:
-                raise Exception("Failed to get captcha token")
-            else:
-                print("Captcha required. Please solve the captcha manually.")
-                return get_arkose_token(download_images=True, captcha_supported=True)
-        try:
-            return resp.json().get("token")
-        except Exception:
-            return resp.text
+    working_endpoints: list[str] = []
+    # Check uptime for different endpoints via gatus
+    resp2: list[dict] = requests.get(
+        "https://stats.churchless.tech/api/v1/endpoints/statuses?page=1",
+    ).json()
+    for endpoint in resp2:
+        # print(endpoint.get("name"))
+        if endpoint.get("group") != "Arkose Labs":
+            continue
+        # Check the last 5 results
+        results: list[dict] = endpoint.get("results", [])[-5:-1]
+        # print(results)
+        if not results:
+            print(f"Endpoint {endpoint.get('name')} has no results")
+            continue
+        # Check if all the results are up
+        if all(result.get("success") is True for result in results):
+            working_endpoints.append(endpoint.get("name"))
+    if not working_endpoints:
+        print("No working endpoints found. Please solve the captcha manually.")
+        return get_arkose_token(download_images=True, captcha_supported=True)
+    # Choose a random endpoint
+    endpoint = random.choice(working_endpoints)
+    resp: requests.Response = requests.get(endpoint)
+    if resp.status_code != 200:
+        if resp.status_code != 511:
+            raise Exception("Failed to get captcha token")
+        print("Captcha required. Please solve the captcha manually.")
+        return get_arkose_token(download_images=True, captcha_supported=True)
+    try:
+        return resp.json().get("token")
+    except Exception:
+        return resp.text
 
 
 class Chatbot:
@@ -315,8 +311,8 @@ class Chatbot:
             else:
                 self.session.proxies.update(proxies)
 
-        self.conversation_id = conversation_id or config.get("conversation_id", None)
-        self.parent_id = parent_id or config.get("parent_id", None)
+        self.conversation_id = conversation_id or config.get("conversation_id")
+        self.parent_id = parent_id or config.get("parent_id")
         self.conversation_mapping = {}
         self.conversation_id_prev_queue = []
         self.parent_id_prev_queue = []
@@ -496,7 +492,7 @@ class Chatbot:
         json.dump(info, open(self.cache_path, "w", encoding="utf-8"), indent=4)
 
     @logger(is_timed=False)
-    def __read_cache(self):
+    def __read_cache(self) -> dict[str, dict[str, str]]:
         try:
             cached = json.load(open(self.cache_path, encoding="utf-8"))
         except (FileNotFoundError, json.decoder.JSONDecodeError):
@@ -543,7 +539,7 @@ class Chatbot:
                 # print(f"Arkose token obtained: {data['arkose_token']}")
             except Exception as e:
                 print(e)
-                raise e
+                raise
 
         cid, pid = data["conversation_id"], data["parent_message_id"]
         message = ""
@@ -598,10 +594,12 @@ class Chatbot:
             author = {}
             if line.get("message"):
                 author = metadata.get("author", {}) or line["message"].get("author", {})
-                if line["message"].get("content"):
-                    if line["message"]["content"].get("parts"):
-                        if len(line["message"]["content"]["parts"]) > 0:
-                            message_exists = True
+                if (
+                    line["message"].get("content")
+                    and line["message"]["content"].get("parts")
+                    and len(line["message"]["content"]["parts"]) > 0
+                ):
+                    message_exists = True
             message: str = (
                 line["message"]["content"]["parts"][0] if message_exists else ""
             )
@@ -643,7 +641,7 @@ class Chatbot:
         messages: list[dict],
         conversation_id: str | None = None,
         parent_id: str | None = None,
-        plugin_ids: list = [],
+        plugin_ids: list = None,
         model: str | None = None,
         auto_continue: bool = False,
         timeout: float = 360,
@@ -670,6 +668,8 @@ class Chatbot:
                 "citations": list[dict],
             }
         """
+        if plugin_ids is None:
+            plugin_ids = []
         if parent_id and not conversation_id:
             raise t.Error(
                 source="User",
@@ -734,7 +734,7 @@ class Chatbot:
         conversation_id: str | None = None,
         parent_id: str = "",
         model: str = "",
-        plugin_ids: list = [],
+        plugin_ids: list = None,
         auto_continue: bool = False,
         timeout: float = 360,
         **kwargs,
@@ -759,6 +759,8 @@ class Chatbot:
                 "recipient": str,
             }
         """
+        if plugin_ids is None:
+            plugin_ids = []
         messages = [
             {
                 "id": str(uuid.uuid4()),
@@ -1048,7 +1050,12 @@ class Chatbot:
             self.parent_id = self.parent_id_prev_queue.pop()
 
     @logger(is_timed=True)
-    def get_plugins(self, offset: int = 0, limit: int = 250, status: str = "approved"):
+    def get_plugins(
+        self,
+        offset: int = 0,
+        limit: int = 250,
+        status: str = "approved",
+    ) -> dict[str, str]:
         """
         Get plugins
         :param offset: Integer. Offset (Only supports 0)
@@ -1062,7 +1069,7 @@ class Chatbot:
         return json.loads(response.text)
 
     @logger(is_timed=True)
-    def install_plugin(self, plugin_id: str):
+    def install_plugin(self, plugin_id: str) -> None:
         """
         Install plugin by ID
         :param plugin_id: String. ID of plugin
@@ -1170,10 +1177,12 @@ class AsyncChatbot(Chatbot):
                         "author",
                         {},
                     )
-                    if line["message"].get("content"):
-                        if line["message"]["content"].get("parts"):
-                            if len(line["message"]["content"]["parts"]) > 0:
-                                message_exists = True
+                    if (
+                        line["message"].get("content")
+                        and line["message"]["content"].get("parts")
+                        and len(line["message"]["content"]["parts"]) > 0
+                    ):
+                        message_exists = True
                 message: str = (
                     line["message"]["content"]["parts"][0] if message_exists else ""
                 )
@@ -1214,7 +1223,7 @@ class AsyncChatbot(Chatbot):
         messages: list[dict],
         conversation_id: str | None = None,
         parent_id: str | None = None,
-        plugin_ids: list = [],
+        plugin_ids: list = None,
         model: str | None = None,
         auto_continue: bool = False,
         timeout: float = 360,
@@ -1243,6 +1252,8 @@ class AsyncChatbot(Chatbot):
                 "citations": list[dict],
             }
         """
+        if plugin_ids is None:
+            plugin_ids = []
         if parent_id and not conversation_id:
             raise t.Error(
                 source="User",
@@ -1306,7 +1317,7 @@ class AsyncChatbot(Chatbot):
         conversation_id: str | None = None,
         parent_id: str = "",
         model: str = "",
-        plugin_ids: list = [],
+        plugin_ids: list = None,
         auto_continue: bool = False,
         timeout: int = 360,
         **kwargs,
@@ -1334,6 +1345,8 @@ class AsyncChatbot(Chatbot):
             }
         """
 
+        if plugin_ids is None:
+            plugin_ids = []
         messages = [
             {
                 "id": str(uuid.uuid4()),
@@ -1663,7 +1676,7 @@ def main(config: dict) -> NoReturn:
         elif command == "!exit":
             if isinstance(chatbot.session, httpx.AsyncClient):
                 chatbot.session.aclose()
-            exit()
+            sys.exit()
         else:
             return False
         return True
@@ -1717,7 +1730,7 @@ def main(config: dict) -> NoReturn:
                 print()
 
     except (KeyboardInterrupt, EOFError):
-        exit()
+        sys.exit()
     except Exception as exc:
         error = t.CLIError("command line program unknown error")
         raise error from exc
